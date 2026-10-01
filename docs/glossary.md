@@ -15,6 +15,11 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | #include | Chỉ thị nạp bộ công cụ của thư viện vào chương trình, giống `import` của Go | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | main | Hàm đầu tiên được chạy khi chương trình bắt đầu | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | std::cout | Cổng ra để in chữ ra màn hình; `std::` là họ thư viện chuẩn | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| undefined behavior / UB | Hành vi không xác định: chuẩn C++ không đặt yêu cầu nào lên kết quả, nên có thể chạy đúng, sai âm thầm hoặc sập, và đổi theo trình biên dịch, cờ tối ưu, máy; khác lỗi biên dịch và lỗi chạy bình thường (có kết quả định nghĩa rõ) | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md), [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (bài học dùng nhiều), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (danh mục và công cụ) |
+| hệ 16 (hexadecimal) | Cách viết số bằng 16 chữ số `0`–`9` rồi `a`–`f`, báo bằng tiền tố `0x`; hai chữ số hệ 16 vừa đủ một byte, nên địa chỉ hay được viết như vậy | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| lỗi biên dịch (compile error) | Lỗi `g++` báo lúc dịch code: không tạo ra chương trình nên không có gì để chạy (khác UB và lỗi lúc chạy) | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| static_cast | `static_cast<Kiểu>(giá trị)` ép giá trị sang `Kiểu`, như `static_cast<void*>(&chu)` để in địa chỉ của `char` | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| chuỗi chữ | Dãy ký tự dạng văn bản, như `"An"`; riêng `char*` thì `std::cout` mặc định in nó như chuỗi chữ chứ không in địa chỉ | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | stack (ngăn xếp) | Vùng nhớ nhỏ, nhanh, chứa biến cục bộ; mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | stack frame (khung gọi hàm) | Mảnh stack riêng của một lần gọi hàm, chứa tham số và biến cục bộ, bị gỡ khi hàm kết thúc | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | heap | Vùng nhớ rộng, phải tự xin bằng `new` và tự trả bằng `delete` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
@@ -29,14 +34,21 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | static initialization order fiasco | Thứ tự khởi tạo global giữa các file `.cpp` là không xác định nên global này có thể dùng global kia khi chưa sẵn sàng; tránh bằng `static` cục bộ trong hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | escape analysis (phân tích thoát) | Trình biên dịch Go kiểm tra biến có thoát khỏi hàm không và tự đưa lên heap nếu có | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | struct | Kiểu gộp nhiều trường lại; trong C++ còn chứa được hàm, gồm hàm tạo và hàm hủy | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| tham số (parameter) | Biến riêng của hàm, nhận giá trị lúc gọi; đối số (argument) là giá trị truyền vào | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| smart pointer (con trỏ thông minh) | Đối tượng giả vờ là con trỏ nhưng tự lo việc giải phóng bộ nhớ bằng hàm hủy; `unique_ptr` và `shared_ptr` là hai loại chính | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (nêu tên), [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (dạy kỹ) |
+| std::vector | Mảng co giãn của thư viện chuẩn, giống slice của Go (`#include <vector>`); `std::vector<int>` là vector các phần tử `int` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md), [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (dùng cơ bản) |
+| đối tượng (object) | Một biến có kiểu là struct/class, có hàm tạo chạy lúc ra đời và hàm hủy chạy lúc chết | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| kiểu trả về / void | Kiểu của giá trị hàm trả ra, viết trước tên hàm (`int nhanDoi(int so)`); hàm không trả gì thì ghi `void` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| đệ quy (recursion) | Hàm tự gọi lại chính nó; không có điều kiện dừng thì mỗi lần gọi chồng thêm một khung và làm tràn stack | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| std::string | Kiểu chuỗi chữ của thư viện chuẩn, giống `string` của Go (`#include <string>`) | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | con trỏ (pointer) | Biến đựng một địa chỉ, thường là địa chỉ của biến khác; `int* p` là con trỏ tới `int` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | giải tham chiếu (dereference) | Đi theo địa chỉ trong con trỏ để đọc hoặc ghi thứ nằm ở đó, viết `*p` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | nullptr | Giá trị của con trỏ "chưa trỏ vào đâu" (C++11), có kiểu riêng `std::nullptr_t`; ứng với `nil` của Go | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | null pointer (con trỏ null) | Con trỏ có giá trị `nullptr`; giải tham chiếu nó là hành vi không xác định | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | toán tử `->` | `p->x` là cách viết gọn của `(*p).x`, lấy trường `x` của struct mà con trỏ `p` trỏ tới | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
-| undefined behavior / UB | Hành vi không xác định: chuẩn C++ không đặt yêu cầu nào lên kết quả, nên có thể chạy đúng, sai âm thầm hoặc sập, và đổi theo trình biên dịch, cờ tối ưu, máy; khác lỗi biên dịch và lỗi chạy bình thường (có kết quả định nghĩa rõ) | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (danh mục và công cụ) |
-| tham số (parameter) | Biến riêng của hàm, nhận giá trị lúc gọi; đối số (argument) là giá trị truyền vào | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
+| crash | Chương trình sập đột ngột | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| macro | Một chữ được trình biên dịch thay bằng thứ khác lúc biên dịch (như `NULL`); khác hẳn hàm hay biến | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | truyền theo giá trị (pass by value) | Hàm nhận bản sao của đối số, nên sửa tham số không đổi biến gốc | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
 | swap (đổi chỗ) | Hàm hoán đổi giá trị của hai biến; viết được bằng con trỏ, không viết được bằng truyền theo giá trị | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
 | int** (con trỏ tới con trỏ) | Con trỏ đựng địa chỉ của một con trỏ `int*`; dùng khi hàm cần đổi chính con trỏ của nơi gọi | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
@@ -55,6 +67,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | truyền theo tham chiếu (pass by reference) | Hàm nhận tham chiếu: không sao chép, và sửa được bản gốc nếu không có `const` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | const& | Tham chiếu hằng `const T&`: chỉ xem, không sao chép, nhận được cả giá trị tạm | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | dangling reference (tham chiếu treo) | Tham chiếu trỏ vào chỗ đã bị dọn | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md), [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (lambda) |
+| hàm thành viên (member function) | Hàm viết bên trong struct/class, gọi bằng `cay.doc()`; thêm `const` sau danh sách tham số để hứa không sửa đối tượng | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | new / delete / delete[] | `new T(...)` xin chỗ ở heap, gọi hàm tạo, trả về địa chỉ; `delete p` gọi hàm hủy rồi trả chỗ; `new T[n]` xin mảng và phải trả bằng `delete[] p`; không được trộn các dạng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | rò rỉ bộ nhớ (memory leak) | Xin chỗ ở heap mà không bao giờ trả; chương trình vẫn đúng luật (không phải UB) nhưng phí bộ nhớ dần | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | malloc / free | Cặp xin/trả bytes thô của ngôn ngữ C, không gọi hàm tạo/hàm hủy; C++ hiện đại gần như không dùng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
@@ -71,7 +84,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | tháo ngăn xếp (stack unwinding) | Khi có ngoại lệ, chương trình thoát ngược từng hàm tới `catch` và hủy mọi đối tượng cục bộ đã ra đời trên đường đi | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | std::terminate | Hàm kết thúc chương trình, được gọi khi ngoại lệ không bị bắt ở đâu cả; việc hủy các đối tượng khi đó là do cài đặt quyết định | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | defer (Go) | Câu lệnh Go chạy việc dọn dẹp ở cuối hàm; phải nhớ viết ở từng nơi dùng, khác RAII gắn vào kiểu dữ liệu | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
-| smart pointer (con trỏ thông minh) | Đối tượng giả vờ là con trỏ nhưng tự lo việc giải phóng bộ nhớ bằng hàm hủy; `unique_ptr` và `shared_ptr` là hai loại chính | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| noexcept | Lời hứa hàm không ném ngoại lệ (hàm hủy mặc định có sẵn lời hứa này); ở Bài 12, hàm tạo di chuyển không có nó thì `std::vector` sao chép thay vì di chuyển khi tăng khối | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md), [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | std::unique_ptr | Con trỏ thông minh sở hữu duy nhất một đối tượng ở heap, tự `delete` khi chết; không copy được, chỉ trao tay bằng move; trong `<memory>` | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | std::make_unique | Hàm tạo đối tượng và bọc ngay vào `unique_ptr`, như `std::make_unique<Cay>(5)`; có từ C++14 | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | quyền sở hữu (ownership) | Việc "ai chịu trách nhiệm xóa đối tượng"; `unique_ptr` ghi rõ điều đó trong kiểu, còn Go không cần vì có GC | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
@@ -111,7 +124,6 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | move assignment (phép gán di chuyển) | Phép gán lấy ruột: chống tự gán, trả vùng cũ, lấy con trỏ của nguồn rồi đặt nguồn về `nullptr` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | valid but unspecified (hợp lệ nhưng không xác định) | Trạng thái của đối tượng chuẩn sau khi bị move: hủy hay gán lại đều an toàn, nhưng đừng đoán nội dung (`unique_ptr`/`shared_ptr` được bảo đảm rỗng) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | rule of 0/5 | Rule of 5: lớp quản lý tài nguyên bằng tay thì quyết định cả năm hàm đặc biệt (hủy, sao chép ×2, di chuyển ×2); Rule of 0: dùng thành viên tự quản lý (`vector`, `unique_ptr`, `string`) và không viết hàm nào | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| noexcept | Lời hứa hàm không ném ngoại lệ; hàm tạo di chuyển không có nó thì `std::vector` sao chép thay vì di chuyển khi tăng khối | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | std::move_if_noexcept | Hàm chuẩn trả rvalue (để di chuyển) chỉ khi hàm tạo di chuyển hứa `noexcept` hoặc kiểu không sao chép được, nếu không thì trả lvalue (để sao chép); `std::vector` dùng nó khi tăng dung lượng | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | copy elision / RVO / NRVO | Trình biên dịch bỏ hẳn bước sao chép/di chuyển khi trả về; C++17 bắt buộc với giá trị tạm (`return Cay(3);`), còn NRVO cho biến có tên (`return c;`) là được phép nhưng không bắt buộc; đừng viết `return std::move(c);` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp đối số bằng `T&&` và `std::forward` (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
@@ -119,13 +131,15 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | std::forward | Chuyển tiếp một đối số mà giữ nguyên nó là lvalue hay rvalue (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | auto | Để trình biên dịch tự đoán kiểu (lần đầu dùng ở [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md), giải thích ngay tại đó); bẫy: bỏ `&` và `const` ngoài cùng, nên muốn giữ phải viết `auto&` hay `const auto&` | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | range-based for | Vòng `for (khai báo : dãy)` duyệt cả dãy mà không cần chỉ số (C++11); `for (auto x : v)` sao chép từng phần tử, `for (const auto& x : v)` thì không | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| std::vector | Mảng co giãn của thư viện chuẩn, giống slice của Go (`#include <vector>`); các kiểu chứa học kỹ ở nhóm STL | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (dùng cơ bản) |
 | lambda | Hàm không tên viết ngay tại chỗ, cú pháp `[bắt](tham số){ thân }`, cất được vào biến `auto` và gọi như hàm (C++11); giống closure của Go | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | capture (bắt) | Danh sách trong `[ ]` của lambda: `[=]` chép biến dùng tới lúc tạo lambda, `[&]` giữ tham chiếu (treo nếu lambda sống lâu hơn biến), `[x]`/`[&x]` chọn từng biến | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | enum class | Kiểu liệt kê có phạm vi riêng (`MauSac::Tim`) và không tự đổi sang `int` (C++11) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | override / final | `override` đánh dấu hàm ghi đè hàm ảo của lớp cha để trình biên dịch báo lỗi nếu sai chữ ký; `final` cấm ghi đè hoặc kế thừa tiếp (C++11); chỉ nêu tên, ví dụ ở nhóm OOP | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | constexpr | Cho phép tính lúc biên dịch: biến `constexpr` bắt buộc và ngầm `const`; hàm `constexpr` gọi với giá trị lúc chạy vẫn chạy lúc chạy (C++11; thân thoải mái hơn từ C++14) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | static_assert | Kiểm tra điều kiện lúc biên dịch; sai thì không biên dịch được (C++11) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| closure | Hàm kèm các biến nó bắt từ bên ngoài; lambda của C++ là closure như của Go, nhưng `[&]` bắt tham chiếu nên có thể treo | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| kế thừa / hàm ảo (`virtual`) | Kế thừa: lớp con dùng lại lớp cha; hàm ảo: hàm lớp con ghi đè được; chỉ nêu tên ở Bài 13, nhóm OOP dạy sau | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| mutable | Từ khóa đặt cho lambda `[=]` để được sửa các bản chép của biến bắt; chỉ nêu tên ở Bài 13 | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | generic lambda | Lambda có tham số `auto`, dùng được cho nhiều kiểu (C++14) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | structured binding | `auto [a, b] = giaTri;` tách cặp hoặc struct thành nhiều biến; `auto` chép, `auto&` là biệt danh (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | std::pair | Cặp hai giá trị (`#include <utility>`), thường dùng để hàm trả hai thứ; tách bằng structured binding | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
@@ -137,7 +151,6 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | `if` có khởi tạo | `if (khởi tạo; điều kiện)`: biến khai báo ở đầu chỉ sống trong `if`/`else`; giống `if v, ok := ...; ok` của Go (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | std::filesystem | Thư viện làm việc với đường dẫn, file, thư mục (C++17); chỉ nêu tên | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | buffer overflow (tràn bộ đệm) | Đọc hoặc ghi vượt biên một mảng hay khối nhớ (ở stack: `stack-buffer-overflow`; ở heap: `heap-buffer-overflow`); là UB | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
-| crash | Chương trình sập đột ngột | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | sanitizer | Công cụ do g++ chèn vào chương trình lúc biên dịch để bắt lỗi lúc chạy (ASan, UBSan, ThreadSanitizer); chậm hơn, chỉ thấy lỗi xảy ra trong lần chạy đó | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | UndefinedBehaviorSanitizer / UBSan | Sanitizer bắt UB không phải lỗi địa chỉ (tràn số nguyên có dấu, dịch bit quá cỡ, giải tham chiếu `nullptr`...), bật bằng `-fsanitize=undefined`; mặc định báo rồi chạy tiếp | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | ThreadSanitizer / TSan | Sanitizer bắt data race, bật bằng `-fsanitize=thread`, không ghép được với ASan; ứng với `go run -race` của Go; chỉ nêu tên | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
@@ -146,3 +159,4 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | tối ưu hóa (`-O2`) | Trình biên dịch viết lại chương trình cho chạy nhanh hơn, và được phép giả sử UB không bao giờ xảy ra | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | tràn số nguyên có dấu (signed overflow) | `INT_MAX + 1` với `int` là UB (số không dấu thì quấn vòng, có định nghĩa; Go thì số có dấu cũng quấn vòng) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | std::out_of_range | Ngoại lệ do `v.at(i)` ném khi chỉ số ngoài biên (còn `v[i]` ngoài biên là UB) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| dịch bit (bit shift) | Phép `1 << s` dịch các bit sang trái `s` vị trí, tức nhân với 2 mũ `s`; dịch một `int` 32 bit đi 32 vị trí trở lên là UB | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
