@@ -44,7 +44,7 @@ OOP và Design Patterns được xếp sau (theo yêu cầu "OOP sau một tý")
 | 3. Đa luồng | 9 thread, mutex, lock · 10 condition_variable, producer-consumer · 11 atomic, async/future · 12 Deadlock và race condition · 13 Thread pool và hiệu năng |
 | 4. OOP và Design Patterns | 14 OOP, virtual, vtable, object slicing · 15 Template cơ bản · 16 Design patterns hay hỏi (Singleton, Factory, Observer, Strategy) |
 | 5. Hệ thống và quy trình | 17 Linux (gdb, CMake, perf), Git · 18 Socket, REST, gRPC, TCP/UDP · 19 Database, SDLC, nguyên lý game dev |
-| Tổng ôn | Đề trắc nghiệm trộn từ mọi bài, cộng câu hỏi về dự án thực tế (cách kể STAR, không tên khách hàng) |
+| Tổng ôn | Đề trắc nghiệm trộn từ mọi bài, cộng câu hỏi về dự án thực tế (cách kể STAR, không tên riêng) |
 
 Bài 19 gộp ba chủ đề bổ sung (database, SDLC, game).
 

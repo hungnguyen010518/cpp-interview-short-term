@@ -20,6 +20,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | lỗi biên dịch (compile error) | Lỗi `g++` báo lúc dịch code: không tạo ra chương trình nên không có gì để chạy (khác UB và lỗi lúc chạy) | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | static_cast | `static_cast<Kiểu>(giá trị)` ép giá trị sang `Kiểu`, như `static_cast<void*>(&chu)` để in địa chỉ của `char` | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | chuỗi chữ | Dãy ký tự dạng văn bản, như `"An"`; riêng `char*` thì `std::cout` mặc định in nó như chuỗi chữ chứ không in địa chỉ | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | stack (ngăn xếp) | Vùng nhớ nhỏ, nhanh, chứa biến cục bộ; mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | stack frame (khung gọi hàm) | Mảnh stack riêng của một lần gọi hàm, chứa tham số và biến cục bộ, bị gỡ khi hàm kết thúc | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | heap | Vùng nhớ rộng, phải tự xin bằng `new` và tự trả bằng `delete` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
@@ -46,7 +47,6 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | nullptr | Giá trị của con trỏ "chưa trỏ vào đâu" (C++11), có kiểu riêng `std::nullptr_t`; ứng với `nil` của Go | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | null pointer (con trỏ null) | Con trỏ có giá trị `nullptr`; giải tham chiếu nó là hành vi không xác định | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | toán tử `->` | `p->x` là cách viết gọn của `(*p).x`, lấy trường `x` của struct mà con trỏ `p` trỏ tới | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
-| void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | crash | Chương trình sập đột ngột | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | macro | Một chữ được trình biên dịch thay bằng thứ khác lúc biên dịch (như `NULL`); khác hẳn hàm hay biến | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | truyền theo giá trị (pass by value) | Hàm nhận bản sao của đối số, nên sửa tham số không đổi biến gốc | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |

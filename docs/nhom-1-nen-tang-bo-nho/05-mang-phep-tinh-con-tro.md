@@ -429,7 +429,7 @@ std::cout << *(p + 2) << "\n";
 - `20`, vì `p + 2` là phần tử thứ hai nếu đếm từ 1
 - `12`, vì `*(p + 2)` được tính như `*p + 2`
 - `30`, vì `p + 2` nhích hai phần tử từ `a[0]`
-- `40`, vì `p + 2` nhích ba phần tử từ `a[0]`
+- `40`, vì `p` được coi là bắt đầu ở `a[1]`
 
 <p class="giai-thich" markdown>`p` trỏ tới `a[0]`, và `p + 2` nhích hai phần tử, tới `a[2]` có giá trị `30`. Chọn `20` là đếm chỉ số từ 1, trong khi chỉ số bắt đầu từ 0. Chọn `12` là bỏ qua ngoặc: ngoặc buộc phép cộng làm trước, còn `*p + 2` mới ra `12`. Chọn `40` là cho rằng `p` bắt đầu ở `a[1]`, nhưng `p` đang ở `a[0]`.</p>
 </div>

@@ -509,7 +509,7 @@ std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 - `tao 1, 00, huy 1`: `weak_ptr` giữ cây sống nên chưa hủy
 - `tao 1, 01, huy 1`: `expired` báo sai, còn `lock` lại trả rỗng
 - `tao 1, huy 1, 00`: cây hủy mà `weak_ptr` vẫn báo còn cây
-- `tao 1, huy 1, 11`: cây hủy ngay lúc `reset`, nên cả `expired` lẫn `lock` đều báo hết
+- `tao 1, huy 1, 11`: cây hủy lúc `reset`, cả hai đều báo hết
 
 <p class="giai-thich" markdown>`a` là `shared_ptr` duy nhất, nên `a.reset()` đưa đếm về 0 và in `huy 1` ngay, trước dòng cuối; `w` không giữ cây sống nên không cản được. Sau đó cả `expired()` và `lock() == nullptr` đều đúng nên in `11`; mình đã chạy ra `tao 1, huy 1, 11`. Dãy `tao 1, 00, huy 1` tin rằng `weak_ptr` giữ cây sống, mà nó không giữ. Dãy `tao 1, huy 1, 00` đúng về thứ tự `huy 1`, nhưng sai ở số cuối: cây đã hủy thì `expired()` phải là đúng (`1`), nên không thể in `0`. Kết quả `01` cũng mâu thuẫn: cây đã hủy thì hai phép kiểm tra phải cùng đúng.</p>
 </div>

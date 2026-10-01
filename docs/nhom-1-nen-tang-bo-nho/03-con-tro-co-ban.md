@@ -587,7 +587,7 @@ std::cout << x << "\n";
 - Chuẩn không hứa gì thêm, nhưng `p` sẽ tự có ô nhớ mới
 - Chuẩn quy định chương trình bỏ qua dòng đó và chạy tiếp
 
-<p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải điều chuẩn quy định, nên không thể khẳng định chương trình phải dừng. C++ không tự cấp ô nhớ cho con trỏ trống. Nó cũng không biến việc này thành lỗi ngoại lệ để bắt bằng `try`/`catch`.</p>
+<p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải điều chuẩn quy định, nên không thể khẳng định chương trình phải dừng. C++ không tự cấp ô nhớ cho con trỏ trống. Chuẩn cũng không quy định bỏ qua dòng đó rồi chạy tiếp: với UB, không có lời hứa nào cả.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>

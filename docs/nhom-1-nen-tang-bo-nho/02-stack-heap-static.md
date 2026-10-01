@@ -125,15 +125,13 @@ C++ còn có từ khóa `class`. Với bài này `class` và `struct` dùng như
 
 ### 5. Bốn kiểu thời gian sống
 
-C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là **storage duration** (thời gian sống của vùng lưu trữ). Có bốn kiểu; bảng dưới liệt kê ba kiểu ta dùng trong bài này, còn kiểu thứ tư tên là **thread**, ta bỏ qua.
+C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là **storage duration** (thời gian sống của vùng lưu trữ). Có bốn kiểu; bảng dưới liệt kê ba kiểu ta dùng trong bài này, còn kiểu thứ tư tên là **thread** (khai báo bằng `thread_local`, dành cho chương trình chạy nhiều dòng code cùng lúc), ta bỏ qua; [Bài 10](10-shared-ptr-weak-ptr.md) mới nói tới chuyện đó.
 
 | Kiểu | Nằm ở | Ra đời | Chết | Ví dụ |
 |---|---|---|---|---|
 | **automatic** (tự động) | stack | khi chạy qua dòng khai báo | khi ra khỏi khối `{ }` chứa nó | biến cục bộ, tham số |
 | **static** (tĩnh) | vùng tĩnh | global: lúc khởi động, thực tế trước `main`; `static` cục bộ: lần chạy qua đầu tiên | khi chương trình kết thúc | global, `static` cục bộ |
 | **dynamic** (động) | heap | khi chạy `new` | khi bạn chạy `delete` | `new int(5)` |
-
-Kiểu thứ tư (`thread`, khai báo bằng `thread_local`) dành cho chương trình chạy nhiều dòng code cùng lúc; mình chỉ nhắc tên, [Bài 10](10-shared-ptr-weak-ptr.md) mới nói tới chuyện đó.
 
 ## 💻 Ví dụ code
 

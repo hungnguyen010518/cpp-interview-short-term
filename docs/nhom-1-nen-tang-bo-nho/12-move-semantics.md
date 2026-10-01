@@ -263,14 +263,14 @@ Ngoại lệ có bảo đảm riêng: chuẩn nói `unique_ptr` và `shared_ptr`
 
 Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì. Có hai quy tắc, và mình đã thử cả hai.
 
-**Quy tắc 1: tự khai báo một hàm di chuyển thì hai hàm sao chép tự sinh bị xóa.** Mình thử một struct `Rieng` chỉ có hàm tạo từ `int` và một hàm tạo di chuyển, rồi viết `Rieng b = a;`. `g++` báo:
+**Quy tắc 1: tự khai báo một hàm di chuyển thì hai hàm sao chép tự sinh bị xóa.** Mình thử một struct `Rieng` chỉ có hàm tạo từ `int` và một hàm tạo di chuyển, rồi viết `Rieng b = a;`. `g++` báo (rút gọn, bỏ chữ `constexpr` trước tên hàm):
 
 ```text
 error: use of deleted function 'Rieng::Rieng(const Rieng&)'
 note: 'Rieng::Rieng(const Rieng&)' is implicitly declared as deleted because 'Rieng' declares a move constructor or move assignment operator
 ```
 
-**Quy tắc 2: tự khai báo hàm hủy hay một hàm sao chép thì các hàm di chuyển không được tự sinh.** Chương trình sau chứng minh. `Cu` là kiểu in `copy!` hoặc `move!` để ta thấy hàm nào chạy; `M1` và `M2` cùng bọc một `Cu`, chỉ khác là `M1` có thêm một hàm hủy rỗng do ta viết.
+**Quy tắc 2: tự khai báo hàm hủy hay một hàm sao chép thì các hàm di chuyển không được tự sinh.** Chương trình sau chứng minh. `Cu` là kiểu `Cu` của mục 5 có thêm hàm tạo di chuyển, in `copy!` hoặc `move!` để ta thấy hàm nào chạy; `M1` và `M2` cùng bọc một `Cu`, chỉ khác là `M1` có thêm một hàm hủy rỗng do ta viết.
 
 ```cpp
 #include <iostream>
@@ -483,7 +483,7 @@ g++ với `-Wall` cảnh báo (rút gọn, bỏ vị trí): `warning: moving a l
 Tức là `std::move` làm mất cơ hội dựng thẳng, bạn phải trả thêm một lần di chuyển mà không được gì. Quy tắc: **trả biến cục bộ theo giá trị thì cứ `return v;`**. (Ở [Bài 09](09-unique-ptr.md) bảng cũng ghi trả `unique_ptr` thì không cần `std::move`.)
 
 !!! info "Để biết: perfect forwarding (chỉ nêu tên)"
-    Trong code thư viện (như `emplace_back`) bạn sẽ gặp `T&&` kèm `std::forward<T>(x)`: kỹ thuật giữ nguyên "x là lvalue hay rvalue" khi đưa `x` cho hàm khác, gọi là **perfect forwarding**. Bài này không dạy; ở đây `T&&` luôn chỉ là tham chiếu rvalue của mục 3.
+    Trong code thư viện (như `emplace_back`) bạn sẽ gặp `T&&` kèm `std::forward<T>(x)`: kỹ thuật giữ nguyên "x là lvalue hay rvalue" khi đưa `x` cho hàm khác, gọi là **perfect forwarding**; `T&&` kiểu này (với `T` suy ra từ đối số) gọi là **forwarding reference**. Bài này không dạy; ở đây `T&&` luôn chỉ là tham chiếu rvalue của mục 3.
 
 ## 💻 Ví dụ code
 
