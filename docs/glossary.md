@@ -74,6 +74,18 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | operator* / operator-> | Hàm đặc biệt để một lớp "giả vờ là con trỏ": `*m` và `m->x` gọi chúng | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | template (khuôn mẫu) | Kiểu có tham số là kiểu khác, viết như `unique_ptr<Cay>`; giống generics của Go | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | custom deleter (bộ xóa tùy chỉnh) | Cách đổi việc `unique_ptr` làm khi hủy (ví dụ `fclose` thay vì `delete`); chỉ cần biết tên | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| std::shared_ptr | Con trỏ thông minh cho nhiều chủ cùng giữ một đối tượng; copy được, đối tượng bị hủy khi người giữ cuối cùng buông; trong `<memory>` | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| std::weak_ptr | Con trỏ chỉ nhìn một đối tượng của `shared_ptr` mà không giữ nó sống; dùng `lock()` để lấy `shared_ptr` khi cần dùng | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| bộ đếm tham chiếu (reference count) | Số `shared_ptr` đang giữ một đối tượng; copy thì +1, buông thì −1, về 0 thì đối tượng bị hủy | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| khối điều khiển (control block) | Vùng heap nhỏ chứa bộ đếm mạnh và bộ đếm yếu, dùng chung cho mọi `shared_ptr`/`weak_ptr` của một đối tượng | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| use_count() | Hàm đọc bộ đếm mạnh của `shared_ptr`; chỉ dùng để học và gỡ lỗi, không dùng cho logic chương trình | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| std::make_shared | Hàm tạo đối tượng và bọc ngay vào `shared_ptr`; thường xin heap một lần cho cả đối tượng lẫn khối điều khiển | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| vòng tham chiếu (reference cycle) | Hai (hay nhiều) đối tượng giữ `shared_ptr` của nhau nên bộ đếm không bao giờ về 0 và chúng bị rò rỉ; phá bằng `weak_ptr` | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| lock() / expired() | `lock()` của `weak_ptr` trả về `shared_ptr` (rỗng nếu đối tượng đã hủy); `expired()` cho biết đối tượng đã hủy chưa | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| cache (bộ nhớ đệm) | Chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, khỏi làm lại | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| observer (người theo dõi) | Đối tượng theo dõi một đối tượng khác mà không sở hữu nó | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| thread-safe (an toàn đa luồng) | Dùng được từ nhiều luồng cùng lúc mà không gây tranh chấp dữ liệu; với `shared_ptr` chỉ bộ đếm là an toàn, đối tượng bên trong thì không | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| tranh chấp dữ liệu (data race) | Nhiều luồng cùng đụng một chỗ nhớ, có luồng ghi, mà không phối hợp: hành vi không xác định | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
