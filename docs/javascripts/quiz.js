@@ -35,6 +35,7 @@
     quiz.appendChild(ketQua);
     var diem = 0;
     var daTraLoi = 0;
+    var cacXaoTron = [];
 
     function capNhatKetQua() {
       ketQua.innerHTML = "";
@@ -69,23 +70,48 @@
         var gt = ch.querySelector(".giai-thich");
         if (gt) gt.classList.remove("hien");
       });
+      cacXaoTron.forEach(function (xao) {
+        xao();
+      });
       capNhatKetQua();
     }
 
     cauHoi.forEach(function (ch) {
       var dapAn = parseInt(ch.getAttribute("data-dap-an"), 10);
-      var luaChon = Array.prototype.slice.call(ch.querySelectorAll("ul > li"));
+      var cacUl = ch.querySelectorAll("ul");
+      var ul = cacUl.length ? cacUl[cacUl.length - 1] : null;
+      var luaChon = ul ? Array.prototype.slice.call(ul.children).filter(function (n) {
+        return n.tagName === "LI";
+      }) : [];
       var giaiThich = ch.querySelector(".giai-thich");
+      /* Nhớ phần tử đúng theo thứ tự GỐC (data-dap-an tính từ 1) trước khi xáo. */
+      var liDung = luaChon[dapAn - 1] || null;
 
-      luaChon.forEach(function (li, i) {
+      function xaoTron() {
+        if (!ul || luaChon.length < 2) return;
+        var thuTu = luaChon.slice();
+        for (var i = thuTu.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tam = thuTu[i];
+          thuTu[i] = thuTu[j];
+          thuTu[j] = tam;
+        }
+        thuTu.forEach(function (li) {
+          ul.appendChild(li);
+        });
+      }
+      cacXaoTron.push(xaoTron);
+      xaoTron();
+
+      luaChon.forEach(function (li) {
         function chon() {
           if (ch.classList.contains("da-tra-loi")) return;
           ch.classList.add("da-tra-loi");
           daTraLoi += 1;
-          var dung = i + 1 === dapAn;
+          var dung = li === liDung;
           if (dung) diem += 1;
           li.classList.add(dung ? "chon-dung" : "chon-sai");
-          if (luaChon[dapAn - 1]) luaChon[dapAn - 1].classList.add("la-dap-an");
+          if (liDung) liDung.classList.add("la-dap-an");
           if (giaiThich) giaiThich.classList.add("hien");
           if (daTraLoi === cauHoi.length) luuDiem(bai, diem, cauHoi.length);
           capNhatKetQua();
