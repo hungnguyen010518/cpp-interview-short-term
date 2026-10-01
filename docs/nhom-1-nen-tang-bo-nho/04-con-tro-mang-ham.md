@@ -16,7 +16,7 @@ Bạn có một bài làm viết tay và nhờ một người bạn sửa lỗi.
 Phần còn lại của bài là hệ quả của hai cách đó. Một **mảng** là một dãy ngăn tủ nằm **liền nhau** (như hàng tủ khóa ở [Bài 01](01-bo-nho-byte-dia-chi.md)). Để đi dọc dãy ấy, ta chỉ cần số của ngăn đầu và một con số đếm "đi bao nhiêu ngăn".
 
 !!! info "Chỗ nào ví dụ photo và số phòng không còn đúng?"
-    Số phòng có thể sai hoặc phòng đã bị dọn, và khi đó người bạn đến sửa một chỗ không phải bài của bạn (chủ đề của Bài 12). Ngoài ra, hàm luôn nhận **bản sao của tờ giấy** ghi số phòng: bạn ấy có thể vẽ nguệch ngoạc lên tờ giấy của mình mà tờ giấy của bạn không đổi. Mục 7 sẽ cho thấy điều này gây ra chuyện gì.
+    Số phòng có thể sai hoặc phòng đã bị dọn, và khi đó người bạn đến sửa một chỗ không phải bài của bạn (chủ đề của Bài 13). Ngoài ra, hàm luôn nhận **bản sao của tờ giấy** ghi số phòng: bạn ấy có thể vẽ nguệch ngoạc lên tờ giấy của mình mà tờ giấy của bạn không đổi. Mục 7 sẽ cho thấy điều này gây ra chuyện gì.
 
 ## 📖 Giải thích
 
@@ -160,7 +160,7 @@ Con trỏ cũng là một biến, nên nó có địa chỉ, và ta lưu đượ
 
 Giả sử ta muốn hàm "chọn giúp" một con trỏ: sau khi gọi, con trỏ `p` ở nơi gọi phải trỏ sang chỗ khác. Nếu hàm nhận `int* con`, nó chỉ nhận **bản sao** của `p` (đúng như mục 1). Gán `con = x` chỉ đổi bản sao, `p` ở nơi gọi không đổi. Muốn đổi chính `p`, ta cần đưa **số phòng của tờ giấy `p`**, tức `&p`, có kiểu `int**`; rồi viết `*con = x` để đổi tờ giấy gốc. Ví dụ 8 chạy cả hai cách.
 
-Nguyên tắc chung: muốn hàm sửa một thứ có kiểu `T`, phải đưa `T*`; nếu thứ đó đã là con trỏ thì kiểu thành `T**`. Có một cách khác gọn hơn là tham chiếu (Bài 05); ở đây ta chỉ cần hiểu vì sao `**` xuất hiện.
+Nguyên tắc chung: muốn hàm sửa một thứ có kiểu `T`, phải đưa `T*`; nếu thứ đó đã là con trỏ thì kiểu thành `T**`. Có một cách khác gọn hơn là tham chiếu (Bài 06); ở đây ta chỉ cần hiểu vì sao `**` xuất hiện.
 
 ### 8. Chuỗi kiểu C
 
@@ -691,7 +691,7 @@ Vì `ten` là `const char*`, ký tự của chuỗi hằng chỉ đọc. Muốn 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "Truyền theo giá trị và truyền bằng con trỏ khác nhau thế nào?"
-    Truyền theo giá trị: hàm nhận một **bản sao** của đối số, nên sửa tham số không ảnh hưởng biến gốc ở nơi gọi. Truyền bằng con trỏ: hàm nhận (một bản sao của) **địa chỉ** của biến gốc, và đi theo địa chỉ bằng `*p` thì sửa được chính biến gốc. Lưu ý: bản thân con trỏ vẫn được truyền theo giá trị, nên muốn đổi chính con trỏ ở nơi gọi phải truyền `int**` (hoặc tham chiếu, Bài 05).
+    Truyền theo giá trị: hàm nhận một **bản sao** của đối số, nên sửa tham số không ảnh hưởng biến gốc ở nơi gọi. Truyền bằng con trỏ: hàm nhận (một bản sao của) **địa chỉ** của biến gốc, và đi theo địa chỉ bằng `*p` thì sửa được chính biến gốc. Lưu ý: bản thân con trỏ vẫn được truyền theo giá trị, nên muốn đổi chính con trỏ ở nơi gọi phải truyền `int**` (hoặc tham chiếu, Bài 06).
 
 ??? question "`a[i]` và `*(a + i)` quan hệ thế nào?"
     Chúng tương đương: `a[i]` được định nghĩa là `*(a + i)`. Tên mảng `a` thoái hóa thành con trỏ tới phần tử đầu, `a + i` là địa chỉ của phần tử thứ `i` (nhích `i` phần tử, không phải `i` byte), và `*` đi theo địa chỉ đó. Cũng vì vậy `p[i]` dùng được với mọi con trỏ `p`, không chỉ với tên mảng.
@@ -717,7 +717,7 @@ Vì `ten` là `const char*`, ký tự của chuỗi hằng chỉ đọc. Muốn 
     `p + 1` nhích một **phần tử**. Với `int*` địa chỉ tăng (thường) 4. Muốn "nhích một byte" thì phải xử lý theo kiểu `char*`, và đó là việc hiếm gặp.
 
 !!! warning "Lỗi 4: Muốn hàm đổi con trỏ nhưng chỉ truyền `int*`"
-    Hàm nhận `int*` chỉ giữ **bản sao** của con trỏ; gán lại con trỏ trong hàm không đổi con trỏ ở nơi gọi (ví dụ 8). Cần `int**` (hoặc tham chiếu, Bài 05). Còn `*p = ...` thì sửa được giá trị mà `p` trỏ tới.
+    Hàm nhận `int*` chỉ giữ **bản sao** của con trỏ; gán lại con trỏ trong hàm không đổi con trỏ ở nơi gọi (ví dụ 8). Cần `int**` (hoặc tham chiếu, Bài 06). Còn `*p = ...` thì sửa được giá trị mà `p` trỏ tới.
 
 ## ✍️ Trắc nghiệm
 

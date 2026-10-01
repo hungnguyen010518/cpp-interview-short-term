@@ -69,7 +69,7 @@ Có địa chỉ rồi, làm sao lấy đồ ra? Bạn đặt dấu `*` **trư�
 
     Cách nhớ: nếu có tên kiểu (`int`, `char`...) đứng ngay trước `*`, đó là khai báo. Nếu không, đó là giải tham chiếu. Tương tự, `&x` (đặt trước tên biến, trong câu lệnh) là "địa chỉ của `x`", **ngược** với `*p`: một cái đi từ biến ra địa chỉ, một cái đi từ địa chỉ về giá trị.
 
-    Hai dấu này còn nghĩa khác ở những chỗ khác: `a * b` là phép nhân, `a & b` là phép "và" theo từng bit, và `&` trong khai báo còn dùng để tạo tham chiếu (Bài 05). Ở bài này chỉ cần các nghĩa vừa nêu.
+    Hai dấu này còn nghĩa khác ở những chỗ khác: `a * b` là phép nhân, `a & b` là phép "và" theo từng bit, và `&` trong khai báo còn dùng để tạo tham chiếu (Bài 06). Ở bài này chỉ cần các nghĩa vừa nêu.
 
 Hai con trỏ có thể cùng trỏ vào một biến, như hai tờ giấy cùng ghi ngăn 12. Viết `int* q = p;` là chép địa chỉ trong `p` sang `q`: bây giờ `q` cũng trỏ tới `x`, và sửa qua `*q` hay `*p` đều đổi `x`.
 
@@ -418,7 +418,7 @@ error: request for member ‘tuoi’ in ‘ai’, which is of pointer type ‘Ng
     Ba điểm khác:
 
     - Với con trỏ tới struct, Go cho viết `p.field` và **tự giải tham chiếu giùm bạn**. C++ không làm vậy: `ai.tuoi` là lỗi, phải viết `ai->tuoi`.
-    - Go **không có phép tính trên con trỏ** (không "cộng 1 vào con trỏ để sang ô kế"). C++ có, ta sẽ học ở Bài 04.
+    - Go **không có phép tính trên con trỏ** (không "cộng 1 vào con trỏ để sang ô kế"). C++ có, ta sẽ học ở Bài 05.
     - Go có bộ thu gom rác (garbage collector): chỗ nhớ nào không ai trỏ tới nữa thì Go tự dọn. C++ không có, nên con trỏ trỏ tới thứ đã chết hoặc chưa tồn tại là rủi ro thật. Go khi gặp `nil` mà bạn giải tham chiếu thì báo lỗi ngay (panic) theo cách xác định; C++ giải tham chiếu `nullptr` là hành vi không xác định.
 
 ### Ví dụ 6: Chạy thật bẫy `int* a, b;`
@@ -491,7 +491,7 @@ Lỗi này cho thấy rõ `b` không phải con trỏ: nó là `int`, không nh�
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Giải tham chiếu `nullptr` hoặc con trỏ chưa khởi tạo"
-    `*p` khi `p` là `nullptr`, hoặc khi `p` chưa được gán gì, là hành vi không xác định. Đừng tin rằng nó "luôn crash": có lúc chương trình chạy tiếp ra kết quả sai và khó tìm. Cách phòng: gán giá trị ngay lúc khai báo, và kiểm tra `if (p)` trước khi dùng `*p` nếu con trỏ có thể trống. Phần UB nói kỹ hơn ở Bài 12.
+    `*p` khi `p` là `nullptr`, hoặc khi `p` chưa được gán gì, là hành vi không xác định. Đừng tin rằng nó "luôn crash": có lúc chương trình chạy tiếp ra kết quả sai và khó tìm. Cách phòng: gán giá trị ngay lúc khai báo, và kiểm tra `if (p)` trước khi dùng `*p` nếu con trỏ có thể trống. Phần UB nói kỹ hơn ở Bài 13.
 
 !!! warning "Lỗi 2: `int* a, b;` tưởng là hai con trỏ"
     Dấu `*` bám vào tên đứng sau nó, nên chỉ `a` là con trỏ còn `b` là `int` (mình đã chạy ở ví dụ 6). Viết `int *a, *b;` hoặc, an toàn hơn, mỗi biến một dòng.

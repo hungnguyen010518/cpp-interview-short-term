@@ -1,4 +1,4 @@
-# Bài 12 — Memory leak, dangling, UB và công cụ phát hiện
+# Bài 13 — Memory leak, dangling, UB và công cụ phát hiện
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Phân biệt được rò rỉ bộ nhớ, con trỏ treo, giải phóng hai lần và hành vi không xác định.
@@ -43,7 +43,7 @@ Quy tắc ghép đôi:
 
 **Cách phòng tránh**:
 
-- Dùng RAII và smart pointer (xem Bài 7 đến Bài 9).
+- Dùng RAII và smart pointer (xem Bài 8 đến Bài 10).
 - Dùng container chuẩn như `vector`, `string`.
 - Tránh `new`/`delete` trần.
 - Bật cảnh báo `-Wall -Wextra`.
@@ -163,7 +163,7 @@ valgrind --leak-check=full ./rolo
 
 ## ✍️ Trắc nghiệm
 
-<div class="quiz" data-bai="12" markdown>
+<div class="quiz" data-bai="13" markdown>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** Rò rỉ bộ nhớ (memory leak) là gì?
