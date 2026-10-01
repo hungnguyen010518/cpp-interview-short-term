@@ -65,6 +65,15 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | tháo ngăn xếp (stack unwinding) | Khi có ngoại lệ, chương trình thoát ngược từng hàm tới `catch` và hủy mọi đối tượng cục bộ đã ra đời trên đường đi | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | std::terminate | Hàm kết thúc chương trình, được gọi khi ngoại lệ không bị bắt ở đâu cả; việc hủy các đối tượng khi đó là do cài đặt quyết định | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | defer (Go) | Câu lệnh Go chạy việc dọn dẹp ở cuối hàm; phải nhớ viết ở từng nơi dùng, khác RAII gắn vào kiểu dữ liệu | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| smart pointer (con trỏ thông minh) | Đối tượng giả vờ là con trỏ nhưng tự lo việc giải phóng bộ nhớ bằng hàm hủy; `unique_ptr` và `shared_ptr` là hai loại chính | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| std::unique_ptr | Con trỏ thông minh sở hữu duy nhất một đối tượng ở heap, tự `delete` khi chết; không copy được, chỉ trao tay bằng move; trong `<memory>` | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| std::make_unique | Hàm tạo đối tượng và bọc ngay vào `unique_ptr`, như `std::make_unique<Cay>(5)`; có từ C++14 | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| quyền sở hữu (ownership) | Việc "ai chịu trách nhiệm xóa đối tượng"; `unique_ptr` ghi rõ điều đó trong kiểu, còn Go không cần vì có GC | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| std::move | Lời nói "tôi đồng ý trao đi" cho phép chuyển ruột của một đối tượng sang đối tượng khác; với `unique_ptr` nguồn thành `nullptr`; chi tiết ở Bài 11 | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| get() / release() / reset() | `get()` trả địa chỉ thô để nhìn, vẫn là chủ; `release()` bỏ quyền sở hữu mà không xóa; `reset()` xóa đối tượng đang giữ | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| operator* / operator-> | Hàm đặc biệt để một lớp "giả vờ là con trỏ": `*m` và `m->x` gọi chúng | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| template (khuôn mẫu) | Kiểu có tham số là kiểu khác, viết như `unique_ptr<Cay>`; giống generics của Go | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| custom deleter (bộ xóa tùy chỉnh) | Cách đổi việc `unique_ptr` làm khi hủy (ví dụ `fclose` thay vì `delete`); chỉ cần biết tên | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
