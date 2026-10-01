@@ -397,7 +397,7 @@ heap:                     [ 0x9000: 5 ]
 stack:   b.p = 0x9000 ------+     <- hai tờ giấy cùng ghi số phòng 0x9000
 ```
 
-Cuối `main`, `b` chết (hàm hủy `delete 0x9000`), rồi `a` chết (lại `delete 0x9000`): đó là **giải phóng hai lần** của [Bài 07](07-new-delete.md), là hành vi không xác định. Vì thế mình để code trong khối bỏ qua và **không ghi kết quả**. Ý chính: mỗi tài nguyên chỉ nên có **một** chủ lo việc trả, còn ở đây có hai. Cách sửa (các quy tắc "rule of 3/5") nằm ở [Bài 11](11-move-semantics.md); bài này chỉ cần bạn biết lớp bọc con trỏ thô cần được để ý khi copy.
+Cuối `main`, `b` chết (hàm hủy `delete 0x9000`), rồi `a` chết (lại `delete 0x9000`): đó là **giải phóng hai lần** của [Bài 07](07-new-delete.md), là hành vi không xác định. Vì thế mình để code trong khối bỏ qua và **không ghi kết quả**. Ý chính: mỗi tài nguyên chỉ nên có **một** chủ lo việc trả, còn ở đây có hai. Cách sửa (các quy tắc "rule of 3/5") nằm ở Bài 11; bài này chỉ cần bạn biết lớp bọc con trỏ thô cần được để ý khi copy.
 
 ### 7. Chốt: đừng gọi `delete` tay
 
@@ -485,7 +485,7 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
     Cả hai đều giúp dọn dẹp đúng lúc. Khác biệt: `defer` là việc lập trình viên phải nhớ viết ở từng nơi dùng tài nguyên (quên là sót), còn RAII gắn việc trả vào chính kiểu dữ liệu nên dùng kiểu đó là tự được trả. Ngoài ra `defer` chạy ở cuối hàm, còn hàm hủy chạy ở cuối khối `{}` chứa đối tượng, có thể sớm hơn.
 
 ??? question "Vì sao lớp RAII giữ con trỏ thô cần để ý khi copy?"
-    Nếu không có hàm tạo sao chép riêng, trình biên dịch chép từng trường, nên hai đối tượng giữ cùng một con trỏ. Cả hai hàm hủy đều `delete` cùng một chỗ, tức giải phóng hai lần (hành vi không xác định). Muốn đúng phải quản lý quyền sở hữu khi copy, đó là rule of 3/5 ([Bài 11](11-move-semantics.md)), hoặc dùng sẵn `std::unique_ptr` ([Bài 09](09-unique-ptr.md)).
+    Nếu không có hàm tạo sao chép riêng, trình biên dịch chép từng trường, nên hai đối tượng giữ cùng một con trỏ. Cả hai hàm hủy đều `delete` cùng một chỗ, tức giải phóng hai lần (hành vi không xác định). Muốn đúng phải quản lý quyền sở hữu khi copy, đó là rule of 3/5 (Bài 11), hoặc dùng sẵn `std::unique_ptr` ([Bài 09](09-unique-ptr.md)).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -496,7 +496,7 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
     Hàm hủy chạy khi tháo ngăn xếp, mà tháo ngăn xếp gắn với việc có một `catch` bắt ở đâu đó. Nếu không có, chương trình gọi `std::terminate` và việc hủy là do cài đặt quyết định (mục 4). Đừng dựa vào nó để dọn dẹp.
 
 !!! warning "Lỗi 3: Copy lớp giữ con trỏ thô"
-    Chép con trỏ chứ không chép chỗ được trỏ tới, nên hai đối tượng cùng `delete` một chỗ (mục 6). [Bài 11](11-move-semantics.md) dạy cách sửa; [Bài 09](09-unique-ptr.md) có bản làm sẵn.
+    Chép con trỏ chứ không chép chỗ được trỏ tới, nên hai đối tượng cùng `delete` một chỗ (mục 6). Bài 11 dạy cách sửa; [Bài 09](09-unique-ptr.md) có bản làm sẵn.
 
 ## ✍️ Trắc nghiệm
 
@@ -614,5 +614,5 @@ std::cout << "het\n";
 1. RAII là xin tài nguyên trong hàm tạo và trả trong hàm hủy; tài nguyên không chỉ là bộ nhớ mà còn là file, khóa, kết nối, ổ cắm mạng (ví dụ trong chuẩn: `std::ifstream`, `std::lock_guard`).
 2. Hàm hủy của biến cục bộ chạy ở cuối khối `{}` chứa nó, theo thứ tự ngược với lúc tạo, kể cả khi `return` sớm; còn `delete` viết tay thì bị nhảy qua.
 3. Khi `throw` được ném và bị `catch` ở ngoài bắt, chương trình tháo ngăn xếp và hủy mọi đối tượng cục bộ đã ra đời trên đường đi, trước khi chạy khối `catch`; nếu không ai bắt thì gọi `std::terminate` và việc hủy là do cài đặt quyết định, còn hàm hủy thì không nên ném ngoại lệ.
-4. Lớp RAII giữ con trỏ thô rất nguy hiểm khi copy: hai đối tượng cùng giữ một con trỏ nên cùng `delete` một chỗ (cách sửa ở [Bài 11](11-move-semantics.md)).
+4. Lớp RAII giữ con trỏ thô rất nguy hiểm khi copy: hai đối tượng cùng giữ một con trỏ nên cùng `delete` một chỗ (cách sửa ở Bài 11).
 5. So với `defer` của Go: `defer` phải nhớ viết ở từng nơi và chạy ở cuối hàm, còn RAII gắn vào kiểu dữ liệu (không cần nhớ viết ở từng nơi) và chạy ở cuối khối; đừng gọi `delete` tay, để một đối tượng lo, và `std::unique_ptr` ([Bài 09](09-unique-ptr.md)) là bản làm sẵn cho bộ nhớ.

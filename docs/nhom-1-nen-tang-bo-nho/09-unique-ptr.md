@@ -150,7 +150,7 @@ int main() {
 | (5) | `if (p)` đúng khi `p` đang giữ cây; in `p dang giu cay` | không đổi |
 | (6) | `reset()` **xóa cây** đang giữ: in `huy 5`; `p` thành `nullptr` | heap: đã trả; `nhin` thành con trỏ treo (không dùng nữa) |
 | in `p rong` | `!p` nghĩa là "p đang rỗng": đúng | không đổi |
-| (7) | Tạo cây cao 7 (in `tao 7`) và đưa vào `p`. Dòng này gán vào `p` kết quả vừa tạo; [Bài 11](11-move-semantics.md) giải thích vì sao được phép | stack: `p` = 0xA000; heap: cây 7 |
+| (7) | Tạo cây cao 7 (in `tao 7`) và đưa vào `p`. Dòng này gán vào `p` kết quả vừa tạo; [Bài 12](12-move-semantics.md) giải thích vì sao được phép | stack: `p` = 0xA000; heap: cây 7 |
 | (8) | `release()` **bỏ quyền sở hữu** và trả địa chỉ thô cho `tho`; **không xóa gì**. `p` thành `nullptr` | `p` rỗng; `tho` = 0xA000 |
 | in 2 dòng | `p rong sau release`, rồi `tho` vẫn đọc được cây 7 | không đổi |
 | (9) | Giờ ta là chủ: phải tự `delete tho`; in `huy 7` | heap: đã trả |
@@ -216,7 +216,7 @@ Cách đọc: `auto b = a;` cần **hàm tạo sao chép** ([Bài 06](06-tham-ch
 
 ### 4. Trao tay bằng `std::move`
 
-Muốn chuyển quyền sở hữu từ `a` sang `b`, ta viết `auto b = std::move(a);`. `std::move` (cần `#include <utility>`) không tự di chuyển gì. Nó chỉ là **lời nói**: "tôi đồng ý trao `a` đi". Việc trao thật do `unique_ptr` làm: chép địa chỉ cây sang `b` rồi đặt `a` về `nullptr`. Ý nghĩa sâu hơn của `std::move` nằm ở [Bài 11](11-move-semantics.md); bây giờ bạn chỉ cần dùng được.
+Muốn chuyển quyền sở hữu từ `a` sang `b`, ta viết `auto b = std::move(a);`. `std::move` (cần `#include <utility>`) không tự di chuyển gì. Nó chỉ là **lời nói**: "tôi đồng ý trao `a` đi". Việc trao thật do `unique_ptr` làm: chép địa chỉ cây sang `b` rồi đặt `a` về `nullptr`. Ý nghĩa sâu hơn của `std::move` nằm ở [Bài 12](12-move-semantics.md); bây giờ bạn chỉ cần dùng được.
 
 ```cpp
 #include <iostream>
@@ -485,7 +485,7 @@ Cả ba lần đều có đúng một `tao` và một `huy`, không có dòng `d
     Vì hàm tạo sao chép của nó bị xóa (`= delete`), nên `auto b = a;` là lỗi biên dịch. Nếu copy được thì hai `unique_ptr` cùng giữ một đối tượng và cùng `delete` nó khi chết, tức là giải phóng hai lần (hành vi không xác định). C++ chọn chặn lỗi đó lúc biên dịch thay vì để nó xảy ra lúc chạy. Muốn chuyển đối tượng cho chỗ khác thì trao tay bằng `std::move`.
 
 ??? question "`std::move` làm gì với `unique_ptr`?"
-    Bản thân `std::move` chỉ là lời nói "tôi đồng ý trao đi" (nó cho phép dùng thao tác di chuyển), còn việc trao do `unique_ptr` làm: chép địa chỉ đối tượng sang `unique_ptr` đích và đặt nguồn về `nullptr`. Chuẩn bảo đảm nguồn là `nullptr` sau đó, nên đừng giải tham chiếu nó. Chi tiết về `std::move` và rvalue nằm ở [Bài 11](11-move-semantics.md).
+    Bản thân `std::move` chỉ là lời nói "tôi đồng ý trao đi" (nó cho phép dùng thao tác di chuyển), còn việc trao do `unique_ptr` làm: chép địa chỉ đối tượng sang `unique_ptr` đích và đặt nguồn về `nullptr`. Chuẩn bảo đảm nguồn là `nullptr` sau đó, nên đừng giải tham chiếu nó. Chi tiết về `std::move` và rvalue nằm ở [Bài 12](12-move-semantics.md).
 
 ??? question "`get()`, `release()` và `reset()` khác nhau thế nào?"
     `get()` trả địa chỉ thô để nhìn và `unique_ptr` vẫn là chủ, nên không được `delete` địa chỉ đó. `release()` bỏ quyền sở hữu và trả địa chỉ thô nhưng **không xóa**: từ đó bạn phải tự lo xóa, nếu không là rò rỉ. `reset()` **xóa** đối tượng đang giữ (và có thể nhận một con trỏ mới để giữ tiếp).
@@ -630,7 +630,7 @@ delete r;
 ## 🔑 Tóm tắt
 
 1. `std::unique_ptr<T>` (trong `<memory>`) là RAII cho bộ nhớ heap: nó là chủ duy nhất của đối tượng và `delete` đối tượng đó trong hàm hủy; tạo bằng `std::make_unique<T>(...)` (C++14), dùng `*p`, `p->` như con trỏ thật nhờ `operator*`/`operator->`.
-2. `unique_ptr` không copy được (hàm tạo sao chép bị xóa nên `auto b = a;` là lỗi biên dịch), vì copy sẽ tạo hai chủ và double free; chuyển quyền bằng `auto b = std::move(a);` thì `a` thành `nullptr` (chuẩn bảo đảm), còn chi tiết `std::move` ở [Bài 11](11-move-semantics.md).
+2. `unique_ptr` không copy được (hàm tạo sao chép bị xóa nên `auto b = a;` là lỗi biên dịch), vì copy sẽ tạo hai chủ và double free; chuyển quyền bằng `auto b = std::move(a);` thì `a` thành `nullptr` (chuẩn bảo đảm), còn chi tiết `std::move` ở [Bài 12](12-move-semantics.md).
 3. `get()` trả địa chỉ thô để nhìn và `p` vẫn là chủ (không `delete` nó); `release()` bỏ quyền sở hữu và trả địa chỉ thô mà không xóa (phải tự xóa); `reset()` xóa cây đang giữ.
 4. Hàm chỉ dùng cây nhận `const T&`/`T&`/`T*`; hàm cần sở hữu nhận `std::unique_ptr<T>` theo giá trị và nơi gọi viết `std::move(p)`; trả `unique_ptr` từ hàm không cần `std::move`; mảng dùng `unique_ptr<T[]>` nhưng `std::vector` thường tốt hơn.
 5. Chi phí gần như bằng con trỏ thô (trên cài đặt phổ biến, với bộ xóa mặc định; chuẩn không hứa), bộ xóa tùy chỉnh chỉ cần biết tên; so với Go, `unique_ptr` là cách C++ ghi "ai chịu trách nhiệm dọn", và quy tắc là mặc định dùng `unique_ptr`, còn con trỏ thô và tham chiếu chỉ để nhìn.

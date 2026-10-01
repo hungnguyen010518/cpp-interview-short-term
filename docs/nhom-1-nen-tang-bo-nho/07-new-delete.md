@@ -405,7 +405,7 @@ Hai lưu ý trung thực. Thứ nhất, ASan chỉ báo những gì **xảy ra t
 valgrind --leak-check=full ./chuongtrinh
 ```
 
-Valgrind chạy chương trình trong một môi trường do nó dựng lên, theo dõi từng lần xin và trả bộ nhớ, và khi chương trình kết thúc thì liệt kê những khối chưa được trả cùng nơi đã xin chúng. Valgrind **chưa được cài trên máy mình dùng để viết bài**, nên mình chỉ ghi lệnh và mô tả bằng lời, không dán kết quả. [Bài 13](13-memory-leak-ub.md) sẽ nói kỹ hơn về các công cụ này.
+Valgrind chạy chương trình trong một môi trường do nó dựng lên, theo dõi từng lần xin và trả bộ nhớ, và khi chương trình kết thúc thì liệt kê những khối chưa được trả cùng nơi đã xin chúng. Valgrind **chưa được cài trên máy mình dùng để viết bài**, nên mình chỉ ghi lệnh và mô tả bằng lời, không dán kết quả. [Bài 14](14-memory-leak-ub.md) sẽ nói kỹ hơn về các công cụ này.
 
 ### 6. Vì sao quản lý bằng tay mong manh
 

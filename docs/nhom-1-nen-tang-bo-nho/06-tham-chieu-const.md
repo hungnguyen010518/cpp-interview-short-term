@@ -244,7 +244,7 @@ x = 4
 error: cannot bind non-const lvalue reference of type ‘int&’ to an rvalue of type ‘int’
 ```
 
-Giải nghĩa câu báo lỗi: "bind" là "gắn"; "lvalue" là giá trị có tên như biến `a`; "rvalue" là giá trị tạm như `5` ([Bài 11](11-move-semantics.md) nói kỹ). Nghĩa là không gắn được tham chiếu không `const` vào giá trị tạm. Lời gọi (1) `docTheoThamChieu(a)` với biến `a` thì vẫn hợp lệ.
+Giải nghĩa câu báo lỗi: "bind" là "gắn"; "lvalue" là giá trị có tên như biến `a`; "rvalue" là giá trị tạm như `5` ([Bài 12](12-move-semantics.md) nói kỹ). Nghĩa là không gắn được tham chiếu không `const` vào giá trị tạm. Lời gọi (1) `docTheoThamChieu(a)` với biến `a` thì vẫn hợp lệ.
 
 ### 6. Đừng trả về tham chiếu tới biến cục bộ
 

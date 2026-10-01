@@ -18,12 +18,12 @@ cái kho đồ, thư viện...) rồi mới tới tên gọi của các khái ni
 
 ## Học theo thứ tự nào?
 
-Hãy học **Nhóm 1 — Nền tảng và bộ nhớ** từ [Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) đến [Bài 13](nhom-1-nen-tang-bo-nho/13-memory-leak-ub.md), đúng thứ tự. Nhóm này có
-13 bài, đi từ "bộ nhớ là gì" đến move semantics, C++11/14/17 và UB:
+Hãy học **Nhóm 1 — Nền tảng và bộ nhớ** từ [Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) đến [Bài 14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md), đúng thứ tự. Nhóm này có
+14 bài, đi từ "bộ nhớ là gì" đến move semantics, C++11/14/17 và UB:
 
 - **[Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md)–[10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md)** được viết theo kiểu "dạy từ gốc": đi từng bước, có ví dụ chạy thật và
   trắc nghiệm.
-- **[Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md)–[13](nhom-1-nen-tang-bo-nho/13-memory-leak-ub.md)** là bài cũ hơn, sẽ được viết lại theo cùng kiểu.
+- **[Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md)–[14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md)** là bài cũ hơn, sẽ được viết lại theo cùng kiểu.
 
 Các nhóm sau (STL, đa luồng, OOP, hệ thống) sẽ được thêm dần.
 

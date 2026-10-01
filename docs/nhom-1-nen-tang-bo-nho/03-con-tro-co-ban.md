@@ -491,7 +491,7 @@ Lỗi này cho thấy rõ `b` không phải con trỏ: nó là `int`, không nh�
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Giải tham chiếu `nullptr` hoặc con trỏ chưa khởi tạo"
-    `*p` khi `p` là `nullptr`, hoặc khi `p` chưa được gán gì, là hành vi không xác định. Đừng tin rằng nó "luôn crash": có lúc chương trình chạy tiếp ra kết quả sai và khó tìm. Cách phòng: gán giá trị ngay lúc khai báo, và kiểm tra `if (p)` trước khi dùng `*p` nếu con trỏ có thể trống. Phần UB nói kỹ hơn ở [Bài 13](13-memory-leak-ub.md).
+    `*p` khi `p` là `nullptr`, hoặc khi `p` chưa được gán gì, là hành vi không xác định. Đừng tin rằng nó "luôn crash": có lúc chương trình chạy tiếp ra kết quả sai và khó tìm. Cách phòng: gán giá trị ngay lúc khai báo, và kiểm tra `if (p)` trước khi dùng `*p` nếu con trỏ có thể trống. Phần UB nói kỹ hơn ở [Bài 14](14-memory-leak-ub.md).
 
 !!! warning "Lỗi 2: `int* a, b;` tưởng là hai con trỏ"
     Dấu `*` bám vào tên đứng sau nó, nên chỉ `a` là con trỏ còn `b` là `int` (mình đã chạy ở ví dụ 6). Viết `int *a, *b;` hoặc, an toàn hơn, mỗi biến một dòng.

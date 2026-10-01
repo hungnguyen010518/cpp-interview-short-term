@@ -1,4 +1,4 @@
-# Bài 11 — Move semantics, rule of 0/3/5
+# Bài 12 — Move semantics, rule of 0/3/5
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Phân biệt được sao chép và di chuyển bằng ví dụ quyển vở.
@@ -233,7 +233,7 @@ Kết quả in ra: `lvalue` rồi `rvalue`.
 
 ## ✍️ Trắc nghiệm
 
-<div class="quiz" data-bai="11" markdown>
+<div class="quiz" data-bai="12" markdown>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** `std::move(x)` thực sự làm gì?
