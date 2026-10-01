@@ -19,9 +19,9 @@ Quay lại **kho đồ của trường** ở [Bài 1](01-stack-heap-con-tro.md).
 
 ## 📖 Giải thích
 
-Có bốn loại lỗi bộ nhớ hay gặp. Tất cả đều có thể dẫn tới UB.
+Có bốn loại lỗi bộ nhớ hay gặp. Rò rỉ là lỗi quản lý bộ nhớ, nhưng chương trình vẫn chạy hợp lệ, chỉ tốn bộ nhớ. Ba loại còn lại là hành vi không xác định (UB).
 
-- **Memory leak (rò rỉ bộ nhớ)**: xin vùng nhớ rồi không trả.
+- **Memory leak (rò rỉ bộ nhớ)**: xin vùng nhớ rồi không trả. Không phải UB, chỉ là phí bộ nhớ.
 - **Dangling pointer / use-after-free (con trỏ treo / dùng sau khi trả)**: con trỏ vẫn giữ địa chỉ của vùng nhớ đã được trả, mà bạn vẫn dùng nó.
 - **Double free (giải phóng hai lần)**: trả một vùng nhớ hai lần. Bộ cấp phát bộ nhớ bị rối.
 - **Buffer overflow (ghi vượt biên mảng)**: đọc hoặc ghi ra ngoài vùng nhớ của mảng.
@@ -206,7 +206,7 @@ valgrind --leak-check=full ./rolo
 - `delete[]` nhanh hơn
 - Để tránh lỗi biên dịch
 
-<p class="giai-thich" markdown>Trình quản lý bộ nhớ ghi lại số phần tử của mảng; `delete[]` biết cách đọc thông tin đó.</p>
+<p class="giai-thich" markdown>Với `new[]`, thường (nhất là khi phần tử có hàm hủy) chương trình ghi thêm thông tin phụ để `delete[]` biết cần hủy bao nhiêu phần tử và trả đúng khối nhớ. Dùng `delete` thường thì không có gì đảm bảo, đó là hành vi không xác định.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
