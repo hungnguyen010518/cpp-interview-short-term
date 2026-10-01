@@ -15,6 +15,23 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | #include | Chỉ thị nạp bộ công cụ của thư viện vào chương trình, giống `import` của Go | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | main | Hàm đầu tiên được chạy khi chương trình bắt đầu | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
 | std::cout | Cổng ra để in chữ ra màn hình; `std::` là họ thư viện chuẩn | [Bài 01](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) |
+| stack (ngăn xếp) | Vùng nhớ nhỏ, nhanh, chứa biến cục bộ; mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| stack frame (khung gọi hàm) | Mảnh stack riêng của một lần gọi hàm, chứa tham số và biến cục bộ, bị gỡ khi hàm kết thúc | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| heap | Vùng nhớ rộng, phải tự xin bằng `new` và tự trả bằng `delete` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| vùng tĩnh (static storage) | Vùng chứa biến global, `static` cục bộ và thành viên `static`; sống suốt chương trình | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| vòng đời (lifetime) | Khoảng thời gian từ lúc đối tượng ra đời đến lúc nó chết | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| phạm vi (scope) | Đoạn code mà trong đó một tên còn dùng được, ví dụ từ chỗ khai báo đến `}` của khối chứa nó | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| hàm tạo (constructor) | Hàm trùng tên struct/class, chạy một lần khi đối tượng ra đời | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| hàm hủy (destructor) | Hàm tên `~` rồi tên struct/class, chạy một lần khi đối tượng chết | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| stack overflow (tràn stack) | Stack đầy, thường do đệ quy không dừng hoặc mảng cục bộ quá lớn; chương trình bị dừng đột ngột | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| global (biến toàn cục) | Biến khai báo ngoài mọi hàm; nằm ở vùng tĩnh, hàm tạo chạy trước `main`, hàm hủy sau `main` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| storage duration | Thời gian sống của vùng lưu trữ: automatic, static, dynamic hoặc thread | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| static initialization order fiasco | Thứ tự khởi tạo global giữa các file `.cpp` là không xác định nên global này có thể dùng global kia khi chưa sẵn sàng; tránh bằng `static` cục bộ trong hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| escape analysis (phân tích thoát) | Trình biên dịch Go kiểm tra biến có thoát khỏi hàm không và tự đưa lên heap nếu có | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| struct | Kiểu gộp nhiều trường lại; trong C++ còn chứa được hàm, gồm hàm tạo và hàm hủy | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| con trỏ (pointer) | Biến đựng một địa chỉ; `int*` là con trỏ tới một `int`, `*p` là giá trị ở địa chỉ đó | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| new / delete | `new` xin chỗ ở heap và trả địa chỉ; `delete` trả chỗ đó về | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| memory leak (rò rỉ bộ nhớ) | Chỗ ở heap đã xin mà không bao giờ được trả | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
