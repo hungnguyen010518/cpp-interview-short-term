@@ -19,14 +19,14 @@ def cau(dap_an=1, so_lua_chon=3, so_giai_thich=1):
             f"**Câu.** Hỏi gì đó?\n\n{lua}\n\n{gt}</div>\n")
 
 
-def bai(so_cau=6, so_dong_tom_tat=5, heading=None, cau_dau=None):
+def bai(so_cau=6, so_dong_tom_tat=5, heading=None, cau_dau=None, data_bai="01"):
     heading = HEADING if heading is None else heading
     out = '# Bài 1\n\n!!! abstract "🎯 Học xong bài này, bạn sẽ"\n    - Một\n'
     for h in heading:
         out += f"\n{h}\n\n"
         if "Trắc nghiệm" in h:
             cac_cau = [cau_dau or cau()] + [cau() for _ in range(so_cau - 1)]
-            out += '<div class="quiz" data-bai="01" markdown>\n\n'
+            out += f'<div class="quiz" data-bai="{data_bai}" markdown>\n\n'
             out += "\n".join(cac_cau) + "\n</div>\n"
         elif "Tóm tắt" in h:
             out += "\n".join(f"{i}. Dòng {i}" for i in range(1, so_dong_tom_tat + 1)) + "\n"
@@ -95,6 +95,79 @@ class TestKiemBai(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(k.main(["x", d]), 0)
+
+    def test_de_bai_lien_voi_lua_chon_la_loi(self):
+        c = ('<div class="cau-hoi" data-dap-an="1" markdown>\n'
+             "**Câu 1.** Hỏi gì đó?\n- Lựa chọn 1\n- Lựa chọn 2\n- Lựa chọn 3\n\n"
+             '<p class="giai-thich" markdown>Vì sao.</p>\n</div>\n')
+        loi = k.kiem_bai("b.md", bai(cau_dau=c))
+        self.assertTrue(any("dòng trống" in l and "câu 1" in l for l in loi), loi)
+
+
+class TestDataBai(unittest.TestCase):
+    def test_data_bai_khop_ten_file(self):
+        self.assertEqual(k.kiem_bai("02-x.md", bai(data_bai="02"), "02"), [])
+
+    def test_data_bai_sai_so(self):
+        loi = k.kiem_bai("01-x.md", bai(data_bai="02"), "01")
+        self.assertTrue(any("data-bai" in l and "01" in l for l in loi), loi)
+
+    def test_khong_biet_ten_file_thi_khong_kiem_so(self):
+        self.assertEqual(k.kiem_bai("b.md", bai(data_bai="07")), [])
+
+    def _thu_muc(self, d, files, tien_do):
+        goc = pathlib.Path(d)
+        (goc / "nhom-1").mkdir()
+        for ten, db in files.items():
+            (goc / "nhom-1" / ten).write_text(bai(data_bai=db), encoding="utf-8")
+        if tien_do is not None:
+            dong = "".join(f'| <span class="diem" data-bai="{n}"></span> |\n'
+                           for n in tien_do)
+            (goc / "tien-do.md").write_text("# T\n\n" + dong, encoding="utf-8")
+        return goc
+
+    def _chay(self, goc):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            ma = k.main(["x", str(goc)])
+        return ma, buf.getvalue()
+
+    def test_main_hop_le(self):
+        with tempfile.TemporaryDirectory() as d:
+            goc = self._thu_muc(d, {"01-a.md": "01", "02-b.md": "02"}, ["01", "02"])
+            self.assertEqual(self._chay(goc)[0], 0)
+
+    def test_main_data_bai_sai_so_so_voi_ten_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            goc = self._thu_muc(d, {"01-a.md": "02", "02-b.md": "02"}, ["01", "02"])
+            ma, out = self._chay(goc)
+            self.assertEqual(ma, 1)
+            self.assertIn("01-a.md", out)
+
+    def test_data_bai_trung_giua_hai_file(self):
+        loi = k.kiem_trung_data_bai({"a/01-a.md": "01", "a/02-b.md": "01"})
+        self.assertTrue(any("trùng" in l for l in loi), loi)
+        self.assertEqual(k.kiem_trung_data_bai({"a/01-a.md": "01", "a/02-b.md": "02"}), [])
+
+    def test_bai_thieu_trong_tien_do(self):
+        with tempfile.TemporaryDirectory() as d:
+            goc = self._thu_muc(d, {"01-a.md": "01", "02-b.md": "02"}, ["01"])
+            ma, out = self._chay(goc)
+            self.assertEqual(ma, 1)
+            self.assertIn("tien-do.md", out)
+            self.assertIn("02", out)
+
+    def test_tien_do_co_bai_khong_ton_tai(self):
+        with tempfile.TemporaryDirectory() as d:
+            goc = self._thu_muc(d, {"01-a.md": "01"}, ["01", "09"])
+            ma, out = self._chay(goc)
+            self.assertEqual(ma, 1)
+            self.assertIn("09", out)
+
+    def test_thieu_file_tien_do(self):
+        with tempfile.TemporaryDirectory() as d:
+            goc = self._thu_muc(d, {"01-a.md": "01"}, None)
+            self.assertEqual(self._chay(goc)[0], 1)
 
 
 if __name__ == "__main__":
