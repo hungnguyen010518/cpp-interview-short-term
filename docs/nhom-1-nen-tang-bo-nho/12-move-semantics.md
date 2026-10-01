@@ -162,7 +162,7 @@ Việc làm là **lấy con trỏ** của nguồn (2), rồi **đặt con trỏ 
 
 Chữ `noexcept` là lời hứa "hàm này không ném ngoại lệ": hàm chỉ chép vài con số nên giữ được lời hứa; vì sao lời hứa quan trọng, mục 8 giải thích.
 
-Phép gán di chuyển (4) làm giống hàm tạo, nhưng `this` đã giữ một vùng cũ nên phải xử lý thêm như phép gán sao chép ở Bài 11: kiểm tra tự gán (5), trả vùng cũ (6), rồi lấy con trỏ và đặt nguồn về `nullptr`. Nếu thiếu kiểm tra (5), `a = std::move(a)` sẽ trả vùng của chính `a` rồi "lấy" lại con trỏ vừa trả. Ở lần thử của mình, kết quả là `a` mất sạch dữ liệu (`n` = 0, `d` = `nullptr`), không báo lỗi gì.
+Phép gán di chuyển (4) làm giống hàm tạo, nhưng `this` đã giữ một vùng cũ nên phải xử lý thêm như phép gán sao chép ở [Bài 11](11-sao-chep-rule-of-3.md): kiểm tra tự gán (5), trả vùng cũ (6), rồi lấy con trỏ và đặt nguồn về `nullptr`. Nếu thiếu kiểm tra (5), `a = std::move(a)` sẽ trả vùng của chính `a` rồi "lấy" lại con trỏ vừa trả. Ở lần thử của mình, kết quả là `a` mất sạch dữ liệu (`n` = 0, `d` = `nullptr`), không báo lỗi gì.
 
 | Bước | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này (địa chỉ minh họa) |
 |---|---|---|---|
@@ -253,13 +253,13 @@ Quy tắc dùng an toàn: sau khi move, chỉ **hủy** nó hoặc **gán lại*
 Ngoại lệ có bảo đảm riêng: chuẩn nói `unique_ptr` và `shared_ptr` sau khi bị move thì **rỗng** (`nullptr`), nên viết `a == nullptr` hợp lệ, đúng như [Bài 09](09-unique-ptr.md). Với lớp tự viết như `Mang`, "trạng thái sau move" do chính bạn quy định: ở trên ta chọn `n = 0` và `d = nullptr`, đó cũng là trạng thái mà hàm hủy `delete[] d` xử lý được.
 
 !!! info "Bạn biết Go?"
-    Go không có hàm hủy và không có khái niệm move. Gán một struct luôn chép từng byte (con trỏ, slice, map bên trong chỉ chép "đầu mối", nên bản sao dùng chung dữ liệu, như Bài 11 đã nói), và bộ gom rác lo việc dọn khi không còn ai trỏ tới. Vì không có "người phải trả vùng nhớ đúng một lần", Go không cần cách trao quyền: không có thứ nào tương đương `std::move`. Gán biến về `nil` ở Go chỉ là gán, không kích hoạt gì.
+    Go không có hàm hủy và không có khái niệm move. Gán một struct luôn chép từng byte (con trỏ, slice, map bên trong chỉ chép "đầu mối", nên bản sao dùng chung dữ liệu, như [Bài 11](11-sao-chep-rule-of-3.md) đã nói), và bộ gom rác lo việc dọn khi không còn ai trỏ tới. Vì không có "người phải trả vùng nhớ đúng một lần", Go không cần cách trao quyền: không có thứ nào tương đương `std::move`. Gán biến về `nil` ở Go chỉ là gán, không kích hoạt gì.
 
 ### 7. Rule of 5 và Rule of 0
 
 [Bài 11](11-sao-chep-rule-of-3.md) có Rule of 3: hàm hủy, hàm tạo sao chép, phép gán sao chép. Thêm hai hàm di chuyển ta được năm hàm đặc biệt.
 
-**Rule of 5**: nếu lớp quản lý tài nguyên bằng tay (như `Mang` giữ `int*`) thì **thường** phải tự quyết định cả năm hàm: viết, hoặc cấm bằng `= delete`, hoặc giữ mặc định bằng `= default` (nêu tên ở Bài 11).
+**Rule of 5**: nếu lớp quản lý tài nguyên bằng tay (như `Mang` giữ `int*`) thì **thường** phải tự quyết định cả năm hàm: viết, hoặc cấm bằng `= delete`, hoặc giữ mặc định bằng `= default` (nêu tên ở [Bài 11](11-sao-chep-rule-of-3.md)).
 
 Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì: nếu bạn **tự khai báo** một hàm di chuyển, hai hàm sao chép tự sinh bị **xóa**; nếu bạn tự khai báo hàm hủy hay một hàm sao chép, các hàm di chuyển **không** được tự sinh. Mình đã thử cả hai chiều (rút gọn: bỏ hàm tạo thường, và `Cay` là kiểu có hàm tạo sao chép in `copy!` và hàm tạo di chuyển in `move!`):
 
@@ -278,7 +278,7 @@ Chương trình ở mục 💻 chạy thật để chứng minh, với lớp `Lo
 
 ### 8. `noexcept` và `std::vector`
 
-`std::vector` là mảng co giãn: các phần tử nằm liền nhau trong một khối heap. Khi `push_back` mà khối đã đầy, vector xin một khối **lớn hơn**, chuyển các phần tử cũ sang, rồi trả khối cũ. Chuyển bằng move thì rẻ, nhưng có một rủi ro: nếu move ném ngoại lệ khi mới chuyển được nửa số phần tử, khối cũ đã bị lấy ruột một phần và vector không thể khôi phục. (Cũng vì vậy, nếu một hàm đã hứa `noexcept` mà ngoại lệ vẫn thoát ra khỏi nó, chương trình gọi `std::terminate` và dừng hẳn; ngoại lệ là chuyện của [Bài 08](08-raii.md).)
+`std::vector` là mảng co giãn: các phần tử nằm liền nhau trong một khối heap. Khi `push_back` mà khối đã đầy, vector xin một khối **lớn hơn**, chuyển các phần tử cũ sang, rồi trả khối cũ. Chuyển bằng move thì rẻ, nhưng có một rủi ro: nếu move ném ngoại lệ khi mới chuyển được nửa số phần tử, khối cũ đã bị lấy ruột một phần và vector không thể khôi phục. (Nhân tiện: nếu một hàm đã hứa `noexcept` mà ngoại lệ vẫn thoát ra khỏi nó, chương trình gọi `std::terminate` và dừng hẳn; ngoại lệ là chuyện của [Bài 08](08-raii.md).)
 
 Để an toàn, vector dùng `std::move_if_noexcept`: **chỉ move khi hàm tạo di chuyển hứa `noexcept`** (hoặc kiểu không sao chép được); nếu không thì **sao chép**, vì sao chép không phá khối cũ. Nghĩa là quên `noexcept` làm vector âm thầm chậm đi. Đếm thử với hai kiểu giống hệt nhau, chỉ khác `noexcept`:
 
@@ -612,7 +612,7 @@ Cay a = taoTam();
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 5.** Đọc đoạn code sau. `Cu` chỉ có một hàm tạo sao chép (in `copy!`), không có hàm tạo di chuyển. Dòng cuối làm gì?
+**Câu 5.** Đọc đoạn code sau. `Cu` chỉ có hàm tạo từ `int` và một hàm tạo sao chép (in `copy!`), không có hàm tạo di chuyển. Dòng cuối làm gì?
 
 ```text
 Cu a(5);

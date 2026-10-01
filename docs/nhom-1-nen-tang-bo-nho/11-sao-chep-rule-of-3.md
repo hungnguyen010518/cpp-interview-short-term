@@ -180,7 +180,7 @@ Khi viết `b = a;` mà `b` **đã tồn tại**, `b` đang giữ một vùng nh
 2. **Chống tự gán**: `a = a;` là hợp lệ. Nếu cứ máy móc "trả vùng cũ rồi chép từ `a`", thì ở `a = a` ta trả mất chính vùng cần chép, rồi đọc vùng đã trả: hành vi không xác định. Nên kiểm tra `if (this != &o)` ("đối tượng kia không phải chính tôi"; `o` là biệt danh nên `&o` là địa chỉ của đối tượng thật).
 3. **Trả về `*this`** (chính `b`), để viết được `x = y = z`. Kiểu trả về là `Hop&` (tham chiếu), nên không tạo thêm bản sao.
 
-Đây là một cách viết, dễ hiểu nhất. Nếu xin vùng mới **trước** rồi mới trả vùng cũ thì không cần kiểm tra tự gán, và nếu `new` ném ngoại lệ thì `b` vẫn còn nguyên (với cách "trả trước" ở đây, `new` hỏng sau `delete p` sẽ để `p` treo). Copy-and-swap là cách chuẩn hóa ý đó.
+Đây là một cách viết, dễ hiểu nhất. Nếu xin vùng mới **trước** rồi mới trả vùng cũ thì không cần kiểm tra tự gán, và nếu `new` ném ngoại lệ thì `b` vẫn còn nguyên (với cách "trả trước" ở đây, `new` hỏng sau `delete p` sẽ để `p` treo). Copy-and-swap (giải thích ở mục sau) là cách chuẩn hóa ý đó.
 
 ```cpp
 #include <iostream>
@@ -249,7 +249,7 @@ Nhìn lại ba hàm ta vừa viết cho `Hop`: **hàm hủy** (`delete p`), **h�
 
 **Rule of 3** (quy tắc ba): nếu lớp của bạn cần tự viết **một** trong ba hàm {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì **thường** cần viết cả ba. Tự viết hàm hủy nghĩa là có tài nguyên phải trả; khi đó hai hàm sao chép mặc định (chép nông) thường sai. Đây là quy tắc kinh nghiệm, không phải luật của ngôn ngữ: trình biên dịch không bắt lỗi nếu bạn chỉ viết một hàm.
 
-Quy tắc này còn hai bản mở rộng, Rule of 5 và Rule of 0, thêm "di chuyển" vào; chúng là nội dung của Bài 12.
+Quy tắc này còn hai bản mở rộng, Rule of 5 và Rule of 0, thêm "di chuyển" vào; chúng là nội dung của [Bài 12](12-move-semantics.md).
 
 ### 6. Cấm sao chép bằng `= delete`
 
@@ -423,7 +423,7 @@ huy day 3 phan tu
     Sao chép nông chép từng thành viên, nên với con trỏ thì chép **địa chỉ**: hai đối tượng cùng trỏ một vùng nhớ. Sao chép sâu xin vùng nhớ **mới** và chép nội dung, nên mỗi đối tượng có vùng riêng. Trình biên dịch mặc định làm bản nông; nếu lớp có hàm hủy `delete` con trỏ thì bản nông dẫn tới hai đối tượng cùng giải phóng một chỗ (hành vi không xác định).
 
 ??? question "Rule of 3 là gì?"
-    Nếu một lớp cần tự viết một trong ba hàm: hàm hủy, hàm tạo sao chép, phép gán sao chép, thì thường cần viết cả ba. Lý do: cần hàm hủy nghĩa là lớp giữ tài nguyên, nên hai hàm sao chép mặc định (chép nông) sẽ sai. Đây là quy tắc kinh nghiệm chứ không phải luật bắt buộc; từ C++11 nó mở rộng thành Rule of 5 (thêm hai hàm di chuyển) và Rule of 0 (Bài 12).
+    Nếu một lớp cần tự viết một trong ba hàm: hàm hủy, hàm tạo sao chép, phép gán sao chép, thì thường cần viết cả ba. Lý do: cần hàm hủy nghĩa là lớp giữ tài nguyên, nên hai hàm sao chép mặc định (chép nông) sẽ sai. Đây là quy tắc kinh nghiệm chứ không phải luật bắt buộc; từ C++11 nó mở rộng thành Rule of 5 (thêm hai hàm di chuyển) và Rule of 0 ([Bài 12](12-move-semantics.md)).
 
 ??? question "Vì sao cần phép gán sao chép riêng, và vì sao phải chống tự gán?"
     Khác với hàm tạo sao chép, phép gán chạy trên đối tượng **đã tồn tại** và đang giữ vùng nhớ cũ, nên phải trả hoặc tái dùng nó, không thì rò rỉ. Với `a = a`, nếu trả vùng cũ trước rồi mới chép từ `o`, ta chép từ vùng vừa bị trả: hành vi không xác định. Vì vậy kiểm `if (this != &o)` và trả về `*this`; cách an toàn hơn là copy-and-swap.
@@ -457,11 +457,11 @@ std::cout << *a.p << " " << (a.p == b.p);
 ```
 
 - `5 0`: bản sao có vùng nhớ riêng
-- `0 0`: gốc bị bỏ trống sau khi sao chép
+- `5 1`: chung vùng nhưng `a` vẫn giữ 5
 - `9 1`: hai con trỏ cùng chỉ một vùng
 - `9 0`: vùng riêng nhưng giá trị bị chép lại
 
-<p class="giai-thich" markdown>Hàm sao chép mặc định chép từng thành viên, nên `b.p` nhận cùng địa chỉ với `a.p` và so sánh cho `1`. Ghi 9 qua `b.p` cũng là ghi vào vùng của `a`, nên `*a.p` là 9 (mình đã chạy ra đúng `9 1`). Kết quả `5 0` mô tả sao chép sâu, chỉ có khi bạn tự viết hàm tạo sao chép. `9 0` tự mâu thuẫn (vùng riêng thì `a` vẫn là 5), còn `0 0` nhầm sao chép với việc chuyển vùng sang `b`: sao chép không làm `a` rỗng đi.</p>
+<p class="giai-thich" markdown>Hàm sao chép mặc định chép từng thành viên, nên `b.p` nhận cùng địa chỉ với `a.p` và so sánh cho `1`. Ghi 9 qua `b.p` cũng là ghi vào vùng của `a`, nên `*a.p` là 9 (mình đã chạy ra đúng `9 1`). Kết quả `5 0` mô tả sao chép sâu, chỉ có khi bạn tự viết hàm tạo sao chép. `9 0` tự mâu thuẫn (vùng riêng thì `a` vẫn là 5), còn `5 1` cũng tự mâu thuẫn theo chiều ngược lại: đã chung một vùng thì ghi qua `b.p` là `a` thấy ngay.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -565,7 +565,7 @@ f(a);
 - Trao hẳn quyền sở hữu vùng nhớ cho đích và để gốc rỗng
 - Chép con trỏ rồi cho hai đối tượng đổi chỗ để cùng giữ một vùng
 
-<p class="giai-thich" markdown>Copy-and-swap là một cách viết phép gán an toàn: chép đối tượng gốc vào một bản tạm trước, rồi hoán đổi ruột của bản tạm với đối tượng đích, để bản tạm mang vùng cũ đi và tự trả. Nó không liên quan tới `= delete`, vốn là cách cấm sao chép. Trao quyền sở hữu và để gốc rỗng là ý tưởng khác, di chuyển, của Bài 12. Còn cho hai đối tượng cùng giữ một vùng chính là sao chép nông mà ta đang tránh.</p>
+<p class="giai-thich" markdown>Copy-and-swap là một cách viết phép gán an toàn: chép đối tượng gốc vào một bản tạm trước, rồi hoán đổi ruột của bản tạm với đối tượng đích, để bản tạm mang vùng cũ đi và tự trả. Nó không liên quan tới `= delete`, vốn là cách cấm sao chép. Trao quyền sở hữu và để gốc rỗng là ý tưởng khác, di chuyển, của [Bài 12](12-move-semantics.md). Còn cho hai đối tượng cùng giữ một vùng chính là sao chép nông mà ta đang tránh.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -593,5 +593,5 @@ b = a;
 1. Sao chép mặc định chép từng thành viên, nên với con trỏ thô thì chép địa chỉ (sao chép nông): hai đối tượng cùng giữ một vùng nhớ, và nếu hàm hủy `delete` nó thì dẫn tới giải phóng hai lần (hành vi không xác định).
 2. Sao chép sâu: hàm tạo sao chép `Hop(const Hop& o)` xin vùng mới và chép nội dung, nên mỗi đối tượng có vùng riêng và hàm hủy `delete` đúng một lần cho mỗi vùng.
 3. Phép gán sao chép (`operator=`, cách `=` hoạt động cho kiểu đó) chạy trên đối tượng đã tồn tại, nên phải trả vùng cũ, chống tự gán bằng `if (this != &o)` và trả về `*this`; đây là một cách viết thường gặp, còn copy-and-swap là cách chuẩn hóa việc "xin mới trước, trả cũ sau" (chỉ cần biết tên).
-4. Rule of 3: cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba (quy tắc kinh nghiệm); Rule of 5 và Rule of 0 ở Bài 12.
+4. Rule of 3: cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba (quy tắc kinh nghiệm); Rule of 5 và Rule of 0 ở [Bài 12](12-move-semantics.md).
 5. `= delete` cấm sao chép bằng lỗi biên dịch (cách `unique_ptr` làm, [Bài 09](09-unique-ptr.md)); truyền theo giá trị gọi hàm tạo sao chép còn `const T&` thì không, nên với kiểu sao chép sâu tốn kém hãy truyền `const T&`.
