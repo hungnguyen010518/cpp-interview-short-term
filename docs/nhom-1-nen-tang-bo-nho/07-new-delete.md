@@ -98,14 +98,16 @@ int main() {
 }
 ```
 
+Dòng (3) xuất hiện hai lần trong bảng vì nó vừa gọi hàm, vừa nhận kết quả về; bảng đánh số theo thứ tự chạy.
+
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (3) `taoSo()` được gọi | Vào hàm; trên bàn học của `taoSo` có biến `p` | stack: `p` ở 0x7fc0 |
-| (1) | Xin heap một `int`, ghi 42 | heap: 0x9000 chứa 42; `p` = 0x9000 |
-| (2) `return p;` | Trả **địa chỉ** về nơi gọi (sao chép tờ giấy); hết hàm, bàn học của `taoSo` bị dọn, biến `p` mất | stack của `taoSo` biến mất; heap: 0x9000 vẫn chứa 42 |
-| (3) tiếp: gán vào `q` | `q` trong `main` nhận địa chỉ 0x9000 | stack: `q` ở 0x7ff0 = 0x9000 |
-| (4) in `*q` | Đọc ra 42, chỗ ở heap vẫn nguyên vẹn dù hàm đã xong | in `*q = 42` |
-| (5) `delete q;` | Nơi gọi trả chỗ về kho | heap: 0x9000 đã trả |
+| Bước 1: dòng (3) gọi `taoSo()` | Vào hàm; trên bàn học của `taoSo` có biến `p` | stack: `p` ở 0x7fc0 |
+| Bước 2: dòng (1) | Xin heap một `int`, ghi 42 | heap: 0x9000 chứa 42; `p` = 0x9000 |
+| Bước 3: dòng (2) `return p;` | Trả **địa chỉ** về nơi gọi (sao chép tờ giấy); hết hàm, bàn học của `taoSo` bị dọn, biến `p` mất | stack của `taoSo` biến mất; heap: 0x9000 vẫn chứa 42 |
+| Bước 4: về lại dòng (3) | Kết quả được gán vào `q`: `q` trong `main` nhận địa chỉ 0x9000 | stack: `q` ở 0x7ff0 = 0x9000 |
+| Bước 5: dòng (4) in `*q` | Đọc ra 42, chỗ ở heap vẫn nguyên vẹn dù hàm đã xong | in `*q = 42` |
+| Bước 6: dòng (5) `delete q;` | Nơi gọi trả chỗ về kho | heap: 0x9000 đã trả |
 
 **Kết quả khi chạy:**
 
@@ -121,7 +123,7 @@ Lý do thứ hai là **kích thước chỉ biết lúc chạy**. Mảng ở sta
     Go cũng có `new(int)`: xin một `int` và trả về con trỏ `*int`. Nhưng Go **không có `delete`**: bộ thu gom rác (garbage collector) tự thu hồi khi không còn ai giữ con trỏ. Trong C++ không ai thu hồi giúp bạn: xin bằng `new` thì bạn phải tự trả bằng `delete`. Cũng vì vậy, "rò rỉ" trong Go thường là chuyện khác hẳn: bạn **vẫn giữ tham chiếu** (ví dụ một map toàn cục phình mãi) nên bộ thu gom không dám dọn. Rò rỉ trong C++ thì ngược lại: bạn **đã mất** tờ giấy mà phòng vẫn chưa trả.
 
 !!! question "Hỏi nhanh: `new` hết chỗ thì sao, có trả về `nullptr` không?"
-    Với `new` thường thì không. Khi kho hết chỗ, `new` **ném ngoại lệ** `std::bad_alloc`. Ngoại lệ (exception) là cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài, hơi giống `panic` của Go ở chỗ hàm bị dừng giữa chừng. Nên viết `if (p == nullptr)` ngay sau `new` thường là thừa; bài này chưa cần xử lý ngoại lệ, chỉ cần biết nó tồn tại.
+    Với `new` thường thì không. Khi kho hết chỗ, `new` **ném ngoại lệ** `std::bad_alloc` (ném = báo lỗi và dừng hàm hiện tại). Ngoại lệ (exception) là cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài, hơi giống `panic` của Go ở chỗ hàm bị dừng giữa chừng. Nên viết `if (p == nullptr)` ngay sau `new` thường là thừa; bài này chưa cần xử lý ngoại lệ, chỉ cần biết nó tồn tại.
 
 ### 2. `new` gọi hàm tạo, `delete` gọi hàm hủy
 
@@ -207,7 +209,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) `int n = 3;` | Biến `n` ở stack | `n` = 3 |
-| (2) `new int[n]` | Xin heap 3 món `int` liền nhau (12 byte); địa chỉ món đầu đặt vào `a`. Các món **chưa có giá trị xác định** | heap: 0x9000..0x900b là 3 món chưa ghi; `a` = 0x9000 |
+| (2) `new int[n]` | Xin heap 3 món `int` liền nhau (cần 12 byte; thực tế thường xin thêm chút chỗ để nhớ kích thước); địa chỉ món đầu đặt vào `a`. Các món **chưa có giá trị xác định** | heap: 0x9000..0x900b là 3 món chưa ghi; `a` = 0x9000 |
 | (3) vòng `for` | Ghi 10, 20, 30 vào từng món qua `a[i]` | heap: món 0 = 10, món 1 = 20, món 2 = 30 |
 | vòng `for` in | In ba số | in `10 20 30 ` |
 | (4) `delete[] a;` | Trả cả mảng 3 món về kho | heap: vùng 0x9000 đã trả |
@@ -220,7 +222,14 @@ int main() {
 
 Lưu ý dòng (2): `new int[n]` **không** tự điền 0. Phải ghi trước (như dòng (3)) rồi mới đọc.
 
-Vì sao có hai dạng `delete`? Vì với mảng đối tượng, `new[]` gọi hàm tạo **cho từng phần tử**, nên `delete[]` phải biết đi qua từng phần tử để gọi hàm hủy của từng cái. Ví dụ 1 ở phần 💻 bên dưới chạy thật điều này với `new Cay[2]`. Luật đi cặp:
+Vì sao có hai dạng `delete`? Vì với mảng đối tượng, `new[]` gọi hàm tạo **cho từng phần tử**, nên `delete[]` phải biết đi qua từng phần tử để gọi hàm hủy của từng cái. Ví dụ 1 ở phần 💻 bên dưới chạy đầy đủ điều này; đây là hai dòng chính của nó:
+
+```text
+Cay* v = new Cay[2];     // gọi hàm tạo hai lần (một lần cho mỗi phần tử)
+delete[] v;              // gọi hàm hủy hai lần, rồi trả cả vùng
+```
+
+Với `new[]`, thực tế thường xin thêm chút chỗ để nhớ số phần tử. `delete[]` biết có bao nhiêu phần tử là việc của thư viện, ta không cần biết cách làm. Luật đi cặp:
 
 | Xin bằng | Trả bằng |
 |---|---|
@@ -240,7 +249,15 @@ Một điểm cần phân biệt ngay từ đầu: trong ba lỗi, **rò rỉ kh
 
 **Rò rỉ bộ nhớ** là khi bạn xin một chỗ ở heap rồi **không bao giờ trả** nó, và đến lúc mất hết tờ giấy trỏ tới chỗ đó thì không còn cách nào trả nữa. Chỗ bị giữ thì không ai dùng được: chạy lâu, xin nhiều, bộ nhớ đầy dần. Cái đáng sợ là lỗi này **im lặng**: chương trình vẫn chạy, vẫn in đúng, thoát với mã 0.
 
-Ví dụ 2 ở phần 💻 bên dưới là chương trình `Cay` ở mục 2 nhưng **bỏ `delete`**. Kết quả không có dòng `huy 7`: hàm hủy không bao giờ chạy, và chỗ ở heap bị bỏ lại. Khi chương trình kết thúc, hệ điều hành thường thu hồi mọi thứ của tiến trình đó, nên bạn không thấy hậu quả ngay; nhưng một chương trình chạy mãi (máy chủ, dịch vụ) mà rò rỉ mỗi lần xử lý một yêu cầu thì sớm muộn sẽ hết bộ nhớ.
+Chương trình `Cay` ở mục 2, nhưng **bỏ `delete`**, trông như sau (đầy đủ ở Ví dụ 2, phần 💻 bên dưới):
+
+```text
+Cay* p = new Cay(7);
+std::cout << "cao = " << p->cao << "\n";
+// quên delete p;
+```
+
+Kết quả không có dòng `huy 7`: hàm hủy không bao giờ chạy, và chỗ ở heap bị bỏ lại. Khi chương trình kết thúc, hệ điều hành thường thu hồi mọi thứ của tiến trình đó, nên bạn không thấy hậu quả ngay; nhưng một chương trình chạy mãi (máy chủ, dịch vụ) mà rò rỉ mỗi lần xử lý một yêu cầu thì sớm muộn sẽ hết bộ nhớ.
 
 #### 4.2 Con trỏ treo và dùng sau khi trả (use-after-free)
 
@@ -355,7 +372,17 @@ g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer -o chuongtrinh chuo
 ./chuongtrinh
 ```
 
-Mình đã chạy lệnh này với chương trình rò rỉ ở ví dụ 2 (phần 💻 bên dưới). Báo cáo thật (đã **rút gọn**: bỏ số tiến trình, địa chỉ và đường dẫn trên máy mình, bỏ bớt dòng):
+Mình đã chạy lệnh này với chương trình rò rỉ vừa rồi (Ví dụ 2 ở phần 💻 bên dưới). Trong file đó, các dòng quan trọng được đánh số như sau (số đầu dòng là số dòng của file):
+
+```text
+14: int main() {
+15:     std::cout << "--- bat dau\n";
+16:     Cay* p = new Cay(7);
+17:     std::cout << "cao = " << p->cao << "\n";
+18:     // quen delete p;
+```
+
+Báo cáo thật (đã **rút gọn**: bỏ số tiến trình, địa chỉ và đường dẫn trên máy mình, bỏ bớt dòng):
 
 ```text
 ERROR: LeakSanitizer: detected memory leaks
@@ -368,9 +395,9 @@ Direct leak of 4 byte(s) in 1 object(s) allocated from:
 SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s).
 ```
 
-Cách đọc: "Direct leak of 4 byte(s) in 1 object(s)" là có 1 chỗ 4 byte bị bỏ rơi; các dòng `#0`, `#1`... là dấu vết "chỗ này được xin ở đâu", và dòng `#1 ... main ...:16` chỉ **đúng dòng 16** có `new Cay(7)`. Chương trình bị ASan chạy kết thúc với **mã thoát khác 0** (mình thấy là 1), dù bản không có ASan thoát mã 0.
+Cách đọc: "Direct leak of 4 byte(s) in 1 object(s)" là có 1 chỗ 4 byte bị bỏ rơi; các dòng `#0`, `#1`... là dấu vết "chỗ này được xin ở đâu", và dòng `#1 ... main ...:16` chỉ **đúng dòng 16** có `new Cay(7)` ở khung số dòng ngay trên. Chương trình bị ASan chạy kết thúc với **mã thoát khác 0** (mình thấy là 1), dù bản không có ASan thoát mã 0.
 
-Hai lưu ý trung thực. Thứ nhất, ASan chỉ báo những gì **xảy ra trong lần chạy đó**; code chưa chạy tới thì nó không thấy. Thứ hai, nó không hứa bắt mọi rò rỉ: với chương trình ở mục 6 (hàm thoát sớm), mình đã chạy thử với ASan và **nó không báo gì**. Nên dùng ASan là cách tốt để tìm lỗi, nhưng "ASan im lặng" không chứng minh được là code sạch.
+Hai lưu ý trung thực. Thứ nhất, ASan chỉ báo những gì **xảy ra trong lần chạy đó**; đoạn code chưa chạy tới thì nó không thấy. Thứ hai, LeakSanitizer đôi khi bỏ sót (ví dụ vì một giá trị cũ còn sót trong bộ nhớ làm nó tưởng "vẫn còn trỏ tới"), nên im lặng không chứng minh là sạch.
 
 **Valgrind** là công cụ khác làm cùng loại việc: bạn **không cần biên dịch lại** chương trình, chỉ chạy nó qua công cụ:
 
@@ -382,7 +409,17 @@ Valgrind chạy chương trình trong một môi trường do nó dựng lên, t
 
 ### 6. Vì sao quản lý bằng tay mong manh
 
-Bốn lỗi trên có chung nguồn gốc: **việc trả bộ nhớ phụ thuộc vào việc bạn nhớ viết `delete` đúng chỗ, đúng một lần, đúng cặp**. Chương trình thật có nhiều đường đi, và mỗi đường phải gặp đúng một `delete`. Chỉ cần một hàm có **thoát sớm** (`return` giữa chừng) là đã có đường bị sót. Ví dụ 3 ở phần 💻 bên dưới là một hàm như vậy.
+Bốn lỗi trên có chung nguồn gốc: **việc trả bộ nhớ phụ thuộc vào việc bạn nhớ viết `delete` đúng chỗ, đúng một lần, đúng cặp**. Chương trình thật có nhiều đường đi, và mỗi đường phải gặp đúng một `delete`. Chỉ cần một hàm có **thoát sớm** (`return` giữa chừng) là đã có đường bị sót. Đây là phần lõi của hàm trong Ví dụ 3 (phần 💻 bên dưới):
+
+```text
+void xuLy(int cao) {
+    Cay* p = new Cay(cao);
+    if (cao < 0) {
+        return;          // thoát sớm: nhảy qua delete
+    }
+    delete p;
+}
+```
 
 Cũng như thế với ngoại lệ (mục 1): nếu một dòng ở giữa hàm ném ngoại lệ, hàm bị cắt ngang và **dòng `delete` ở cuối hàm không bao giờ chạy**. Bạn có thể viết `delete` thêm vào mọi đường thoát, nhưng code càng dài, càng dễ sót, và ai sửa code sau này cũng phải nhớ.
 
@@ -425,7 +462,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (3) `new Cay[2]` | Xin heap cho hai `Cay` liền nhau (8 byte), rồi gọi hàm tạo cho **từng phần tử**: lần 1 in `tao 1`, lần 2 in `tao 2`; địa chỉ phần tử đầu đặt vào `v` | heap: 0x9000 chứa `so` = 1, 0x9004 chứa `so` = 2; `v` = 0x9000 (địa chỉ minh họa) |
+| (3) `new Cay[2]` | Xin heap cho hai `Cay` liền nhau (cần 8 byte, thực tế thường xin thêm chút chỗ để nhớ số phần tử), rồi gọi hàm tạo cho **từng phần tử**: lần 1 in `tao 1`, lần 2 in `tao 2`; địa chỉ phần tử đầu đặt vào `v` | heap: 0x9000 chứa `so` = 1, 0x9004 chứa `so` = 2; `v` = 0x9000 (địa chỉ minh họa) |
 | in `--- giua` | Đánh dấu | không đổi |
 | (4) `delete[] v;` | Gọi hàm hủy cho **từng phần tử**: in `huy 2` rồi `huy 1`; sau đó trả cả vùng về kho | heap: vùng 0x9000 đã trả |
 | in `--- xong` | Đánh dấu | không đổi |
@@ -527,6 +564,7 @@ void xuLy(int cao) {
 int main() {
     xuLy(5);
     xuLy(-1);
+    std::cout << "xong\n";
     return 0;
 }
 ```
@@ -542,6 +580,7 @@ int main() {
 | `xuLy(-1)`, (1) | Xin heap, hàm tạo in `tao -1` | heap: một `Cay` có `cao` = -1 |
 | `cao < 0`? | Đúng: in `cao am, thoat som` | không đổi |
 | (2) `return;` | Thoát hàm ngay, **nhảy qua (3)**; biến `p` mất | heap: `Cay` cao -1 bị bỏ rơi (rò rỉ) |
+| in `xong` | Quay về `main`, in dòng cuối | in `xong` |
 
 **Kết quả khi chạy:**
 
@@ -551,11 +590,26 @@ xu ly cay cao 5
 huy 5
 tao -1
 cao am, thoat som
+xong
 ```
 
 Lần gọi đầu có đủ cặp `tao 5` / `huy 5`. Lần gọi sau có `tao -1` mà **không có `huy -1`**. Cùng một hàm, hai đường đi, chỉ một đường trả bộ nhớ: đó chính là sự mong manh ở mục 6. Chương trình vẫn thoát mã 0, giống ví dụ 2.
 
-**Thử thay đổi: chạy ví dụ này với ASan.** Mình đã chạy thật: nó **không báo rò rỉ nào** (chương trình in như trên, mã thoát 0), dù code rõ ràng bỏ sót `delete` ở `xuLy(-1)`. Đây là minh chứng cho lưu ý ở mục 5: ASan không hứa bắt mọi rò rỉ, đừng coi nó là bằng chứng code đúng. Sửa thật sự là thêm `delete p;` trước `return;` ở (2), hoặc tốt hơn là dùng RAII (Bài 08) để khỏi phải nhớ.
+**Thử thay đổi: chạy ví dụ này với ASan.** Mình đã chạy thật (cùng lệnh ở mục 5). Chương trình in như trên, rồi LeakSanitizer báo (rút gọn, bỏ số tiến trình, địa chỉ và đường dẫn):
+
+```text
+ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 4 byte(s) in 1 object(s) allocated from:
+    #0 ... in operator new(unsigned long) ...
+    #1 ... in xuLy(int) ...:15
+    #2 ... in main ...:26
+    #3 ... in __libc_start_call_main ...
+
+SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s).
+```
+
+Mã thoát là 1. Dòng `#1` chỉ vào `new Cay(cao)` bên trong `xuLy` (dòng 15 của file, tức dòng (1)), và `#2` là lời gọi `xuLy(-1)` ở `main` (dòng 26): đúng chỗ rò rỉ. Chỉ có một khối bị báo, vì lần gọi `xuLy(5)` đã trả đúng. Sửa thật sự là thêm `delete p;` trước `return;` ở (2), hoặc tốt hơn là dùng RAII (Bài 08) để khỏi phải nhớ.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -625,10 +679,10 @@ int main() {
 
 - `delete a;`, vì `a` là một con trỏ
 - `free(a);`, vì đó là mảng
-- `delete a[10];`, vì cần nêu số phần tử
+- `delete *a;`, vì phải xóa giá trị mà `a` trỏ tới
 - `delete[] a;`, vì xin bằng `new[]`
 
-<p class="giai-thich" markdown>Luật đi cặp: `new[]` đi với `delete[]`, vì `delete[]` biết đây là cả mảng và đi qua từng phần tử để gọi hàm hủy. `delete a;` là dạng dành cho `new` đơn, và dùng với `new[]` là hành vi không xác định. `free` là cặp của `malloc`, không phải của `new`. Còn `delete a[10];` không phải cú pháp trả mảng: nó nhầm `[ ]` ở chỗ xin với `[ ]` ở chỗ trả, và `a[10]` còn là một phần tử vượt biên.</p>
+<p class="giai-thich" markdown>Luật đi cặp: `new[]` đi với `delete[]`, vì `delete[]` biết đây là cả mảng và đi qua từng phần tử để gọi hàm hủy. `delete a;` là dạng dành cho `new` đơn, và dùng với `new[]` là hành vi không xác định. `free` là cặp của `malloc`, không phải của `new`. Còn `delete *a;` là nhầm: `delete` nhận chính con trỏ (địa chỉ của chỗ cần trả), không phải giá trị đọc ra qua `*a`, và `g++` báo lỗi `type ‘int’ argument given to ‘delete’, expected pointer` (mình đã biên dịch).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -679,7 +733,7 @@ std::cout << *q;
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 7.** Bạn biên dịch chương trình quên `delete` (như ví dụ 2) với `-fsanitize=address -g` rồi chạy. Điều gì xảy ra?
+**Câu 7.** Bạn biên dịch chương trình `Cay` có `new Cay(7)` mà không có `delete` (như ví dụ 2) với `-fsanitize=address -g` rồi chạy. Điều gì xảy ra?
 
 - Nó báo lỗi ngay lúc biên dịch, vì code thiếu lệnh `delete`
 - Nó chạy y hệt bản thường và không in thêm gì ra màn hình
@@ -717,4 +771,4 @@ int main() { f(1, true); f(2, false); return 0; }
 2. Mảng động xin bằng `new T[n]` và trả bằng `delete[]`, gọi hàm tạo/hủy cho từng phần tử; cặp phải đúng: `new` với `delete`, `new[]` với `delete[]`, `malloc` với `free` (và `malloc`/`free` không gọi hàm tạo/hủy).
 3. Rò rỉ (quên trả) không phải UB, im lặng, và hàm hủy không chạy; con trỏ treo dùng sau khi trả (use-after-free), giải phóng hai lần và trộn `new[]` với `delete` đều là hành vi không xác định, không ai hứa kết quả.
 4. `p = nullptr` sau `delete` làm `delete p` lần nữa vô hại, nhưng chỉ sửa đúng con trỏ `p`: các con trỏ khác giữ địa chỉ cũ vẫn treo.
-5. Tìm rò rỉ bằng `-fsanitize=address -g` (LeakSanitizer) hoặc Valgrind, nhưng chúng không hứa bắt hết; thoát sớm hay ngoại lệ dễ làm sót `delete`, vì vậy cần RAII (Bài 08) thay vì `new`/`delete` trần.
+5. Tìm rò rỉ bằng `-fsanitize=address -g` (LeakSanitizer) hoặc Valgrind, nhưng LeakSanitizer đôi khi bỏ sót nên im lặng không chứng minh là sạch; thoát sớm hay ngoại lệ dễ làm sót `delete`, vì vậy cần RAII (Bài 08) thay vì `new`/`delete` trần.

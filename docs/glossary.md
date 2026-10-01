@@ -30,8 +30,8 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | escape analysis (phân tích thoát) | Trình biên dịch Go kiểm tra biến có thoát khỏi hàm không và tự đưa lên heap nếu có | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | struct | Kiểu gộp nhiều trường lại; trong C++ còn chứa được hàm, gồm hàm tạo và hàm hủy | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | con trỏ (pointer) | Biến đựng một địa chỉ; `int*` là con trỏ tới một `int`, `*p` là giá trị ở địa chỉ đó | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
-| new / delete | `new` xin chỗ ở heap và trả địa chỉ; `delete` trả chỗ đó về | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
-| memory leak (rò rỉ bộ nhớ) | Chỗ ở heap đã xin mà không bao giờ được trả | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| new / delete / delete[] | `new T(...)` xin chỗ ở heap, gọi hàm tạo, trả về địa chỉ; `delete p` gọi hàm hủy rồi trả chỗ; `new T[n]` xin mảng và phải trả bằng `delete[] p`; không được trộn các dạng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
+| rò rỉ bộ nhớ (memory leak) | Xin chỗ ở heap mà không bao giờ trả; chương trình vẫn đúng luật (không phải UB) nhưng phí bộ nhớ dần | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | con trỏ (pointer) | Biến đựng một địa chỉ, thường là địa chỉ của biến khác; `int* p` là con trỏ tới `int` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | giải tham chiếu (dereference) | Đi theo địa chỉ trong con trỏ để đọc hoặc ghi thứ nằm ở đó, viết `*p` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | nullptr | Giá trị của con trỏ "chưa trỏ vào đâu" (C++11), có kiểu riêng `std::nullptr_t`; ứng với `nil` của Go | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
@@ -56,10 +56,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | giá trị tạm (temporary) | Giá trị không có tên, chỉ sống trong một câu lệnh, như `5` hay `a + 1` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | truyền theo tham chiếu (pass by reference) | Hàm nhận tham chiếu: không sao chép, và sửa được bản gốc nếu không có `const` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | const& | Tham chiếu hằng `const T&`: chỉ xem, không sao chép, nhận được cả giá trị tạm | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
-| new | Xin chỗ ở heap rồi gọi hàm tạo, trả về địa chỉ; `new T(...)` cho một đối tượng, `new T[n]` cho một mảng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
-| delete / delete[] | `delete p` gọi hàm hủy rồi trả chỗ xin bằng `new`; `delete[] p` trả mảng xin bằng `new[]`; không được trộn hai dạng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | malloc / free | Cặp xin/trả bytes thô của ngôn ngữ C, không gọi hàm tạo/hàm hủy; C++ hiện đại gần như không dùng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
-| rò rỉ bộ nhớ (memory leak) | Xin chỗ ở heap mà không bao giờ trả; chương trình vẫn đúng luật (không phải UB) nhưng phí bộ nhớ dần | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | con trỏ treo (dangling pointer) | Con trỏ còn giữ địa chỉ của chỗ đã bị trả hoặc đã hết hiệu lực | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | ngoại lệ (exception) | Cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài; `new` hết chỗ ném `std::bad_alloc` | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
