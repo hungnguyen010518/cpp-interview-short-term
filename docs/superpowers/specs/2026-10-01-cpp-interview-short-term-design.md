@@ -14,7 +14,7 @@ Sản phẩm: một web tĩnh công khai tại `https://hungnguyen010518.github.
 ## Phong cách viết
 - Giải thích sao cho học sinh lớp 5 cũng hiểu, giống khóa `database-tu-a-z`: mở bài bằng một câu chuyện hoặc phép ẩn dụ đời thường (cái bàn học, kho đồ, thư viện...) rồi mới tới thuật ngữ.
 - Mỗi thuật ngữ tiếng Anh xuất hiện lần đầu phải kèm nghĩa tiếng Việt dễ hiểu và đưa vào trang Thuật ngữ.
-- Câu ngắn, ví dụ nhỏ, một ý một đoạn. Phần "Câu hỏi phỏng vấn" mới dùng ngôn ngữ chính xác như khi trả lời nhà tuyển dụng.
+- Câu ngắn, ví dụ nhỏ, một ý một đoạn. Phần "Câu hỏi phỏng vấn" mới dùng ngôn ngữ chính xác như khi trả lời trực tiếp.
 
 ## Hướng kỹ thuật
 - MkDocs Material (cùng bộ với repo `database-tu-a-z`), deploy bằng GitHub Actions (`mkdocs gh-deploy`) khi push vào `main`.
