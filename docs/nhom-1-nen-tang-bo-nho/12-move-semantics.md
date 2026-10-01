@@ -28,12 +28,14 @@ Chép xong rồi vứt bản gốc thì thật lãng phí: thay vì chép, ta ch
 
 ### 2. lvalue và rvalue bằng lời thường
 
-- **lvalue**: có **tên** và có chỗ trong bộ nhớ để quay lại dùng ở dòng sau. Ví dụ biến `x`.
+- **lvalue**: có **tên** và có chỗ trong bộ nhớ để quay lại dùng ở dòng sau. Ví dụ biến `x` (và vài thứ khác như `*p`).
 - **rvalue**: giá trị **tạm thời**, hết câu lệnh là biến mất. Ví dụ kết quả của `x + 1`, số viết thẳng `3`, đối tượng tạm `Cay(3)`, hay giá trị một hàm trả về theo giá trị.
 
 Mẹo hay dùng: nếu lấy được địa chỉ bằng `&` thì thường là lvalue. Mình đã thử `&(x + 1)`: g++ báo `lvalue required as unary '&' operand`, vì kết quả tạm không có chỗ ổn định để trỏ tới. Đây là cách hiểu đủ dùng cho bài này; chuẩn C++ chia mịn hơn, ta không cần.
 
 Điều quan trọng: lấy ruột của **rvalue** thì không ai tiếc (nó sắp biến mất), còn lấy ruột của **lvalue** thì người dùng biến đó sẽ bất ngờ. Vì vậy C++ cần một loại tham chiếu chỉ nhận rvalue.
+
+Ngoại lệ có chủ ý: `std::move(x)` bắt C++ **coi** `x` như một giá trị tạm, dù `x` vẫn sống (mục 5 nói rõ).
 
 ### 3. Tham chiếu rvalue `T&&`
 
@@ -95,7 +97,7 @@ Có hai điều cần nhớ từ output. Một: hai dòng `rvalue, x = 1` và `s
 
 ### 4. Hàm tạo di chuyển và phép gán di chuyển
 
-Giờ viết cho `Mang` (giống `Day` ở [Bài 11](11-sao-chep-rule-of-3.md), đổi tên), thêm hai hàm có `&&` và cho các hàm sao chép/di chuyển in một dòng để đếm. Phần mới chỉ là các dòng (1)–(6). Phép gán sao chép bị bỏ cho gọn: vì ta khai báo hàm di chuyển, nó không còn được tự sinh (mục 7), và ví dụ này không cần tới nó.
+Giờ viết cho `Mang` (giống `Day` ở [Bài 11](11-sao-chep-rule-of-3.md), đổi tên), thêm hai hàm có `&&` và cho các hàm sao chép/di chuyển in một dòng để đếm. Phần mới chỉ là các dòng (1)–(6). Phép gán sao chép bị bỏ cho gọn: vì ta khai báo hàm di chuyển, phép gán sao chép tự sinh bị **xóa** (mục 7), nên `d = lvalue` sẽ là lỗi biên dịch; ví dụ này không cần tới nó.
 
 ```cpp
 #include <iostream>
@@ -160,18 +162,18 @@ Việc làm là **lấy con trỏ** của nguồn (2), rồi **đặt con trỏ 
 
 Chữ `noexcept` là lời hứa "hàm này không ném ngoại lệ": hàm chỉ chép vài con số nên giữ được lời hứa; vì sao lời hứa quan trọng, mục 8 giải thích.
 
-Phép gán di chuyển (4) làm giống hàm tạo, nhưng `this` đã giữ một vùng cũ nên phải xử lý thêm như phép gán sao chép ở Bài 11: kiểm tra tự gán (5), trả vùng cũ (6), rồi lấy con trỏ và đặt nguồn về `nullptr`. Nếu thiếu kiểm tra (5), `a = std::move(a)` sẽ trả vùng của chính `a` rồi "lấy" lại con trỏ vừa trả.
+Phép gán di chuyển (4) làm giống hàm tạo, nhưng `this` đã giữ một vùng cũ nên phải xử lý thêm như phép gán sao chép ở Bài 11: kiểm tra tự gán (5), trả vùng cũ (6), rồi lấy con trỏ và đặt nguồn về `nullptr`. Nếu thiếu kiểm tra (5), `a = std::move(a)` sẽ trả vùng của chính `a` rồi "lấy" lại con trỏ vừa trả. Ở lần thử của mình, kết quả là `a` mất sạch dữ liệu (`n` = 0, `d` = `nullptr`), không báo lỗi gì.
 
 | Bước | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này (địa chỉ minh họa) |
 |---|---|---|---|
 | 1 | `Mang a(3, 1)` | Xin mảng 3 `int` | `a.d` = 0x9000 |
-| 2 | (7) `Mang b = a;` | `a` là lvalue, `b` chưa tồn tại: hàm tạo sao chép, xin mảng mới, in `copy!` | `b.d` = 0xA000 |
+| 2 | (7) `Mang b = a;` | `a` là lvalue: hàm tạo sao chép, mảng mới, in `copy!` | `b.d` = 0xA000 |
 | 3 | (8) `Mang c = std::move(a);` | `std::move(a)` là rvalue nên chọn hàm tạo di chuyển (1): (2) `c.d` = 0x9000, (3) `a.d` = `nullptr`, `a.n` = 0; in `move!` | `c.d` = 0x9000; `a.d` = `nullptr` |
 | 4 | in | `a.n = 0, c.n = 3` | không đổi |
-| 5 | (9) `nhan(b)` | Tham số `m` là biến mới tạo từ lvalue `b`: hàm tạo sao chép, in `copy!`; trong hàm in `nhan 3 phan tu`; hết hàm thì `m` chết và trả mảng chép | `m.d` = 0xB000 rồi đã trả |
-| 6 | (10) `nhan(std::move(b))` | `m` tạo từ rvalue: hàm tạo di chuyển, in `move!`; in `nhan 3 phan tu`; `m` chết và trả 0xA000 (mảng của `b` cũ) | `m.d` = 0xA000 rồi đã trả; `b.d` = `nullptr` |
+| 5 | (9) `nhan(b)` | `m` tạo từ lvalue `b`: sao chép, in `copy!`; in `nhan 3 phan tu`; `m` chết, trả mảng chép | `m.d` = 0xB000 rồi đã trả |
+| 6 | (10) `nhan(std::move(b))` | `m` tạo từ rvalue: di chuyển, in `move!`; in `nhan 3 phan tu`; `m` chết, trả 0xA000 | `m.d` = 0xA000 rồi đã trả; `b.d` = `nullptr` |
 | 7 | `Mang d(2, 0)` | Xin mảng 2 `int` | `d.d` = 0xC000 |
-| 8 | (11) `d = Mang(4, 9);` | `Mang(4, 9)` là đối tượng tạm (rvalue) nên chọn phép gán di chuyển (4): (5) khác nhau, (6) trả 0xC000, lấy con trỏ của tạm, tạm về `nullptr`; in `move gan!`. Tạm chết cuối câu lệnh, `delete[]` trên `nullptr` thì không làm gì | `d.d` = mảng của tạm (4 `int`) |
+| 8 | (11) `d = Mang(4, 9);` | Vế phải là tạm (rvalue) nên chọn (4): (5) khác nhau, (6) trả 0xC000, lấy con trỏ của tạm, tạm về `nullptr`; in `move gan!`. Tạm chết cuối câu lệnh, `delete[]` trên `nullptr` không làm gì | `d.d` = mảng của tạm (4 `int`) |
 | 9 | in | `d.n = 4` | không đổi |
 | 10 | cuối `main` | `d`, `c`, `b`, `a` chết theo thứ tự ngược; `b` và `a` đã `nullptr` nên `delete[]` của chúng không làm gì (chỉ `d` và `c` trả mảng) | heap trống |
 
@@ -242,9 +244,6 @@ b.v = 5
 
 **Thử thay đổi: thêm `Cu(Cu&& o) { v = o.v; std::cout << "move!\n"; }` ngay trước (1).** Mình đã chạy: lần này in `move!` rồi `b.v = 5`. Cùng một dòng `std::move`, kết quả đổi theo việc lớp có hàm tạo di chuyển hay không.
 
-!!! question "Hỏi nhanh: sao không cứ `std::move` mọi thứ cho nhanh?"
-    Vì lấy ruột nghĩa là nguồn bị rỗng. Nếu bạn còn dùng biến đó ở dòng sau thì bạn đang dùng một cái bìa rỗng. Chỉ `std::move` khi bạn chắc từ đây không còn cần giá trị cũ của biến đó nữa.
-
 ### 6. Đối tượng sau khi bị move
 
 Đối tượng bị move **vẫn còn sống**, hàm hủy của nó vẫn chạy khi hết phạm vi. Với các kiểu của thư viện chuẩn (`std::string`, `std::vector`...), chuẩn chỉ hứa đối tượng ở trạng thái **hợp lệ nhưng không xác định (valid but unspecified)**. "Hợp lệ" nghĩa là hủy nó hay gán giá trị mới cho nó đều an toàn. "Không xác định" nghĩa là bạn **không được đoán** nội dung: nhiều máy thấy chuỗi rỗng, nhưng chuẩn không hứa.
@@ -262,34 +261,24 @@ Ngoại lệ có bảo đảm riêng: chuẩn nói `unique_ptr` và `shared_ptr`
 
 **Rule of 5**: nếu lớp quản lý tài nguyên bằng tay (như `Mang` giữ `int*`) thì **thường** phải tự quyết định cả năm hàm: viết, hoặc cấm bằng `= delete`, hoặc giữ mặc định bằng `= default` (nêu tên ở Bài 11).
 
-Có một luật nhỏ cho biết trình biên dịch tự sinh gì: nếu bạn **tự khai báo** một hàm di chuyển, hai hàm sao chép tự sinh bị tắt; nếu bạn tự khai báo hàm hủy hay một hàm sao chép, các hàm di chuyển **không** được tự sinh. Mình đã thử cả hai chiều. Chiều đầu, `Hop` chỉ có hàm tạo di chuyển rồi viết `Hop b = a;` (rút gọn, bỏ vị trí):
+Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì: nếu bạn **tự khai báo** một hàm di chuyển, hai hàm sao chép tự sinh bị **xóa**; nếu bạn tự khai báo hàm hủy hay một hàm sao chép, các hàm di chuyển **không** được tự sinh. Mình đã thử cả hai chiều (rút gọn: bỏ hàm tạo thường, và `Cay` là kiểu có hàm tạo sao chép in `copy!` và hàm tạo di chuyển in `move!`):
 
 ```text
-error: use of deleted function 'Hop::Hop(const Hop&)'
-note: 'Hop::Hop(const Hop&)' is implicitly declared as deleted because 'Hop' declares a move constructor or move assignment operator
+struct Hop { Hop(){}  Hop(Hop&&) noexcept {} };
+    Hop a; Hop b = a;       // lỗi biên dịch: use of deleted function 'Hop::Hop(const Hop&)'
+struct M1 { Cay c;  ~M1() {} };    // M1 b = std::move(a);  in: copy!
+struct M2 { Cay c; };              // M2 y = std::move(x);  in: move!
 ```
 
-Chiều sau, hai struct bọc một `Cay`, kiểu có hàm tạo sao chép in `copy!` và hàm tạo di chuyển in `move!`. Một cái có thêm hàm hủy rỗng, một cái không có gì (rút gọn, bỏ hàm tạo):
+Chỉ vì thêm một hàm hủy rỗng mà `M1` mất hàm di chuyển tự sinh, và `std::move` âm thầm thành sao chép.
 
-```text
-struct M1 { Cay c; ~M1() {} };     // M1 b = std::move(a);  in: copy!
-struct M2 { Cay c; };               // M2 y = std::move(x);  in: move!
-```
+Vì vậy có **Rule of 0**: nếu mọi thành viên của lớp **tự quản lý mình** (`std::vector`, `std::string`, `std::unique_ptr`), bạn **không viết hàm đặc biệt nào** và để trình biên dịch tự sinh; chúng chép và di chuyển từng thành viên đúng cách. Bạn nên ưu tiên cách này mỗi khi có thể.
 
-Chỉ vì thêm một hàm hủy rỗng mà `M1` mất hàm di chuyển tự sinh, và `std::move` âm thầm thành sao chép. Đây là lý do cho **Rule of 0**: nếu mọi thành viên của lớp **tự quản lý mình** (`std::vector`, `std::string`, `std::unique_ptr`), bạn **không viết hàm đặc biệt nào** và để trình biên dịch tự sinh; chúng sẽ chép và di chuyển từng thành viên đúng cách. Chương trình ở mục 💻 chứng minh điều này bằng cách chạy thật, với một lớp chỉ gồm hai thành viên:
-
-```text
-struct Lop {
-    std::vector<int> d;
-    std::string ten;
-};          // không hàm hủy, không sao chép, không di chuyển
-```
-
-Bạn nên ưu tiên Rule of 0 mỗi khi có thể.
+Chương trình ở mục 💻 chạy thật để chứng minh, với lớp `Lop` chỉ gồm một `std::vector<int>` và một `std::string`, không viết hàm đặc biệt nào.
 
 ### 8. `noexcept` và `std::vector`
 
-`std::vector` là mảng co giãn: các phần tử nằm liền nhau trong một khối heap. Khi `push_back` mà khối đã đầy, vector xin một khối **lớn hơn**, chuyển các phần tử cũ sang, rồi trả khối cũ. Chuyển bằng move thì rẻ, nhưng có một rủi ro: nếu move ném ngoại lệ khi mới chuyển được nửa số phần tử, khối cũ đã bị lấy ruột một phần và vector không thể khôi phục.
+`std::vector` là mảng co giãn: các phần tử nằm liền nhau trong một khối heap. Khi `push_back` mà khối đã đầy, vector xin một khối **lớn hơn**, chuyển các phần tử cũ sang, rồi trả khối cũ. Chuyển bằng move thì rẻ, nhưng có một rủi ro: nếu move ném ngoại lệ khi mới chuyển được nửa số phần tử, khối cũ đã bị lấy ruột một phần và vector không thể khôi phục. (Cũng vì vậy, nếu một hàm đã hứa `noexcept` mà ngoại lệ vẫn thoát ra khỏi nó, chương trình gọi `std::terminate` và dừng hẳn; ngoại lệ là chuyện của [Bài 08](08-raii.md).)
 
 Để an toàn, vector dùng `std::move_if_noexcept`: **chỉ move khi hàm tạo di chuyển hứa `noexcept`** (hoặc kiểu không sao chép được); nếu không thì **sao chép**, vì sao chép không phá khối cũ. Nghĩa là quên `noexcept` làm vector âm thầm chậm đi. Đếm thử với hai kiểu giống hệt nhau, chỉ khác `noexcept`:
 
@@ -373,9 +362,9 @@ Con số cụ thể ở trên là của g++ trên máy mình: dung lượng tăn
 
 ### 9. Trả về theo giá trị: viết `return v;`
 
-Khi hàm trả một đối tượng theo giá trị, đừng viết `std::move`. Trình biên dịch có thể bỏ hẳn bước chuyển: gọi là **copy elision** (bỏ qua sao chép), thường gọi là RVO. Từ C++17 điều này **bắt buộc** khi trả về một giá trị tạm (`return Cay(3);`): không có sao chép hay di chuyển nào, kể cả khi hai hàm đó bị xóa.
+Khi hàm trả một đối tượng theo giá trị, đừng viết `std::move`. Trình biên dịch có thể bỏ hẳn bước sao chép hoặc di chuyển: gọi là **copy elision** (bỏ qua sao chép), thường gọi là RVO (Return Value Optimization, tối ưu giá trị trả về). Từ C++17 điều này **bắt buộc** khi trả về một giá trị tạm (`return Cay(3);`): không có sao chép hay di chuyển nào, kể cả khi hai hàm đó bị xóa.
 
-Với biến cục bộ có tên (`return c;`) thì gọi là **NRVO**, được phép nhưng **không bắt buộc**. Nếu không bỏ qua được, trả về biến cục bộ được thử như rvalue trước, tức là dùng **move** chứ không phải copy.
+Với biến cục bộ có tên (`return c;`) thì gọi là **NRVO**, được phép nhưng **không bắt buộc**. Nếu không bỏ qua được, trả về biến cục bộ được thử như rvalue trước, tức là dùng **move** chứ không phải copy. Mình đã thử một hàm có hai biến cục bộ và trả một trong hai tùy nhánh: g++ in đúng một `move!`.
 
 ```cpp
 #include <iostream>
@@ -397,21 +386,12 @@ Cay taoCoTen() {
     return c;                                     // (2)
 }
 
-Cay taoNhanh(bool k) {
-    Cay x(1);
-    Cay y(2);
-    if (k) return x;                              // (3)
-    return y;
-}
-
 int main() {
     std::cout << "--- taoTam\n";
-    Cay a = taoTam();                             // (4)
+    Cay a = taoTam();                             // (3)
     std::cout << "--- taoCoTen\n";
-    Cay b = taoCoTen();                           // (5)
-    std::cout << "--- taoNhanh\n";
-    Cay c = taoNhanh(true);                       // (6)
-    std::cout << "--- xong " << a.cao << " " << b.cao << " " << c.cao << "\n";
+    Cay b = taoCoTen();                           // (4)
+    std::cout << "--- xong " << a.cao << " " << b.cao << "\n";
     return 0;
 }
 ```
@@ -419,12 +399,10 @@ int main() {
 | Bước | Dòng | Chuyện gì xảy ra |
 |---|---|---|
 | 1 | in | `--- taoTam` |
-| 2 | (4) → (1) | `Cay(3)` là giá trị tạm trả về: từ C++17 nó được dựng thẳng vào `a`. Chỉ in `tao 3`, không `copy!` hay `move!` |
+| 2 | (3) → (1) | `Cay(3)` là giá trị tạm trả về: từ C++17 nó được dựng thẳng vào `a`. Chỉ in `tao 3`, không `copy!` hay `move!` |
 | 3 | in | `--- taoCoTen` |
-| 4 | (5) → (2) | `c` có tên. Trên g++ của mình, `c` được dựng thẳng vào `b` (NRVO): chỉ in `tao 4` |
-| 5 | in | `--- taoNhanh` |
-| 6 | (6) → (3) | Tạo `x` (`tao 1`), `y` (`tao 2`). Hàm có hai biến cục bộ khác nhau tùy nhánh, và g++ không bỏ qua ở đây: `return x` dùng hàm tạo di chuyển, in `move!` |
-| 7 | in | `--- xong 3 4 1` |
+| 4 | (4) → (2) | `c` có tên. Trên g++ của mình, `c` được dựng thẳng vào `b` (NRVO): chỉ in `tao 4` |
+| 5 | in | `--- xong 3 4` |
 
 **Kết quả khi chạy:**
 
@@ -433,14 +411,10 @@ int main() {
 tao 3
 --- taoCoTen
 tao 4
---- taoNhanh
-tao 1
-tao 2
-move!
---- xong 3 4 1
+--- xong 3 4
 ```
 
-Chỉ dòng `tao 3` ở (1) là được **bảo đảm** bởi chuẩn C++17. Việc `taoCoTen` không in gì thêm là điều mình **quan sát** trên g++ này; chuẩn không bắt buộc. Còn `taoNhanh` cho thấy phương án dự phòng là `move!`, không phải `copy!`.
+Chỉ dòng `tao 3` ở (1) là được **bảo đảm** bởi chuẩn C++17. Việc `taoCoTen` không in gì thêm là điều mình **quan sát** trên g++ này; chuẩn không bắt buộc.
 
 Vậy nếu viết `return std::move(c);` thì sao? Mình đã chạy một bản của `taoCoTen` viết như vậy:
 
@@ -463,7 +437,7 @@ Tức là `std::move` làm mất cơ hội dựng thẳng, bạn phải trả th
 
 ### Ví dụ: Rule of 0 chạy thật
 
-Lớp `Lop` dưới đây chứa `std::vector<int>` và `std::string`, và **không viết hàm đặc biệt nào** (không hàm hủy, không sao chép, không di chuyển). Ta kiểm tra: sao chép có sâu không, di chuyển có thật là lấy ruột không.
+Lớp `Lop` dưới đây (đã nêu ở mục 7) **không viết hàm đặc biệt nào**. Ta kiểm tra: sao chép có sâu không, di chuyển có thật là lấy ruột không.
 
 ```cpp
 #include <iostream>
@@ -497,11 +471,11 @@ int main() {
 
 | Bước | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này (địa chỉ minh họa) |
 |---|---|---|---|
-| 1 | `a.d = {1, 2, 3}`, `a.ten = "abc"` | `a` giữ ba số và chuỗi `abc` | `a.d.data()` = 0x9000 |
+| 1 | `a.d = {1, 2, 3}`, `a.ten = "abc"` | `a` giữ ba số (một dấu `{}` gán ba số vào vector) và chuỗi `abc` | `a.d.data()` = 0x9000 |
 | 2 | (1) | Lưu địa chỉ khối của `a.d` vào `truoc` | `truoc` = 0x9000 |
 | 3 | (2) `Lop b = a;` | Hàm sao chép tự sinh chép từng thành viên: vector chép sâu sang khối mới, chuỗi cũng vậy | `b.d.data()` = 0xA000 |
 | 4 | `b.d[0] = 9` + in | Chỉ đổi khối của `b`: in `sao chep: a.d[0] = 1, b.d[0] = 9` | không đổi |
-| 5 | (3) `Lop c = std::move(a);` | Hàm di chuyển tự sinh di chuyển từng thành viên: vector của `c` lấy khối của `a`, chuỗi cũng được lấy ruột | `c.d.data()` = 0x9000 |
+| 5 | (3) `Lop c = std::move(a);` | Hàm di chuyển tự sinh di chuyển từng thành viên: vector của `c` lấy khối của `a`, chuỗi cũng được di chuyển | `c.d.data()` = 0x9000 |
 | 6 | in | `c` có 3 số, tên `abc` | không đổi |
 | 7 | in | `c.d.data() == truoc` đúng, in `1` | không đổi |
 
@@ -542,7 +516,7 @@ Lớp tự động **không sao chép được** nhưng **di chuyển được**
     Rule of 3: cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba. Rule of 5 thêm hàm tạo di chuyển và phép gán di chuyển: lớp quản lý tài nguyên bằng tay thì thường phải quyết định cả năm (viết, `= delete` hoặc `= default`). Rule of 0: dùng thành viên tự quản lý (`std::vector`, `std::unique_ptr`, `std::string`) và không viết hàm nào trong năm hàm đó; đây là cách nên ưu tiên.
 
 ??? question "`return std::move(x);` có sai không?"
-    Với biến cục bộ trả theo giá trị thì có, nó là thói quen xấu: nó **ngăn** copy elision/NRVO (g++ có cảnh báo `-Wpessimizing-move`) và buộc thêm một lần di chuyển. Cứ viết `return x;`: trình biên dịch có thể bỏ qua bước chuyển, và nếu không thì cũng dùng move. C++17 còn bảo đảm bỏ qua hoàn toàn khi trả về giá trị tạm như `return Cay(3);`.
+    Với biến cục bộ trả theo giá trị thì có, nó là thói quen xấu: nó **ngăn** copy elision/NRVO (g++ có cảnh báo `-Wpessimizing-move`) và buộc thêm một lần di chuyển. Cứ viết `return x;`: trình biên dịch có thể bỏ qua bước sao chép hoặc di chuyển, và nếu không thì cũng dùng move. C++17 còn bảo đảm bỏ qua hoàn toàn khi trả về giá trị tạm như `return Cay(3);`.
 
 ## ⚠️ Lỗi thường gặp
 
@@ -550,7 +524,7 @@ Lớp tự động **không sao chép được** nhưng **di chuyển được**
     Đối tượng bị move chỉ ở trạng thái "hợp lệ nhưng không xác định": chỉ hủy nó hoặc gán lại. Đừng viết code dựa trên việc "chắc nó rỗng". Ngoại lệ chuẩn bảo đảm là `unique_ptr`/`shared_ptr`, rỗng sau khi move.
 
 !!! warning "Lỗi 2: Viết `return std::move(bienCucBo);`"
-    Nó cản copy elision và thêm một lần di chuyển vô ích (mục 9). Hãy viết `return bienCucBo;`.
+    Nó cản copy elision (mục 9). Hãy viết `return bienCucBo;`.
 
 !!! warning "Lỗi 3: Hàm tạo di chuyển quên đặt nguồn về `nullptr`"
     Khi đó nguồn và đích cùng giữ một con trỏ, và cả hai hàm hủy cùng `delete[]` một vùng: giải phóng hai lần, hành vi không xác định ([Bài 07](07-new-delete.md)). Mình không chạy đoạn dưới và không ghi kết quả.
@@ -677,7 +651,7 @@ f(x);  f(x + 1);  f(std::move(x));  f(3);
 - `return v;` nhưng phải tự viết hàm tạo sao chép trước
 - `return std::move(v);` vì nó luôn bỏ qua được bước sao chép
 
-<p class="giai-thich" markdown>`return v;` cho trình biên dịch cơ hội bỏ qua hẳn bước chuyển (NRVO, được phép chứ không bắt buộc), và nếu không bỏ qua được thì cũng dùng di chuyển. `return std::move(v);` ngược lại ngăn tối ưu đó (g++ cảnh báo `-Wpessimizing-move`) và buộc thêm một lần di chuyển, nên "chắc chắn chọn di chuyển" là lợi ích giả. Không cần viết hàm sao chép riêng để `return v;` chạy. Còn nói `std::move` "luôn bỏ qua được sao chép" sai vì nó không bỏ qua gì: nó chỉ ép kiểu.</p>
+<p class="giai-thich" markdown>`return v;` cho trình biên dịch cơ hội bỏ qua hẳn bước sao chép hoặc di chuyển (NRVO, được phép chứ không bắt buộc), và nếu không bỏ qua được thì cũng dùng di chuyển. `return std::move(v);` ngược lại ngăn tối ưu đó (g++ cảnh báo `-Wpessimizing-move`) và buộc thêm một lần di chuyển, nên "chắc chắn chọn di chuyển" là lợi ích giả. Không cần viết hàm sao chép riêng để `return v;` chạy. Còn nói `std::move` "luôn bỏ qua được sao chép" sai vì nó không bỏ qua gì: nó chỉ ép kiểu.</p>
 </div>
 
 </div>
@@ -687,5 +661,5 @@ f(x);  f(x + 1);  f(std::move(x));  f(3);
 1. **lvalue** có tên và dùng lại được ở dòng sau (`x`); **rvalue** là giá trị tạm sắp biến mất (`x + 1`, `Cay(3)`, kết quả hàm); tham chiếu `T&&` chỉ gắn với rvalue, nhưng bên trong hàm thì tham số `&&` có tên nên là lvalue.
 2. **Di chuyển** = lấy con trỏ của nguồn rồi đặt con trỏ nguồn về `nullptr` (kèm `noexcept`); phép gán di chuyển còn phải chống tự gán và trả vùng cũ. `std::move(x)` **không di chuyển gì**: nó chỉ ép `x` thành rvalue, hàm tạo/gán di chuyển được chọn mới làm việc; không có hàm đó thì kết thúc bằng sao chép.
 3. Sau khi move, chỉ **hủy** hoặc **gán lại** đối tượng (trạng thái "hợp lệ nhưng không xác định" với kiểu chuẩn; riêng `unique_ptr`/`shared_ptr` được bảo đảm rỗng).
-4. **Rule of 5**: lớp quản lý tài nguyên bằng tay thì quyết định cả năm hàm đặc biệt; **Rule of 0**: dùng thành viên tự quản lý (`vector`, `unique_ptr`, `string`) và không viết hàm nào. `noexcept` trên hàm tạo di chuyển quan trọng: không có thì `std::vector` (qua `std::move_if_noexcept`) sao chép khi tăng khối.
-5. Trả theo giá trị thì viết `return v;`, không viết `return std::move(v);` (có thể cản copy elision); C++17 bảo đảm bỏ qua khi trả giá trị tạm (`return Cay(3);`), còn NRVO cho biến có tên là được phép chứ không bắt buộc. Perfect forwarding và `std::forward` chỉ cần biết tên.
+4. **Rule of 5**: lớp quản lý tài nguyên bằng tay thì quyết định cả năm hàm đặc biệt; **Rule of 0**: dùng thành viên tự quản lý (`vector`, `unique_ptr`, `string`) và không viết hàm nào. Thiếu `noexcept` trên hàm tạo di chuyển thì `std::vector` sao chép khi tăng khối.
+5. Trả theo giá trị thì viết `return v;`, không viết `return std::move(v);` (có thể cản copy elision); C++17 bảo đảm bỏ qua với giá trị tạm, còn NRVO không bắt buộc. Perfect forwarding chỉ cần biết tên.
