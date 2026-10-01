@@ -50,7 +50,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | '\0' | Ký tự có mã số 0, đánh dấu hết chuỗi kiểu C | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
 | tham chiếu (reference) | Một tên khác (biệt danh) của biến có sẵn, viết `int& b = a;`; phải gắn lúc khai báo, không rỗng, không gắn lại | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | const (hằng) | Nhãn "chỉ được xem, không được sửa"; trình biên dịch từ chối mọi dòng cố sửa | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
-| hàm tạo sao chép (copy constructor) | Hàm tạo đặc biệt chạy mỗi khi tạo bản sao của đối tượng cùng kiểu, nhận tham số `const T&` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| hàm tạo sao chép (copy constructor) | Hàm tạo đặc biệt chạy mỗi khi tạo bản sao của đối tượng cùng kiểu, nhận tham số `const T&`; tự viết để sao chép sâu | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (ý niệm), [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (tự viết) |
 | giá trị tạm (temporary) | Giá trị không có tên, chỉ sống trong một câu lệnh, như `5` hay `a + 1` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | truyền theo tham chiếu (pass by reference) | Hàm nhận tham chiếu: không sao chép, và sửa được bản gốc nếu không có `const` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | const& | Tham chiếu hằng `const T&`: chỉ xem, không sao chép, nhận được cả giá trị tạm | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
@@ -93,11 +93,20 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | data race | Hai luồng cùng truy cập một biến, ít nhất một luồng ghi, mà không có đồng bộ; là UB | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (nhắc, gọi là tranh chấp dữ liệu), [Bài 14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md) |
 | luồng (thread) | Một dòng chạy riêng trong cùng chương trình, gần giống goroutine của Go | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | nguyên tử (atomic) | Thao tác mà luồng khác không thể chen vào giữa chừng; bộ đếm của `shared_ptr` được cập nhật như vậy | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
+| sao chép nông (shallow copy) | Chép từng thành viên, nên con trỏ chỉ chép địa chỉ: hai đối tượng cùng giữ một vùng nhớ; là cách sao chép mặc định | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| sao chép sâu (deep copy) | Xin vùng nhớ mới và chép cả nội dung, để mỗi đối tượng có vùng riêng | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| phép gán sao chép (copy assignment) | Hàm `operator=` chạy khi gán vào đối tượng đã tồn tại (`b = a;`); phải trả vùng cũ, chống tự gán và trả `*this` | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| operator= | Tên hàm hiểu là "cách dấu `=` hoạt động cho kiểu này" | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| this | Con trỏ tới chính đối tượng đang chạy hàm; `*this` là chính đối tượng đó | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| Rule of 3 | Cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba; quy tắc kinh nghiệm | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| = delete | Xóa một hàm để cấm dùng; sao chép một kiểu đã xóa hàm sao chép là lỗi biên dịch (như `unique_ptr`) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| = default | Bảo trình biên dịch tự sinh hàm đặc biệt mặc định (chỉ nêu tên ở Bài 11) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
+| copy-and-swap | Cách viết phép gán an toàn: chép vào bản tạm rồi hoán đổi ruột (chỉ nêu tên ở Bài 11) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | copy elision / RVO | Trình biên dịch bỏ qua bước copy khi trả về | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| rule of 0/3/5 | Quy tắc về các hàm đặc biệt của class | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| rule of 0/5 | Quy tắc mở rộng của Rule of 3: thêm hai hàm di chuyển (Rule of 5), hoặc không tự viết hàm đặc biệt nào (Rule of 0) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | rvalue reference (tham chiếu rvalue) | Tham chiếu tới giá trị tạm, viết `T&&` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | move constructor (hàm tạo di chuyển) | Hàm tạo đối tượng mới bằng cách lấy ruột của một rvalue (đối tượng tạm hoặc đối tượng đã `std::move`) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
