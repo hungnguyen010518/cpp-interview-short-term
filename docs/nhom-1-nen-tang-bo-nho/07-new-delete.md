@@ -377,7 +377,7 @@ Mình đã chạy lệnh này với chương trình rò rỉ vừa rồi (Ví d�
 ```text
 14: int main() {
 15:     std::cout << "--- bat dau\n";
-16:     Cay* p = new Cay(7);
+16:     Cay* p = new Cay(7);                  // (1)
 17:     std::cout << "cao = " << p->cao << "\n";
 18:     // (2) quen delete p;
 ```

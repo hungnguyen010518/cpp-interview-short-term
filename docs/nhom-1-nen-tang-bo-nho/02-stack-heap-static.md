@@ -384,7 +384,7 @@ heap:    0x5707aa85ceb0
 bien con tro heap (cuc bo): 0x7ffeeb931b20
 ```
 
-Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. `heap` và vùng tĩnh có cùng tiền tố `0x…` trong lần chạy này, nhưng mẫu này không được bảo đảm. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
+Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. `heap` và vùng tĩnh có cùng tiền tố `0x5707…` trong lần chạy này, nhưng mẫu này không được bảo đảm. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
 
 ### Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
 
