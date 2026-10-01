@@ -38,15 +38,15 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | null pointer (con trỏ null) | Con trỏ có giá trị `nullptr`; giải tham chiếu nó là hành vi không xác định | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | toán tử `->` | `p->x` là cách viết gọn của `(*p).x`, lấy trường `x` của struct mà con trỏ `p` trỏ tới | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
-| tham số (parameter) | Biến riêng của hàm, nhận giá trị lúc gọi; đối số (argument) là giá trị truyền vào | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| truyền theo giá trị (pass by value) | Hàm nhận bản sao của đối số, nên sửa tham số không đổi biến gốc | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| mảng (array) | Dãy các biến cùng kiểu nằm liền nhau, ví dụ `int a[4]`; chỉ số bắt đầu từ 0 | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| phần tử (element) | Một biến trong mảng, lấy bằng chỉ số `a[i]` | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| array decay (mảng thoái hóa thành con trỏ) | Trong biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; tham số mảng của hàm thực chất là con trỏ nên `sizeof` chỉ cho cỡ con trỏ | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| phép tính con trỏ (pointer arithmetic) | `p + 1` nhích một phần tử (`sizeof(kiểu)` byte); `q - p` đếm số phần tử trong cùng mảng; không cộng hai con trỏ | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| int** (con trỏ tới con trỏ) | Con trỏ đựng địa chỉ của một con trỏ `int*`; dùng khi hàm cần đổi chính con trỏ của nơi gọi | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| chuỗi kiểu C | Mảng `char` kết thúc bằng ký tự `'\0'`; `const char*` trỏ tới ký tự đầu | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
-| '\0' | Ký tự có mã số 0, đánh dấu hết chuỗi kiểu C | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-mang-ham.md) |
+| tham số (parameter) | Biến riêng của hàm, nhận giá trị lúc gọi; đối số (argument) là giá trị truyền vào | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
+| truyền theo giá trị (pass by value) | Hàm nhận bản sao của đối số, nên sửa tham số không đổi biến gốc | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
+| int** (con trỏ tới con trỏ) | Con trỏ đựng địa chỉ của một con trỏ `int*`; dùng khi hàm cần đổi chính con trỏ của nơi gọi | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
+| mảng (array) | Dãy các biến cùng kiểu nằm liền nhau, ví dụ `int a[4]`; chỉ số bắt đầu từ 0 | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| phần tử (element) | Một biến trong mảng, lấy bằng chỉ số `a[i]` | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| array decay (mảng thoái hóa thành con trỏ) | Trong biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; tham số mảng của hàm thực chất là con trỏ nên `sizeof` chỉ cho cỡ con trỏ | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| phép tính con trỏ (pointer arithmetic) | `p + 1` nhích một phần tử (`sizeof(kiểu)` byte); `q - p` đếm số phần tử trong cùng mảng; không cộng hai con trỏ | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| chuỗi kiểu C | Mảng `char` kết thúc bằng ký tự `'\0'`; `const char*` trỏ tới ký tự đầu | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| '\0' | Ký tự có mã số 0, đánh dấu hết chuỗi kiểu C | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
