@@ -58,7 +58,13 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | const& | Tham chiếu hằng `const T&`: chỉ xem, không sao chép, nhận được cả giá trị tạm | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | malloc / free | Cặp xin/trả bytes thô của ngôn ngữ C, không gọi hàm tạo/hàm hủy; C++ hiện đại gần như không dùng | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | con trỏ treo (dangling pointer) | Con trỏ còn giữ địa chỉ của chỗ đã bị trả hoặc đã hết hiệu lực | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
-| ngoại lệ (exception) | Cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài; `new` hết chỗ ném `std::bad_alloc` | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
+| ngoại lệ (exception) | Cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài; `new` hết chỗ ném `std::bad_alloc`; cú pháp `throw`/`try`/`catch` ở Bài 08 | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
+| RAII (Resource Acquisition Is Initialization) | Xin tài nguyên trong hàm tạo, trả trong hàm hủy, để tài nguyên tự được trả khi đối tượng chết | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| tài nguyên (resource) | Thứ mượn rồi phải trả: bộ nhớ heap, file, khóa, kết nối, ổ cắm mạng | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| throw / try / catch | `throw` ném một giá trị ra và cắt ngang hàm; `try { }` là vùng thử; `catch (T x) { }` bắt giá trị kiểu `T` được ném | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| tháo ngăn xếp (stack unwinding) | Khi có ngoại lệ, chương trình thoát ngược từng hàm tới `catch` và hủy mọi đối tượng cục bộ đã ra đời trên đường đi | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| std::terminate | Hàm kết thúc chương trình, được gọi khi ngoại lệ không bị bắt ở đâu cả; việc hủy các đối tượng khi đó là do cài đặt quyết định | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
+| defer (Go) | Câu lệnh Go chạy việc dọn dẹp ở cuối hàm; phải nhớ viết ở từng nơi dùng, khác RAII gắn vào kiểu dữ liệu | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
