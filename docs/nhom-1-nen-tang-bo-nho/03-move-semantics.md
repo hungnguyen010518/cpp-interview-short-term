@@ -38,7 +38,8 @@ Vật "tạm thời, sắp biến mất", như tờ giấy nháp vừa viết, g
 - Nguồn ở trạng thái **hợp lệ nhưng không xác định (valid but unspecified)**.
 - Hợp lệ nghĩa là hủy nó hay gán giá trị mới cho nó đều an toàn.
 - Không xác định nghĩa là bạn đừng đoán bên trong có gì. Ví dụ `std::string` đã bị move thì độ dài của nó không được đảm bảo.
-- Vì vậy sau khi move, chỉ nên hủy hoặc gán lại.
+- Vì vậy với kiểu thông thường như `std::string`, sau khi move chỉ nên hủy hoặc gán lại.
+- Có một trường hợp đặc biệt: `unique_ptr` và `shared_ptr`. Chuẩn C++ bảo đảm một cái đã bị move thì rỗng (bằng `nullptr`), nên đọc nó là an toàn. Ví dụ ở [Bài 2](02-raii-smart-pointer.md) đọc `a == nullptr` sau khi move là được vì lý do này.
 
 **Move constructor nên có `noexcept`.**
 
@@ -55,13 +56,14 @@ Vật "tạm thời, sắp biến mất", như tờ giấy nháp vừa viết, g
 **Trả về đối tượng cục bộ theo giá trị.**
 
 - Hãy viết `return v;`.
-- Trình biên dịch có thể dùng **copy elision (bỏ qua bước copy)**, thường gọi là RVO. Nếu không bỏ qua được, nó sẽ dùng move.
+- Trình biên dịch có thể dùng **copy elision (bỏ qua bước copy)**, thường gọi là RVO. Với biến có tên như `v` thì tên chính xác là **NRVO** (named return value optimization, tối ưu giá trị trả về có tên). Nếu không bỏ qua được, nó sẽ dùng move.
 - Từ C++17, khi trả về một giá trị tạm (như `return T(...);`), việc bỏ qua copy là bắt buộc.
 - Đừng viết `return std::move(v);`. Nó có thể cản tối ưu này.
 
 **Perfect forwarding (chuyển tiếp hoàn hảo).**
 
-- Trong template, `T&&` là **tham chiếu chuyển tiếp (forwarding reference)**: nhận được cả lvalue lẫn rvalue.
+- Trong template, `T&&` là **tham chiếu chuyển tiếp (forwarding reference)** khi `T` được suy ra từ chính tham số của hàm đó, như `template <typename T> void f(T&& x)`. Nó nhận được cả lvalue lẫn rvalue.
+- Nếu `T` đã được cố định từ trước (ví dụ `T` là tham số của cả class), thì `T&&` chỉ là tham chiếu rvalue bình thường.
 - `std::forward<T>(x)` giữ nguyên x là lvalue hay rvalue khi đưa tiếp cho hàm khác.
 
 ## 💻 Ví dụ code
@@ -87,7 +89,7 @@ int main() {
 
 Kết quả in ra: `1000` rồi `1000`.
 
-Ví dụ 2: class `Mang` giữ con trỏ thô, tự viết đủ cả năm hàm đặc biệt (Rule of 5). Nhớ lại `new[]` và `delete[]` từ [Bài 1](01-stack-heap-con-tro.md).
+Ví dụ 2: class `Mang` giữ con trỏ thô, tự viết đủ cả năm hàm đặc biệt (Rule of 5). Chú ý `new int[n]` và `delete[]`: `new int[n]` xin một khối gồm nhiều `int` nằm liền nhau, và khối đó phải được trả bằng `delete[]`. [Bài 5](05-memory-leak-ub.md) sẽ nói kỹ về chuyện này.
 
 ```cpp
 #include <cstddef>
@@ -209,12 +211,12 @@ Kết quả in ra: `lvalue` rồi `rvalue`.
     Rule of 3: tự viết một trong destructor, copy constructor, copy assignment thì thường phải viết cả ba. Rule of 5 thêm move constructor và move assignment. Rule of 0: dùng thành phần tự quản lý tài nguyên để không phải viết hàm nào. Ưu tiên Rule of 0.
 
 ??? question "Perfect forwarding là gì?"
-    Chuyển tiếp tham số mà giữ nguyên là lvalue hay rvalue, bằng `T&&` (forwarding reference) và `std::forward<T>`.
+    Chuyển tiếp tham số mà giữ nguyên là lvalue hay rvalue, bằng `T&&` (forwarding reference, khi `T` được suy ra từ chính tham số của hàm) và `std::forward<T>`.
 
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Dùng đối tượng sau khi đã move và đoán nội dung của nó"
-    Nguồn chỉ ở trạng thái "hợp lệ nhưng không xác định". Chỉ nên hủy nó hoặc gán giá trị mới. Đừng đọc rồi đoán bên trong còn gì.
+    Nguồn chỉ ở trạng thái "hợp lệ nhưng không xác định". Chỉ nên hủy nó hoặc gán giá trị mới. Đừng đọc rồi đoán bên trong còn gì. (`unique_ptr` và `shared_ptr` là trường hợp đặc biệt: chúng được bảo đảm rỗng sau khi move.)
 
 !!! warning "Lỗi 2: Viết `return std::move(bienCucBo);`"
     Viết vậy có thể cản copy elision/RVO, làm code chậm hơn. Cứ viết `return bienCucBo;`.
@@ -233,35 +235,35 @@ Kết quả in ra: `lvalue` rồi `rvalue`.
 
 <div class="quiz" data-bai="03" markdown>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** `std::move(x)` thực sự làm gì?
 
-- Di chuyển dữ liệu của x sang chỗ khác ngay
-- Chỉ ép x thành rvalue để cho phép "lấy ruột"; việc di chuyển do move constructor làm
-- Xóa x
-- Sao chép sâu x
+- Di chuyển ngay dữ liệu của `x` sang đối tượng mới
+- Sao chép sâu `x` rồi xóa bản gốc đi
+- Chỉ ép `x` thành rvalue; việc di chuyển thật do move constructor làm
+- Đánh dấu `x` là hằng để không ai sửa được
 
 <p class="giai-thich" markdown>Tên gọi dễ gây hiểu lầm: `std::move` chỉ là cái ép kiểu.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 2.** Sau `std::string b = std::move(a);`, điều nào an toàn với `a`?
 
-- Đọc `a.size()` và chắc chắn bằng 0
-- Gán giá trị mới cho `a` hoặc hủy `a`; không nên đoán nội dung của `a`
-- Dùng `a` như chưa có gì xảy ra
-- Không được gán lại `a` nữa
+- Đọc `a.size()` và chắc chắn kết quả bằng 0
+- Đọc nội dung `a` và chắc chắn nó vẫn giữ chuỗi cũ
+- Không được gán lại hay hủy `a` nữa vì nó đã hỏng
+- Hủy `a` hoặc gán giá trị mới cho `a`; không đoán nội dung của `a`
 
-<p class="giai-thich" markdown>Nguồn ở trạng thái "hợp lệ nhưng không xác định". Gán mới và hủy thì luôn an toàn.</p>
+<p class="giai-thich" markdown>Với `std::string`, nguồn ở trạng thái "hợp lệ nhưng không xác định". Gán mới và hủy thì luôn an toàn. `unique_ptr` và `shared_ptr` là trường hợp đặc biệt có bảo đảm riêng.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 3.** Vì sao move constructor nên đánh dấu `noexcept`?
 
-- Để code ngắn hơn
-- Để `std::vector` khi tăng dung lượng dám dùng move thay vì copy
-- Để tắt kiểm tra lỗi
-- Cú pháp bắt buộc
+- Để `std::vector` khi hết chỗ dám chuyển phần tử bằng move thay vì copy
+- Vì cú pháp C++ bắt buộc mọi move constructor phải có `noexcept`
+- Để lỗi xảy ra trong move constructor bị bỏ qua âm thầm
+- Để move constructor tự động sao chép sâu dữ liệu
 
 <p class="giai-thich" markdown>Nếu move có thể ném ngoại lệ, `vector` quay về copy để không làm hỏng dữ liệu.</p>
 </div>
@@ -269,34 +271,34 @@ Kết quả in ra: `lvalue` rồi `rvalue`.
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 4.** Rule of Zero nghĩa là gì?
 
-- Không bao giờ viết class
-- Dùng các thành phần tự quản lý tài nguyên (`vector`, `unique_ptr`…) để khỏi tự viết destructor/copy/move
-- Luôn viết cả 5 hàm đặc biệt
-- Xóa mọi destructor
+- Class không được chứa thành viên dữ liệu nào
+- Dùng thành phần tự quản lý tài nguyên (`vector`, `unique_ptr`…) để khỏi tự viết năm hàm đặc biệt
+- Mọi hàm đặc biệt đều phải `= delete` để class không copy được
+- Class không được chứa hàm nào, kể cả hàm tạo
 
 <p class="giai-thich" markdown>Để thư viện chuẩn dọn dẹp giùm, bớt code, bớt lỗi.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 5.** Rule of Five nói gì?
 
-- Nếu tự viết một trong năm hàm (destructor, copy ctor, copy assign, move ctor, move assign) thì thường phải xem xét viết cả năm
-- Mỗi class tối đa 5 hàm
-- Cần 5 thành viên dữ liệu
-- Chỉ áp dụng cho template
+- Mỗi class chỉ được viết tối đa năm hàm thành viên
+- Class cần có đúng năm thành viên dữ liệu thì mới dùng được move
+- Tự viết một trong năm hàm (destructor, copy ctor, copy assign, move ctor, move assign) thì thường phải xem xét cả năm
+- Chỉ áp dụng cho class template, còn class thường thì không cần
 
 <p class="giai-thich" markdown>Cần quản lý tài nguyên bằng tay thì phải chăm cả năm hàm.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 6.** Hàm trả về biến cục bộ theo giá trị (`return v;`) nên viết thế nào?
 
-- `return std::move(v);`
-- `return v;` để trình biên dịch dùng copy elision/RVO hoặc move
-- Bắt buộc `return new T(v);`
-- Luôn trả bằng tham chiếu
+- `return std::move(v);` để chắc chắn dùng move
+- `return new T(v);` rồi để người gọi tự `delete`
+- Trả bằng tham chiếu `T&` tới `v` cho đỡ tốn bộ nhớ
+- `return v;` để trình biên dịch dùng copy elision (NRVO) hoặc move
 
-<p class="giai-thich" markdown>`return std::move(v);` có thể cản tối ưu RVO.</p>
+<p class="giai-thich" markdown>`return std::move(v);` có thể cản tối ưu copy elision/NRVO. Trả tham chiếu tới biến cục bộ thì thành tham chiếu treo.</p>
 </div>
 
 </div>

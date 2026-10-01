@@ -22,7 +22,7 @@ Quay lại **kho đồ của trường** ở [Bài 1](01-stack-heap-con-tro.md).
 Có bốn loại lỗi bộ nhớ hay gặp. Rò rỉ là lỗi quản lý bộ nhớ, nhưng chương trình vẫn chạy hợp lệ, chỉ tốn bộ nhớ. Ba loại còn lại là hành vi không xác định (UB).
 
 - **Memory leak (rò rỉ bộ nhớ)**: xin vùng nhớ rồi không trả. Không phải UB, chỉ là phí bộ nhớ.
-- **Dangling pointer / use-after-free (con trỏ treo / dùng sau khi trả)**: con trỏ vẫn giữ địa chỉ của vùng nhớ đã được trả, mà bạn vẫn dùng nó.
+- **Dangling pointer / use-after-free (con trỏ treo / dùng sau khi trả)**: con trỏ vẫn giữ địa chỉ của vùng nhớ đã được trả hoặc đã bị dọn (như biến cục bộ đã ra khỏi phạm vi), mà bạn vẫn dùng nó.
 - **Double free (giải phóng hai lần)**: trả một vùng nhớ hai lần. Bộ cấp phát bộ nhớ bị rối.
 - **Buffer overflow (ghi vượt biên mảng)**: đọc hoặc ghi ra ngoài vùng nhớ của mảng.
 
@@ -38,7 +38,7 @@ Quy tắc ghép đôi:
 
 **Công cụ tìm lỗi**:
 
-- **AddressSanitizer (ASan)**: bạn biên dịch với cờ `-fsanitize=address`. Chương trình tự báo khi truy cập bộ nhớ sai. Trên Linux, nó còn báo rò rỉ lúc chương trình kết thúc. ASan chạy nhanh hơn Valgrind khoảng vài lần.
+- **AddressSanitizer (ASan)**: bạn biên dịch với cờ `-fsanitize=address`. Chương trình tự báo khi truy cập bộ nhớ sai. Trên Linux, nó còn báo rò rỉ lúc chương trình kết thúc. ASan nhanh hơn Valgrind nhiều: thường chỉ chậm khoảng 2 lần so với 20–50 lần.
 - **Valgrind (memcheck)**: bạn không cần biên dịch lại. Nó chạy chương trình trong một "máy ảo" để kiểm tra từng lần truy cập bộ nhớ. Vì vậy nó chậm hơn nhiều.
 
 **Cách phòng tránh**:
@@ -122,7 +122,7 @@ valgrind --leak-check=full ./rolo
 ??? question "Memory leak khác dangling pointer thế nào?"
     Leak: vùng nhớ vẫn còn nhưng không còn ai trỏ tới để trả.
 
-    Dangling: con trỏ vẫn còn nhưng vùng nhớ đã được trả.
+    Dangling: con trỏ vẫn còn nhưng vùng nhớ đã được trả hoặc đã bị dọn.
 
 ??? question "Double free là gì, hậu quả?"
     Là giải phóng cùng một vùng nhớ hai lần. Nó làm hỏng bộ cấp phát bộ nhớ, có thể gây crash hoặc bị khai thác thành lỗ hổng bảo mật.
@@ -165,81 +165,81 @@ valgrind --leak-check=full ./rolo
 
 <div class="quiz" data-bai="05" markdown>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** Rò rỉ bộ nhớ (memory leak) là gì?
 
+- Dùng vùng nhớ đã trả, nên con trỏ trỏ vào chỗ trống
+- Ghi vượt biên mảng nên làm hỏng vùng nhớ bên cạnh
 - Xin vùng nhớ nhưng không bao giờ trả lại, nên bộ nhớ bị chiếm dần
-- Dùng vùng nhớ đã trả
-- Ghi vượt mảng
-- Trả vùng nhớ hai lần
+- Trả cùng một vùng nhớ hai lần nên bộ cấp phát bị rối
 
-<p class="giai-thich" markdown>Mượn đồ mà quên trả. Các phương án còn lại là lỗi khác.</p>
-</div>
-
-<div class="cau-hoi" data-dap-an="2" markdown>
-**Câu 2.** Con trỏ treo (dangling pointer) là gì?
-
-- Con trỏ bằng nullptr
-- Con trỏ vẫn giữ địa chỉ của vùng nhớ đã được trả
-- Con trỏ trỏ lên stack
-- Con trỏ `const`
-
-<p class="giai-thich" markdown>Tờ giấy ghi số phòng đã bị dỡ: dùng nó là UB.</p>
-</div>
-
-<div class="cau-hoi" data-dap-an="2" markdown>
-**Câu 3.** Công cụ nào phát hiện lỗi bộ nhớ khi biên dịch kèm cờ `-fsanitize=address`?
-
-- gdb
-- AddressSanitizer
-- CMake
-- git
-
-<p class="giai-thich" markdown>ASan chèn các kiểm tra vào chương trình lúc biên dịch và báo lỗi lúc chạy.</p>
+<p class="giai-thich" markdown>Mượn đồ mà quên trả. Các phương án còn lại là lỗi khác: dùng sau khi trả, ghi vượt mảng và giải phóng hai lần.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
+**Câu 2.** Con trỏ treo (dangling pointer) là gì?
+
+- Con trỏ vẫn giữ địa chỉ của vùng nhớ đã được trả hoặc đã bị dọn
+- Con trỏ đang bằng `nullptr` nên không trỏ vào đâu cả
+- Con trỏ đang trỏ vào một biến nằm trên stack
+- Con trỏ được khai báo `const` nên không đổi được chỗ trỏ
+
+<p class="giai-thich" markdown>Tờ giấy ghi số phòng đã bị dỡ: dùng nó là UB. Vùng nhớ có thể đã được trả (heap) hoặc đã bị dọn (biến cục bộ ra khỏi phạm vi).</p>
+</div>
+
+<div class="cau-hoi" data-dap-an="2" markdown>
+**Câu 3.** Cờ biên dịch `-fsanitize=address` bật công cụ nào?
+
+- Valgrind (memcheck)
+- AddressSanitizer
+- gdb
+- UndefinedBehaviorSanitizer
+
+<p class="giai-thich" markdown>ASan chèn các kiểm tra vào chương trình lúc biên dịch và báo lỗi lúc chạy. Valgrind không cần cờ này, gdb là trình gỡ lỗi, còn UBSan dùng cờ `-fsanitize=undefined`.</p>
+</div>
+
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 4.** Vì sao mảng cấp phát bằng `new int[10]` phải giải phóng bằng `delete[]`?
 
-- `delete[]` gọi hàm hủy cho mọi phần tử và trả đúng khối nhớ; dùng `delete` thường là hành vi không xác định
-- Chỉ là quy ước, dùng cái nào cũng được
-- `delete[]` nhanh hơn
-- Để tránh lỗi biên dịch
+- Chỉ là quy ước đặt tên; dùng `delete` thường cho mảng vẫn đúng
+- `delete[]` chạy nhanh hơn `delete` nên được khuyên dùng
+- `delete` thường chỉ trả phần tử đầu, các phần tử khác chắc chắn rò rỉ
+- `delete[]` hủy mọi phần tử và trả đúng khối nhớ; dùng `delete` thường là UB
 
-<p class="giai-thich" markdown>Với `new[]`, thường (nhất là khi phần tử có hàm hủy) chương trình ghi thêm thông tin phụ để `delete[]` biết cần hủy bao nhiêu phần tử và trả đúng khối nhớ. Dùng `delete` thường thì không có gì đảm bảo, đó là hành vi không xác định.</p>
+<p class="giai-thich" markdown>Với `new[]`, thường (nhất là khi phần tử có hàm hủy) chương trình ghi thêm thông tin phụ để `delete[]` biết cần hủy bao nhiêu phần tử và trả đúng khối nhớ. Dùng `delete` thường thì không có gì đảm bảo, đó là hành vi không xác định, không phải một kiểu rò rỉ cố định.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 5.** Hành vi không xác định (UB) nghĩa là gì?
 
-- Chương trình luôn crash
-- Chuẩn C++ không quy định kết quả: có thể chạy "đúng", sai âm thầm hoặc crash, và đổi theo trình biên dịch/máy
-- Luôn có thông báo lỗi
-- Chỉ xảy ra trên Windows
+- Chương trình chắc chắn crash ngay tại dòng gây lỗi
+- Trình biên dịch luôn báo lỗi và không cho biên dịch
+- Chuẩn C++ không quy định kết quả: có thể chạy "đúng", sai âm thầm hoặc crash, tùy trình biên dịch và máy
+- Chỉ xảy ra với con trỏ, còn phép tính số nguyên thì không bao giờ
 
-<p class="giai-thich" markdown>Nguy hiểm vì nó có thể "chạy đúng" lúc thử rồi sập khi chạy thật.</p>
+<p class="giai-thich" markdown>Nguy hiểm vì nó có thể "chạy đúng" lúc thử rồi sập khi chạy thật. UB cũng có ở số nguyên, ví dụ tràn số nguyên có dấu.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 6.** Cách phòng tránh rò rỉ tốt nhất trong C++ hiện đại là gì?
 
-- Nhớ `delete` cẩn thận
 - Dùng RAII, smart pointer và container chuẩn thay vì `new`/`delete` trần
-- Tắt cảnh báo của trình biên dịch
-- Chỉ dùng biến toàn cục
+- Nhớ `delete` cẩn thận ở mọi nhánh, kể cả khi có `return` sớm
+- Dùng `malloc`/`free` thay cho `new`/`delete` vì chúng an toàn hơn
+- Chuyển mọi biến sang biến toàn cục để khỏi phải giải phóng
 
 <p class="giai-thich" markdown>Để hàm hủy lo việc trả đồ thay vì trông chờ vào trí nhớ.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 7.** Valgrind (memcheck) khác ASan ở điểm nào?
 
-- Valgrind chạy chương trình biên dịch bình thường dưới máy ảo kiểm tra, không cần biên dịch lại nhưng chậm hơn nhiều; ASan chèn kiểm tra lúc biên dịch nên nhanh hơn
-- Giống hệt nhau
-- Valgrind chỉ dùng cho Java
-- ASan không bao giờ tìm được rò rỉ
+- Valgrind phải biên dịch lại bằng cờ riêng, còn ASan chạy trên chương trình có sẵn
+- Valgrind kiểm tra chương trình đã biên dịch thường, không cần biên dịch lại, nhưng chậm hơn; ASan chèn kiểm tra lúc biên dịch
+- Hai công cụ chỉ khác tên; cách làm và tốc độ giống hệt nhau
+- ASan không bao giờ báo được rò rỉ, chỉ Valgrind mới báo được
 
-<p class="giai-thich" markdown>ASan trên Linux có kèm LeakSanitizer nên cũng báo rò rỉ; Valgrind đổi lại cho khả năng kiểm tra không cần sửa cách biên dịch.</p>
+<p class="giai-thich" markdown>ASan thường chỉ làm chương trình chậm khoảng 2 lần, còn Valgrind memcheck hay chậm 20–50 lần, nhưng Valgrind không cần biên dịch lại. ASan trên Linux có kèm LeakSanitizer nên cũng báo rò rỉ.</p>
 </div>
 
 </div>

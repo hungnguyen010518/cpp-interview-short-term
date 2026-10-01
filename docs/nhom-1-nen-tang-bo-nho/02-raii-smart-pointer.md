@@ -25,7 +25,7 @@ Từ luật đó, ta có ba "thẻ" để giữ đồ trong kho:
 
 - Tài nguyên có thể là bộ nhớ, file hay khóa (lock).
 - Hàm khởi tạo xin tài nguyên.
-- **Hàm hủy (destructor)** tự chạy khi đối tượng ra khỏi phạm vi, kể cả khi có ngoại lệ (exception).
+- **Hàm hủy (destructor)** tự chạy khi đối tượng ra khỏi phạm vi, kể cả khi có ngoại lệ (exception, tức là một sự cố bất ngờ) bay ra, miễn là ngoại lệ đó được bắt ở đâu đó.
 - Thư viện chuẩn có sẵn nhiều ví dụ: `std::lock_guard` (tự mở khóa), `std::ifstream` (tự đóng file), `std::vector` (tự giải phóng mảng).
 
 **Smart pointer (con trỏ thông minh)** là con trỏ biết tự dọn. Nó dùng RAII để `delete` đúng lúc. Các smart pointer nằm trong `<memory>`.
@@ -93,6 +93,8 @@ int main() {
 
 Kết quả in ra: `42` rồi `1`.
 
+Vì sao đọc `a` ở đây lại an toàn? Vì `unique_ptr` là một trường hợp đặc biệt: chuẩn C++ bảo đảm một `unique_ptr` đã bị move thì rỗng, tức là bằng `nullptr`. Với các kiểu khác thì không được đoán như vậy. [Bài 3](03-move-semantics.md) nói rõ hơn.
+
 Ví dụ 3: `shared_ptr`, bộ đếm và `weak_ptr`.
 
 ```cpp
@@ -142,7 +144,7 @@ Cách sửa: đổi một phía thành `std::weak_ptr`, ví dụ `std::weak_ptr<
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "RAII là gì? Cho ví dụ trong thư viện chuẩn."
-    Gắn vòng đời của tài nguyên với vòng đời của đối tượng: tài nguyên được xin trong hàm khởi tạo và được trả trong hàm hủy, kể cả khi có ngoại lệ.
+    Gắn vòng đời của tài nguyên với vòng đời của đối tượng: tài nguyên được xin trong hàm khởi tạo và được trả trong hàm hủy, kể cả khi có ngoại lệ (nếu ngoại lệ được bắt; còn ngoại lệ không được bắt có thể gọi `std::terminate` mà không chạy hàm hủy nào).
 
     Ví dụ: `std::lock_guard`, `std::unique_ptr`, `std::ifstream`.
 
@@ -189,70 +191,68 @@ Cách sửa: đổi một phía thành `std::weak_ptr`, ví dụ `std::weak_ptr<
 
 <div class="quiz" data-bai="02" markdown>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 1.** Ý tưởng cốt lõi của RAII là gì?
 
-- Xin tài nguyên khi tạo đối tượng và tự trả trong hàm hủy khi đối tượng hết vòng đời
-- Luôn dùng `new` và `delete`
-- Bỏ kiểm tra để chạy nhanh hơn
-- Đặt mọi biến lên heap
+- Luôn tạo đối tượng bằng `new` và để người dùng gọi `delete` khi xong
+- Đặt mọi đối tượng lên heap để vòng đời của chúng kéo dài hơn
+- Kiểm tra mọi tài nguyên bằng `if` trước khi dùng cho chắc ăn
+- Xin tài nguyên khi tạo đối tượng và tự trả trong hàm hủy khi nó hết vòng đời
 
-<p class="giai-thich" markdown>Như thư viện: mượn khi vào, tự trả khi ra. Nhờ vậy không quên trả, kể cả khi có ngoại lệ.</p>
+<p class="giai-thich" markdown>Như thư viện: mượn khi vào, tự trả khi ra. Nhờ vậy không quên trả, kể cả khi có ngoại lệ được bắt.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 2.** `unique_ptr` khác `shared_ptr` ở điểm nào?
 
 - `unique_ptr` chỉ có một chủ duy nhất, `shared_ptr` cho nhiều chủ cùng giữ
-- `unique_ptr` chạy chậm hơn
-- `shared_ptr` không giải phóng bộ nhớ
-- Hai loại giống hệt
+- `unique_ptr` có bộ đếm tham chiếu, còn `shared_ptr` thì không có
+- `unique_ptr` chỉ dùng được trên stack, `shared_ptr` dùng cho heap
 
-<p class="giai-thich" markdown>Một chìa khóa duy nhất so với nhiều bạn cùng giữ thẻ.</p>
+<p class="giai-thich" markdown>Một chìa khóa duy nhất so với nhiều bạn cùng giữ thẻ. Bộ đếm tham chiếu là của `shared_ptr`, và cả hai đều quản lý đối tượng trên heap.</p>
+</div>
+
+<div class="cau-hoi" data-dap-an="3" markdown>
+**Câu 3.** Với `unique_ptr a`, sau `auto b = std::move(a);` thì `a` là gì?
+
+- Vẫn trỏ vào đối tượng cũ cùng với `b`, như một bản sao
+- Không còn tồn tại nên dùng `a` là lỗi biên dịch
+- Bằng `nullptr` vì quyền sở hữu đã chuyển sang `b`
+- Giữ một địa chỉ không xác định nên đọc `a` là UB
+
+<p class="giai-thich" markdown>Chìa khóa đã trao tay, nên `a` không còn giữ gì. Chuẩn C++ bảo đảm một `unique_ptr` đã bị move thì rỗng (bằng `nullptr`); xem thêm ở [Bài 3](03-move-semantics.md).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
-**Câu 3.** Với `unique_ptr a`, sau `auto b = std::move(a);` thì `a` là gì?
-
-- Vẫn trỏ vào đối tượng cũ
-- Bằng `nullptr` vì quyền sở hữu đã chuyển sang `b`
-- Lỗi biên dịch
-- Bị xóa khỏi bộ nhớ cùng đối tượng
-
-<p class="giai-thich" markdown>Chìa khóa đã trao tay, nên `a` không còn giữ gì.</p>
-</div>
-
-<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 4.** Hai đối tượng giữ `shared_ptr` lẫn nhau theo vòng tròn gây ra điều gì?
 
-- Bộ đếm không bao giờ về 0 nên bộ nhớ không được giải phóng (rò rỉ)
-- Lỗi biên dịch
-- Tự động thành `weak_ptr`
-- Chương trình chạy nhanh hơn
+- Lỗi biên dịch vì hai kiểu khai báo vòng quanh nhau
+- Bộ đếm không bao giờ về 0 nên đối tượng không được hủy (rò rỉ)
+- Một trong hai tự đổi thành `weak_ptr` để phá vòng
+- Mỗi bên hủy bên kia nên cả hai bị hủy hai lần
 
-<p class="giai-thich" markdown>Mỗi bên đều giữ thẻ của bên kia nên không ai buông trước.</p>
+<p class="giai-thich" markdown>Mỗi bên đều giữ thẻ của bên kia nên không ai buông trước, và bộ đếm không về 0.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 5.** `weak_ptr` dùng để làm gì?
 
-- Trỏ tới đối tượng mà không tăng bộ đếm, nên phá được vòng tròn giữ nhau
-- Giữ đối tượng sống mãi mãi
-- Thay thế `unique_ptr`
-- Chỉ dùng cho mảng
+- Giữ đối tượng sống mãi cho đến khi chương trình kết thúc
+- Thay thế `unique_ptr` khi chỉ cần một chủ duy nhất
+- Tăng bộ đếm tham chiếu nhưng ít hơn `shared_ptr`
+- Nhìn đối tượng của `shared_ptr` mà không tăng bộ đếm, nên phá được vòng tròn
 
 <p class="giai-thich" markdown>Người nhìn qua cửa kính: thấy được, nhưng không giữ kho mở.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 6.** Nên ưu tiên cách nào để tạo `shared_ptr`?
 
-- `std::shared_ptr<T>(new T)`
-- `std::make_shared<T>()`
-- `new T` rồi gán
-- `malloc`
+- `std::make_shared<T>()`: cấp phát một lần cho cả đối tượng lẫn bộ đếm
+- `std::shared_ptr<T>(new T)`: nhanh hơn vì không qua hàm trung gian
+- `new T` rồi tạo hai `shared_ptr` từ cùng con trỏ thô đó cho chắc
 
-<p class="giai-thich" markdown>`make_shared` cấp phát một lần cho cả đối tượng lẫn bộ đếm nên gọn hơn. Trước C++17, nó còn tránh được rò rỉ khi dùng chung với lời gọi khác.</p>
+<p class="giai-thich" markdown>`make_shared` cấp phát một lần cho cả đối tượng lẫn bộ đếm nên gọn hơn. Trước C++17, nó còn tránh được rò rỉ khi dùng chung với lời gọi khác. Tạo nhiều `shared_ptr` từ cùng một con trỏ thô thì mỗi cái có bộ đếm riêng, nên đối tượng bị hủy hai lần.</p>
 </div>
 
 </div>

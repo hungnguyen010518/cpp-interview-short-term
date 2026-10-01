@@ -23,7 +23,7 @@ Nhãn dán "Chỉ được xem, không được sửa" là **const (hằng)**.
 
 **Stack** chứa các biến cục bộ, tức là biến khai báo trong hàm.
 
-- Ra khỏi hàm là biến tự được giải phóng.
+- Ra khỏi phạm vi (khối `{}` chứa nó) là biến tự được giải phóng.
 - Rất nhanh.
 - Dung lượng nhỏ, thường vài MB.
 
@@ -129,7 +129,7 @@ Kết quả in ra: `31`.
     ```
 
 !!! warning "Lỗi 2: `new` mà quên `delete`"
-    Heap không tự dọn. Quên trả thì vùng nhớ bị chiếm mãi. Đó là **rò rỉ bộ nhớ (memory leak)**. Bài 5 sẽ nói kỹ hơn.
+    Heap không tự dọn. Quên trả thì vùng nhớ bị chiếm cho đến khi chương trình kết thúc (lúc đó hệ điều hành mới thu lại). Đó là **rò rỉ bộ nhớ (memory leak)**. Bài 5 sẽ nói kỹ hơn.
 
 !!! warning "Lỗi 3: Dùng con trỏ chưa gán giá trị hoặc đang là `nullptr`"
     Luôn khởi tạo con trỏ khi khai báo. Trước khi dùng `*p`, hãy kiểm tra `p` có khác `nullptr` không.
@@ -138,68 +138,67 @@ Kết quả in ra: `31`.
 
 <div class="quiz" data-bai="01" markdown>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 1.** Biến `int x = 5;` khai báo trong một hàm thường nằm ở đâu?
 
-- Stack
-- Heap
-- Ổ cứng
-- Bên trong con trỏ
+- Heap, vì `int` nào cũng phải xin bộ nhớ bằng `new`
+- Stack, và tự được dọn khi ra khỏi phạm vi chứa nó
+- Vùng dùng chung cho mọi hàm, chỉ dọn khi chương trình tắt
 
-<p class="giai-thich" markdown>Biến cục bộ nằm trên stack và tự được dọn khi hàm kết thúc.</p>
+<p class="giai-thich" markdown>Biến cục bộ nằm trên stack và tự được dọn khi ra khỏi phạm vi (khối `{}` chứa nó). Heap chỉ dùng khi bạn tự xin bằng `new`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 2.** Chuyện gì xảy ra nếu `new` một vùng nhớ rồi không bao giờ `delete`?
 
-- Lỗi biên dịch
-- Vùng nhớ tự trả khi hàm kết thúc
-- Rò rỉ bộ nhớ (memory leak)
-- Máy tự khởi động lại
+- Vùng nhớ tự được trả khi hàm chứa nó kết thúc
+- Chương trình không biên dịch được vì thiếu `delete`
+- Vùng nhớ vẫn bị giữ cho đến khi chương trình kết thúc: rò rỉ bộ nhớ
+- Con trỏ tự thành `nullptr` và vùng nhớ được thu hồi
 
-<p class="giai-thich" markdown>Heap không tự dọn. Quên trả thì vùng nhớ bị chiếm mãi, gọi là rò rỉ bộ nhớ.</p>
+<p class="giai-thich" markdown>Heap không tự dọn. Quên trả thì vùng nhớ bị giữ cho đến khi chương trình kết thúc (lúc đó hệ điều hành mới thu lại). Đó là rò rỉ bộ nhớ.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 3.** Điểm khác chính giữa tham chiếu và con trỏ là gì?
 
-- Tham chiếu có thể null, con trỏ thì không
-- Tham chiếu phải gắn với một đối tượng ngay khi khai báo và không đổi sang đối tượng khác
-- Con trỏ không lưu địa chỉ
-- Hai thứ giống hệt nhau
+- Tham chiếu có thể null và đổi sang đối tượng khác, con trỏ thì không
+- Con trỏ phải gán ngay khi khai báo, còn tham chiếu thì để trống được
+- Tham chiếu lưu địa chỉ trên heap, còn con trỏ lưu địa chỉ trên stack
+- Tham chiếu gắn một lần với đối tượng và không null; con trỏ có thể null và đổi chỗ trỏ
 
-<p class="giai-thich" markdown>Con trỏ mới có thể null và đổi chỗ trỏ. Tham chiếu là biệt danh gắn một lần.</p>
+<p class="giai-thich" markdown>Con trỏ mới có thể null và đổi chỗ trỏ. Tham chiếu là biệt danh gắn một lần, phải gán ngay khi khai báo.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 4.** `const int* p` có nghĩa là gì?
 
-- Không đổi được p sang trỏ chỗ khác
-- Không sửa được giá trị int mà p trỏ tới (qua p)
-- p luôn bằng null
-- p nằm trên heap
+- Không sửa được giá trị int mà `p` trỏ tới (qua `p`), nhưng `p` đổi chỗ trỏ được
+- Không đổi được `p` sang trỏ chỗ khác, nhưng sửa được giá trị int đó
+- `p` luôn bằng `nullptr` nên không dùng để đọc được gì
+- Cả `p` lẫn giá trị int đều không thay đổi được
 
-<p class="giai-thich" markdown>Chữ `const` đứng trước `int` nên cái `int` là hằng. Muốn con trỏ không đổi chỗ thì viết `int* const`.</p>
+<p class="giai-thich" markdown>Chữ `const` đứng trước `int` nên cái `int` là hằng. Muốn con trỏ không đổi chỗ thì viết `int* const`, muốn cả hai đều hằng thì viết `const int* const`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 5.** Hàm trả về địa chỉ của một biến cục bộ gây ra vấn đề gì?
 
-- Không vấn đề gì
-- Con trỏ trỏ tới vùng đã bị dọn (dangling pointer), dùng sẽ sinh lỗi
-- Biến tự chuyển lên heap
-- Trình biên dịch tự sửa
+- Biến tự được chuyển lên heap nên vẫn dùng an toàn
+- Con trỏ trỏ vào vùng đã bị dọn (dangling); dùng nó là UB, có thể chạy đúng hoặc sập
+- Trình biên dịch luôn báo lỗi nên chương trình không chạy được
+- Chỉ có vấn đề khi hàm đó bị gọi nhiều hơn một lần
 
-<p class="giai-thich" markdown>Biến cục bộ mất khi hàm kết thúc; địa chỉ còn đó nhưng chỗ đó không còn thuộc về bạn.</p>
+<p class="giai-thich" markdown>Biến cục bộ mất khi hàm kết thúc; địa chỉ còn đó nhưng chỗ đó không còn thuộc về bạn. Dùng con trỏ treo là hành vi không xác định (UB): chuẩn C++ không bảo đảm kết quả, nó có thể trông như chạy đúng hoặc có thể sập.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 6.** Vì sao nên truyền `std::string` lớn bằng `const std::string&`?
 
-- Để tránh sao chép mà hàm vẫn không sửa được chuỗi
-- Để chuỗi nằm trên heap
-- Để hàm sửa được chuỗi gốc
-- Chỉ để code ngắn hơn
+- Để chuỗi được đặt trên heap thay vì stack
+- Để hàm sửa được chuỗi gốc mà không phải sao chép
+- Để tránh sao chép cả chuỗi mà hàm vẫn không sửa được nó
+- Để chương trình biên dịch nhanh hơn nhờ code ngắn hơn
 
 <p class="giai-thich" markdown>Truyền tham chiếu không copy cả chuỗi; `const` cam kết không sửa.</p>
 </div>
