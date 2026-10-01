@@ -74,7 +74,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | std::unique_ptr | Con trỏ thông minh sở hữu duy nhất một đối tượng ở heap, tự `delete` khi chết; không copy được, chỉ trao tay bằng move; trong `<memory>` | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | std::make_unique | Hàm tạo đối tượng và bọc ngay vào `unique_ptr`, như `std::make_unique<Cay>(5)`; có từ C++14 | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | quyền sở hữu (ownership) | Việc "ai chịu trách nhiệm xóa đối tượng"; `unique_ptr` ghi rõ điều đó trong kiểu, còn Go không cần vì có GC | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
-| std::move | Lời nói "tôi đồng ý trao đi" cho phép chuyển ruột của một đối tượng sang đối tượng khác; với `unique_ptr` nguồn thành `nullptr`; chi tiết ở [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
+| std::move | Lời nói "tôi đồng ý trao đi": chỉ **ép** đối tượng thành rvalue, chưa di chuyển gì; hàm tạo/gán di chuyển được chọn mới lấy ruột (với `unique_ptr` nguồn thành `nullptr`); chi tiết ở [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | get() / release() / reset() | `get()` trả địa chỉ thô để nhìn, vẫn là chủ; `release()` bỏ quyền sở hữu mà không xóa; `reset()` xóa đối tượng đang giữ | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | operator* / operator-> | Hàm đặc biệt để một lớp "giả vờ là con trỏ": `*m` và `m->x` gọi chúng | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
 | template (khuôn mẫu) | Kiểu có tham số là kiểu khác, viết như `unique_ptr<Cay>`; giống generics của Go | [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) |
@@ -102,19 +102,20 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | = delete | Xóa một hàm để cấm dùng; sao chép một kiểu đã xóa hàm sao chép là lỗi biên dịch (như `unique_ptr`) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
 | = default | Bảo trình biên dịch tự sinh hàm đặc biệt mặc định (chỉ nêu tên ở Bài 11) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
 | copy-and-swap | Cách viết phép gán an toàn: chép vào bản tạm rồi hoán đổi ruột (chỉ nêu tên ở Bài 11) | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
-| lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| copy elision / RVO | Trình biên dịch bỏ qua bước copy khi trả về | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| rule of 0/5 | Quy tắc mở rộng của Rule of 3: thêm hai hàm di chuyển (Rule of 5), hoặc không tự viết hàm đặc biệt nào (Rule of 0) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| rvalue reference (tham chiếu rvalue) | Tham chiếu tới giá trị tạm, viết `T&&` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| move constructor (hàm tạo di chuyển) | Hàm tạo đối tượng mới bằng cách lấy ruột của một rvalue (đối tượng tạm hoặc đối tượng đã `std::move`) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| move assignment (toán tử gán di chuyển) | Phép gán lấy ruột của đối tượng khác thay vì sao chép | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| noexcept | Lời hứa rằng hàm này không ném ngoại lệ | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| valid but unspecified (hợp lệ nhưng không xác định) | Đối tượng đã bị move vẫn dùng được để hủy hoặc gán lại, nhưng đừng đoán bên trong có gì | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| forwarding reference (tham chiếu chuyển tiếp) | `T&&` trong template khi `T` được suy ra từ tham số, nhận được cả lvalue lẫn rvalue | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| std::forward | Chuyển tiếp một tham số mà giữ nguyên nó là lvalue hay rvalue | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| lvalue (giá trị có tên) | Giá trị có tên và có chỗ để quay lại dùng ở dòng sau, như biến `x` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| rvalue (giá trị tạm) | Giá trị tạm thời sắp biến mất, như `x + 1`, `3`, `Cay(3)` hay giá trị hàm trả về theo giá trị; lấy ruột của nó thì không ai tiếc | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| move semantics (ngữ nghĩa di chuyển) | Lấy ruột (con trỏ) của đối tượng sắp bỏ thay vì sao chép sâu; nguồn còn lại cái bìa rỗng | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| copy elision / RVO / NRVO | Trình biên dịch bỏ hẳn bước sao chép/di chuyển khi trả về; C++17 bắt buộc với giá trị tạm (`return Cay(3);`), còn NRVO cho biến có tên (`return c;`) là được phép nhưng không bắt buộc; đừng viết `return std::move(c);` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| rule of 0/5 | Rule of 5: lớp quản lý tài nguyên bằng tay thì quyết định cả năm hàm đặc biệt (hủy, sao chép ×2, di chuyển ×2); Rule of 0: dùng thành viên tự quản lý (`vector`, `unique_ptr`, `string`) và không viết hàm nào | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp đối số bằng `T&&` và `std::forward` (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| rvalue reference (tham chiếu rvalue) | Tham chiếu chỉ gắn được với giá trị tạm, viết `T&&`; bên trong hàm, tham số `&&` có tên nên là lvalue | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| move constructor (hàm tạo di chuyển) | Hàm tạo `T(T&&) noexcept` lấy ruột của một rvalue: chép con trỏ của nguồn rồi đặt con trỏ nguồn về `nullptr` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| move assignment (phép gán di chuyển) | Phép gán lấy ruột: chống tự gán, trả vùng cũ, lấy con trỏ của nguồn rồi đặt nguồn về `nullptr` | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| noexcept | Lời hứa hàm không ném ngoại lệ; hàm tạo di chuyển không có nó thì `std::vector` sao chép thay vì di chuyển khi tăng khối | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| std::move_if_noexcept | Hàm chuẩn trả rvalue (để di chuyển) chỉ khi hàm tạo di chuyển hứa `noexcept` hoặc kiểu không sao chép được, nếu không thì trả lvalue (để sao chép); `std::vector` dùng nó khi tăng dung lượng | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| valid but unspecified (hợp lệ nhưng không xác định) | Trạng thái của đối tượng chuẩn sau khi bị move: hủy hay gán lại đều an toàn, nhưng đừng đoán nội dung (`unique_ptr`/`shared_ptr` được bảo đảm rỗng) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| forwarding reference (tham chiếu chuyển tiếp) | `T&&` trong template khi `T` được suy ra từ đối số, nhận cả lvalue lẫn rvalue (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
+| std::forward | Chuyển tiếp một đối số mà giữ nguyên nó là lvalue hay rvalue (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | auto | Để trình biên dịch tự đoán kiểu (lần đầu dùng ở [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md), giải thích ngay tại đó) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | lambda | Hàm vô danh viết ngay tại chỗ | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | constexpr | Cho phép tính lúc biên dịch khi đầu vào cố định | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |

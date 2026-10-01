@@ -15,6 +15,6 @@
 | [Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây](nhom-1-nen-tang-bo-nho/09-unique-ptr.md) | <span class="diem" data-bai="09"></span> |
 | [Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) | <span class="diem" data-bai="10"></span> |
 | [Bài 11 — Sao chép đúng cách và Rule of 3](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) | <span class="diem" data-bai="11"></span> |
-| [Bài 12 — Move semantics, rule of 0/3/5](nhom-1-nen-tang-bo-nho/12-move-semantics.md) | <span class="diem" data-bai="12"></span> |
+| [Bài 12 — Move semantics, rule of 5/0](nhom-1-nen-tang-bo-nho/12-move-semantics.md) | <span class="diem" data-bai="12"></span> |
 | [Bài 13 — Tính năng C++11/14/17](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) | <span class="diem" data-bai="13"></span> |
 | [Bài 14 — Memory leak, dangling, UB](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md) | <span class="diem" data-bai="14"></span> |
