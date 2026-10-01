@@ -110,7 +110,7 @@ Quy tắc: cảnh báo là lưới thô, nó bắt được những ca rõ ràng
 
 **AddressSanitizer (ASan)** đã xuất hiện ở [Bài 07](07-new-delete.md) để bắt rò rỉ. Nó còn bắt cả lỗi **ngay lúc chúng xảy ra**: đọc hoặc ghi ngoài vùng được phép, dùng sau khi trả, giải phóng hai lần.
 
-Lệnh bật nó (các cờ giống Bài 07: `-g` để báo cáo có số dòng, `-fno-omit-frame-pointer` để danh sách hàm đầy đủ):
+Lệnh bật nó (các cờ giống [Bài 07](07-new-delete.md): `-g` để báo cáo có số dòng, `-fno-omit-frame-pointer` để danh sách hàm đầy đủ):
 
 ```text
 g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer -o chuongtrinh chuongtrinh.cpp
