@@ -2,7 +2,7 @@
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Dùng `std::make_unique`, `*p`, `p->`, `get()`, `reset()`, `release()` và hiểu "quyền sở hữu duy nhất": chỉ một `unique_ptr` giữ một đối tượng, nên hàm hủy chạy đúng một lần.
-    - Biết vì sao `auto b = a;` là lỗi biên dịch, và trao quyền bằng `std::move` thì `a` thành `nullptr`.
+    - Biết vì sao `std::unique_ptr<Cay> b = a;` là lỗi biên dịch, và trao quyền bằng `std::move` thì `a` thành `nullptr`.
     - Truyền `unique_ptr` vào và ra khỏi hàm đúng cách, và biết khi nào chỉ cần con trỏ thô hoặc tham chiếu để "nhìn".
 
 **Bạn cần biết trước:** [Bài 03](03-con-tro-co-ban.md) (`*p`, `->`, `nullptr`), [Bài 06](06-tham-chieu-const.md) (`const T&`), [Bài 07](07-new-delete.md) (`new`/`delete`, double free) và [Bài 08](08-raii.md) (RAII, lớp `Hop`, ngoại lệ).
@@ -11,13 +11,13 @@
 
 Kho đồ của trường có một chiếc **chìa khóa duy nhất**. Chỉ một người cầm chìa, và người đó chịu trách nhiệm đóng kho, dọn sạch khi xong việc. Muốn người khác dùng kho thì phải **trao tay** chiếc chìa: từ lúc đó người cũ hết chìa, người mới là chủ. Khi người cầm chìa đi khỏi (ra khỏi khối `{}` của họ), kho tự đóng và được dọn.
 
-`std::unique_ptr` là chiếc chìa đó. Ở Bài 08 bạn thấy lớp `Hop` tự `delete` trong hàm hủy nhưng bị nguy hiểm khi copy, vì copy làm **hai** người cầm chìa. `unique_ptr` giải quyết bằng cách **không cho copy**: chìa chỉ được trao, không được đúc thêm.
+`std::unique_ptr` là chiếc chìa đó. Ở Bài 08 bạn thấy lớp `Hop` tự `delete` trong hàm hủy nhưng bị nguy hiểm khi copy, vì copy làm **hai** người cầm chìa. `unique_ptr` giải quyết bằng cách **không cho copy**: chìa chỉ được trao, không được đúc thêm (miễn là bạn không tự đưa cùng một con trỏ thô cho hai `unique_ptr`, hay `delete` kết quả của `get()`).
 
 !!! info "Bạn biết Go?"
-    Go không có khái niệm "quyền sở hữu": bộ nhớ được dọn bởi GC khi không còn ai dùng, nên bạn không cần biết "ai chịu trách nhiệm dọn". C++ không có GC, nên phải có một chỗ ghi rõ **ai** dọn. `unique_ptr` là cách C++ viết điều đó ngay trong kiểu dữ liệu: biến nào là `unique_ptr` thì biến đó là chủ.
+    Go không có khái niệm "quyền sở hữu": bộ nhớ được dọn bởi GC khi không còn ai dùng, nên với bộ nhớ bạn không cần biết "ai chịu trách nhiệm dọn"; với tài nguyên khác như file bạn vẫn tự `defer Close()`. C++ không có GC, nên phải có một chỗ ghi rõ **ai** dọn. `unique_ptr` là cách C++ viết điều đó ngay trong kiểu dữ liệu: biến nào là `unique_ptr` thì biến đó là chủ.
 
 !!! info "Chỗ nào ví dụ chiếc chìa không còn đúng?"
-    Chìa thật là đồ vật; còn ở đây "chìa" là địa chỉ cây nằm trong `unique_ptr`, và "trao tay" là chép địa chỉ đó sang `unique_ptr` khác rồi đặt cái cũ về `nullptr`.
+    "Chìa" thật là đồ vật; ở đây nó là địa chỉ cây trong `unique_ptr`, và "trao tay" là chép địa chỉ sang chỗ khác rồi đặt chỗ cũ về `nullptr`.
 
 ## 📖 Giải thích
 
@@ -150,7 +150,7 @@ int main() {
 | (5) | `if (p)` đúng khi `p` đang giữ cây; in `p dang giu cay` | không đổi |
 | (6) | `reset()` **xóa cây** đang giữ: in `huy 5`; `p` thành `nullptr` | heap: đã trả; `nhin` thành con trỏ treo (không dùng nữa) |
 | in `p rong` | `!p` nghĩa là "p đang rỗng": đúng | không đổi |
-| (7) | Tạo cây cao 7 (in `tao 7`) và đưa vào `p`. Dòng này gán một `unique_ptr` tạm vào `p`; ta chỉ cần biết nó được phép vì là trao quyền từ giá trị tạm (chi tiết ở Bài 11) | stack: `p` = 0xA000; heap: cây 7 |
+| (7) | Tạo cây cao 7 (in `tao 7`) và đưa vào `p`. Dòng này gán vào `p` kết quả vừa tạo; Bài 11 giải thích vì sao được phép | stack: `p` = 0xA000; heap: cây 7 |
 | (8) | `release()` **bỏ quyền sở hữu** và trả địa chỉ thô cho `tho`; **không xóa gì**. `p` thành `nullptr` | `p` rỗng; `tho` = 0xA000 |
 | in 2 dòng | `p rong sau release`, rồi `tho` vẫn đọc được cây 7 | không đổi |
 | (9) | Giờ ta là chủ: phải tự `delete tho`; in `huy 7` | heap: đã trả |
@@ -180,12 +180,9 @@ Ba hàm hay bị lẫn, nên đặt cạnh nhau:
 | `p.release()` | rỗng (`nullptr`) | **không** | địa chỉ thô; **bạn** thành chủ và phải lo xóa |
 | `p.reset()` | rỗng (`nullptr`) | **có**, ngay lúc gọi | không có gì |
 
-!!! warning "Hay nhầm"
-    `release()` nghe như "giải phóng" nhưng **không xóa gì**: nó chỉ "buông tay", cây vẫn nằm ở heap. Người hiểu nhầm sẽ gọi `p.release();` rồi bỏ đó, và cây bị rò rỉ. Nếu muốn xóa thì dùng `reset()`.
-
 **Thử thay đổi 1: bỏ dòng (9) `delete tho;`.** Mình đã chạy với AddressSanitizer (`-fsanitize=address`, Bài 07): chương trình in `tao 7` ... `het main` mà **không có `huy 7`**, và LeakSanitizer báo `4 byte(s) leaked in 1 allocation(s)`. Đúng như bảng: sau `release()` cây là việc của bạn.
 
-**Thử thay đổi 2: thay (6) bằng `p.reset(new Cay(2));`** (`reset` có thể nhận con trỏ thô mới và giữ nó). Mình đã chạy với `p` đang giữ cây cao 1: output `tao 1`, `tao 2`, `huy 1`, rồi `p giu cay 2` và cuối chương trình `huy 2`. Cây mới ra đời trước, cây cũ bị xóa ngay sau đó.
+**Thử thay đổi 2: thay (6) bằng `p.reset(new Cay(2));`** (`reset` có thể nhận con trỏ thô mới và giữ nó). Mình đã chạy với `p` đang giữ cây cao 1 (và thêm một dòng in `p->cao`): output `tao 1`, `tao 2`, `huy 1`, rồi `p giu cay 2` và cuối chương trình `huy 2`. Cây mới ra đời trước, cây cũ bị xóa ngay sau đó.
 
 ### 3. Không copy được
 
@@ -193,20 +190,7 @@ Bây giờ thử copy một `unique_ptr`, đúng thứ gây double free ở Bài
 
 ```cpp
 // bo-qua-kiem-tra
-#include <iostream>
-#include <memory>
-
-struct Cay {
-    int cao;
-    Cay(int c) {
-        cao = c;
-        std::cout << "tao " << cao << "\n";
-    }
-    ~Cay() {
-        std::cout << "huy " << cao << "\n";
-    }
-};
-
+// (struct Cay và các #include như các ví dụ trên)
 int main() {
     std::unique_ptr<Cay> a = std::make_unique<Cay>(5);
     auto b = a;                                  // (1)
@@ -225,14 +209,14 @@ note: declared here
 
 Cách đọc: `auto b = a;` cần **hàm tạo sao chép** (Bài 06) của `unique_ptr`. Thư viện chuẩn viết hàm đó kèm `= delete`, nghĩa là "hàm này bị xóa": trình biên dịch từ chối mọi dòng gọi tới nó. Vì sao bị xóa? Nếu `a` và `b` cùng giữ một cây thì hai hàm hủy cùng `delete` một chỗ: đúng cái double free ở Bài 08. Thay vì để lỗi đó xảy ra lúc chạy, C++ chặn nó ngay lúc **biên dịch**.
 
-Đây là ý nghĩa của "sở hữu duy nhất": tại mọi thời điểm, nhiều lắm một `unique_ptr` giữ một cây, nên cây bị xóa đúng một lần.
+Đây là ý nghĩa của "sở hữu duy nhất": tại mọi thời điểm, nhiều lắm một `unique_ptr` giữ một cây, nên cây bị xóa đúng một lần (miễn là bạn không tự đưa cùng một con trỏ thô cho hai `unique_ptr`, hay `delete` kết quả của `get()`).
 
 !!! question "Hỏi nhanh: cấm copy thì làm sao đưa cây cho người khác?"
     Bằng cách **trao tay**: người cũ buông, người mới nhận. Đó là mục sau.
 
 ### 4. Trao tay bằng `std::move`
 
-Muốn chuyển quyền sở hữu từ `a` sang `b`, ta viết `auto b = std::move(a);`. `std::move` (cần `#include <utility>` hoặc `<memory>`) không tự di chuyển gì. Nó chỉ là **lời nói**: "tôi đồng ý trao `a` đi". Việc trao thật do `unique_ptr` làm: chép địa chỉ cây sang `b` rồi đặt `a` về `nullptr`. Ý nghĩa sâu hơn của `std::move` nằm ở Bài 11; bây giờ bạn chỉ cần dùng được.
+Muốn chuyển quyền sở hữu từ `a` sang `b`, ta viết `auto b = std::move(a);`. `std::move` (cần `#include <utility>`) không tự di chuyển gì. Nó chỉ là **lời nói**: "tôi đồng ý trao `a` đi". Việc trao thật do `unique_ptr` làm: chép địa chỉ cây sang `b` rồi đặt `a` về `nullptr`. Ý nghĩa sâu hơn của `std::move` nằm ở Bài 11; bây giờ bạn chỉ cần dùng được.
 
 ```cpp
 #include <iostream>
@@ -286,9 +270,6 @@ huy 5
 ```
 
 Có đúng **một** `tao 5` và **một** `huy 5`: cây đổi chủ chứ không được nhân đôi. Với `unique_ptr`, chuẩn **bảo đảm** nguồn sau khi bị move là `nullptr`, nên viết `a == nullptr` là hợp lệ.
-
-!!! warning "Hay nhầm"
-    Sau `auto b = std::move(a);` đừng viết `*a` hay `a->cao`: `a` là `nullptr`, và giải tham chiếu `nullptr` là hành vi không xác định (Bài 03). Mình không chạy dòng đó. Muốn dùng cây thì dùng `b`.
 
 ### 5. Truyền `unique_ptr` vào và ra khỏi hàm
 
@@ -377,7 +358,7 @@ Quy tắc rút ra:
 |---|---|---|---|
 | Chỉ **dùng** cây (phổ biến nhất) | `const Cay&` (hoặc `Cay&` nếu cần sửa) | `f(*p)` | Hàm không biết cây được quản lý thế nào, và không quan tâm |
 | Dùng cây, **có thể không có cây** | `Cay*` | `f(p.get())` | `nullptr` nghĩa là "không có"; hàm không được `delete` |
-| **Trở thành chủ** (lưu lại, hoặc hủy xong việc) | `std::unique_ptr<Cay>` theo giá trị | `f(std::move(p))` | Nhìn tham số là biết: hàm này nhận quyền |
+| **Trở thành chủ** (lưu lại, hoặc dùng xong rồi hủy nó) | `std::unique_ptr<Cay>` theo giá trị | `f(std::move(p))` | Nhìn tham số là biết: hàm này nhận quyền |
 | **Trả cây** về nơi gọi | kiểu trả về `std::unique_ptr<Cay>` | `return std::make_unique<Cay>(...);` | Không cần `std::move` ở `return`: trình biên dịch lo |
 
 !!! warning "Hay nhầm"
@@ -392,58 +373,29 @@ Quy tắc rút ra:
 #include <memory>
 
 int main() {
-    std::unique_ptr<int[]> m = std::make_unique<int[]>(4);   // (1)
+    // (1) xin mảng 4 int ở heap: số 4 là số phần tử, không phải giá trị
+    std::unique_ptr<int[]> m = std::make_unique<int[]>(4);
     for (int i = 0; i < 4; i++) {
-        m[i] = (i + 1) * 10;                                  // (2)
+        m[i] = (i + 1) * 10;     // (2) ghi 10, 20, 30, 40
     }
     std::cout << "m[0] = " << m[0] << ", m[3] = " << m[3] << "\n";
     return 0;
-}                                                             // (3)
+}                                // (3) m chết: mảng được delete[]
 ```
-
-(1) xin mảng 4 `int` ở heap (cú pháp `make_unique<int[]>(4)`: số 4 là **số phần tử**, không phải giá trị). (2) ghi 10, 20, 30, 40. (3) `}` làm `m` chết và mảng được `delete[]`. Kết quả mình đã chạy:
 
 ```text
 m[0] = 10, m[3] = 40
 ```
 
-Dù vậy, thường nên dùng `std::vector` (kiểu mảng co giãn, có độ dài, đã gặp ở Bài 02) thay cho mảng động; mình sẽ dạy kỹ ở nhóm STL. Còn `std::vector<std::unique_ptr<Cay>>` (danh sách các chủ cây) dùng được vì vector chỉ cần trao tay các phần tử, không cần copy; mình chỉ nêu một câu này.
+Dù vậy, thường nên dùng `std::vector` (kiểu mảng co giãn, đã gặp ở Bài 02) thay cho mảng động; mình dạy kỹ ở nhóm STL. `std::vector<std::unique_ptr<Cay>>` (danh sách các chủ cây) cũng dùng được vì chỉ cần trao tay, không cần copy.
 
 ### 7. Chi phí và bộ xóa tùy chỉnh
 
-`unique_ptr` gần như **không tốn thêm** so với con trỏ thô. Mình đo trên máy mình bằng `sizeof`:
-
-```cpp
-#include <iostream>
-#include <memory>
-
-int main() {
-    std::cout << "sizeof(int*)                  = " << sizeof(int*) << "\n";
-    std::cout << "sizeof(std::unique_ptr<int>)  = " << sizeof(std::unique_ptr<int>) << "\n";
-    return 0;
-}
-```
-
-```text
-sizeof(int*)                  = 8
-sizeof(std::unique_ptr<int>)  = 8
-```
-
-Chuẩn không hứa hai số này bằng nhau. Trên các cài đặt phổ biến, với bộ xóa mặc định (là `delete`), `unique_ptr` cùng cỡ với con trỏ thô, và thường không chậm hơn đáng kể so với con trỏ thô.
-
-Chữ "bộ xóa mặc định" ám chỉ rằng việc xóa có thể đổi được: **bộ xóa tùy chỉnh (custom deleter)** cho `unique_ptr` giữ thứ không phải bộ nhớ `new`, ví dụ file mở bằng `fopen` cần `fclose`. Bài này chỉ nêu tên; bạn chưa cần viết.
+`unique_ptr` gần như không tốn thêm so với con trỏ thô. Mình đã đo `sizeof`: trên máy mình cả `int*` lẫn `std::unique_ptr<int>` đều 8 byte; chuẩn không hứa điều này, nhưng trên các cài đặt phổ biến, với bộ xóa mặc định (là `delete`), hai kiểu cùng cỡ. Việc xóa có thể đổi được bằng **bộ xóa tùy chỉnh (custom deleter)**, ví dụ để `unique_ptr` giữ file mở bằng `fopen` và gọi `fclose`; bài này chỉ nêu tên.
 
 ### 8. Quy tắc chọn
 
 Mặc định, **dùng `unique_ptr`** cho đối tượng ở heap có một chủ rõ ràng. Con trỏ thô và tham chiếu vẫn dùng, nhưng chỉ để **nhìn** (không sở hữu, không `delete`). Với trường hợp nhiều chủ cùng dùng một đối tượng, có `std::shared_ptr` (Bài 10).
-
-| Bạn muốn | Dùng |
-|---|---|
-| Một đối tượng ở heap, một chủ | `std::unique_ptr<T>` tạo bằng `make_unique` |
-| Một hàm chỉ dùng đối tượng | `const T&` hoặc `T&` |
-| Dùng đối tượng nhưng có thể "không có" | `T*` (nhìn, không `delete`) |
-| Nhiều chủ cùng giữ | `shared_ptr` (Bài 10) |
-| Xóa tay bằng `new`/`delete` | Hầu như không; chỉ trong lớp RAII tự viết |
 
 ## 💻 Ví dụ code
 
@@ -520,7 +472,7 @@ bat duoc loi 0
 xong
 ```
 
-Cả ba lần đều có đúng một `tao` và một `huy`, không có dòng `delete` nào. Mình đã chạy thêm bản này với AddressSanitizer: không báo gì, mã thoát 0 (như mọi lần, im lặng của công cụ không chứng minh là sạch, nhưng ở đây ta còn thấy bằng mắt đủ cặp `tao`/`huy`).
+Cả ba lần đều có đúng một `tao` và một `huy`, không có dòng `delete` nào. Mình đã chạy thêm với AddressSanitizer: không báo gì (nhưng im lặng không chứng minh là sạch; ta còn thấy đủ cặp `tao`/`huy`).
 
 **Thử thay đổi: đổi dòng (1) thành `Cay* p = new Cay(cao);` và thêm `delete p;` ở cuối hàm (thay cho dòng (4)).** Đây là hàm thủ công của Bài 08. Mình đã chạy: `xuLy(5)` đủ `tao 5`/`huy 5`, nhưng `xuLy(-1)` chỉ có `tao -1` (không có `huy -1`) và `xuLy(0)` chỉ có `tao 0` rồi `bat duoc loi 0`, vì `return` và `throw` đều nhảy qua `delete p;`.
 

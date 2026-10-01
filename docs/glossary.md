@@ -87,7 +87,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | valid but unspecified (hợp lệ nhưng không xác định) | Đối tượng đã bị move vẫn dùng được để hủy hoặc gán lại, nhưng đừng đoán bên trong có gì | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | forwarding reference (tham chiếu chuyển tiếp) | `T&&` trong template khi `T` được suy ra từ tham số, nhận được cả lvalue lẫn rvalue | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | std::forward | Chuyển tiếp một tham số mà giữ nguyên nó là lvalue hay rvalue | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
-| auto | Để trình biên dịch tự đoán kiểu | [Bài 12](nhom-1-nen-tang-bo-nho/12-cpp11-14-17.md) |
+| auto | Để trình biên dịch tự đoán kiểu (lần đầu dùng ở Bài 09, giải thích ngay tại đó) | [Bài 12](nhom-1-nen-tang-bo-nho/12-cpp11-14-17.md) |
 | lambda | Hàm vô danh viết ngay tại chỗ | [Bài 12](nhom-1-nen-tang-bo-nho/12-cpp11-14-17.md) |
 | constexpr | Cho phép tính lúc biên dịch khi đầu vào cố định | [Bài 12](nhom-1-nen-tang-bo-nho/12-cpp11-14-17.md) |
 | enum class | Liệt kê có phạm vi riêng | [Bài 12](nhom-1-nen-tang-bo-nho/12-cpp11-14-17.md) |
