@@ -1,3 +1,5 @@
+import contextlib
+import io
 import pathlib
 import sys
 import tempfile
@@ -47,6 +49,44 @@ class TestKiemFile(unittest.TestCase):
             loi = k.kiem_file(p)
         self.assertEqual(len(loi), 1)
         self.assertIn("b.md:3", loi[0])
+
+    def _kiem(self, text):
+        with tempfile.TemporaryDirectory() as d:
+            p = pathlib.Path(d) / "b.md"
+            p.write_text(text, encoding="utf-8")
+            return k.kiem_file(p)
+
+    def test_khoi_co_thuoc_tinh_van_duoc_bien_dich(self):
+        text = 'Văn bản\n\n```cpp title="x.cpp" linenums="1"\nint main() { return x; }\n```\n'
+        self.assertEqual(len(k.lay_khoi(text)), 1)
+        loi = self._kiem(text)
+        self.assertEqual(len(loi), 1)
+        self.assertIn("biên dịch", loi[0])
+
+    def test_khong_lay_cppx_hay_cpp_cong(self):
+        self.assertEqual(k.lay_khoi("```cppx\nint x;\n```\n```c++\nint y;\n```\n"), [])
+
+    def test_khoi_khong_dong_bi_bao_loi(self):
+        text = "Văn bản\n\n```cpp\nint main() { return 0; }\n"
+        loi = self._kiem(text)
+        self.assertEqual(len(loi), 1)
+        self.assertIn("b.md:3", loi[0])
+        self.assertIn("không đóng", loi[0])
+
+
+class TestStdinVaThuMuc(unittest.TestCase):
+    def test_doc_cin_that_bai_nhanh(self):
+        code = "#include <iostream>\nint main() { int x; return std::cin >> x ? 0 : 3; }\n"
+        self.assertIn("mã 3", k.kiem_khoi(code))
+
+    def test_thu_muc_khong_ton_tai_thoat_ma_1(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(k.main(["x", "/khong/ton/tai/docs"]), 1)
+
+    def test_thu_muc_rong_thoat_ma_0(self):
+        with tempfile.TemporaryDirectory() as d:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(k.main(["x", d]), 0)
 
 
 if __name__ == "__main__":

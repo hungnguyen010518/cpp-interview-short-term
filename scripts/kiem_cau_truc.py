@@ -21,6 +21,19 @@ LUA_CHON = re.compile(r"^- \S", re.M)
 DONG_SO = re.compile(r"^\d+\. \S", re.M)
 
 
+def lay_lua_chon(noi_dung: str) -> int:
+    """Đếm các lựa chọn: danh sách `- ` liền mạch cuối cùng trước khối giai-thich."""
+    truoc = noi_dung.split('<p class="giai-thich"', 1)[0]
+    dong = [d for d in truoc.split("\n")]
+    while dong and not dong[-1].strip():
+        dong.pop()
+    n = 0
+    while dong and LUA_CHON.match(dong[-1]):
+        n += 1
+        dong.pop()
+    return n
+
+
 def kiem_quiz(ten: str, text: str) -> list:
     n_quiz = text.count('<div class="quiz"')
     if n_quiz != 1:
@@ -33,7 +46,7 @@ def kiem_quiz(ten: str, text: str) -> list:
     if not 6 <= len(cau) <= 8:
         loi.append(f"{ten}: quiz cần 6–8 câu, đang có {len(cau)}")
     for k, (dap_an, noi_dung) in enumerate(cau, 1):
-        so = len(LUA_CHON.findall(noi_dung))
+        so = lay_lua_chon(noi_dung)
         if not 3 <= so <= 4:
             loi.append(f"{ten}: câu {k} có {so} lựa chọn (cần 3–4)")
         elif not 1 <= int(dap_an) <= so:
@@ -74,6 +87,9 @@ def kiem_bai(ten: str, text: str) -> list:
 
 def main(argv: list) -> int:
     goc = pathlib.Path(argv[1] if len(argv) > 1 else "docs")
+    if not goc.is_dir():
+        print(f"Lỗi: không tìm thấy thư mục docs {str(goc)!r}")
+        return 1
     loi = []
     for f in sorted(goc.glob("nhom-*/*.md")):
         loi += kiem_bai(str(f), f.read_text(encoding="utf-8"))

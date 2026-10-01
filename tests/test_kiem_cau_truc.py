@@ -1,5 +1,8 @@
+import contextlib
+import io
 import pathlib
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
@@ -69,6 +72,29 @@ class TestKiemBai(unittest.TestCase):
         text = bai().replace('data-dap-an="1" markdown>', 'markdown data-dap-an="1">', 1)
         loi = k.kiem_bai("b.md", text)
         self.assertTrue(any("sai cú pháp" in l for l in loi), loi)
+
+    def test_cau_hoi_co_gach_dau_dong_o_de_bai_van_hop_le(self):
+        c = ('<div class="cau-hoi" data-dap-an="3" markdown>\n'
+             "**Câu.** Hỏi gì đó?\n- gợi ý một\n- gợi ý hai\n- gợi ý ba\n\n"
+             "- Lựa chọn 1\n- Lựa chọn 2\n- Lựa chọn 3\n\n"
+             '<p class="giai-thich" markdown>Vì sao.</p>\n</div>\n')
+        self.assertEqual(k.kiem_bai("b.md", bai(cau_dau=c)), [])
+
+    def test_gach_dau_dong_trong_giai_thich_khong_tinh_la_lua_chon(self):
+        c = ('<div class="cau-hoi" data-dap-an="4" markdown>\n'
+             "**Câu.** Hỏi gì đó?\n\n- Lựa chọn 1\n- Lựa chọn 2\n- Lựa chọn 3\n\n"
+             '<p class="giai-thich" markdown>Vì sao.\n- ý phụ\n</p>\n</div>\n')
+        loi = k.kiem_bai("b.md", bai(cau_dau=c))
+        self.assertTrue(any("ngoài" in l for l in loi), loi)
+
+    def test_thu_muc_khong_ton_tai_thoat_ma_1(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(k.main(["x", "/khong/ton/tai/docs"]), 1)
+
+    def test_thu_muc_rong_thoat_ma_0(self):
+        with tempfile.TemporaryDirectory() as d:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(k.main(["x", d]), 0)
 
 
 if __name__ == "__main__":

@@ -17,8 +17,9 @@ import tempfile
 
 BO_QUA = "// bo-qua-kiem-tra"
 KHOI = re.compile(
-    r"^(?P<thut>[ \t]*)```cpp[ \t]*\n(?P<code>.*?)^(?P=thut)```[ \t]*$",
+    r"^(?P<thut>[ \t]*)```cpp(?=[ \t\n])[^\n]*\n(?P<code>.*?)^(?P=thut)```[ \t]*$",
     re.S | re.M)
+MO_DAU = re.compile(r"^[ \t]*```cpp(?=[ \t\n]|\Z)", re.M)
 
 
 def lay_khoi(text: str) -> list:
@@ -47,7 +48,8 @@ def kiem_khoi(code: str):
         if bd.returncode != 0:
             return "biên dịch lỗi:\n" + bd.stderr
         try:
-            kq = subprocess.run([str(chay)], capture_output=True, text=True, timeout=5)
+            kq = subprocess.run([str(chay)], capture_output=True, text=True, timeout=5,
+                stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
             return "chạy quá 5 giây"
         if kq.returncode != 0:
@@ -57,7 +59,16 @@ def kiem_khoi(code: str):
 
 def kiem_file(duong: pathlib.Path) -> list:
     loi = []
-    for so_dong, code in lay_khoi(duong.read_text(encoding="utf-8")):
+    text = duong.read_text(encoding="utf-8")
+    khoi = lay_khoi(text)
+    da_lay = {so for so, _ in khoi}
+    mo = [text.count("\n", 0, m.start()) + 1 for m in MO_DAU.finditer(text)]
+    if len(mo) != len(khoi):
+        chua = next((so for so in mo if so not in da_lay), None)
+        vi_tri = f":{chua}" if chua else ""
+        loi.append(f"{duong}{vi_tri}: có {len(mo)} dòng mở ```cpp nhưng chỉ lấy được "
+                   f"{len(khoi)} khối (khối không đóng hoặc đóng sai thụt lề)")
+    for so_dong, code in khoi:
         ket_qua = kiem_khoi(code)
         if ket_qua:
             loi.append(f"{duong}:{so_dong}: {ket_qua}")
@@ -66,6 +77,9 @@ def kiem_file(duong: pathlib.Path) -> list:
 
 def main(argv: list) -> int:
     goc = pathlib.Path(argv[1] if len(argv) > 1 else "docs")
+    if not goc.is_dir():
+        print(f"Lỗi: không tìm thấy thư mục docs {str(goc)!r}")
+        return 1
     loi = []
     n_khoi = 0
     for f in sorted(goc.glob("nhom-*/*.md")):
