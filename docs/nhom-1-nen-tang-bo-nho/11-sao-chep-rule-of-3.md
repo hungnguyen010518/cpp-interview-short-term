@@ -20,7 +20,7 @@ Cách 1 là **sao chép nông (shallow copy)**, cách 2 là **sao chép sâu (de
 
 ### 1. Sao chép mặc định chỉ chép cái bìa
 
-Từ [Bài 06](06-tham-chieu-const.md): hàm tạo sao chép chạy mỗi khi một bản sao được tạo. Nếu bạn không tự viết, trình biên dịch tự sinh một hàm **chép từng thành viên**. Với `int` thì chép số; với con trỏ thì chép **giá trị con trỏ**, tức là chép địa chỉ, không chép chỗ được trỏ tới.
+Từ [Bài 06](06-tham-chieu-const.md): hàm tạo sao chép chạy mỗi khi một bản sao được tạo. Nếu bạn không tự viết, trình biên dịch tự sinh một hàm **chép từng thành viên** (mỗi trường của struct, như `p`). Với `int` thì chép số; với con trỏ thì chép **giá trị con trỏ**, tức là chép địa chỉ, không chép chỗ được trỏ tới.
 
 Thử với `Hop` (hộp) giữ một con trỏ `p` tới `int` ở heap. Lần này chưa có hàm hủy, nên chương trình chưa gặp lỗi gì nghiêm trọng:
 
@@ -48,7 +48,7 @@ int main() {
 }
 ```
 
-Biểu thức `a.p == b.p` so sánh hai địa chỉ và cho `1` (đúng) hoặc `0` (sai) khi in. Mình so sánh thay vì in địa chỉ thô để kết quả không đổi giữa các lần chạy.
+Biểu thức `a.p == b.p` so sánh hai địa chỉ và cho `1` (đúng) hoặc `0` (sai) khi in; ta phải đặt trong ngoặc vì `<<` ưu tiên hơn `==`. Mình so sánh thay vì in địa chỉ thô để kết quả không đổi giữa các lần chạy.
 
 | Bước | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này (địa chỉ minh họa) |
 |---|---|---|---|
@@ -66,6 +66,14 @@ a: 9, b: 9
 ```
 
 Dòng `a: 9` là bằng chứng: bạn chỉ sửa `b`, nhưng `a` cũng đổi, vì hai tờ bìa chỉ chung một quyển vở. Chương trình này cũng **bị rò rỉ** một khối 4 byte, vì `Hop` chưa có hàm hủy nên không ai `delete`. Mình đã chạy với AddressSanitizer: nó báo `Direct leak of 4 byte(s) in 1 object(s)` (rút gọn, bỏ địa chỉ và đường dẫn) và thoát mã 1. Chú ý "1 object": suốt chương trình chỉ **có một** khối heap, dù có hai `Hop`.
+
+Hình dung sau dòng (1) (địa chỉ minh họa):
+
+```text
+a.p ---+
+       +--> [ 5 ]   (một khối heap duy nhất, 0x9000)
+b.p ---+
+```
 
 **Thử thay đổi: thay dòng (1) bằng `Hop b(9); b = a;`** (tạo `b` riêng rồi gán `a` vào). Mình đã chạy: vẫn in `1` và `a: 9, b: 9`, nhưng ASan báo `8 byte(s) leaked in 2 allocation(s)`. Phép gán mặc định cũng chỉ chép cái bìa, nên khối 9 ban đầu của `b` bị mất địa chỉ và không ai trả được nữa.
 
@@ -86,7 +94,7 @@ int main() {
 }
 ```
 
-Cuối `main`, hai hàm hủy cùng `delete` **một** địa chỉ: đó là giải phóng hai lần của [Bài 07](07-new-delete.md), hành vi không xác định. Mình để code trong khối bỏ qua và không ghi kết quả (đây là điều hứa ở [Bài 08](08-raii.md): "Bài 11 dạy cách sửa"). Gốc rễ là có **hai chủ** cho một vùng nhớ chỉ nên có một chủ.
+Cuối `main`, hai hàm hủy cùng `delete` **một** địa chỉ: đó là giải phóng hai lần của [Bài 07](07-new-delete.md), hành vi không xác định. Mình để code trong khối bỏ qua và không ghi kết quả ([Bài 08](08-raii.md) đã hứa bài này sẽ dạy cách sửa). Gốc rễ là có **hai chủ** cho một vùng nhớ chỉ nên có một chủ.
 
 !!! info "Bạn biết Go?"
     Gán struct trong Go cũng chép từng trường. Nếu trường là con trỏ, slice hay map thì bản sao vẫn trỏ **chung** dữ liệu: nó cũng là sao chép nông, và sửa qua bản này thì bản kia thấy. Khác biệt là bộ gom rác (GC): dùng chung không gây giải phóng hai lần, vì GC chỉ dọn khi không còn ai trỏ tới. C++ không có GC, nên "hai chủ" nghĩa là hai lần trả.
@@ -99,7 +107,7 @@ Cuối `main`, hai hàm hủy cùng `delete` **một** địa chỉ: đó là gi
 
 ### 3. Hàm tạo sao chép sâu
 
-Cách sửa: tự viết hàm tạo sao chép để nó **xin vùng nhớ mới** và **chép giá trị** từ vùng cũ sang. Chữ `const Hop&` nhắc lại [Bài 06](06-tham-chieu-const.md): nhận đối tượng gốc bằng tham chiếu hằng, không sao chép tiếp (truyền theo giá trị lại cần chính hàm này, nên C++ không cho phép) và không sửa gốc.
+Cách sửa: tự viết hàm tạo sao chép để nó **xin vùng nhớ mới** và **chép giá trị** từ vùng cũ sang. Chữ `const Hop&` nhắc lại [Bài 06](06-tham-chieu-const.md): nhận đối tượng gốc bằng tham chiếu hằng, không sao chép tiếp và không sửa gốc. Nếu viết `Hop(Hop o)` (theo giá trị) thì để tạo tham số `o` lại cần chính hàm tạo sao chép này, nên C++ không cho phép.
 
 ```cpp
 #include <iostream>
@@ -150,6 +158,13 @@ huy 9
 huy 5
 ```
 
+Hình dung sau dòng (4) (địa chỉ minh họa):
+
+```text
+a.p ---> [ 5 ]   (0x9000)
+b.p ---> [ 5 ]   (0xA000, khối riêng)
+```
+
 Bây giờ `a` và `b` mỗi cái có quyển vở riêng; có hai chữ `huy` cho hai đối tượng, mỗi khối heap được `delete` đúng một lần. Mình đã chạy bản này với AddressSanitizer: không có báo cáo và thoát mã 0 (nhắc lại: im lặng không chứng minh là sạch, nhưng khớp với việc đếm được hai `huy` cho hai lần xin).
 
 !!! warning "Hay nhầm"
@@ -159,11 +174,13 @@ Bây giờ `a` và `b` mỗi cái có quyển vở riêng; có hai chữ `huy` c
 
 ### 4. Phép gán sao chép
 
-Khi viết `b = a;` mà `b` **đã tồn tại**, `b` đang giữ một vùng nhớ cũ. Hàm tạo sao chép chạy trên đối tượng còn trống; phép gán thì phải xử lý thêm ba việc:
+Khi viết `b = a;` mà `b` **đã tồn tại**, `b` đang giữ một vùng nhớ cũ. Hàm tạo sao chép chạy trên đối tượng vừa mới tạo, chưa giữ vùng nào; phép gán thì phải xử lý thêm ba việc:
 
 1. **Trả vùng cũ của `b`** (nếu không thì rò rỉ, như thử thay đổi ở mục 1).
 2. **Chống tự gán**: `a = a;` là hợp lệ. Nếu cứ máy móc "trả vùng cũ rồi chép từ `a`", thì ở `a = a` ta trả mất chính vùng cần chép, rồi đọc vùng đã trả: hành vi không xác định. Nên kiểm tra `if (this != &o)` ("đối tượng kia không phải chính tôi"; `o` là biệt danh nên `&o` là địa chỉ của đối tượng thật).
 3. **Trả về `*this`** (chính `b`), để viết được `x = y = z`. Kiểu trả về là `Hop&` (tham chiếu), nên không tạo thêm bản sao.
+
+Đây là một cách viết, dễ hiểu nhất. Nếu xin vùng mới **trước** rồi mới trả vùng cũ thì không cần kiểm tra tự gán, và nếu `new` ném ngoại lệ thì `b` vẫn còn nguyên (với cách "trả trước" ở đây, `new` hỏng sau `delete p` sẽ để `p` treo). Copy-and-swap là cách chuẩn hóa ý đó.
 
 ```cpp
 #include <iostream>
@@ -254,16 +271,16 @@ int main() {
 }
 ```
 
-Mình đã biên dịch khối này bằng `g++ -std=c++17 -Wall`; đây là lỗi **biên dịch** thật (rút gọn, bỏ tên file):
+Mình đã biên dịch khối này bằng `g++ -std=c++17 -Wall`; đây là lỗi **biên dịch** thật (rút gọn: bỏ tên file và số dòng):
 
 ```text
 error: use of deleted function 'Hop::Hop(const Hop&)'
-    9 |     Hop b = a;
+    Hop b = a;
 note: declared here
-    4 |     Hop(const Hop&) = delete;
+    Hop(const Hop&) = delete;
 ```
 
-Lỗi nằm ngay lúc biên dịch, trước khi chạy, và chỉ đúng dòng sao chép: rẻ hơn nhiều so với lỗi hai lần `delete` chỉ lộ ra khi chạy. Viết `Hop& operator=(const Hop&) = delete;` thì chặn thêm `b = a;` (mình đã thử, g++ báo `use of deleted function 'Hop& Hop::operator=(const Hop&)'`).
+Ở `Hop(const Hop&) = delete;` tham số không có tên vì hàm bị xóa nên không dùng tới nó. Lỗi nằm ngay lúc biên dịch, trước khi chạy, và chỉ đúng dòng sao chép: rẻ hơn nhiều so với lỗi hai lần `delete` chỉ lộ ra khi chạy. Viết `Hop& operator=(const Hop&) = delete;` thì chặn thêm `b = a;` (mình đã thử, g++ báo `use of deleted function 'Hop& Hop::operator=(const Hop&)'`).
 
 Đây chính là cách `std::unique_ptr` ở [Bài 09](09-unique-ptr.md) không copy được: hàm sao chép của nó bị `= delete`. Còn `= default` là chiều ngược lại: bảo trình biên dịch tự sinh hàm mặc định (bản chép từng thành viên); ở đây chỉ nêu tên.
 
@@ -299,6 +316,14 @@ int main() {
     return 0;
 }
 ```
+
+| Bước | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này (địa chỉ minh họa) |
+|---|---|---|---|
+| 1 | `Hop a(5)` | Xin heap một `int` bằng 5 | `a.p` = 0x9000 |
+| 2 | `theoGiaTri(a)` | Tham số `h` là biến mới, tạo bằng hàm tạo sao chép từ `a`: xin vùng mới, chép 5, in `copy!` | `h.p` = 0xA000 |
+| 3 | trong (1) | In `theoGiaTri: 5`; hết hàm thì `h` chết, trả 0xA000 | heap: chỉ còn 0x9000 |
+| 4 | `theoThamChieu(a)` | `h` là biệt danh của `a`: không tạo gì, không in `copy!` | không đổi |
+| 5 | trong (2) | In `theoThamChieu: 5` | không đổi |
 
 **Kết quả khi chạy:**
 
@@ -432,11 +457,11 @@ std::cout << *a.p << " " << (a.p == b.p);
 ```
 
 - `5 0`: bản sao có vùng nhớ riêng
-- `5 1`: cùng vùng nhưng ghi không thấy
+- `0 0`: gốc bị bỏ trống sau khi sao chép
 - `9 1`: hai con trỏ cùng chỉ một vùng
 - `9 0`: vùng riêng nhưng giá trị bị chép lại
 
-<p class="giai-thich" markdown>Hàm sao chép mặc định chép từng thành viên, nên `b.p` nhận cùng địa chỉ với `a.p` và so sánh cho `1`. Ghi 9 qua `b.p` cũng là ghi vào vùng của `a`, nên `*a.p` là 9 (mình đã chạy ra đúng `9 1`). Kết quả `5 0` mô tả sao chép sâu, chỉ có khi bạn tự viết hàm tạo sao chép. Hai kết quả còn lại tự mâu thuẫn: nếu cùng vùng thì phải thấy giá trị mới, còn nếu vùng riêng thì `a` vẫn là 5.</p>
+<p class="giai-thich" markdown>Hàm sao chép mặc định chép từng thành viên, nên `b.p` nhận cùng địa chỉ với `a.p` và so sánh cho `1`. Ghi 9 qua `b.p` cũng là ghi vào vùng của `a`, nên `*a.p` là 9 (mình đã chạy ra đúng `9 1`). Kết quả `5 0` mô tả sao chép sâu, chỉ có khi bạn tự viết hàm tạo sao chép. `9 0` tự mâu thuẫn (vùng riêng thì `a` vẫn là 5), còn `0 0` nhầm sao chép với việc chuyển vùng sang `b`: sao chép không làm `a` rỗng đi.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -505,7 +530,7 @@ Hop b = a;
 ```
 
 - Biên dịch được, nhưng `b.p` cùng địa chỉ với `a.p`
-- Lỗi biên dịch: dùng hàm sao chép đã bị xóa
+- Lỗi biên dịch: gọi hàm sao chép đã bị `= delete`
 - Biên dịch được, nhưng chương trình dừng lúc chạy
 - Biên dịch được, và `b.p` thành `nullptr`
 
@@ -524,10 +549,10 @@ g(a);
 f(a);
 ```
 
-- 0 lần, vì `a` đã tồn tại từ trước đó
-- 1 lần, vì chỉ lần đầu cần chép sang tham số
+- 0 lần, vì `a` đã tồn tại từ trước
+- 1 lần, vì chỉ lần đầu cần chép tham số
 - 3 lần, vì mỗi lần gọi hàm đều phải chép
-- 2 lần, vì chỉ `f` nhận tham số theo giá trị
+- 2 lần, vì chỉ `f` nhận theo giá trị
 
 <p class="giai-thich" markdown>Mỗi lần gọi `f(a)`, tham số `h` là một biến mới được tạo bằng hàm tạo sao chép từ `a`, nên hai lần gọi `f` cho hai lần `copy!` (mình đã chạy). `g` nhận biệt danh của `a` nên không chép. Việc `a` đã tồn tại không ngăn chép, vì `h` là một đối tượng khác. Còn "chỉ lần đầu" sai: lần gọi thứ hai tạo lại một tham số mới.</p>
 </div>
@@ -535,7 +560,7 @@ f(a);
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** "Copy-and-swap" nói về điều gì?
 
-- Chép gốc vào bản tạm, rồi hoán đổi ruột bản tạm với đích
+- Chép gốc vào một bản tạm, rồi hoán đổi ruột bản tạm với đích
 - Cấm sao chép bằng `= delete`, rồi hoán đổi hai đối tượng bằng tay
 - Trao hẳn quyền sở hữu vùng nhớ cho đích và để gốc rỗng
 - Chép con trỏ rồi cho hai đối tượng đổi chỗ để cùng giữ một vùng
@@ -567,6 +592,6 @@ b = a;
 
 1. Sao chép mặc định chép từng thành viên, nên với con trỏ thô thì chép địa chỉ (sao chép nông): hai đối tượng cùng giữ một vùng nhớ, và nếu hàm hủy `delete` nó thì dẫn tới giải phóng hai lần (hành vi không xác định).
 2. Sao chép sâu: hàm tạo sao chép `Hop(const Hop& o)` xin vùng mới và chép nội dung, nên mỗi đối tượng có vùng riêng và hàm hủy `delete` đúng một lần cho mỗi vùng.
-3. Phép gán sao chép (`operator=`, cách `=` hoạt động cho kiểu đó) chạy trên đối tượng đã tồn tại, nên phải trả vùng cũ, chống tự gán bằng `if (this != &o)` và trả về `*this`; copy-and-swap là một cách an toàn khác, chỉ cần biết tên.
+3. Phép gán sao chép (`operator=`, cách `=` hoạt động cho kiểu đó) chạy trên đối tượng đã tồn tại, nên phải trả vùng cũ, chống tự gán bằng `if (this != &o)` và trả về `*this`; đây là một cách viết thường gặp, còn copy-and-swap là cách chuẩn hóa việc "xin mới trước, trả cũ sau" (chỉ cần biết tên).
 4. Rule of 3: cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba (quy tắc kinh nghiệm); Rule of 5 và Rule of 0 ở Bài 12.
 5. `= delete` cấm sao chép bằng lỗi biên dịch (cách `unique_ptr` làm, [Bài 09](09-unique-ptr.md)); truyền theo giá trị gọi hàm tạo sao chép còn `const T&` thì không, nên với kiểu sao chép sâu tốn kém hãy truyền `const T&`.
