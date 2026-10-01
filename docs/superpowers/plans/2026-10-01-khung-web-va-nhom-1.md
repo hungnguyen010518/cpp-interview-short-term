@@ -21,7 +21,7 @@ Mọi task đều phải tuân thủ các điều sau (lấy nguyên từ bản 
 - Mọi khối ```` ```cpp ```` biên dịch và chạy với `g++ -std=c++17 -pthread`, thoát mã 0, trong 5 giây. Khối cố ý minh họa hành vi không xác định (UB) bắt đầu bằng dòng đầu tiên `// bo-qua-kiem-tra` và bị bỏ qua.
 - Mỗi bài có đúng **8 khối** theo thứ tự trong "Khuôn bài" bên dưới; trắc nghiệm 6–8 câu, mỗi câu 3–4 lựa chọn, đúng 1 đáp án, có giải thích; tóm tắt đúng 5 dòng đánh số.
 - Truy cập `localStorage` luôn bọc `try/catch`; trang vẫn hiển thị đúng khi storage không dùng được.
-- Git: danh tính commit `<ten va email da cau hinh>` (đã cấu hình cục bộ trong repo). Mỗi commit kết thúc bằng dòng `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. Thông điệp commit bằng tiếng Việt.
+- Git: danh tính commit đã được cấu hình cục bộ trong repo (không tự đổi). Mỗi commit kết thúc bằng dòng `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. Thông điệp commit bằng tiếng Việt.
 - Push chỉ ở Task 9 (sau khi cả nhóm 1 xong và mọi kiểm tra xanh).
 
 ### Khuôn bài
@@ -1708,8 +1708,7 @@ Expected: 16 test `ok`; `0 lỗi cấu trúc`; `… khối code, 0 lỗi`; build
 
 - [ ] **Step 2: Soát nội dung trước khi công khai**
 
-Run: `grep -rniE "<danh sach tu khoa giu ngoai repo>" docs README.md mkdocs.yml requirements.txt scripts tests .github || echo "sạch"`
-Expected: chỉ có thể xuất hiện dòng trong `docs/superpowers/` (spec/plan, được loại khỏi site nhưng **vẫn nằm trong repo công khai**). Kiểm tra từng kết quả: nếu `docs/superpowers/` nhắc tên công ty/khách hàng, thay bằng cách nói chung ("công ty", "dự án thực tế") trước khi push. Các file khác phải "sạch".
+Người điều phối giữ một danh sách từ khóa cần tránh (tên công ty, khách hàng, dự án) **ở ngoài repo** và chạy `grep -rniE "<danh sách>" . --exclude-dir=.git --exclude-dir=.superpowers --exclude-dir=site`. Kết quả phải rỗng; nếu có, thay bằng cách nói chung ("công ty", "dự án thực tế") trước khi push. Danh sách này không được ghi vào bất kỳ file nào trong repo.
 
 - [ ] **Step 3: Tạo repo công khai và push**
 
