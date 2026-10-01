@@ -50,6 +50,12 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | chuỗi kiểu C | Mảng `char` kết thúc bằng ký tự `'\0'`; `const char*` trỏ tới ký tự đầu | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
 | chuỗi hằng | Chuỗi chữ viết sẵn trong nháy kép như `"An"`; ký tự của nó chỉ đọc, kiểu `const char[N]` | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
 | '\0' | Ký tự có mã số 0, đánh dấu hết chuỗi kiểu C | [Bài 05](nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) |
+| tham chiếu (reference) | Một tên khác (biệt danh) của biến có sẵn, viết `int& b = a;`; phải gắn lúc khai báo, không rỗng, không gắn lại | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| const (hằng) | Nhãn "chỉ được xem, không được sửa"; trình biên dịch từ chối mọi dòng cố sửa | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| hàm tạo sao chép (copy constructor) | Hàm tạo đặc biệt chạy mỗi khi tạo bản sao của đối tượng cùng kiểu, nhận tham số `const T&` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| giá trị tạm (temporary) | Giá trị không có tên, chỉ sống trong một câu lệnh, như `5` hay `a + 1` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| truyền theo tham chiếu (pass by reference) | Hàm nhận tham chiếu: không sao chép, và sửa được bản gốc nếu không có `const` | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
+| const& | Tham chiếu hằng `const T&`: chỉ xem, không sao chép, nhận được cả giá trị tạm | [Bài 06](nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
