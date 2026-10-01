@@ -24,7 +24,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | hàm tạo (constructor) | Hàm trùng tên struct/class, chạy một lần khi đối tượng ra đời | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | hàm hủy (destructor) | Hàm tên `~` rồi tên struct/class, chạy một lần khi đối tượng chết | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | stack overflow (tràn stack) | Stack đầy, thường do đệ quy không dừng hoặc mảng cục bộ quá lớn; chương trình bị dừng đột ngột | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
-| global (biến toàn cục) | Biến khai báo ngoài mọi hàm; nằm ở vùng tĩnh, hàm tạo chạy trước `main`, hàm hủy sau `main` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| global (biến toàn cục) | Biến khai báo ngoài mọi hàm; nằm ở vùng tĩnh, hàm tạo thực tế chạy trước `main` (trên trình biên dịch phổ biến), hàm hủy sau `main` | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | storage duration | Thời gian sống của vùng lưu trữ: automatic, static, dynamic hoặc thread | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | static initialization order fiasco | Thứ tự khởi tạo global giữa các file `.cpp` là không xác định nên global này có thể dùng global kia khi chưa sẵn sàng; tránh bằng `static` cục bộ trong hàm | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | escape analysis (phân tích thoát) | Trình biên dịch Go kiểm tra biến có thoát khỏi hàm không và tự đưa lên heap nếu có | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
