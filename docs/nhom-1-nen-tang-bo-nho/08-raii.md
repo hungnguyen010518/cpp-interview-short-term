@@ -87,7 +87,7 @@ Hai điều cần nhớ. Một: hàm hủy chạy **ngay tại `}`**, không ai 
 **Tài nguyên (resource)** là bất cứ thứ gì "mượn rồi phải trả": bộ nhớ ở heap (Bài 07), một file đang mở, một cái khóa đang giữ (để hai phần của chương trình không cùng sửa một thứ một lúc), một kết nối mạng, một ổ cắm mạng. Thư viện chuẩn của C++ có sẵn nhiều lớp theo kiểu này, bạn chỉ cần biết tên: `std::ifstream` mở file khi tạo và đóng khi hủy; `std::lock_guard` giữ khóa khi tạo và mở khóa khi hủy. Bài này không đi sâu vào chúng, mà tự viết một lớp nhỏ để hiểu bên trong.
 
 !!! info "Bạn biết Go?"
-    Go có `defer f.Close()`: đóng file đúng lúc hàm thoát. Hàm hủy làm việc tương tự, nhưng có hai khác biệt thật. Thứ nhất, `defer` là việc **bạn phải nhớ viết** ở từng nơi dùng; còn RAII gắn việc trả vào **chính kiểu dữ liệu**, nên dùng kiểu đó là tự được trả, không thể quên. Thứ hai, `defer` chạy ở **cuối hàm**, còn hàm hủy chạy ở cuối **khối `{}`** chứa đối tượng, có thể sớm hơn nhiều.
+    Go có `defer f.Close()`: đóng file đúng lúc hàm thoát. Hàm hủy làm việc tương tự, nhưng có hai khác biệt thật. Thứ nhất, `defer` là việc **bạn phải nhớ viết** ở từng nơi dùng; còn RAII gắn việc trả vào **chính kiểu dữ liệu**, nên dùng kiểu đó là tự được trả, không cần nhớ viết ở từng nơi dùng. Thứ hai, `defer` chạy ở **cuối hàm**, còn hàm hủy chạy ở cuối **khối `{}`** chứa đối tượng, có thể sớm hơn nhiều.
 
 ### 3. Thí nghiệm: thoát sớm, cách thủ công và cách RAII
 
@@ -222,7 +222,7 @@ try { ... }                    // vùng "thử": code trong này có thể ném
 catch (int ma) { ... }         // nếu có ném một int, nhảy tới đây và gán vào ma
 ```
 
-Khi `throw` chạy, chương trình **không** chạy tiếp dòng sau nó. Nó thoát khỏi hàm hiện tại, rồi hàm đã gọi hàm đó, cứ thế đi ngược lên cho tới khi gặp một `catch` có kiểu khớp, và chạy khối `catch` đó. Ở đây ta ném số `int` cho đơn giản; code thật thường ném đối tượng lỗi như `std::runtime_error`.
+Khi `throw` chạy, chương trình **không** chạy tiếp dòng sau nó. Nó thoát khỏi hàm hiện tại, rồi hàm đã gọi hàm đó, cứ thế đi ngược lên cho tới khi gặp một `catch` có kiểu khớp, và chạy khối `catch` đó. **Kiểu** của giá trị được ném quyết định `catch` nào bắt: `catch (int ma)` không bắt được một `std::string`. Ở đây ta ném số `int` cho đơn giản; code thật thường ném đối tượng lỗi như `std::runtime_error`.
 
 !!! info "Bạn biết Go?"
     Go báo lỗi thông thường bằng giá trị `error` trả về, và bạn kiểm tra `if err != nil` ở từng nơi. `throw` thì không trả về gì: nó nhảy thẳng tới `catch` gần nhất ở phía trên, nên gần với `panic` + `recover` của Go hơn. Khác biệt lớn: C++ dùng ngoại lệ như cách báo lỗi bình thường trong nhiều thư viện (ví dụ `new` hết chỗ ném `std::bad_alloc`), còn Go chủ yếu để `panic` cho tình huống nghiêm trọng.
@@ -286,7 +286,7 @@ xong
 
 Chú ý thứ tự: `huy -1` in **trước** `bat duoc loi -1`. Hàm hủy của `c` chạy trong lúc chương trình còn đang đi ngược ra khỏi `xuLy`, rồi mới tới thân khối `catch`.
 
-Việc đi ngược từ nơi `throw` lên nơi `catch`, hủy mọi đối tượng cục bộ trên đường đi, gọi là **tháo ngăn xếp (stack unwinding)**. Nó là lý do RAII an toàn với ngoại lệ: dù hàm bị cắt ngang ở đâu, các đối tượng đã ra đời đều được hủy.
+Việc đi ngược từ nơi `throw` lên nơi `catch`, hủy mọi đối tượng cục bộ trên đường đi, gọi là **tháo ngăn xếp (stack unwinding)** (ngăn xếp = stack, cái bàn học của Bài 02; không phải "ngăn" của tủ khóa). Nó là lý do RAII an toàn với ngoại lệ: dù hàm bị cắt ngang ở đâu, các đối tượng đã ra đời đều được hủy.
 
 Cùng hàm đó nhưng viết thủ công (`Cay* p = new Cay(cao);` ... `delete p;` ở cuối): mình đã chạy, kết quả là `tao -1`, `truoc khi throw`, `bat duoc loi -1`, `xong`. **Không có `huy -1`**: dòng `delete p;` bị nhảy qua, và ASan báo rò rỉ 4 byte. Con trỏ `p` mất, còn chỗ ở heap thì không ai giữ hay trả.
 
@@ -302,7 +302,9 @@ void xuLy(int cao) {
 }
 ```
 
-Mình có thử trên máy mình: g++ in `terminate called after throwing an instance of 'int'` và chương trình bị hủy bỏ (mã thoát 134). Còn việc có thấy `huy` hay không thì mình không ghi ở đây, vì đó là chỗ chuẩn để ngỏ. Điều thứ hai: hàm hủy **không nên ném ngoại lệ** (hàm hủy mà ném trong lúc đang tháo ngăn xếp là tình huống rất xấu); cứ coi đó là luật khi viết hàm hủy.
+Mình có thử trên máy mình: g++ in `terminate called after throwing an instance of 'int'` và chương trình bị hủy bỏ (mã thoát 134). Còn việc có thấy `huy` hay không thì mình không ghi ở đây, vì đó là chỗ chuẩn để ngỏ.
+
+Điều thứ hai: hàm hủy **không nên ném ngoại lệ**. Từ C++11, hàm hủy mặc định là `noexcept` (hứa không ném ngoại lệ ra ngoài), và nếu một ngoại lệ thoát ra khỏi hàm hủy thì chương trình gọi `std::terminate`. Vì thế đừng ném từ hàm hủy.
 
 ### 5. Tự viết một lớp RAII: `Hop`
 
@@ -399,7 +401,7 @@ Cuối `main`, `b` chết (hàm hủy `delete 0x9000`), rồi `a` chết (lại 
 
 ### 7. Chốt: đừng gọi `delete` tay
 
-Nhìn lại những gì ta thấy: `return` sớm làm sót `delete`, ngoại lệ làm sót `delete`, nhưng đối tượng cục bộ luôn được hủy. Quy tắc rút ra: **đừng viết `delete` tay ở code dùng; để một đối tượng lo.** Lớp `Hop` ở trên là bản tự làm cho một `int`. Thư viện chuẩn có bản **làm sẵn** cho bộ nhớ ở heap, tên `std::unique_ptr`, là nội dung Bài 09: bạn sẽ không phải tự viết `Hop` nữa, và nó còn xử lý sẵn vụ copy ở mục 6.
+Nhìn lại những gì ta thấy: `return` sớm làm sót `delete`, ngoại lệ làm sót `delete`, nhưng đối tượng cục bộ luôn được hủy. Quy tắc rút ra: **đừng viết `delete` tay ở code dùng; để một đối tượng lo.** Lớp `Hop` ở trên là bản tự làm cho một `int`. Thư viện chuẩn có bản **làm sẵn** cho bộ nhớ ở heap, tên `std::unique_ptr`, là nội dung Bài 09: bạn sẽ không phải tự viết `Hop` nữa, và nó còn chặn copy (sẽ thấy ở Bài 09).
 
 !!! question "Hỏi nhanh: vậy `new` và `delete` dùng ở đâu?"
     Gần như chỉ **bên trong** các lớp RAII như `Hop`. Code của người dùng thì giữ đối tượng ở biến cục bộ (hoặc trong lớp RAII làm sẵn) và để hàm hủy lo phần trả.
@@ -516,10 +518,10 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
 
 - Lúc chương trình kết thúc, cùng với mọi biến khác
 - Lúc bạn gọi `delete` cho biến đó
-- Lúc dòng cuối cùng của hàm chứa nó chạy xong
+- Lúc hàm chứa nó trả về, dù biến nằm ở khối nào
 - Lúc ra khỏi khối `{}` chứa nó
 
-<p class="giai-thich" markdown>Biến cục bộ chết khi chương trình ra khỏi khối chứa nó, dù bằng chạy hết khối, `return` hay ngoại lệ, và hàm hủy chạy đúng lúc đó. Không phải lúc chương trình kết thúc: đó là thời điểm của biến global. `delete` chỉ dành cho đối tượng xin bằng `new`, còn biến cục bộ không cần và không được `delete`. Nói "cuối hàm" chỉ đúng khi khối đó chính là thân hàm; khối nhỏ bên trong hàm làm biến chết sớm hơn.</p>
+<p class="giai-thich" markdown>Biến cục bộ chết khi chương trình ra khỏi khối chứa nó, dù bằng chạy hết khối, `return` hay ngoại lệ, và hàm hủy chạy đúng lúc đó. Không phải lúc chương trình kết thúc: đó là thời điểm của biến global. `delete` chỉ dành cho đối tượng xin bằng `new`, còn biến cục bộ không cần và không được `delete`. Nói "lúc hàm trả về" sai với biến nằm trong khối nhỏ bên trong hàm: nó chết sớm hơn, ngay ở `}` của khối nhỏ.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -560,9 +562,9 @@ int main() { try { g(); } catch (int e) { std::cout << "bat " << e << "\n"; } }
 - `defer` chạy ở cuối khối còn hàm hủy chạy ở cuối hàm
 - `defer` chỉ dùng được cho bộ nhớ còn RAII dùng cho cả file
 - Hàm hủy phải do người dùng gọi tay còn `defer` thì tự chạy
-- RAII gắn việc trả vào kiểu dữ liệu nên không thể quên
+- RAII gắn việc trả vào kiểu, không cần nhớ viết mỗi nơi
 
-<p class="giai-thich" markdown>Với `defer`, bạn phải nhớ viết nó ở từng nơi dùng tài nguyên; với RAII, việc trả nằm trong hàm hủy của kiểu, nên dùng kiểu là tự được trả. Hai lựa chọn đầu bị đảo hoặc sai: `defer` chạy ở cuối hàm còn hàm hủy ở cuối khối, và `defer` dùng được cho cả file, khóa, bất cứ việc dọn nào. Còn hàm hủy tự chạy, không ai gọi tay, nên lựa chọn nói ngược lại là sai.</p>
+<p class="giai-thich" markdown>Với `defer`, bạn phải nhớ viết nó ở từng nơi dùng tài nguyên; với RAII, việc trả nằm trong hàm hủy của kiểu, nên bạn không cần nhớ viết nó ở từng nơi dùng. Hai lựa chọn đầu bị đảo hoặc sai: `defer` chạy ở cuối hàm còn hàm hủy ở cuối khối, và `defer` dùng được cho cả file, khóa, bất cứ việc dọn nào. Còn hàm hủy tự chạy, không ai gọi tay, nên lựa chọn nói ngược lại là sai.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -580,11 +582,11 @@ int main() { try { g(); } catch (int e) { std::cout << "bat " << e << "\n"; } }
 **Câu 7.** Ví dụ nào sau đây trong thư viện chuẩn là RAII?
 
 - `std::lock_guard`: giữ khóa khi tạo, nhả khóa khi bị hủy
-- `std::terminate`: dọn mọi tài nguyên khi chương trình bị dừng
-- `malloc`: xin bytes thô và tự trả khi hết hàm
-- `throw`: ném lỗi và tự đóng các file đang mở
+- `std::terminate`: gọi hàm hủy của mọi đối tượng rồi mới dừng
+- `malloc`: xin bộ nhớ và tự trả khi con trỏ hết phạm vi
+- `throw`: ném lỗi và tự đóng giúp các file đang mở
 
-<p class="giai-thich" markdown>`std::lock_guard` xin khóa trong hàm tạo và nhả trong hàm hủy: đúng khuôn RAII. `std::terminate` là hàm kết thúc chương trình khi ngoại lệ không bị bắt, không phải một đối tượng giữ tài nguyên. `malloc` chỉ xin bytes và bạn phải tự gọi `free`. `throw` chỉ là lệnh ném ngoại lệ; việc các đối tượng RAII trên đường đi được hủy là do hàm hủy của chúng, không phải do `throw` tự đóng file.</p>
+<p class="giai-thich" markdown>`std::lock_guard` xin khóa trong hàm tạo và nhả trong hàm hủy: đúng khuôn RAII. `std::terminate` là hàm kết thúc chương trình, được gọi ví dụ khi ngoại lệ không bị bắt; nó không phải một đối tượng giữ tài nguyên, và chuẩn không hứa nó chạy hàm hủy giúp bạn. `malloc` chỉ xin bytes và bạn phải tự gọi `free`, không có hàm hủy nào lo. `throw` chỉ là lệnh ném ngoại lệ; việc các đối tượng RAII trên đường đi được hủy là do hàm hủy của chúng, không phải do `throw` tự đóng file.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -613,4 +615,4 @@ std::cout << "het\n";
 2. Hàm hủy của biến cục bộ chạy ở cuối khối `{}` chứa nó, theo thứ tự ngược với lúc tạo, kể cả khi `return` sớm; còn `delete` viết tay thì bị nhảy qua.
 3. Khi `throw` được ném và bị `catch` ở ngoài bắt, chương trình tháo ngăn xếp và hủy mọi đối tượng cục bộ đã ra đời trên đường đi, trước khi chạy khối `catch`; nếu không ai bắt thì gọi `std::terminate` và việc hủy là do cài đặt quyết định, còn hàm hủy thì không nên ném ngoại lệ.
 4. Lớp RAII giữ con trỏ thô rất nguy hiểm khi copy: hai đối tượng cùng giữ một con trỏ nên cùng `delete` một chỗ (cách sửa ở Bài 11).
-5. So với `defer` của Go: `defer` phải nhớ viết ở từng nơi và chạy ở cuối hàm, còn RAII gắn vào kiểu dữ liệu và chạy ở cuối khối; đừng gọi `delete` tay, để một đối tượng lo, và `std::unique_ptr` (Bài 09) là bản làm sẵn cho bộ nhớ.
+5. So với `defer` của Go: `defer` phải nhớ viết ở từng nơi và chạy ở cuối hàm, còn RAII gắn vào kiểu dữ liệu (không cần nhớ viết ở từng nơi) và chạy ở cuối khối; đừng gọi `delete` tay, để một đối tượng lo, và `std::unique_ptr` (Bài 09) là bản làm sẵn cho bộ nhớ.
