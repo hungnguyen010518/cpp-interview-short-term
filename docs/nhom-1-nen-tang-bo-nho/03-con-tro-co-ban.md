@@ -14,7 +14,9 @@ Tờ giấy đó **không phải là đồ**. Nó chỉ là một mảnh giấy 
 Con trỏ (**pointer**) chính là tờ giấy đó. Điều quan trọng nhất của bài: **tờ giấy cũng là một vật**. Bạn phải cất nó ở đâu đó, nên nó cũng nằm trong một ngăn nhớ riêng, có địa chỉ riêng. Chỉ khác ở chỗ thứ nó "đựng" là một địa chỉ của ngăn khác.
 
 !!! info "Chỗ nào ví dụ tờ giấy không còn đúng?"
-    Tờ giấy thật có thể ghi sai hoặc để trống. Con trỏ cũng thế: nó có thể chưa ghi gì, hoặc ghi một địa chỉ không còn đồ của bạn. Hai tình huống đó (mục 4) là chỗ sinh ra phần lớn lỗi C++ nguy hiểm. Ngoài ra, một `int` chiếm nhiều ngăn liền nhau (thường 4), còn tờ giấy chỉ ghi số của ngăn **đầu tiên**. Vậy nên đọc được hết món đồ là nhờ **kiểu** của con trỏ: `int*` cho chương trình biết phải đọc 4 ngăn từ chỗ đó, `char*` thì chỉ đọc 1.
+    Tờ giấy thật có thể ghi sai hoặc để trống. Con trỏ cũng thế: nó có thể chưa ghi gì, hoặc ghi một địa chỉ không còn đồ của bạn. Hai tình huống đó (mục 4) là chỗ sinh ra phần lớn lỗi C++ nguy hiểm.
+
+    Còn một giới hạn nữa: một `int` chiếm nhiều ngăn liền nhau (thường 4), còn tờ giấy chỉ ghi số của ngăn **đầu tiên**. Vậy nên đọc được hết món đồ là nhờ **kiểu** của con trỏ: `int*` cho chương trình biết phải đọc 4 ngăn từ chỗ đó, `char*` thì chỉ đọc 1.
 
 ## 📖 Giải thích
 
@@ -201,7 +203,7 @@ int main() {
 | in cuối | `x`, `*p`, `*q` đều là cùng một ô | in `30` ba lần |
 
 ```text
-     p  [ 0x1000 ] ------+
+     p  [ 0x1000 ] ---------+
                             |
                             v
      x  [    30    ] <------+
@@ -563,7 +565,7 @@ std::cout << x << "\n";
 - `p` đã trỏ tới một ô nhớ vừa bị `delete`
 - `p` hiện chưa trỏ tới ô nhớ hợp lệ nào cả
 
-<p class="giai-thich" markdown>`nullptr` là giá trị "chưa trỏ vào đâu", tờ giấy được cố ý để trống, và ta kiểm tra được bằng `if (p)`. Nó không phải địa chỉ của một số `int` bằng 0, vì không có ô nhớ nào được trỏ tới. Cũng không được ghi vào "ô số 0": giải tham chiếu `nullptr` là hành vi không xác định. Con trỏ trỏ vào chỗ đã `delete` là chuyện khác (con trỏ treo), nó vẫn đựng một địa chỉ cũ chứ không trống.</p>
+<p class="giai-thich" markdown>`nullptr` là giá trị "chưa trỏ vào đâu", tờ giấy được cố ý để trống, và ta kiểm tra được bằng `if (p)`. Nó không phải địa chỉ của một số `int` bằng 0, vì không có ô nhớ nào được trỏ tới. Cũng không được ghi vào "ô số 0": giải tham chiếu `nullptr` là hành vi không xác định. Con trỏ trỏ vào chỗ đã `delete` là chuyện khác (gọi là con trỏ treo: con trỏ vẫn giữ địa chỉ của một chỗ đã bị trả mất rồi), nó vẫn đựng một địa chỉ cũ chứ không trống.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -582,7 +584,7 @@ std::cout << x << "\n";
 
 - Chuẩn quy định chương trình phải dừng với `Segmentation fault`
 - Chuẩn không hứa kết quả nào, chuyện gì cũng có thể xảy ra
-- Chuẩn quy định chương trình tự cấp ô nhớ mới cho `p`
+- Chuẩn không hứa gì thêm, nhưng `p` sẽ tự có ô nhớ mới
 - Chuẩn quy định đó là lỗi ném ra, bắt được bằng `try`/`catch`
 
 <p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải điều chuẩn quy định, nên không thể khẳng định chương trình phải dừng. C++ không tự cấp ô nhớ cho con trỏ trống. Nó cũng không biến việc này thành lỗi ngoại lệ để bắt bằng `try`/`catch`.</p>
