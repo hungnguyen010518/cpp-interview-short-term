@@ -410,7 +410,7 @@ Số byte đổi từ `4` thành `8`: biến giờ chiếm 8 ngăn liền nhau. 
 - Số thứ tự của ngăn đó trong dãy
 - Tên của biến đang được đặt lên ngăn đó
 - Giá trị đang được đựng trong ngăn đó
-- Kiểu dữ liệu của ngăn đó
+- Kiểu dữ liệu mà ngăn đó đang chứa
 
 <p class="giai-thich" markdown>Địa chỉ là số thứ tự của ngăn, dùng để tìm ra đúng ngăn đó. Tên biến là mảnh giấy do lập trình viên dán lên, và giá trị là thứ đang nằm trong ngăn, cả hai đều có thể đổi mà ngăn vẫn ở nguyên chỗ cũ. Kiểu thuộc về biến chứ không thuộc về từng ngăn riêng lẻ.</p>
 </div>
@@ -475,8 +475,8 @@ std::cout << sizeof(a) + sizeof(c) << "\n";
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Cho `char chu = 'A';`. Vì sao muốn in địa chỉ của `chu` thì phải viết `static_cast<void*>(&chu)` thay vì `&chu`?
 
-- Vì `&chu` có kiểu `char*`, mà `std::cout` coi `char*` là chuỗi chữ nên in ký tự thay vì địa chỉ
-- Vì `char` không có địa chỉ riêng, nó dùng chung địa chỉ với `int` đứng cạnh
+- Vì `&chu` có kiểu `char*`, mà `std::cout` in `char*` như một chuỗi chữ
+- Vì `char` không có địa chỉ riêng, nó dùng chung địa chỉ với biến `int` đứng cạnh nó
 - Vì `&chu` in ra địa chỉ hệ 10, còn `void*` mới đổi sang hệ 16
 - Vì `static_cast` làm `chu` chiếm thêm byte để đủ chỗ chứa địa chỉ
 
@@ -486,7 +486,7 @@ std::cout << sizeof(a) + sizeof(c) << "\n";
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 8.** Với `int x = 7;`, biểu thức `&x` cho ra điều gì?
 
-- Giá trị `7`, chỉ viết theo cách khác
+- Giá trị `7`, chỉ là cách viết khác của chính con số đó
 - Địa chỉ của `x`: số của ngăn đầu tiên nó chiếm
 - Số byte mà `x` chiếm, giống `sizeof(x)`
 - Một bản sao của `x` đặt ở ngăn mới
