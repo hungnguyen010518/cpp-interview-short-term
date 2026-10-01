@@ -6,3 +6,4 @@
 |---|---|
 | [Bài 1 — Stack, heap, con trỏ](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) | <span class="diem" data-bai="01"></span> |
 | [Bài 2 — RAII và smart pointer](nhom-1-nen-tang-bo-nho/02-raii-smart-pointer.md) | <span class="diem" data-bai="02"></span> |
+| [Bài 3 — Move semantics, rule of 0/3/5](nhom-1-nen-tang-bo-nho/03-move-semantics.md) | <span class="diem" data-bai="03"></span> |

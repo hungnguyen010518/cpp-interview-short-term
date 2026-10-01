@@ -17,3 +17,9 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | ownership (quyền sở hữu) | Ai chịu trách nhiệm dọn | [Bài 2](nhom-1-nen-tang-bo-nho/02-raii-smart-pointer.md) |
 | reference count (bộ đếm tham chiếu) | Đếm số người đang giữ | [Bài 2](nhom-1-nen-tang-bo-nho/02-raii-smart-pointer.md) |
 | control block (khối điều khiển) | Chỗ lưu bộ đếm của `shared_ptr` | [Bài 2](nhom-1-nen-tang-bo-nho/02-raii-smart-pointer.md) |
+| lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| copy elision / RVO | Trình biên dịch bỏ qua bước copy khi trả về | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| rule of 0/3/5 | Quy tắc về các hàm đặc biệt của class | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
