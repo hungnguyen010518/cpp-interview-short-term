@@ -45,7 +45,7 @@ Từ luật đó, ta có ba "thẻ" để giữ đồ trong kho:
 
 **`weak_ptr`** trỏ tới đối tượng của `shared_ptr` mà không tăng bộ đếm.
 
-- Dùng để phá vòng tròn giữ nhau, làm cache, làm observer.
+- Dùng để phá vòng tròn giữ nhau, làm cache (chỗ cất tạm đồ hay dùng cho nhanh), làm observer (người theo dõi một đối tượng khác).
 - `expired()` cho biết đối tượng đã bị hủy chưa.
 - `lock()` trả về một `shared_ptr` nếu đối tượng còn sống, hoặc `nullptr` nếu đã chết.
 
@@ -179,7 +179,7 @@ Cách sửa: đổi một phía thành `std::weak_ptr`, ví dụ `std::weak_ptr<
 
     Hãy dùng `std::make_shared`, hoặc copy từ một `shared_ptr` có sẵn.
 
-!!! warning "Lỗi 2: Dùng `shared_ptr` ở mọi nơi \"cho chắc\""
+!!! warning "Lỗi 2: Dùng `shared_ptr` ở mọi nơi 'cho chắc'"
     Làm vậy tốn thêm chi phí và làm rối quyền sở hữu: không ai biết ai là chủ thật sự. Hãy bắt đầu bằng `unique_ptr`.
 
 !!! warning "Lỗi 3: Lấy `.get()` ra rồi tự `delete`"
@@ -252,7 +252,7 @@ Cách sửa: đổi một phía thành `std::weak_ptr`, ví dụ `std::weak_ptr<
 - `new T` rồi gán
 - `malloc`
 
-<p class="giai-thich" markdown>`make_shared` an toàn trước ngoại lệ và cấp phát một lần cho cả đối tượng lẫn bộ đếm.</p>
+<p class="giai-thich" markdown>`make_shared` cấp phát một lần cho cả đối tượng lẫn bộ đếm nên gọn hơn. Trước C++17, nó còn tránh được rò rỉ khi dùng chung với lời gọi khác.</p>
 </div>
 
 </div>
