@@ -261,13 +261,65 @@ Ngoại lệ có bảo đảm riêng: chuẩn nói `unique_ptr` và `shared_ptr`
 
 **Rule of 5**: nếu lớp quản lý tài nguyên bằng tay (như `Mang` giữ `int*`) thì **thường** phải tự quyết định cả năm hàm: viết, hoặc cấm bằng `= delete`, hoặc giữ mặc định bằng `= default` (nêu tên ở [Bài 11](11-sao-chep-rule-of-3.md)).
 
-Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì: nếu bạn **tự khai báo** một hàm di chuyển, hai hàm sao chép tự sinh bị **xóa**; nếu bạn tự khai báo hàm hủy hay một hàm sao chép, các hàm di chuyển **không** được tự sinh. Mình đã thử cả hai chiều (rút gọn: bỏ hàm tạo thường, và `Cay` là kiểu có hàm tạo sao chép in `copy!` và hàm tạo di chuyển in `move!`):
+Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì. Có hai quy tắc, và mình đã thử cả hai.
+
+**Quy tắc 1: tự khai báo một hàm di chuyển thì hai hàm sao chép tự sinh bị xóa.** Mình thử một struct `Rieng` chỉ có hàm tạo từ `int` và một hàm tạo di chuyển, rồi viết `Rieng b = a;`. `g++` báo:
 
 ```text
-struct Hop { Hop(){}  Hop(Hop&&) noexcept {} };
-    Hop a; Hop b = a;       // lỗi biên dịch: use of deleted function 'Hop::Hop(const Hop&)'
-struct M1 { Cay c;  ~M1() {} };    // M1 b = std::move(a);  in: copy!
-struct M2 { Cay c; };              // M2 y = std::move(x);  in: move!
+error: use of deleted function 'Rieng::Rieng(const Rieng&)'
+note: 'Rieng::Rieng(const Rieng&)' is implicitly declared as deleted because 'Rieng' declares a move constructor or move assignment operator
+```
+
+**Quy tắc 2: tự khai báo hàm hủy hay một hàm sao chép thì các hàm di chuyển không được tự sinh.** Chương trình sau chứng minh. `Cu` là kiểu in `copy!` hoặc `move!` để ta thấy hàm nào chạy; `M1` và `M2` cùng bọc một `Cu`, chỉ khác là `M1` có thêm một hàm hủy rỗng do ta viết.
+
+```cpp
+#include <iostream>
+#include <utility>
+
+struct Cu {                                       // in copy! hoặc move! để ta thấy hàm nào chạy
+    int v;
+    Cu(int x) { v = x; }
+    Cu(const Cu& o) { v = o.v; std::cout << "copy!\n"; }
+    Cu(Cu&& o) noexcept { v = o.v; std::cout << "move!\n"; }
+};
+
+struct M1 {                                       // có hàm hủy rỗng do ta tự viết
+    Cu c;
+    ~M1() {}
+};
+
+struct M2 {                                       // y hệt nhưng KHÔNG viết hàm hủy
+    Cu c;
+};
+
+int main() {
+    M1 a{Cu(1)};                                  // (1)
+    M2 x{Cu(2)};                                  // (2)
+    std::cout << "M1: ";
+    M1 b = std::move(a);                          // (3)
+    std::cout << "M2: ";
+    M2 y = std::move(x);                          // (4)
+    std::cout << "y.c.v = " << y.c.v << "\n";
+    return 0;
+}
+```
+
+(Cặp ngoặc nhọn ở dòng (1) và (2) đưa `Cu(1)` hay `Cu(2)` cho thành viên `c`: cách dựng một struct không có hàm tạo riêng.)
+
+**Chạy từng dòng**
+
+| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
+|---|---|---|
+| (1), (2) | Dựng `a` (bọc `Cu` giá trị 1) và `x` (bọc `Cu` giá trị 2); chưa in gì | `a.c.v = 1`, `x.c.v = 2` |
+| (3) `M1 b = std::move(a);` | `M1` có hàm hủy tự viết nên **không** có hàm di chuyển tự sinh; `std::move` âm thầm thành sao chép, và `Cu` được chép: in `copy!` | `b.c.v = 1` |
+| (4) `M2 y = std::move(x);` | `M2` không viết gì nên có hàm di chuyển tự sinh, và nó di chuyển `Cu`: in `move!` | `y.c.v = 2` |
+
+**Kết quả khi chạy:**
+
+```text
+M1: copy!
+M2: move!
+y.c.v = 2
 ```
 
 Chỉ vì thêm một hàm hủy rỗng mà `M1` mất hàm di chuyển tự sinh, và `std::move` âm thầm thành sao chép.
@@ -431,7 +483,7 @@ g++ với `-Wall` cảnh báo (rút gọn, bỏ vị trí): `warning: moving a l
 Tức là `std::move` làm mất cơ hội dựng thẳng, bạn phải trả thêm một lần di chuyển mà không được gì. Quy tắc: **trả biến cục bộ theo giá trị thì cứ `return v;`**. (Ở [Bài 09](09-unique-ptr.md) bảng cũng ghi trả `unique_ptr` thì không cần `std::move`.)
 
 !!! info "Để biết: perfect forwarding (chỉ nêu tên)"
-    Trong một **template** (hàm viết chung cho nhiều kiểu), `T&&` với `T` được suy ra từ chính đối số là một **forwarding reference** (tham chiếu chuyển tiếp): nó nhận cả lvalue lẫn rvalue. `std::forward<T>(x)` là hàm giữ nguyên "x là lvalue hay rvalue" khi đưa tiếp `x` cho hàm khác; cách dùng cả hai gọi là **perfect forwarding**. Bài này không dạy; bạn sẽ gặp khi đọc code thư viện (như `emplace_back`). Trong bài này, `T&&` luôn chỉ là tham chiếu rvalue của mục 3.
+    Trong code thư viện (như `emplace_back`) bạn sẽ gặp `T&&` kèm `std::forward<T>(x)`: kỹ thuật giữ nguyên "x là lvalue hay rvalue" khi đưa `x` cho hàm khác, gọi là **perfect forwarding**. Bài này không dạy; ở đây `T&&` luôn chỉ là tham chiếu rvalue của mục 3.
 
 ## 💻 Ví dụ code
 
@@ -489,14 +541,7 @@ cung vung nho voi truoc? 1
 
 Dòng cuối là bằng chứng: sau khi move, `c` giữ **đúng khối nhớ cũ** của `a`, không có khối mới nào được xin. Con số `1` là kết quả mình thấy trên máy này; chuẩn bảo đảm di chuyển một vector là thao tác hằng thời gian, nên thực tế nó chỉ chuyển con trỏ. Mình đã chạy với AddressSanitizer: không báo gì, thoát mã 0.
 
-Còn một thành viên khác loại thì sao? Nếu `Lop` có thành viên `std::unique_ptr<int> p`, thì hàm sao chép tự sinh bị xóa theo (vì `unique_ptr` không copy được), nhưng di chuyển vẫn hoạt động. Mình đã biên dịch `Lop b = a;` cho bản đó, g++ báo (rút gọn):
-
-```text
-error: use of deleted function 'Lop::Lop(const Lop&)'
-note: 'Lop::Lop(const Lop&)' is implicitly deleted because the default definition would be ill-formed
-```
-
-Lớp tự động **không sao chép được** nhưng **di chuyển được**, đúng ý nghĩa sở hữu duy nhất, mà bạn không viết dòng nào.
+Nếu `Lop` có thêm thành viên `std::unique_ptr<int> p`, mình đã thử và `Lop b = a;` thành lỗi biên dịch (`use of deleted function 'Lop::Lop(const Lop&)'`, vì `unique_ptr` không copy được), còn di chuyển vẫn dùng được: lớp tự động không sao chép được nhưng di chuyển được, đúng ý sở hữu duy nhất, mà bạn không viết dòng nào.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -554,8 +599,8 @@ Mang d = std::move(b);
 
 - `copy!`, `copy!`, `copy!`: `std::move` chỉ đổi tên
 - `copy!`, `move!`, `move!`: `a` là lvalue, hai dòng sau là rvalue
-- `move!`, `move!`, `move!`: mọi khởi tạo từ biến cùng loại đều di chuyển
-- `copy!`, `move!`, `copy!`: `b` đã được sao chép từ `a` nên dòng cuối chép tiếp
+- `move!`, `move!`, `move!`: mọi khởi tạo cùng loại đều di chuyển
+- `copy!`, `move!`, `copy!`: dòng cuối chép tiếp từ `b`
 
 <p class="giai-thich" markdown>Dòng `Mang b = a;` có `a` là lvalue (có tên, không có `std::move`) nên chọn hàm tạo sao chép. Hai dòng sau có `std::move`, ép thành rvalue, nên chọn hàm tạo di chuyển (mình đã chạy ra `copy! move! move!`). `std::move` không "chỉ đổi tên": nó quyết định hàm nào được chọn. Việc `b` từng là bản sao không ngăn nó bị lấy ruột tiếp, và dòng đầu không thể là `move!` vì `a` không được ép thành rvalue.</p>
 </div>
@@ -572,7 +617,7 @@ std::cout << (a == nullptr) << " " << *b;
 - `0 7`: `a` vẫn giữ số 7 vì `std::move` không xóa gì
 - `1 0`: `b` được tạo mới nên bắt đầu từ 0
 - `0 0`: cả hai đều bị `std::move` làm rỗng đi
-- `1 7`: `a` rỗng sau khi trao, `b` giữ số 7
+- `1 7`: `a` rỗng sau khi trao, `b` giữ 7
 
 <p class="giai-thich" markdown>Chuẩn bảo đảm `unique_ptr` bị move thì thành rỗng, nên `a == nullptr` đúng và in `1`; `b` nhận số 7 (mình đã chạy ra `1 7`). Lập luận "`std::move` không xóa gì" đúng về bản thân `std::move`, nhưng hàm tạo di chuyển của `unique_ptr` mới là chỗ đặt nguồn về `nullptr`. `b` nhận giá trị của `a` chứ không bắt đầu từ 0, và `b` không thể rỗng vì nó là bên nhận.</p>
 </div>
@@ -588,9 +633,9 @@ struct T {
 ```
 
 - Chúng được di chuyển, vì chỉ cần có hàm di chuyển là đủ
-- Chương trình không biên dịch được, vì thiếu `noexcept`
+- Không biên dịch được, vì thiếu `noexcept`
 - Chúng được sao chép, vì hàm di chuyển không `noexcept`
-- Chúng bị bỏ lại ở khối cũ và vector giữ cả hai khối
+- Chúng bị bỏ lại ở khối cũ, vector giữ hai khối
 
 <p class="giai-thich" markdown>Vector dùng `std::move_if_noexcept`: hàm di chuyển không hứa `noexcept` và kiểu còn sao chép được thì nó sao chép các phần tử cũ, để khối cũ còn nguyên nếu có ngoại lệ (mình đã đếm bằng `CayB` ra các dòng `copy`; chi tiết có thể khác giữa các cài đặt). Có hàm di chuyển là chưa đủ để vector chọn nó. `noexcept` không bắt buộc về cú pháp nên vẫn biên dịch được. Vector luôn giữ đúng một khối, khối cũ được trả sau khi chuyển.</p>
 </div>
@@ -603,7 +648,7 @@ Cay taoTam() { return Cay(3); }
 Cay a = taoTam();
 ```
 
-- Chỉ `tao 3`: giá trị tạm được dựng thẳng vào chính `a`
+- Chỉ `tao 3`: giá trị tạm được dựng thẳng vào chính biến `a` luôn
 - `tao 3` rồi `move!`: giá trị tạm được chuyển vào `a`
 - `tao 3` rồi `copy!`: giá trị tạm được sao chép vào `a`
 - `tao 3` rồi hai `move!`: một ở lệnh `return`, một ở lệnh gán
@@ -620,8 +665,8 @@ Cu b = std::move(a);
 ```
 
 - In `move!`, vì `std::move` luôn gọi hàm move
-- Lỗi biên dịch, vì `Cu` không có hàm tạo di chuyển
-- Không in gì, vì `std::move` chỉ là phép ép kiểu mà thôi
+- Lỗi biên dịch, vì `Cu` chưa có hàm tạo di chuyển để gọi
+- Không in gì, vì `std::move` chỉ là phép ép kiểu, không gọi hàm nào
 - In `copy!`, vì không có hàm di chuyển nào để chọn cả
 
 <p class="giai-thich" markdown>`std::move(a)` chỉ ép `a` thành rvalue. `Cu` không có hàm tạo di chuyển nên hàm duy nhất khớp là hàm tạo sao chép, vì `const Cu&` gắn được cả rvalue; kết quả là `copy!` (mình đã chạy). Nói `std::move` "luôn gọi hàm di chuyển" là hiểu sai: nó chỉ cho phép, hàm có tồn tại hay không là chuyện khác. Cũng không có lỗi biên dịch, và "không in gì" sai vì vẫn phải tạo `b`.</p>
@@ -636,7 +681,7 @@ f(x);  f(x + 1);  f(std::move(x));  f(3);
 ```
 
 - `L L R R`: `x + 1` gọi lại được như một biến
-- `R R R R`: mọi đối số truyền vào hàm đều là rvalue
+- `R R R R`: mọi đối số đều là rvalue
 - `L R R R`: chỉ `x` là lvalue, ba cái kia là rvalue
 - `L R L R`: ngay sau `std::move`, `x` trở lại là lvalue
 
@@ -646,7 +691,7 @@ f(x);  f(x + 1);  f(std::move(x));  f(3);
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Hàm trả một biến cục bộ `v` theo giá trị. Cách viết lệnh `return` nào là tốt nhất?
 
-- `return v;` để trình biên dịch tự chọn bỏ qua hay move
+- `return v;` để trình biên dịch tự chọn cách tốt nhất
 - `return std::move(v);` để chắc chắn chọn hàm di chuyển
 - `return v;` nhưng phải tự viết hàm tạo sao chép trước
 - `return std::move(v);` vì nó luôn bỏ qua được bước sao chép

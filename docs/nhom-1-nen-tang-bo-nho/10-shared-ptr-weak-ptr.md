@@ -9,11 +9,11 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-[Bài 09](09-unique-ptr.md) có **một chiếc chìa** cho một kho: một chủ, chủ đi thì kho đóng. Nhưng đôi khi nhiều bạn cùng cần kho và **không ai biết ai dùng xong sau cùng**. Ví dụ một bức ảnh mà ba cửa sổ cùng đang hiển thị: cửa sổ nào đóng cuối cùng thì ảnh mới được dọn.
+[Bài 09](09-unique-ptr.md) có **một chiếc chìa** cho một tủ trong kho: một chủ, chủ đi thì tủ đóng. Nhưng đôi khi nhiều bạn cùng cần một tủ và **không ai biết ai dùng xong sau cùng**. Ví dụ một bức ảnh mà ba cửa sổ cùng đang hiển thị: cửa sổ nào đóng cuối cùng thì ảnh mới được dọn.
 
-Lúc này ta cho **mỗi bạn một tấm thẻ vào kho**, và treo ở cửa một **bảng đếm** "đang có mấy người giữ thẻ". Ai nhận thẻ thì đếm +1, ai trả thẻ thì −1. Người cuối cùng trả thẻ làm bảng về 0: kho đóng và được dọn. Đó là `std::shared_ptr` ("con trỏ chia sẻ").
+Lúc này ta cho **mỗi bạn một tấm thẻ mở tủ**, và treo ở cửa một **bảng đếm** "đang có mấy người giữ thẻ". Ai nhận thẻ thì đếm +1, ai trả thẻ thì −1. Người cuối cùng trả thẻ làm bảng về 0: tủ đóng và được dọn. Đó là `std::shared_ptr` ("con trỏ chia sẻ").
 
-Còn **người đứng nhìn qua cửa kính** là `std::weak_ptr`: nhìn được xem kho còn mở không, nhưng không có thẻ nên không giữ kho mở. ("Kho" ở đây là đối tượng nằm ở heap, tức kho đồ của trường.) Phép so sánh này không còn đúng ở một chỗ: thẻ thật là đồ vật còn `shared_ptr` là một biến chứa địa chỉ; "bảng đếm" thật ra là các con số nằm ở một vùng heap (mục 2).
+Còn **người đứng nhìn qua cửa kính** là `std::weak_ptr`: nhìn được xem tủ còn mở không, nhưng không có thẻ nên không giữ tủ mở. ("Tủ" ở đây là một đối tượng nằm trong kho đồ của trường, tức ở heap.) Phép so sánh này không còn đúng ở một chỗ: thẻ thật là đồ vật còn `shared_ptr` là một biến chứa địa chỉ; "bảng đếm" thật ra là các con số nằm ở một vùng heap (mục 2).
 
 !!! info "Bạn biết Go?"
     Go dọn bộ nhớ bằng GC kiểu **đánh dấu và quét** (tracing): GC đi từ các biến đang sống để tìm mọi thứ còn tới được, phần còn lại bị dọn. Vì vậy hai đối tượng trỏ vòng vào nhau mà không ai ngoài trỏ tới thì Go vẫn dọn bình thường. `shared_ptr` của C++ thì **đếm** tham chiếu, không đi tìm, nên một vòng tham chiếu làm bộ đếm không bao giờ về 0 và bị rò rỉ (mục 3).
@@ -489,7 +489,7 @@ std::cout << a.use_count() << " " << (c == nullptr) << "\n";
 ```
 
 - `3 0`: `reset` của `b` không làm đếm giảm, `c` vẫn giữ cây
-- `2 1`: `a` và `d` giữ, `b` `c` đã buông, `w` không tính
+- `2 1`: chỉ `a` và `d` giữ, `w` không tính
 - `1 1`: chỉ `a` giữ, vì `d` chỉ là bản nhìn chứ không giữ
 - `4 0`: cả bốn đều giữ, vì `weak_ptr` cũng đếm thẻ
 
@@ -509,7 +509,7 @@ std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 - `tao 1, 00, huy 1`: `weak_ptr` giữ cây sống nên chưa hủy
 - `tao 1, 01, huy 1`: `expired` báo sai, còn `lock` lại trả rỗng
 - `tao 1, huy 1, 00`: cây hủy mà `weak_ptr` vẫn báo còn cây
-- `tao 1, huy 1, 11`: cây hủy ngay lúc `reset`, cả hai đúng
+- `tao 1, huy 1, 11`: cây hủy ngay lúc `reset`, nên cả `expired` lẫn `lock` đều báo hết
 
 <p class="giai-thich" markdown>`a` là `shared_ptr` duy nhất, nên `a.reset()` đưa đếm về 0 và in `huy 1` ngay, trước dòng cuối; `w` không giữ cây sống nên không cản được. Sau đó cả `expired()` và `lock() == nullptr` đều đúng nên in `11`; mình đã chạy ra `tao 1, huy 1, 11`. Dãy `tao 1, 00, huy 1` tin rằng `weak_ptr` giữ cây sống, mà nó không giữ. Dãy `tao 1, huy 1, 00` đúng về thứ tự `huy 1`, nhưng sai ở số cuối: cây đã hủy thì `expired()` phải là đúng (`1`), nên không thể in `0`. Kết quả `01` cũng mâu thuẫn: cây đã hủy thì hai phép kiểm tra phải cùng đúng.</p>
 </div>
@@ -530,7 +530,7 @@ std::cout << "xong\n";
 - `tao 1, tao 2, xong`: cả hai cây đều không bị hủy
 - `tao 1, tao 2, huy 2, huy 1, xong`: cả hai hủy ngay
 - `tao 1, tao 2, huy 2, xong`: chỉ `b` hủy
-- `tao 1, tao 2, xong, huy 2, huy 1`: hủy lúc thoát
+- `tao 1, tao 2, xong, huy 2, huy 1`: hủy sau
 
 <p class="giai-thich" markdown>Hai cây giữ nhau nên khi `a` và `b` chết ở `}`, mỗi cây vẫn còn một thẻ do cây kia giữ: bộ đếm dừng ở 1, không về 0, nên không có `huy` nào; mình đã chạy ra đúng dãy này. Hai dãy có `huy` ngay sau khối (`huy 2, huy 1`, hay chỉ `huy 2`) tin rằng biến chết là đủ để cây bị hủy, mà ở đây còn thẻ trong vòng. Dãy có `huy` sau `xong` tin rằng chương trình dọn lúc thoát, nhưng `shared_ptr` không có bộ dọn cuối chương trình.</p>
 </div>
@@ -552,7 +552,7 @@ std::cout << "xong\n";
 - Có, mỗi `weak_ptr` cộng 1 vào `use_count()`
 - Không: `weak_ptr` không giữ cây sống nên không vào bộ đếm mạnh
 - Không, và `weak_ptr` cũng không có cách nào để dùng được cây
-- Chỉ cộng vào bộ đếm yếu, và cây vẫn chưa bị hủy cho đến khi nó về 0
+- Chỉ cộng vào bộ đếm yếu, và cây vẫn chưa bị hủy cho đến khi bộ đếm yếu về 0
 
 <p class="giai-thich" markdown>`weak_ptr` chỉ nhìn: nó cộng vào bộ đếm yếu chứ không cộng vào bộ đếm mạnh, nên cây vẫn bị hủy khi `shared_ptr` cuối cùng buông. Dùng được cây vẫn có cách, là `lock()` trả về `shared_ptr`, nên không phải "không có cách nào". Bộ đếm yếu tồn tại thật, nhưng cây sống hay chết do bộ đếm mạnh quyết định, không phải bộ đếm yếu.</p>
 </div>
@@ -571,10 +571,10 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 7.** Ba cửa sổ cùng hiển thị một bức ảnh, cửa sổ nào đóng cuối cùng thì ảnh phải được dọn. Cách mô tả nào hợp nhất?
 
-- Mỗi cửa sổ giữ một `unique_ptr` tới ảnh
+- Mỗi cửa sổ giữ một `unique_ptr` tới ảnh đó
 - Mỗi cửa sổ giữ con trỏ thô, và tự `delete` khi đóng
-- Mỗi cửa sổ giữ một `shared_ptr` tới ảnh đó
-- Mỗi cửa sổ giữ một `weak_ptr` tới ảnh
+- Mỗi cửa sổ giữ một `shared_ptr` tới ảnh
+- Mỗi cửa sổ giữ một `weak_ptr` tới ảnh đó
 
 <p class="giai-thich" markdown>Đây là chia sẻ quyền sở hữu thật sự, nên `shared_ptr`: ảnh được dọn khi cửa sổ cuối buông. `unique_ptr` không copy được nên ba cửa sổ không cùng giữ được. Con trỏ thô với `delete` ở mỗi cửa sổ sẽ xóa ảnh nhiều lần. `weak_ptr` thì không giữ ảnh sống, nên nếu cả ba chỉ nhìn thì ảnh không có chủ nào.</p>
 </div>

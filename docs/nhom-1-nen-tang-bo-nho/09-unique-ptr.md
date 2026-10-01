@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Kho đồ của trường có một chiếc **chìa khóa duy nhất**. Chỉ một người cầm chìa, và người đó chịu trách nhiệm đóng kho, dọn sạch khi xong việc. Muốn người khác dùng kho thì phải **trao tay** chiếc chìa: từ lúc đó người cũ hết chìa, người mới là chủ. Khi người cầm chìa đi khỏi (ra khỏi khối `{}` của họ), kho tự đóng và được dọn.
+Trong kho đồ của trường, mỗi món đồ nằm trong một **tủ riêng** có một chiếc **chìa khóa duy nhất**. Chỉ một người cầm chìa, và người đó chịu trách nhiệm đóng tủ, dọn sạch khi xong việc. Muốn người khác dùng tủ thì phải **trao tay** chiếc chìa: từ lúc đó người cũ hết chìa, người mới là chủ. Khi người cầm chìa đi khỏi (ra khỏi khối `{}` của họ), tủ tự đóng và được dọn.
 
 `std::unique_ptr` là chiếc chìa đó. Ở [Bài 08](08-raii.md) bạn thấy lớp `Hop` tự `delete` trong hàm hủy nhưng bị nguy hiểm khi copy, vì copy làm **hai** người cầm chìa. `unique_ptr` giải quyết bằng cách **không cho copy**: chìa chỉ được trao, không được đúc thêm (miễn là bạn không tự đưa cùng một con trỏ thô cho hai `unique_ptr`, hay `delete` kết quả của `get()`).
 
@@ -513,7 +513,7 @@ Cả ba lần đều có đúng một `tao` và một `huy`, không có dòng `d
 
 - Cây có đúng một địa chỉ ở heap nên con trỏ thô nào trỏ vào cũng là chủ
 - Nhiều `unique_ptr` cùng giữ một cây, nhưng chỉ cái đầu tiên được phép xóa
-- Mỗi lúc chỉ một `unique_ptr` giữ cây, nên chỉ nó chịu trách nhiệm xóa
+- Mỗi lúc chỉ một `unique_ptr` giữ cây, nên chỉ riêng nó chịu trách nhiệm xóa
 - Cây chỉ được tạo một lần trong cả chương trình và sống đến lúc dừng hẳn
 
 <p class="giai-thich" markdown>Mỗi cây có đúng một chủ tại mỗi lúc, và chủ đó xóa cây khi chết, nên hàm hủy chạy đúng một lần. Con trỏ thô nhìn vào cây không thành chủ, vì chỉ `unique_ptr` mới xóa. Cho nhiều `unique_ptr` cùng giữ là điều bị cấm (không copy được), chứ không phải "cái đầu tiên xóa". Còn số lần tạo cây không bị giới hạn: bạn tạo bao nhiêu cây cũng được, mỗi cây có một chủ.</p>
@@ -522,10 +522,10 @@ Cả ba lần đều có đúng một `tao` và một `huy`, không có dòng `d
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 2.** Vì sao `auto b = a;` (với `a` là `unique_ptr<Cay>`) là lỗi biên dịch?
 
-- Hàm tạo sao chép bị xóa, vì copy sẽ tạo hai chủ cho một cây
+- Hàm tạo sao chép bị xóa, vì copy sẽ tạo ra hai chủ cho một cây
 - `auto` không đoán được kiểu `unique_ptr` nên phải ghi kiểu rõ ra
 - Copy sẽ chép cả cây ở heap, quá tốn nên C++ cấm hẳn từ trước
-- `a` còn đang giữ cây nên chưa được đụng tới trước khi hết `main`
+- `a` còn giữ cây nên chưa được đụng tới trước khi hết `main`
 
 <p class="giai-thich" markdown>Hàm tạo sao chép của `unique_ptr` được viết là `= delete`, vì cho copy thì có hai chủ và cây bị xóa hai lần. `auto` đoán kiểu `unique_ptr` bình thường (`auto p = std::make_unique<Cay>(5);` chạy tốt). Copy mặc định của một con trỏ chỉ chép địa chỉ chứ không chép cây, nên lý do không phải chuyện tốn bộ nhớ. Còn việc `a` đang giữ cây không cản gì: trao tay bằng `std::move` ngay lúc đó vẫn được.</p>
 </div>
@@ -539,7 +539,7 @@ auto c = std::move(p);
 std::cout << (p == nullptr) << (c == nullptr) << "\n";
 ```
 
-- `11`: cả hai đều rỗng vì cây đã bị xóa lúc trao
+- `11`: cả hai đều rỗng vì cây đã bị xóa
 - `10`: `p` rỗng sau khi trao, `c` đang giữ cây
 - `00`: cả hai cùng giữ cây vì `std::move` chỉ đổi tên
 - `01`: `p` còn giữ cây, `c` mới chỉ nhận nhưng chưa dùng
@@ -600,7 +600,7 @@ int main() {
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** `std::make_unique<Cay>(5)` hơn `new Cay(5)` ở điểm nào?
 
-- Tạo cây và bọc vào `unique_ptr` ngay, không còn `new` trần
+- Tạo cây rồi bọc vào `unique_ptr` ngay trong một bước, không còn `new` trần
 - Cây được tạo ở stack thay vì heap, nên nhanh hơn và khỏi phải xóa
 - Cho phép copy `unique_ptr` đó thoải mái vì cây đã được bọc sẵn
 - Cây được dọn bởi GC giống Go khi không còn biến nào trỏ tới nó
@@ -620,7 +620,7 @@ delete r;
 - `get()` đặt `p` về `nullptr`, nên `delete r` xóa nhầm một cây khác
 - `delete r` xóa cây, rồi `p` chết lại xóa lần nữa: double free
 - Không có lỗi, vì `get()` đã trao quyền sở hữu cho `r`
-- Rò rỉ: `delete r` chỉ trả con trỏ `r`, không trả cây ở heap
+- Rò rỉ: `delete r` chỉ trả con trỏ `r`, chứ không trả cây ở heap
 
 <p class="giai-thich" markdown>`get()` chỉ cho địa chỉ để nhìn, `p` vẫn là chủ. `delete r` xóa cây, và khi `p` chết hàm hủy của nó xóa chỗ đó lần nữa: giải phóng hai lần, hành vi không xác định (mình không chạy đoạn này). `get()` không đổi `p` thành `nullptr`; đó là việc của `release()` và `reset()`. Hàm trao quyền sở hữu cho con trỏ thô là `release()`, không phải `get()`. Còn `delete r` xóa cây mà `r` trỏ tới, không phải riêng con trỏ `r`, nên không gây rò rỉ.</p>
 </div>

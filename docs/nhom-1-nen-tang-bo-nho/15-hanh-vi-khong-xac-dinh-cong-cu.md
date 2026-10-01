@@ -134,7 +134,7 @@ Mọi báo cáo ASan có cùng các phần. Bảng sau là bản đồ chung; �
 | `freed by ...` / `allocated by ...` | Chỗ nhớ đó **được trả** hay **được xin** ở dòng nào |
 | `SUMMARY: ...` | Một dòng tóm tắt: loại lỗi và dòng |
 
-"Khung" (frame) là một hàm đang chạy trong chuỗi các hàm gọi nhau (như các tờ nằm chồng trên bàn học, [Bài 02](02-stack-heap-static.md)): `#0` là hàm trong cùng, `#1` là hàm đã gọi nó.
+"Khung" (frame) là một hàm đang chạy trong chuỗi các hàm gọi nhau (như các khung chồng lên nhau trên stack, [Bài 02](02-stack-heap-static.md)): `#0` là hàm trong cùng, `#1` là hàm đã gọi nó.
 
 Trong các báo cáo dưới đây mình **rút gọn**: bỏ địa chỉ (viết `0x...`), bỏ đường dẫn tệp (còn `bai.cpp`), bỏ các khung `#1`, `#2`... của thư viện hệ thống ở cuối chuỗi, bỏ dòng `HINT`, và bỏ bảng "Shadow bytes" dài ở cuối.
 
@@ -347,7 +347,7 @@ bai.cpp:9:15: runtime error: shift exponent 40 is too large for 32-bit type 'int
 xong
 ```
 
-Báo cáo UBSan **ngắn hơn ASan nhiều**: một dòng cho mỗi lỗi, dạng `tệp:dòng:cột: runtime error: <chuyện gì>`. Số `7:9` là dòng 7, cột 9, đúng chỗ `n + 1`.
+Báo cáo UBSan **ngắn hơn ASan nhiều**: một dòng cho mỗi lỗi, dạng `tệp:dòng:cột: runtime error: <chuyện gì>`. Số `7:9` là dòng 7, cột 9: g++ ghi cột này ở chữ `m` của câu lệnh `int m = n + 1;`, còn báo cáo thứ hai `9:15` rơi đúng vào dấu `<<`. Cột chỉ để tham khảo, đọc số dòng là đủ để tìm ra chỗ lỗi.
 
 Khác ASan, mặc định UBSan **in rồi chạy tiếp** (nên có `xong` ở cuối); đó là hành vi của công cụ, không phải lời hứa gì về chương trình khi không có nó.
 
@@ -509,9 +509,9 @@ previously allocated by thread T0 here:
     #1 ... in main bai.cpp:4
 ```
 
-- Dòng 6 ghi tràn ra khỏi khối quá nhỏ mà dòng 4 đã xin
-- Dòng 8 đọc chỗ dòng 6 đã trả, chỗ dòng 4 từng xin
-- Dòng 6 trả hai lần một chỗ mà dòng 4 đã xin trước đó rồi
+- Dòng 6 ghi tràn khỏi khối quá nhỏ mà dòng 4 đã xin
+- Dòng 8 đọc chỗ mà dòng 6 đã trả, chỗ dòng 4 từng xin
+- Dòng 6 trả hai lần chỗ mà dòng 4 đã xin
 - Dòng 8 đọc một chỗ chương trình chưa xin
 
 <p class="giai-thich" markdown>Tên lỗi `heap-use-after-free` cùng ba mốc nói đủ câu chuyện: chỗ nhớ được xin ở dòng 4, trả ở dòng 6, rồi bị đọc ở dòng 8 (nơi `#0`). Báo cáo không nói "ghi tràn", vì lần truy cập là `READ` và loại lỗi không phải `buffer-overflow`. Cũng không phải trả hai lần, vì loại đó có tên `double-free`, và mốc `allocated` chứng tỏ chỗ này có được xin. Và chỗ bị đọc có xin ở dòng 4, nên không phải "chưa từng xin".</p>
@@ -541,7 +541,7 @@ std::cout << "xong\n";
 0x... is located 0 bytes to the right of 12-byte region
 ```
 
-- Chỗ của `p[3]`, món thứ tư không thuộc khối, ngay sau khối
+- Chỗ của `p[3]`, món thứ tư ngay sau khối
 - Chỗ bị đọc nằm trong khối 12 byte, tức món `p[0]` ở đầu khối
 - Khối 12 byte đã bị trả trước đó, nên đây là con trỏ treo
 - Khối 12 byte nằm ở stack, nên `p[3]` rơi ra ngoài bàn học
@@ -561,14 +561,14 @@ std::cout << "xong\n";
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
-**Câu 5.** Chương trình có `new int(5)` mà không bao giờ `delete`, rồi kết thúc bình thường. Chuẩn C++ coi đó là gì?
+**Câu 5.** Chương trình có `int* p = new int(5);` mà không bao giờ `delete p;`, rồi kết thúc bình thường. Chuẩn C++ coi đó là gì?
 
 - Rò rỉ bộ nhớ: chương trình vẫn đúng luật, không phải UB
-- UB, vì chuẩn cấm kết thúc khi còn khối chưa được trả
-- Lỗi biên dịch, vì g++ nhận ra thiếu `delete` nên từ chối hẳn
-- Con trỏ treo, vì `p` còn giữ địa chỉ sau khi kết thúc
+- UB, vì chuẩn cấm kết thúc khi còn khối chưa trả
+- Lỗi biên dịch, vì g++ nhận ra thiếu `delete`
+- Con trỏ treo, vì `p` còn giữ địa chỉ cũ
 
-<p class="giai-thich" markdown>Quên `delete` là rò rỉ bộ nhớ: chương trình đúng luật, kết quả vẫn được định nghĩa, chỉ là phí bộ nhớ (và LeakSanitizer có thể liệt kê nó). Chuẩn không có điều cấm kết thúc khi còn khối chưa trả, nên đó không phải UB. G++ không biên dịch lỗi vì với trình biên dịch đây là code hợp lệ. Và `new` không ném ngoại lệ lúc kết thúc: nó chỉ ném khi hết chỗ lúc xin.</p>
+<p class="giai-thich" markdown>Quên `delete` là rò rỉ bộ nhớ: chương trình đúng luật, kết quả vẫn được định nghĩa, chỉ là phí bộ nhớ (và LeakSanitizer có thể liệt kê nó). Chuẩn không có điều cấm kết thúc khi còn khối chưa trả, nên đó không phải UB. G++ không báo lỗi biên dịch vì với trình biên dịch đây là code hợp lệ. Cũng không phải con trỏ treo: con trỏ treo giữ địa chỉ của chỗ **đã bị trả**, còn ở đây chỗ chưa bao giờ bị trả, nên `p` vẫn trỏ vào một chỗ còn hợp lệ (chỉ là không ai trả nó).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -579,7 +579,7 @@ std::cout << "xong\n";
 - Valgrind nhanh hơn ASan, vì nó chỉ đọc file chạy
 - ASan cần biên dịch lại và nhanh hơn Valgrind nhiều
 
-<p class="giai-thich" markdown>ASan chèn các bước kiểm tra lúc biên dịch nên phải biên dịch lại với cờ, và nhờ đó thường chậm ít hơn nhiều so với Valgrind, thứ chạy nguyên bản chương trình trong một môi trường theo dõi. Hai ý đầu đảo ngược hoặc sai: ASan không chạy nguyên bản, và nó bắt cả ngoài biên lẫn dùng sau khi trả, không chỉ rò rỉ. Valgrind không biên dịch lại nhưng cũng không nhanh hơn.</p>
+<p class="giai-thich" markdown>ASan chèn các bước kiểm tra lúc biên dịch nên phải biên dịch lại với cờ, và nhờ đó thường chậm ít hơn nhiều so với Valgrind, thứ chạy nguyên bản chương trình trong một môi trường theo dõi. Nói ASan chạy nguyên bản còn Valgrind phải biên dịch lại là đảo ngược: ASan mới cần biên dịch lại, Valgrind thì không. Nói ASan chỉ bắt rò rỉ là sai: nó bắt cả truy cập ngoài biên lẫn dùng sau khi trả. Còn nói Valgrind nhanh hơn thì ngược sự thật: nó không biên dịch lại nhưng chạy chậm hơn nhiều.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -598,7 +598,7 @@ std::cout << "xong\n";
 
 - Cả hai ném `std::out_of_range`, chỉ khác tên gọi hàm
 - `v.at(3)` ném `std::out_of_range`, còn `v[3]` là UB
-- Cả hai là UB, vì vector chỉ có chỉ số 0 đến 2
+- Cả hai là UB, vì vector chỉ có các chỉ số từ 0 đến 2
 - `v.at(3)` là UB, còn `v[3]` mới ném `std::out_of_range`
 
 <p class="giai-thich" markdown>`at` có kiểm tra biên và ném `std::out_of_range`: đó là hành vi được định nghĩa, bắt được bằng `try`/`catch`. `v[3]` thì không kiểm tra, nên ngoài biên là UB (dưới ASan nó bị báo `heap-buffer-overflow`). Cho nên hai lệnh không giống nhau: chỉ `at` ném ngoại lệ. Và cũng không phải cả hai đều UB, vì `at` được thiết kế để làm điều ngược lại.</p>

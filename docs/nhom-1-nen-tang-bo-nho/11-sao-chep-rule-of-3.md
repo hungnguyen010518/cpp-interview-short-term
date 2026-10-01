@@ -180,7 +180,7 @@ Khi viết `b = a;` mà `b` **đã tồn tại**, `b` đang giữ một vùng nh
 2. **Chống tự gán**: `a = a;` là hợp lệ. Nếu cứ máy móc "trả vùng cũ rồi chép từ `a`", thì ở `a = a` ta trả mất chính vùng cần chép, rồi đọc vùng đã trả: hành vi không xác định. Nên kiểm tra `if (this != &o)` ("đối tượng kia không phải chính tôi"; `o` là biệt danh nên `&o` là địa chỉ của đối tượng thật).
 3. **Trả về `*this`** (chính `b`), để viết được `x = y = z`. Kiểu trả về là `Hop&` (tham chiếu), nên không tạo thêm bản sao.
 
-Đây là một cách viết, dễ hiểu nhất. Nếu xin vùng mới **trước** rồi mới trả vùng cũ thì không cần kiểm tra tự gán, và nếu `new` ném ngoại lệ thì `b` vẫn còn nguyên (với cách "trả trước" ở đây, `new` hỏng sau `delete p` sẽ để `p` treo). Copy-and-swap (giải thích ở mục sau) là cách chuẩn hóa ý đó.
+Đây là một cách viết, dễ hiểu nhất. Nếu xin vùng mới **trước** rồi mới trả vùng cũ thì không cần kiểm tra tự gán, và nếu `new` ném ngoại lệ thì `b` vẫn còn nguyên (với cách "trả trước" ở đây, `new` hỏng sau `delete p` sẽ để `p` treo). Copy-and-swap (chỉ nêu tên ở mục sau) là cách chuẩn hóa ý đó.
 
 ```cpp
 #include <iostream>
@@ -458,7 +458,7 @@ std::cout << *a.p << " " << (a.p == b.p);
 
 - `5 0`: bản sao có vùng nhớ riêng
 - `5 1`: chung vùng nhưng `a` vẫn giữ 5
-- `9 1`: hai con trỏ cùng chỉ một vùng
+- `9 1`: hai con trỏ cùng chỉ vào chính một vùng nhớ
 - `9 0`: vùng riêng nhưng giá trị bị chép lại
 
 <p class="giai-thich" markdown>Hàm sao chép mặc định chép từng thành viên, nên `b.p` nhận cùng địa chỉ với `a.p` và so sánh cho `1`. Ghi 9 qua `b.p` cũng là ghi vào vùng của `a`, nên `*a.p` là 9 (mình đã chạy ra đúng `9 1`). Kết quả `5 0` mô tả sao chép sâu, chỉ có khi bạn tự viết hàm tạo sao chép. `9 0` tự mâu thuẫn (vùng riêng thì `a` vẫn là 5), còn `5 1` cũng tự mâu thuẫn theo chiều ngược lại: đã chung một vùng thì ghi qua `b.p` là `a` thấy ngay.</p>
@@ -509,11 +509,11 @@ a = a;
 **Câu 4.** Rule of 3 nói về ba hàm nào của một lớp?
 
 - Hàm tạo, hàm hủy và hàm tạo sao chép của lớp
-- Hàm tạo mặc định, hàm hủy và `operator=` của lớp
+- Hàm tạo thường, hàm hủy và `operator=` của lớp
 - Hàm tạo, phép gán sao chép và toán tử `new` của lớp
 - Hàm hủy, hàm tạo sao chép và phép gán sao chép
 
-<p class="giai-thich" markdown>Ba hàm là hàm hủy, hàm tạo sao chép và phép gán sao chép: cần tự viết một trong ba thì thường cần cả ba. Hàm tạo thường (kể cả hàm tạo mặc định) không nằm trong bộ ba, vì nó không liên quan tới việc sao chép hay trả tài nguyên. `new` là toán tử xin bộ nhớ, không phải hàm đặc biệt của lớp. Đây là quy tắc kinh nghiệm, không phải luật bắt buộc.</p>
+<p class="giai-thich" markdown>Ba hàm là hàm hủy, hàm tạo sao chép và phép gán sao chép: cần tự viết một trong ba thì thường cần cả ba. Hàm tạo thường (hàm tạo bạn viết để dựng đối tượng, như `Hop(int v)`) không nằm trong bộ ba, vì nó không liên quan tới việc sao chép hay trả tài nguyên. `new` là toán tử xin bộ nhớ, không phải hàm đặc biệt của lớp. Đây là quy tắc kinh nghiệm, không phải luật bắt buộc.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -552,7 +552,7 @@ f(a);
 - 0 lần, vì `a` đã tồn tại từ trước
 - 1 lần, vì chỉ lần đầu cần chép tham số
 - 3 lần, vì mỗi lần gọi hàm đều phải chép
-- 2 lần, vì chỉ `f` nhận theo giá trị
+- 2 lần, vì `f` nhận theo giá trị
 
 <p class="giai-thich" markdown>Mỗi lần gọi `f(a)`, tham số `h` là một biến mới được tạo bằng hàm tạo sao chép từ `a`, nên hai lần gọi `f` cho hai lần `copy!` (mình đã chạy). `g` nhận biệt danh của `a` nên không chép. Việc `a` đã tồn tại không ngăn chép, vì `h` là một đối tượng khác. Còn "chỉ lần đầu" sai: lần gọi thứ hai tạo lại một tham số mới.</p>
 </div>
@@ -560,7 +560,7 @@ f(a);
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** "Copy-and-swap" nói về điều gì?
 
-- Chép gốc vào một bản tạm, rồi hoán đổi ruột bản tạm với đích
+- Chép gốc vào bản tạm, rồi hoán đổi ruột với đích
 - Cấm sao chép bằng `= delete`, rồi hoán đổi hai đối tượng bằng tay
 - Trao hẳn quyền sở hữu vùng nhớ cho đích và để gốc rỗng
 - Chép con trỏ rồi cho hai đối tượng đổi chỗ để cùng giữ một vùng
@@ -578,9 +578,9 @@ Hop c = a;
 b = a;
 ```
 
-- `Hop c = a;` gọi phép gán sao chép, còn `b = a;` gọi hàm tạo sao chép
+- `Hop c = a;` gọi phép gán, còn `b = a;` gọi hàm tạo sao chép
 - Cả hai dòng đều gọi phép gán sao chép của `Hop`
-- `Hop c = a;` gọi hàm tạo sao chép, còn `b = a;` gọi phép gán
+- `Hop c = a;` gọi hàm tạo sao chép, còn `b = a;` gọi phép gán sao chép
 - Cả hai dòng đều gọi hàm tạo sao chép của `Hop`
 
 <p class="giai-thich" markdown>`Hop c = a;` **tạo** `c` mới nên gọi hàm tạo sao chép, còn `b = a;` gán vào `b` đã có nên gọi phép gán sao chép (mình đã chạy: in `copy!` rồi `gan`). Dấu `=` ở dòng khai báo không làm nó thành phép gán, nên hai lựa chọn "cả hai cùng một loại" đều sai. Lựa chọn đảo ngược hai hàm sai vì phép gán cần một đối tượng đã tồn tại để ghi vào.</p>
