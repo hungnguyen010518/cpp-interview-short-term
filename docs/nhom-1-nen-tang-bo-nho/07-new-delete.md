@@ -3,13 +3,13 @@
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Xin và trả bộ nhớ ở heap đúng cách: `new` đi với `delete`, `new[]` đi với `delete[]`, và biết `new` gọi hàm tạo, `delete` gọi hàm hủy.
     - Nhận ra ba lỗi kinh điển: rò rỉ bộ nhớ, con trỏ treo (dùng sau khi trả), giải phóng hai lần; biết lỗi nào là hành vi không xác định.
-    - Chạy được công cụ bắt rò rỉ (AddressSanitizer) và hiểu vì sao quản lý bằng tay mong manh, nên cần RAII (Bài 08).
+    - Chạy được công cụ bắt rò rỉ (AddressSanitizer) và hiểu vì sao quản lý bằng tay mong manh, nên cần RAII ([Bài 08](08-raii.md)).
 
 **Bạn cần biết trước:** [Bài 02](02-stack-heap-static.md) (stack, heap, hàm tạo, hàm hủy), [Bài 03](03-con-tro-co-ban.md) (con trỏ, `*p`, `->`, `nullptr`) và [Bài 05](05-mang-phep-tinh-con-tro.md) (mảng, `p[i]`).
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại **kho đồ của trường** ở Bài 02. Khi cần một chỗ để đồ sống lâu hơn một tiết học, bạn đến xin thầy giữ kho một căn phòng. Thầy đưa bạn một **tờ giấy ghi số phòng**. Tờ giấy đó chính là con trỏ, và bạn mang nó về bàn học của mình (stack).
+Quay lại **kho đồ của trường** ở [Bài 02](02-stack-heap-static.md). Khi cần một chỗ để đồ sống lâu hơn một tiết học, bạn đến xin thầy giữ kho một căn phòng. Thầy đưa bạn một **tờ giấy ghi số phòng**. Tờ giấy đó chính là con trỏ, và bạn mang nó về bàn học của mình (stack).
 
 Quy tắc của kho rất đơn giản: **xin thì phải trả**. Dùng xong, bạn mang số phòng ra trả (`delete`), thầy dọn phòng và cho người khác mượn. Có ba cách làm sai, và bài này dạy từng cách:
 
@@ -24,7 +24,7 @@ Quy tắc của kho rất đơn giản: **xin thì phải trả**. Dùng xong, b
 
 ### 1. `new` và `delete`: xin một chỗ, trả một chỗ
 
-Ở Bài 02 bạn đã thấy hình dạng của hai lệnh này. Bây giờ ta học kỹ từng bước.
+Ở [Bài 02](02-stack-heap-static.md) bạn đã thấy hình dạng của hai lệnh này. Bây giờ ta học kỹ từng bước.
 
 ```text
 int* p = new int(5);     // xin chỗ ở heap cho một int, ghi 5 vào đó
@@ -33,7 +33,7 @@ delete p;                // trả chỗ đó về kho
 ```
 
 - **`new int(5)`** xin heap một chỗ vừa đủ cho một `int` (4 byte), ghi `5` vào, rồi **trả về địa chỉ** của chỗ đó.
-- **`int* p`** là biến con trỏ (Bài 03) giữ địa chỉ ấy: tờ giấy ghi số phòng. Biến `p` nằm ở stack, còn chỗ chứa số `5` nằm ở heap.
+- **`int* p`** là biến con trỏ ([Bài 03](03-con-tro-co-ban.md)) giữ địa chỉ ấy: tờ giấy ghi số phòng. Biến `p` nằm ở stack, còn chỗ chứa số `5` nằm ở heap.
 - **`delete p;`** trả chỗ mà `p` đang trỏ tới về kho. Nó trả **thứ `p` trỏ tới**, chứ không xóa biến `p`.
 
 Chương trình đầy đủ, có đánh số các dòng quan trọng:
@@ -80,7 +80,7 @@ Hai địa chỉ ở máy bạn sẽ là số khác, và chỉ cần thấy chú
 
 #### Vì sao phải xin ở heap?
 
-Có hai lý do, cả hai đã gặp ở Bài 02. Lý do thứ nhất: biến ở stack chết khi hàm kết thúc, còn chỗ xin bằng `new` **sống đến khi bạn `delete`**. Chương trình sau cho một hàm xin một chỗ rồi giao nó cho nơi gọi:
+Có hai lý do, cả hai đã gặp ở [Bài 02](02-stack-heap-static.md). Lý do thứ nhất: biến ở stack chết khi hàm kết thúc, còn chỗ xin bằng `new` **sống đến khi bạn `delete`**. Chương trình sau cho một hàm xin một chỗ rồi giao nó cho nơi gọi:
 
 ```cpp
 #include <iostream>
@@ -115,7 +115,7 @@ Dòng (3) xuất hiện hai lần trong bảng vì nó vừa gọi hàm, vừa n
 *q = 42
 ```
 
-Hàm `taoSo` đã kết thúc từ lâu mà số 42 vẫn còn, đó là điều biến cục bộ không làm được (so với tham chiếu tới biến cục bộ ở Bài 06). Đổi lại, có một quy ước phải nhớ: **ai xin thì phải có người trả**. Ở đây `main` nhận địa chỉ nên `main` phải `delete`.
+Hàm `taoSo` đã kết thúc từ lâu mà số 42 vẫn còn, đó là điều biến cục bộ không làm được (so với tham chiếu tới biến cục bộ ở [Bài 06](06-tham-chieu-const.md)). Đổi lại, có một quy ước phải nhớ: **ai xin thì phải có người trả**. Ở đây `main` nhận địa chỉ nên `main` phải `delete`.
 
 Lý do thứ hai là **kích thước chỉ biết lúc chạy**. Mảng ở stack phải có cỡ cố định viết sẵn trong code; heap thì bạn xin bao nhiêu cũng được, tính ngay lúc chạy (mục 3).
 
@@ -127,7 +127,7 @@ Lý do thứ hai là **kích thước chỉ biết lúc chạy**. Mảng ở sta
 
 ### 2. `new` gọi hàm tạo, `delete` gọi hàm hủy
 
-Với `int`, `new` chỉ xin chỗ rồi ghi số. Với một struct có hàm tạo và hàm hủy (Bài 02), `new` làm thêm một việc: **sau khi xin chỗ, nó gọi hàm tạo** để dựng đối tượng. Và `delete` **gọi hàm hủy trước**, rồi mới trả chỗ về kho. Ta dùng lại struct `Cay` in chữ `tao` và `huy` để nhìn thấy điều đó:
+Với `int`, `new` chỉ xin chỗ rồi ghi số. Với một struct có hàm tạo và hàm hủy ([Bài 02](02-stack-heap-static.md)), `new` làm thêm một việc: **sau khi xin chỗ, nó gọi hàm tạo** để dựng đối tượng. Và `delete` **gọi hàm hủy trước**, rồi mới trả chỗ về kho. Ta dùng lại struct `Cay` in chữ `tao` và `huy` để nhìn thấy điều đó:
 
 ```cpp
 #include <iostream>
@@ -153,7 +153,7 @@ int main() {
 }
 ```
 
-(1) xin chỗ cho một `Cay` rồi đưa `7` cho hàm tạo. (2) dùng `->` (Bài 03) để đọc trường `cao` qua con trỏ.
+(1) xin chỗ cho một `Cay` rồi đưa `7` cho hàm tạo. (2) dùng `->` ([Bài 03](03-con-tro-co-ban.md)) để đọc trường `cao` qua con trỏ.
 
 **Chạy từng dòng**
 
@@ -178,11 +178,11 @@ huy 7
 `tao 7` xuất hiện ngay lúc `new`, và `huy 7` ngay lúc `delete`: cặp `new`/`delete` chính là cặp "tạo"/"hủy" của đối tượng ở heap. Nếu không có `delete`, dòng `huy 7` sẽ **không bao giờ in** (mục 4.1 chạy thật điều này).
 
 !!! info "Còn `malloc` và `free` thì sao?"
-    `malloc` và `free` là cặp xin/trả của ngôn ngữ C (C++ vẫn dùng được, nằm trong `<cstdlib>`). Khác biệt then chốt: chúng chỉ xin và trả **bytes thô**, **không gọi hàm tạo hay hàm hủy**, nên với `Cay` bạn sẽ không thấy `tao` hay `huy`. Trong C++ hiện đại, bạn gần như không cần chúng: dùng `new`/`delete` khi buộc phải tự quản lý, và tốt hơn nữa là dùng các công cụ tự trả ở Bài 08 đến Bài 10. Hai cặp này **không được lẫn**: xin bằng `malloc` thì trả bằng `free`; xin bằng `new` thì trả bằng `delete`.
+    `malloc` và `free` là cặp xin/trả của ngôn ngữ C (C++ vẫn dùng được, nằm trong `<cstdlib>`). Khác biệt then chốt: chúng chỉ xin và trả **bytes thô**, **không gọi hàm tạo hay hàm hủy**, nên với `Cay` bạn sẽ không thấy `tao` hay `huy`. Trong C++ hiện đại, bạn gần như không cần chúng: dùng `new`/`delete` khi buộc phải tự quản lý, và tốt hơn nữa là dùng các công cụ tự trả ở [Bài 08](08-raii.md) đến [Bài 10](10-shared-ptr-weak-ptr.md). Hai cặp này **không được lẫn**: xin bằng `malloc` thì trả bằng `free`; xin bằng `new` thì trả bằng `delete`.
 
 ### 3. Mảng động: `new[]` và `delete[]`
 
-Muốn xin **nhiều món liên tiếp** (một mảng) mà số lượng chỉ biết lúc chạy, viết số lượng trong `[ ]`: `new int[n]`. Kết quả là địa chỉ của món đầu tiên (như tên mảng ở Bài 05), nên dùng được `a[i]`. Để trả, phải dùng dạng có `[]`: **`delete[] a;`**.
+Muốn xin **nhiều món liên tiếp** (một mảng) mà số lượng chỉ biết lúc chạy, viết số lượng trong `[ ]`: `new int[n]`. Kết quả là địa chỉ của món đầu tiên (như tên mảng ở [Bài 05](05-mang-phep-tinh-con-tro.md)), nên dùng được `a[i]`. Để trả, phải dùng dạng có `[]`: **`delete[] a;`**.
 
 ```cpp
 #include <iostream>
@@ -405,7 +405,7 @@ Hai lưu ý trung thực. Thứ nhất, ASan chỉ báo những gì **xảy ra t
 valgrind --leak-check=full ./chuongtrinh
 ```
 
-Valgrind chạy chương trình trong một môi trường do nó dựng lên, theo dõi từng lần xin và trả bộ nhớ, và khi chương trình kết thúc thì liệt kê những khối chưa được trả cùng nơi đã xin chúng. Valgrind **chưa được cài trên máy mình dùng để viết bài**, nên mình chỉ ghi lệnh và mô tả bằng lời, không dán kết quả. Bài 13 sẽ nói kỹ hơn về các công cụ này.
+Valgrind chạy chương trình trong một môi trường do nó dựng lên, theo dõi từng lần xin và trả bộ nhớ, và khi chương trình kết thúc thì liệt kê những khối chưa được trả cùng nơi đã xin chúng. Valgrind **chưa được cài trên máy mình dùng để viết bài**, nên mình chỉ ghi lệnh và mô tả bằng lời, không dán kết quả. [Bài 13](13-memory-leak-ub.md) sẽ nói kỹ hơn về các công cụ này.
 
 ### 6. Vì sao quản lý bằng tay mong manh
 
@@ -424,7 +424,7 @@ void xuLy(int cao) {
 Cũng như thế với ngoại lệ (mục 1): nếu một dòng ở giữa hàm ném ngoại lệ, hàm bị cắt ngang và **dòng `delete` ở cuối hàm không bao giờ chạy**. Bạn có thể viết `delete` thêm vào mọi đường thoát, nhưng code càng dài, càng dễ sót, và ai sửa code sau này cũng phải nhớ.
 
 !!! info "Bạn biết Go?"
-    Trong Go, bạn không bị chuyện này: bộ thu gom rác lo bộ nhớ, còn việc cần dọn (đóng file, mở khóa) thì bạn viết `defer` ngay sau khi mở, và `defer` chạy dù hàm thoát đường nào. C++ có cách tương đương nhưng đi theo hướng khác: gắn việc dọn vào **hàm hủy**, vì hàm hủy chạy đúng lúc đối tượng chết. Kỹ thuật đó tên là **RAII**, và là nội dung Bài 08. Bài sau đó (Bài 09, Bài 10) là các con trỏ thông minh dùng nó để tự trả bộ nhớ.
+    Trong Go, bạn không bị chuyện này: bộ thu gom rác lo bộ nhớ, còn việc cần dọn (đóng file, mở khóa) thì bạn viết `defer` ngay sau khi mở, và `defer` chạy dù hàm thoát đường nào. C++ có cách tương đương nhưng đi theo hướng khác: gắn việc dọn vào **hàm hủy**, vì hàm hủy chạy đúng lúc đối tượng chết. Kỹ thuật đó tên là **RAII**, và là nội dung [Bài 08](08-raii.md). Bài sau đó ([Bài 09](09-unique-ptr.md), [Bài 10](10-shared-ptr-weak-ptr.md)) là các con trỏ thông minh dùng nó để tự trả bộ nhớ.
 
 ## 💻 Ví dụ code
 
@@ -456,7 +456,7 @@ int main() {
 }
 ```
 
-(1) là biến toàn cục đếm số lần tạo (Bài 02) để mỗi `Cay` có số thứ tự riêng. (2) là hàm tạo **không nhận tham số**: `new Cay[2]` tạo hai phần tử mà không đưa giá trị nào, nên struct phải có hàm tạo như vậy.
+(1) là biến toàn cục đếm số lần tạo ([Bài 02](02-stack-heap-static.md)) để mỗi `Cay` có số thứ tự riêng. (2) là hàm tạo **không nhận tham số**: `new Cay[2]` tạo hai phần tử mà không đưa giá trị nào, nên struct phải có hàm tạo như vậy.
 
 **Chạy từng dòng**
 
@@ -609,7 +609,7 @@ Direct leak of 4 byte(s) in 1 object(s) allocated from:
 SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s).
 ```
 
-Mã thoát là 1. Dòng `#1` chỉ vào `new Cay(cao)` bên trong `xuLy` (dòng 15 của file, tức dòng (1)), và `#2` là lời gọi `xuLy(-1)` ở `main` (dòng 26): đúng chỗ rò rỉ. Chỉ có một khối bị báo, vì lần gọi `xuLy(5)` đã trả đúng. Sửa thật sự là thêm `delete p;` trước `return;` ở (2), hoặc tốt hơn là dùng RAII (Bài 08) để khỏi phải nhớ.
+Mã thoát là 1. Dòng `#1` chỉ vào `new Cay(cao)` bên trong `xuLy` (dòng 15 của file, tức dòng (1)), và `#2` là lời gọi `xuLy(-1)` ở `main` (dòng 26): đúng chỗ rò rỉ. Chỉ có một khối bị báo, vì lần gọi `xuLy(5)` đã trả đúng. Sửa thật sự là thêm `delete p;` trước `return;` ở (2), hoặc tốt hơn là dùng RAII ([Bài 08](08-raii.md)) để khỏi phải nhớ.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -626,7 +626,7 @@ Mã thoát là 1. Dòng `#1` chỉ vào `new Cay(cao)` bên trong `xuLy` (dòng 
     Cách thông dụng nhất là biên dịch với `-fsanitize=address -g`: khi chạy xong, LeakSanitizer liệt kê những chỗ chưa trả cùng dòng code đã xin chúng. Cách khác là Valgrind (`valgrind --leak-check=full ./chuongtrinh`), không cần biên dịch lại nhưng chạy chậm hơn. Cả hai chỉ thấy những gì xảy ra trong lần chạy đó, nên cần chạy với dữ liệu và đường đi đủ rộng. Tốt nhất vẫn là thiết kế để khó rò rỉ ngay từ đầu (RAII, con trỏ thông minh).
 
 ??? question "Vì sao nên tránh `new`/`delete` trần?"
-    Vì việc trả bộ nhớ phụ thuộc vào việc người viết nhớ `delete` đúng một lần trên **mọi** đường thoát của hàm, kể cả `return` sớm và ngoại lệ; chỉ cần sót một đường là rò rỉ, thừa một lần là double free. Thay vào đó, dùng đối tượng tự quản lý (`std::vector`, `std::string`, `std::unique_ptr`, `std::shared_ptr`) để hàm hủy của chúng tự trả bộ nhớ đúng lúc. Đây là ý tưởng RAII ở Bài 08.
+    Vì việc trả bộ nhớ phụ thuộc vào việc người viết nhớ `delete` đúng một lần trên **mọi** đường thoát của hàm, kể cả `return` sớm và ngoại lệ; chỉ cần sót một đường là rò rỉ, thừa một lần là double free. Thay vào đó, dùng đối tượng tự quản lý (`std::vector`, `std::string`, `std::unique_ptr`, `std::shared_ptr`) để hàm hủy của chúng tự trả bộ nhớ đúng lúc. Đây là ý tưởng RAII ở [Bài 08](08-raii.md).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -671,7 +671,7 @@ int main() {
 - `tao 1, tao 2, huy 1, huy 2`, vì hủy theo đúng thứ tự tạo ra
 - `tao 2, tao 1, huy 2, huy 1`, vì `new` chạy trước biến `a`
 
-<p class="giai-thich" markdown>Hai biến được tạo theo thứ tự viết nên `tao 1` rồi `tao 2`. `delete p;` hủy cây ở heap ngay lúc đó (`huy 2`), còn `a` là biến cục bộ nên hàm hủy của nó chạy khi chạy tới `}` của `main` (`huy 1`); mình đã chạy ra đúng dãy này. Đối tượng ở stack vẫn có hàm hủy, đó là Bài 02, nên dãy thiếu `huy 1` sai. Dãy hủy `1` trước `2` bỏ qua việc `delete p;` nằm trước `}`. Còn dãy tạo `2` trước `1` sai vì dòng `Cay a(1);` được chạy trước dòng có `new`.</p>
+<p class="giai-thich" markdown>Hai biến được tạo theo thứ tự viết nên `tao 1` rồi `tao 2`. `delete p;` hủy cây ở heap ngay lúc đó (`huy 2`), còn `a` là biến cục bộ nên hàm hủy của nó chạy khi chạy tới `}` của `main` (`huy 1`); mình đã chạy ra đúng dãy này. Đối tượng ở stack vẫn có hàm hủy, đó là [Bài 02](02-stack-heap-static.md), nên dãy thiếu `huy 1` sai. Dãy hủy `1` trước `2` bỏ qua việc `delete p;` nằm trước `}`. Còn dãy tạo `2` trước `1` sai vì dòng `Cay a(1);` được chạy trước dòng có `new`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -771,4 +771,4 @@ int main() { f(1, true); f(2, false); return 0; }
 2. Mảng động xin bằng `new T[n]` và trả bằng `delete[]`, gọi hàm tạo/hủy cho từng phần tử; cặp phải đúng: `new` với `delete`, `new[]` với `delete[]`, `malloc` với `free` (và `malloc`/`free` không gọi hàm tạo/hủy).
 3. Rò rỉ (quên trả) không phải UB, im lặng, và hàm hủy không chạy; con trỏ treo dùng sau khi trả (use-after-free), giải phóng hai lần và trộn `new[]` với `delete` đều là hành vi không xác định, không ai hứa kết quả.
 4. `p = nullptr` sau `delete` làm `delete p` lần nữa vô hại, nhưng chỉ sửa đúng con trỏ `p`: các con trỏ khác giữ địa chỉ cũ vẫn treo.
-5. Tìm rò rỉ bằng `-fsanitize=address -g` (LeakSanitizer) hoặc Valgrind, nhưng LeakSanitizer đôi khi bỏ sót nên im lặng không chứng minh là sạch; thoát sớm hay ngoại lệ dễ làm sót `delete`, vì vậy cần RAII (Bài 08) thay vì `new`/`delete` trần.
+5. Tìm rò rỉ bằng `-fsanitize=address -g` (LeakSanitizer) hoặc Valgrind, nhưng LeakSanitizer đôi khi bỏ sót nên im lặng không chứng minh là sạch; thoát sớm hay ngoại lệ dễ làm sót `delete`, vì vậy cần RAII ([Bài 08](08-raii.md)) thay vì `new`/`delete` trần.

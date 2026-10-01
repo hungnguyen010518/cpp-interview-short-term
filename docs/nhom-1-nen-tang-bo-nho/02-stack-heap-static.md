@@ -79,12 +79,12 @@ int* p = new int(5);
 Đọc từng phần, từ phải sang trái:
 
 - `new int(5)` nghĩa là "xin heap một chỗ vừa đủ cho một `int`, và ghi giá trị `5` vào đó". `new` **trả về địa chỉ** của chỗ vừa xin.
-- `int*` là kiểu "địa chỉ của một `int`". Dấu `*` đứng sau tên kiểu nghĩa là "địa chỉ của một …" (Bài 01 đã nhắc qua, Bài 03 sẽ dạy kỹ). Một biến kiểu `int*` gọi là **con trỏ (pointer)**: nó đựng một địa chỉ.
+- `int*` là kiểu "địa chỉ của một `int`". Dấu `*` đứng sau tên kiểu nghĩa là "địa chỉ của một …" ([Bài 01](01-bo-nho-byte-dia-chi.md) đã nhắc qua, [Bài 03](03-con-tro-co-ban.md) sẽ dạy kỹ). Một biến kiểu `int*` gọi là **con trỏ (pointer)**: nó đựng một địa chỉ.
 - `p` là tên biến con trỏ. Bản thân `p` là biến cục bộ nằm trên stack, nhưng nó **chỉ tới** một chỗ ở heap. Giống tờ giấy ghi số phòng trong kho: tờ giấy nằm trên bàn học, còn đồ nằm trong kho.
 
 Muốn đi theo địa chỉ để lấy giá trị, viết `*p` (dấu `*` đặt **trước** tên con trỏ, đọc là "thứ nằm ở địa chỉ `p`"). Viết `*p = 8;` là ghi `8` vào chỗ đó.
 
-Chỗ xin bằng `new` **không tự mất**. Nó tồn tại đến khi bạn tự trả bằng **`delete p;`**. Hàm kết thúc mà bạn chưa `delete` thì tờ giấy `p` mất (vì nó là biến cục bộ), nhưng chỗ trong kho **vẫn bị giữ**, và giờ không còn ai biết số phòng để trả. Lỗi đó tên là **rò rỉ bộ nhớ (memory leak)**. Ta sẽ học kỹ `new`, `delete` và cách tránh rò rỉ ở Bài 07; hôm nay chỉ cần nhớ hình dạng.
+Chỗ xin bằng `new` **không tự mất**. Nó tồn tại đến khi bạn tự trả bằng **`delete p;`**. Hàm kết thúc mà bạn chưa `delete` thì tờ giấy `p` mất (vì nó là biến cục bộ), nhưng chỗ trong kho **vẫn bị giữ**, và giờ không còn ai biết số phòng để trả. Lỗi đó tên là **rò rỉ bộ nhớ (memory leak)**. Ta sẽ học kỹ `new`, `delete` và cách tránh rò rỉ ở [Bài 07](07-new-delete.md); hôm nay chỉ cần nhớ hình dạng.
 
 Heap rộng hơn stack nhiều, nhưng **thường chậm hơn**: mỗi lần xin, đoạn code thủ kho phải đi tìm một chỗ trống đủ lớn, rồi ghi sổ.
 
@@ -236,7 +236,7 @@ ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 4 byte(s) in 1 object(s) allocated from:
 ```
 
-(Công cụ này Bài 13 dạy kỹ.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
+(Công cụ này [Bài 13](13-memory-leak-ub.md) dạy kỹ.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
 
 ### Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in
 
@@ -330,11 +330,11 @@ Ba dòng cuối cho thấy thêm một quy tắc: các đối tượng chết th
 **Thử thay đổi 2: xóa hai dòng gọi `goiHam();` ở (5) và (6).** Mình đã chạy. Dòng `[ra doi] static trong ham` và dòng `[chet]   static trong ham` **đều không xuất hiện**. Không ai chạy qua dòng (2) nên `tinh` chưa bao giờ ra đời, và cũng không có gì để hủy. Điều này chứng minh `static` cục bộ ra đời lúc chạy qua dòng khai báo chứ không phải lúc chương trình bắt đầu.
 
 !!! info "Bạn biết Go?"
-    Trong Go không có "hàm hủy" chạy đúng lúc một biến hết phạm vi, vì bộ thu gom rác (garbage collector) dọn bộ nhớ vào lúc nó chọn. Cái gần nhất với "việc dọn dẹp chạy đúng lúc rời hàm" là `defer`. C++ chạy hàm hủy đúng lúc ra khỏi khối, một cách xác định, và đó là nền của kỹ thuật **RAII** (gắn việc trả tài nguyên vào hàm hủy, để nó tự chạy đúng lúc) mà ta học ở Bài 08.
+    Trong Go không có "hàm hủy" chạy đúng lúc một biến hết phạm vi, vì bộ thu gom rác (garbage collector) dọn bộ nhớ vào lúc nó chọn. Cái gần nhất với "việc dọn dẹp chạy đúng lúc rời hàm" là `defer`. C++ chạy hàm hủy đúng lúc ra khỏi khối, một cách xác định, và đó là nền của kỹ thuật **RAII** (gắn việc trả tài nguyên vào hàm hủy, để nó tự chạy đúng lúc) mà ta học ở [Bài 08](08-raii.md).
 
     Về stack và heap: Go thường **không bắt bạn chọn**. Trình biên dịch Go có **phân tích thoát (escape analysis)**: nó xem biến có "thoát" khỏi hàm không, và nếu có thì tự đặt biến lên heap. Vì vậy `func taoSo() *int { x := 5; return &x }` hoàn toàn hợp lệ trong Go, và `go build -gcflags=-m` in dòng `moved to heap: x`.
 
-    Biến cấp package của Go thường nằm ở vùng tĩnh như global của C++, nhưng Go quy định rõ thứ tự khởi tạo chúng (theo sự phụ thuộc giữa các biến). C++ thì **không làm hộ** bạn việc chọn stack hay heap. Vì vậy C++ có RAII và **smart pointer** (con trỏ thông minh, một vật bọc tự trả chỗ ở heap; Bài 09).
+    Biến cấp package của Go thường nằm ở vùng tĩnh như global của C++, nhưng Go quy định rõ thứ tự khởi tạo chúng (theo sự phụ thuộc giữa các biến). C++ thì **không làm hộ** bạn việc chọn stack hay heap. Vì vậy C++ có RAII và **smart pointer** (con trỏ thông minh, một vật bọc tự trả chỗ ở heap; [Bài 09](09-unique-ptr.md)).
 
 ### Ví dụ 4: In địa chỉ của bốn loại
 
@@ -383,7 +383,7 @@ heap:    0x5707aa85ceb0
 bien con tro heap (cuc bo): 0x7ffeeb931b20
 ```
 
-Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như Bài 01 đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. Trong lần chạy này `heap` có vẻ gần cả hai, nhưng đó chỉ là tình cờ của lần chạy: kiểu mẫu này không được đảm bảo. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
+Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. Trong lần chạy này `heap` có vẻ gần cả hai, nhưng đó chỉ là tình cờ của lần chạy: kiểu mẫu này không được đảm bảo. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
 
 ### Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
 
@@ -523,7 +523,7 @@ b = 0x5583a17df180
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Trả về địa chỉ của biến cục bộ"
-    Trong Go, `return &x` với `x` cục bộ là hợp lệ. Trong C++, `x` nằm trên stack và chết khi hàm kết thúc, nên địa chỉ trả ra **trỏ vào chỗ đã dọn**. Mình thử một hàm `int* hamXau() { int x = 5; return &x; }` và `g++ -Wall` cảnh báo: `warning: address of local variable ‘x’ returned`. Đọc cái địa chỉ đó sau này là hành vi không xác định (Bài 13). Muốn giá trị sống lâu hơn hàm, hãy đặt nó ở heap, hoặc dùng `static` nếu đúng ý.
+    Trong Go, `return &x` với `x` cục bộ là hợp lệ. Trong C++, `x` nằm trên stack và chết khi hàm kết thúc, nên địa chỉ trả ra **trỏ vào chỗ đã dọn**. Mình thử một hàm `int* hamXau() { int x = 5; return &x; }` và `g++ -Wall` cảnh báo: `warning: address of local variable ‘x’ returned`. Đọc cái địa chỉ đó sau này là hành vi không xác định ([Bài 13](13-memory-leak-ub.md)). Muốn giá trị sống lâu hơn hàm, hãy đặt nó ở heap, hoặc dùng `static` nếu đúng ý.
 
 !!! warning "Lỗi 2: Tưởng global thì không có hàm tạo/hàm hủy chạy"
     Global của kiểu có hàm tạo thì hàm tạo **vẫn chạy**, thường ngay trước `main` mà bạn không thấy dòng nào gọi nó. Hàm hủy cũng vậy, sau `main`. Vì thế một global có hàm tạo in chữ thường sẽ in trước chữ đầu tiên của `main`.

@@ -16,13 +16,13 @@ Quay lại dãy tủ khóa của [Bài 01](01-bo-nho-byte-dia-chi.md). Bài làm
 **Cách 2: đưa tờ giấy ghi số ngăn tủ** (tờ giấy của [Bài 03](03-con-tro-co-ban.md)). Bạn ấy mở đúng ngăn đó và sửa trực tiếp lên bài gốc. Đây là **truyền con trỏ**.
 
 !!! info "Chỗ nào ví dụ photo và số ngăn không còn đúng?"
-    Số ngăn có thể sai, hoặc đồ trong ngăn đã bị dọn mất (chuyện này sẽ gặp ở Bài 07, khi học `new` và `delete`). Ngoài ra, hàm luôn nhận **bản sao của tờ giấy**: bạn ấy có thể vẽ nguệch ngoạc lên tờ giấy của mình mà tờ giấy của bạn không đổi. Mục 3 cho thấy điều này gây ra chuyện gì.
+    Số ngăn có thể sai, hoặc đồ trong ngăn đã bị dọn mất (chuyện này sẽ gặp ở [Bài 07](07-new-delete.md), khi học `new` và `delete`). Ngoài ra, hàm luôn nhận **bản sao của tờ giấy**: bạn ấy có thể vẽ nguệch ngoạc lên tờ giấy của mình mà tờ giấy của bạn không đổi. Mục 3 cho thấy điều này gây ra chuyện gì.
 
 ## 📖 Giải thích
 
 ### 1. Hàm có tham số, và truyền theo giá trị
 
-Ta đã thấy vài hàm nhỏ ở Bài 02; giờ học kỹ cách viết một hàm. Hình dạng của nó:
+Ta đã thấy vài hàm nhỏ ở [Bài 02](02-stack-heap-static.md); giờ học kỹ cách viết một hàm. Hình dạng của nó:
 
 ```text
 void tang(int x) {
@@ -37,14 +37,14 @@ void tang(int x) {
 
 Để gọi hàm, viết tên và đặt giá trị truyền vào trong ngoặc: `tang(a);`. Giá trị truyền vào gọi là **đối số (argument)**.
 
-Tham số `x` là **một biến mới**, thường nằm trong khung stack của riêng lần gọi này (Bài 02). Lúc gọi, C++ **chép giá trị** của `a` vào `x`. Hàm sửa `x` thì chỉ sửa bản photo, còn `a` ở nơi gọi vẫn như cũ. Đó là truyền theo giá trị, cách mặc định của C++.
+Tham số `x` là **một biến mới**, thường nằm trong khung stack của riêng lần gọi này ([Bài 02](02-stack-heap-static.md)). Lúc gọi, C++ **chép giá trị** của `a` vào `x`. Hàm sửa `x` thì chỉ sửa bản photo, còn `a` ở nơi gọi vẫn như cũ. Đó là truyền theo giá trị, cách mặc định của C++.
 
 !!! info "Bạn biết Go?"
     Go cũng truyền theo giá trị: `func tang(x int)` cho đúng kết quả y hệt. Với con trỏ cũng vậy: Go truyền con trỏ theo giá trị (chép địa chỉ), và C++ làm giống hệt, như mục 3 sẽ cho thấy.
 
 ### 2. Truyền con trỏ để sửa bản gốc
 
-Muốn hàm sửa được biến của nơi gọi, ta đưa **số ngăn** thay vì bản photo: tham số có kiểu con trỏ, và nơi gọi truyền địa chỉ bằng `&` (cả hai đã học ở Bài 03).
+Muốn hàm sửa được biến của nơi gọi, ta đưa **số ngăn** thay vì bản photo: tham số có kiểu con trỏ, và nơi gọi truyền địa chỉ bằng `&` (cả hai đã học ở [Bài 03](03-con-tro-co-ban.md)).
 
 ```text
 void tang(int* x) {     // x là con trỏ tới int
@@ -56,7 +56,7 @@ tang(&a);               // đưa địa chỉ của a
 
 Bên trong hàm, `x` vẫn là một biến mới (bản sao của tờ giấy), nhưng tờ giấy chép lại **ghi cùng một số ngăn**. Nên `*x` chính là `a`.
 
-Con trỏ có thể là `nullptr` (Bài 03), mà đi theo `nullptr` là hành vi không xác định. Vì vậy hàm nhận con trỏ nên kiểm tra trước: `if (x == nullptr) { return; }`. Dòng `return;` (không kèm giá trị) thoát khỏi hàm `void` ngay lập tức.
+Con trỏ có thể là `nullptr` ([Bài 03](03-con-tro-co-ban.md)), mà đi theo `nullptr` là hành vi không xác định. Vì vậy hàm nhận con trỏ nên kiểm tra trước: `if (x == nullptr) { return; }`. Dòng `return;` (không kèm giá trị) thoát khỏi hàm `void` ngay lập tức.
 
 Ví dụ kinh điển là hàm **đổi chỗ (swap)** hai biến: không thể viết được bằng truyền theo giá trị, vì hàm chỉ đổi chỗ hai bản photo. Với con trỏ thì được, và ví dụ 2 làm đúng việc này.
 
@@ -70,7 +70,7 @@ Con trỏ cũng là một biến, nên nó có địa chỉ, và ta lưu đượ
 
 **Vì sao `int**` được?** Ta đưa **số ngăn của chính tờ giấy `p`**, tức `&p`, có kiểu `int**`. Rồi viết `*con = x` để đổi tờ giấy gốc. Ví dụ 3 chạy cả hai cách.
 
-Nguyên tắc chung: muốn hàm sửa một thứ có kiểu `T`, phải đưa `T*`; nếu thứ đó đã là con trỏ thì kiểu thành `T**`. Có một cách gọn hơn là tham chiếu (Bài 06); ở đây ta chỉ cần hiểu vì sao `**` xuất hiện.
+Nguyên tắc chung: muốn hàm sửa một thứ có kiểu `T`, phải đưa `T*`; nếu thứ đó đã là con trỏ thì kiểu thành `T**`. Có một cách gọn hơn là tham chiếu ([Bài 06](06-tham-chieu-const.md)); ở đây ta chỉ cần hiểu vì sao `**` xuất hiện.
 
 ## 💻 Ví dụ code
 
@@ -262,7 +262,7 @@ error: cannot convert ‘int*’ to ‘int**’ in assignment
     Nơi gọi có thể truyền `nullptr`, và giải tham chiếu `nullptr` là hành vi không xác định. Kiểm tra `if (p == nullptr) return;` ở đầu hàm biến lỗi đó thành một nhánh xử lý rõ ràng thay vì chương trình chạy sai.
 
 ??? question "Muốn hàm đổi chính con trỏ của nơi gọi thì làm sao?"
-    Con trỏ cũng được truyền theo giá trị, nên hàm nhận `int*` chỉ sửa bản sao. Phải truyền địa chỉ của con trỏ (`&p`, kiểu `int**`) rồi gán `*con = ...`, hoặc dùng tham chiếu (Bài 06).
+    Con trỏ cũng được truyền theo giá trị, nên hàm nhận `int*` chỉ sửa bản sao. Phải truyền địa chỉ của con trỏ (`&p`, kiểu `int**`) rồi gán `*con = ...`, hoặc dùng tham chiếu ([Bài 06](06-tham-chieu-const.md)).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -379,4 +379,4 @@ int main() { int a = 1; int b = 2; int* p = &a; chon(p, &b); std::cout << *p; }
 2. Muốn sửa biến của nơi gọi thì nhận con trỏ (`void tang(int* x)`, gọi `tang(&a)`), sửa bằng `*x = ...`.
 3. Hàm nhận con trỏ nên kiểm tra `nullptr` trước khi dùng `*x`, vì giải tham chiếu `nullptr` là hành vi không xác định.
 4. `swap` bằng con trỏ phải đổi giá trị (`int tam = *p; *p = *q; *q = tam;`); chỉ đổi chỗ hai con trỏ thì `a` và `b` không đổi.
-5. Con trỏ cũng truyền theo giá trị, nên muốn hàm đổi chính con trỏ ở nơi gọi thì truyền `int**` (hoặc tham chiếu, Bài 06).
+5. Con trỏ cũng truyền theo giá trị, nên muốn hàm đổi chính con trỏ ở nơi gọi thì truyền `int**` (hoặc tham chiếu, [Bài 06](06-tham-chieu-const.md)).

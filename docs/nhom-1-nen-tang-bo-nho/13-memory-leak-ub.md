@@ -7,7 +7,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại **kho đồ của trường** ở Bài 2.
+Quay lại **kho đồ của trường** ở [Bài 2](02-stack-heap-static.md).
 
 **Rò rỉ (leak)**: bạn mượn đồ mà quên trả. Kho đầy dần, đến lúc không còn chỗ cho ai.
 
@@ -43,7 +43,7 @@ Quy tắc ghép đôi:
 
 **Cách phòng tránh**:
 
-- Dùng RAII và smart pointer (xem Bài 8 đến Bài 10).
+- Dùng RAII và smart pointer (xem [Bài 8](08-raii.md) đến [Bài 10](10-shared-ptr-weak-ptr.md)).
 - Dùng container chuẩn như `vector`, `string`.
 - Tránh `new`/`delete` trần.
 - Bật cảnh báo `-Wall -Wextra`.

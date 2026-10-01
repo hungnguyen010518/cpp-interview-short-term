@@ -82,7 +82,7 @@ Con trỏ có thể trỏ tới mọi phần tử của mảng, và thêm **mộ
 
 ### 4. Đi ra ngoài mảng
 
-**Đi ra ngoài mảng là hành vi không xác định (UB, Bài 03).** Ví dụ `a[4]`, `a[-1]` hay `*(p + 10)` với mảng 4 phần tử: chuẩn không hứa chuyện gì sẽ xảy ra. Có thể trông như chạy bình thường, có thể đọc hay ghi nhầm vào biến khác, có thể dừng đột ngột. Mình không chạy các dòng này:
+**Đi ra ngoài mảng là hành vi không xác định (UB, [Bài 03](03-con-tro-co-ban.md)).** Ví dụ `a[4]`, `a[-1]` hay `*(p + 10)` với mảng 4 phần tử: chuẩn không hứa chuyện gì sẽ xảy ra. Có thể trông như chạy bình thường, có thể đọc hay ghi nhầm vào biến khác, có thể dừng đột ngột. Mình không chạy các dòng này:
 
 ```cpp
 // bo-qua-kiem-tra
@@ -103,7 +103,7 @@ C++ **không kiểm tra** chỉ số khi chạy (khác Go: Go dừng chương tr
 
 ### 5. Truyền mảng vào hàm: bẫy `sizeof`
 
-Khi truyền một mảng vào hàm, mảng thoái hóa thành con trỏ, nên hàm chỉ nhận **một địa chỉ**: địa chỉ của phần tử đầu (như mọi tham số, nó là một bản sao, Bài 04). Hàm không nhận số phần tử, cũng không nhận bản sao của mảng. Dù bạn viết tham số là `int a[4]`, trình biên dịch vẫn coi nó là `int*`.
+Khi truyền một mảng vào hàm, mảng thoái hóa thành con trỏ, nên hàm chỉ nhận **một địa chỉ**: địa chỉ của phần tử đầu (như mọi tham số, nó là một bản sao, [Bài 04](04-con-tro-ham.md)). Hàm không nhận số phần tử, cũng không nhận bản sao của mảng. Dù bạn viết tham số là `int a[4]`, trình biên dịch vẫn coi nó là `int*`.
 
 Hệ quả: bên trong hàm, `sizeof(a)` chỉ là cỡ của **một con trỏ**, không phải 16. Ví dụ 3 chạy thật chuyện này, và `g++ -Wall` còn cảnh báo bạn.
 
@@ -145,11 +145,11 @@ Phần `"An"` (chuỗi trong nháy kép) là **chuỗi hằng**. Nó chiếm **3
 
 `ten` là con trỏ tới ký tự đầu. Kiểu của chính `"An"` là mảng 3 `const char`, nên nó thoái hóa thành `const char*` khi gán. Chữ `const` nghĩa là các ký tự **chỉ đọc**.
 
-Hàm đọc chuỗi không biết độ dài, nó đi từng ô cho đến khi gặp `'\0'`. `std::cout << ten` làm đúng thế. Chính quy ước này là lý do Bài 01 phải ép `char*` sang `void*` mới in được địa chỉ.
+Hàm đọc chuỗi không biết độ dài, nó đi từng ô cho đến khi gặp `'\0'`. `std::cout << ten` làm đúng thế. Chính quy ước này là lý do [Bài 01](01-bo-nho-byte-dia-chi.md) phải ép `char*` sang `void*` mới in được địa chỉ.
 
 Về việc sửa: `ten[0] = 'B';` với `const char* ten` bị trình biên dịch từ chối (ví dụ 4 có thử). Nếu cố ép bỏ `const` rồi ghi vào chuỗi hằng thì là hành vi không xác định, mình không chạy.
 
-Muốn chuỗi sửa được, tạo một **mảng** riêng chép nội dung ra: `char ban[] = "An";`. Với đa số việc thực tế, hãy dùng `std::string` (Bài 02): nó tự lo độ dài và việc chép.
+Muốn chuỗi sửa được, tạo một **mảng** riêng chép nội dung ra: `char ban[] = "An";`. Với đa số việc thực tế, hãy dùng `std::string` ([Bài 02](02-stack-heap-static.md)): nó tự lo độ dài và việc chép.
 
 ## 💻 Ví dụ code
 
@@ -353,7 +353,7 @@ int main() {
 }
 ```
 
-Hai chỗ cần giải thích. `static_cast<int>(ten[i])` (Bài 01) ép một `char` thành số để in ra **mã số** thay vì chữ. `while (điều kiện) { ... }` lặp thân vòng lặp chừng nào điều kiện còn đúng (như `for` của Go khi chỉ có điều kiện), và `dem++` là tăng `dem` thêm 1.
+Hai chỗ cần giải thích. `static_cast<int>(ten[i])` ([Bài 01](01-bo-nho-byte-dia-chi.md)) ép một `char` thành số để in ra **mã số** thay vì chữ. `while (điều kiện) { ... }` lặp thân vòng lặp chừng nào điều kiện còn đúng (như `for` của Go khi chỉ có điều kiện), và `dem++` là tăng `dem` thêm 1.
 
 **Chạy từng dòng**
 

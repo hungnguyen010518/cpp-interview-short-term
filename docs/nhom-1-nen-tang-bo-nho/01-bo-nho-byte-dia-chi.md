@@ -245,7 +245,7 @@ Con số này là kết quả trên máy mình. Máy bạn rất có thể in y 
 
 ### Ví dụ 3: Địa chỉ của hai ba biến
 
-Trong code dưới đây có hai thứ lạ ở dòng (2): `void*` và `static_cast<void*>(...)`. Dấu `*` sau tên kiểu nghĩa là "địa chỉ của một …" (`char*` là "địa chỉ của một `char`"); Bài 03 sẽ dạy kỹ. Cứ đọc tiếp, ngay sau phần kết quả mình giải thích vì sao cần chúng.
+Trong code dưới đây có hai thứ lạ ở dòng (2): `void*` và `static_cast<void*>(...)`. Dấu `*` sau tên kiểu nghĩa là "địa chỉ của một …" (`char*` là "địa chỉ của một `char`"); [Bài 03](03-con-tro-co-ban.md) sẽ dạy kỹ. Cứ đọc tiếp, ngay sau phần kết quả mình giải thích vì sao cần chúng.
 
 ```cpp
 #include <iostream>

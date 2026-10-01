@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Ở Bài 07, kho đồ của trường bắt bạn **tự đi trả** phòng: quên một lần là phòng bị giữ mãi. Bây giờ hãy nghĩ tới **thư viện**. Bạn bước vào, mượn sách ở quầy. Đến lúc bước ra khỏi cửa, sách **tự động được trả**: bạn không cần nhớ, và cũng không thể "quên trả" vì cánh cửa lo việc đó.
+Ở [Bài 07](07-new-delete.md), kho đồ của trường bắt bạn **tự đi trả** phòng: quên một lần là phòng bị giữ mãi. Bây giờ hãy nghĩ tới **thư viện**. Bạn bước vào, mượn sách ở quầy. Đến lúc bước ra khỏi cửa, sách **tự động được trả**: bạn không cần nhớ, và cũng không thể "quên trả" vì cánh cửa lo việc đó.
 
 RAII là ý tưởng đó trong C++. Tài nguyên được mượn lúc đối tượng **ra đời** và được trả lúc đối tượng **chết**. Bạn chỉ cần để đối tượng chết đúng lúc; việc trả đã gắn sẵn vào hàm hủy.
 
@@ -20,7 +20,7 @@ RAII là ý tưởng đó trong C++. Tài nguyên được mượn lúc đối t
 
 ### 1. Ôn: hàm hủy chạy ở cuối khối `{}`
 
-Từ Bài 02, bạn đã biết: hàm tạo chạy khi đối tượng ra đời, hàm hủy chạy khi nó chết, và biến cục bộ chết ở dấu `}` kết thúc khối chứa nó. Ta kiểm lại bằng struct `TheMuon` (thẻ mượn sách) in `muon` khi ra đời và `tra` khi chết:
+Từ [Bài 02](02-stack-heap-static.md), bạn đã biết: hàm tạo chạy khi đối tượng ra đời, hàm hủy chạy khi nó chết, và biến cục bộ chết ở dấu `}` kết thúc khối chứa nó. Ta kiểm lại bằng struct `TheMuon` (thẻ mượn sách) in `muon` khi ra đời và `tra` khi chết:
 
 ```cpp
 #include <iostream>
@@ -84,14 +84,14 @@ Hai điều cần nhớ. Một: hàm hủy chạy **ngay tại `}`**, không ai 
 
 **RAII** viết tắt của *Resource Acquisition Is Initialization*, dịch thoáng là "xin tài nguyên chính là khởi tạo". Cách làm gồm hai bước: **xin tài nguyên trong hàm tạo**, **trả trong hàm hủy**. Từ đó trở đi, chỉ cần để đối tượng sống ở một biến cục bộ: ra khỏi khối là tài nguyên được trả.
 
-**Tài nguyên (resource)** là bất cứ thứ gì "mượn rồi phải trả": bộ nhớ ở heap (Bài 07), một file đang mở, một cái khóa đang giữ (để hai phần của chương trình không cùng sửa một thứ một lúc), một kết nối mạng, một ổ cắm mạng. Thư viện chuẩn của C++ có sẵn nhiều lớp theo kiểu này, bạn chỉ cần biết tên: `std::ifstream` mở file khi tạo và đóng khi hủy; `std::lock_guard` giữ khóa khi tạo và mở khóa khi hủy. Bài này không đi sâu vào chúng, mà tự viết một lớp nhỏ để hiểu bên trong.
+**Tài nguyên (resource)** là bất cứ thứ gì "mượn rồi phải trả": bộ nhớ ở heap ([Bài 07](07-new-delete.md)), một file đang mở, một cái khóa đang giữ (để hai phần của chương trình không cùng sửa một thứ một lúc), một kết nối mạng, một ổ cắm mạng. Thư viện chuẩn của C++ có sẵn nhiều lớp theo kiểu này, bạn chỉ cần biết tên: `std::ifstream` mở file khi tạo và đóng khi hủy; `std::lock_guard` giữ khóa khi tạo và mở khóa khi hủy. Bài này không đi sâu vào chúng, mà tự viết một lớp nhỏ để hiểu bên trong.
 
 !!! info "Bạn biết Go?"
     Go có `defer f.Close()`: đóng file đúng lúc hàm thoát. Hàm hủy làm việc tương tự, nhưng có hai khác biệt thật. Thứ nhất, `defer` là việc **bạn phải nhớ viết** ở từng nơi dùng; còn RAII gắn việc trả vào **chính kiểu dữ liệu**, nên dùng kiểu đó là tự được trả, không cần nhớ viết ở từng nơi dùng. Thứ hai, `defer` chạy ở **cuối hàm**, còn hàm hủy chạy ở cuối **khối `{}`** chứa đối tượng, có thể sớm hơn nhiều.
 
 ### 3. Thí nghiệm: thoát sớm, cách thủ công và cách RAII
 
-Ta lấy lại hàm `xuLy` của Bài 07. Bản (a) quản lý bằng `new`/`delete` thủ công; bản (b) để một đối tượng cục bộ lo. Mỗi bản đều gọi `xuLy(5)` rồi `xuLy(-1)` (số âm kích hoạt `return` sớm).
+Ta lấy lại hàm `xuLy` của [Bài 07](07-new-delete.md). Bản (a) quản lý bằng `new`/`delete` thủ công; bản (b) để một đối tượng cục bộ lo. Mỗi bản đều gọi `xuLy(5)` rồi `xuLy(-1)` (số âm kích hoạt `return` sớm).
 
 **(a) Thủ công** (không phải UB: chỉ bị rò rỉ, chương trình vẫn đúng luật):
 
@@ -148,7 +148,7 @@ cao am, thoat som
 xong
 ```
 
-Lần gọi thứ hai có `tao -1` mà **không có `huy -1`**: đây chính là hàm đã gặp ở Bài 07, rò rỉ vì `delete` bị nhảy qua.
+Lần gọi thứ hai có `tao -1` mà **không có `huy -1`**: đây chính là hàm đã gặp ở [Bài 07](07-new-delete.md), rò rỉ vì `delete` bị nhảy qua.
 
 **(b) RAII**: không còn `new` và `delete`. `Cay` là biến cục bộ, nên hàm hủy của nó tự chạy:
 
@@ -207,14 +207,14 @@ xong
 
 Dòng `huy -1` **xuất hiện**, đúng giữa `cao am, thoat som` và `xong`. Không có dòng `delete` nào để nhảy qua. Dù hàm có thêm mười chỗ `return`, mỗi chỗ đều ra khỏi khối chứa `c` và làm `c` chết.
 
-**Thử thay đổi: chạy cả hai bản với AddressSanitizer** (lệnh ở Bài 07, mục 5). Mình đã chạy: bản (a) bị LeakSanitizer báo `4 byte(s) leaked in 1 allocation(s)` ở dòng `new Cay(cao)` và thoát mã 1; bản (b) không báo gì và thoát mã 0. Nhớ rằng im lặng của công cụ không chứng minh chương trình sạch, nhưng ở đây ta còn thấy bằng mắt: có `huy -1`.
+**Thử thay đổi: chạy cả hai bản với AddressSanitizer** (lệnh ở [Bài 07](07-new-delete.md), mục 5). Mình đã chạy: bản (a) bị LeakSanitizer báo `4 byte(s) leaked in 1 allocation(s)` ở dòng `new Cay(cao)` và thoát mã 1; bản (b) không báo gì và thoát mã 0. Nhớ rằng im lặng của công cụ không chứng minh chương trình sạch, nhưng ở đây ta còn thấy bằng mắt: có `huy -1`.
 
 !!! warning "Hay nhầm"
     "Biến cục bộ ở stack thì không cần hàm hủy" là sai. Hàm hủy chạy với **mọi** đối tượng, kể cả ở stack. Chính vì thế RAII dùng được: ta đặt việc trả vào hàm hủy của một biến cục bộ.
 
 ### 4. Ngoại lệ: `throw`, `try`, `catch`
 
-Ngoại lệ (đã nhắc ở Bài 07) là cách báo lỗi bằng cách **cắt ngang hàm đang chạy**. Cú pháp gồm ba mảnh:
+Ngoại lệ (đã nhắc ở [Bài 07](07-new-delete.md)) là cách báo lỗi bằng cách **cắt ngang hàm đang chạy**. Cú pháp gồm ba mảnh:
 
 ```text
 throw 5;                       // ném một giá trị ra: hàm hiện tại dừng ngay tại đây
@@ -286,7 +286,7 @@ xong
 
 Chú ý thứ tự: `huy -1` in **trước** `bat duoc loi -1`. Hàm hủy của `c` chạy trong lúc chương trình còn đang đi ngược ra khỏi `xuLy`, rồi mới tới thân khối `catch`.
 
-Việc đi ngược từ nơi `throw` lên nơi `catch`, hủy mọi đối tượng cục bộ trên đường đi, gọi là **tháo ngăn xếp (stack unwinding)** (ngăn xếp = stack, cái bàn học của Bài 02; không phải "ngăn" của tủ khóa). Nó là lý do RAII an toàn với ngoại lệ: dù hàm bị cắt ngang ở đâu, các đối tượng đã ra đời đều được hủy.
+Việc đi ngược từ nơi `throw` lên nơi `catch`, hủy mọi đối tượng cục bộ trên đường đi, gọi là **tháo ngăn xếp (stack unwinding)** (ngăn xếp = stack, cái bàn học của [Bài 02](02-stack-heap-static.md); không phải "ngăn" của tủ khóa). Nó là lý do RAII an toàn với ngoại lệ: dù hàm bị cắt ngang ở đâu, các đối tượng đã ra đời đều được hủy.
 
 Cùng hàm đó nhưng viết thủ công (`Cay* p = new Cay(cao);` ... `delete p;` ở cuối): mình đã chạy, kết quả là `tao -1`, `truoc khi throw`, `bat duoc loi -1`, `xong`. **Không có `huy -1`**: dòng `delete p;` bị nhảy qua, và ASan báo rò rỉ 4 byte. Con trỏ `p` mất, còn chỗ ở heap thì không ai giữ hay trả.
 
@@ -308,7 +308,7 @@ Mình có thử trên máy mình: g++ in `terminate called after throwing an ins
 
 ### 5. Tự viết một lớp RAII: `Hop`
 
-Ta tự bọc một tài nguyên in được: một chỗ `int` ở heap. Lớp `Hop` (cái hộp) xin chỗ bằng `new` trong hàm tạo và trả bằng `delete` trong hàm hủy. Mình dùng `struct` cho gọn (ở đây `class` và `struct` dùng như nhau, như Bài 02 đã nói):
+Ta tự bọc một tài nguyên in được: một chỗ `int` ở heap. Lớp `Hop` (cái hộp) xin chỗ bằng `new` trong hàm tạo và trả bằng `delete` trong hàm hủy. Mình dùng `struct` cho gọn (ở đây `class` và `struct` dùng như nhau, như [Bài 02](02-stack-heap-static.md) đã nói):
 
 ```cpp
 #include <iostream>
@@ -372,7 +372,7 @@ Mỗi lần "xin" có đúng một lần "tra", kể cả lần thoát sớm. M�
 
 ### 6. Chỗ nguy hiểm: copy một lớp giữ con trỏ thô
 
-Lớp `Hop` có một cái bẫy. Khi bạn **sao chép** một `Hop`, nếu bạn không tự viết hàm tạo sao chép (Bài 06), trình biên dịch tự viết một bản **chép từng trường**. Trường của `Hop` chỉ có một: con trỏ `p`. Vậy bản sao nhận **cùng địa chỉ** ở heap, không phải một chỗ mới:
+Lớp `Hop` có một cái bẫy. Khi bạn **sao chép** một `Hop`, nếu bạn không tự viết hàm tạo sao chép ([Bài 06](06-tham-chieu-const.md)), trình biên dịch tự viết một bản **chép từng trường**. Trường của `Hop` chỉ có một: con trỏ `p`. Vậy bản sao nhận **cùng địa chỉ** ở heap, không phải một chỗ mới:
 
 ```cpp
 // bo-qua-kiem-tra
@@ -397,11 +397,11 @@ heap:                     [ 0x9000: 5 ]
 stack:   b.p = 0x9000 ------+     <- hai tờ giấy cùng ghi số phòng 0x9000
 ```
 
-Cuối `main`, `b` chết (hàm hủy `delete 0x9000`), rồi `a` chết (lại `delete 0x9000`): đó là **giải phóng hai lần** của Bài 07, là hành vi không xác định. Vì thế mình để code trong khối bỏ qua và **không ghi kết quả**. Ý chính: mỗi tài nguyên chỉ nên có **một** chủ lo việc trả, còn ở đây có hai. Cách sửa (các quy tắc "rule of 3/5") nằm ở Bài 11; bài này chỉ cần bạn biết lớp bọc con trỏ thô cần được để ý khi copy.
+Cuối `main`, `b` chết (hàm hủy `delete 0x9000`), rồi `a` chết (lại `delete 0x9000`): đó là **giải phóng hai lần** của [Bài 07](07-new-delete.md), là hành vi không xác định. Vì thế mình để code trong khối bỏ qua và **không ghi kết quả**. Ý chính: mỗi tài nguyên chỉ nên có **một** chủ lo việc trả, còn ở đây có hai. Cách sửa (các quy tắc "rule of 3/5") nằm ở [Bài 11](11-move-semantics.md); bài này chỉ cần bạn biết lớp bọc con trỏ thô cần được để ý khi copy.
 
 ### 7. Chốt: đừng gọi `delete` tay
 
-Nhìn lại những gì ta thấy: `return` sớm làm sót `delete`, ngoại lệ làm sót `delete`, nhưng đối tượng cục bộ luôn được hủy. Quy tắc rút ra: **đừng viết `delete` tay ở code dùng; để một đối tượng lo.** Lớp `Hop` ở trên là bản tự làm cho một `int`. Thư viện chuẩn có bản **làm sẵn** cho bộ nhớ ở heap, tên `std::unique_ptr`, là nội dung Bài 09: bạn sẽ không phải tự viết `Hop` nữa, và nó còn chặn copy (sẽ thấy ở Bài 09).
+Nhìn lại những gì ta thấy: `return` sớm làm sót `delete`, ngoại lệ làm sót `delete`, nhưng đối tượng cục bộ luôn được hủy. Quy tắc rút ra: **đừng viết `delete` tay ở code dùng; để một đối tượng lo.** Lớp `Hop` ở trên là bản tự làm cho một `int`. Thư viện chuẩn có bản **làm sẵn** cho bộ nhớ ở heap, tên `std::unique_ptr`, là nội dung [Bài 09](09-unique-ptr.md): bạn sẽ không phải tự viết `Hop` nữa, và nó còn chặn copy (sẽ thấy ở Bài 09).
 
 !!! question "Hỏi nhanh: vậy `new` và `delete` dùng ở đâu?"
     Gần như chỉ **bên trong** các lớp RAII như `Hop`. Code của người dùng thì giữ đối tượng ở biến cục bộ (hoặc trong lớp RAII làm sẵn) và để hàm hủy lo phần trả.
@@ -485,7 +485,7 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
     Cả hai đều giúp dọn dẹp đúng lúc. Khác biệt: `defer` là việc lập trình viên phải nhớ viết ở từng nơi dùng tài nguyên (quên là sót), còn RAII gắn việc trả vào chính kiểu dữ liệu nên dùng kiểu đó là tự được trả. Ngoài ra `defer` chạy ở cuối hàm, còn hàm hủy chạy ở cuối khối `{}` chứa đối tượng, có thể sớm hơn.
 
 ??? question "Vì sao lớp RAII giữ con trỏ thô cần để ý khi copy?"
-    Nếu không có hàm tạo sao chép riêng, trình biên dịch chép từng trường, nên hai đối tượng giữ cùng một con trỏ. Cả hai hàm hủy đều `delete` cùng một chỗ, tức giải phóng hai lần (hành vi không xác định). Muốn đúng phải quản lý quyền sở hữu khi copy, đó là rule of 3/5 (Bài 11), hoặc dùng sẵn `std::unique_ptr` (Bài 09).
+    Nếu không có hàm tạo sao chép riêng, trình biên dịch chép từng trường, nên hai đối tượng giữ cùng một con trỏ. Cả hai hàm hủy đều `delete` cùng một chỗ, tức giải phóng hai lần (hành vi không xác định). Muốn đúng phải quản lý quyền sở hữu khi copy, đó là rule of 3/5 ([Bài 11](11-move-semantics.md)), hoặc dùng sẵn `std::unique_ptr` ([Bài 09](09-unique-ptr.md)).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -496,7 +496,7 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
     Hàm hủy chạy khi tháo ngăn xếp, mà tháo ngăn xếp gắn với việc có một `catch` bắt ở đâu đó. Nếu không có, chương trình gọi `std::terminate` và việc hủy là do cài đặt quyết định (mục 4). Đừng dựa vào nó để dọn dẹp.
 
 !!! warning "Lỗi 3: Copy lớp giữ con trỏ thô"
-    Chép con trỏ chứ không chép chỗ được trỏ tới, nên hai đối tượng cùng `delete` một chỗ (mục 6). Bài 11 dạy cách sửa; Bài 09 có bản làm sẵn.
+    Chép con trỏ chứ không chép chỗ được trỏ tới, nên hai đối tượng cùng `delete` một chỗ (mục 6). [Bài 11](11-move-semantics.md) dạy cách sửa; [Bài 09](09-unique-ptr.md) có bản làm sẵn.
 
 ## ✍️ Trắc nghiệm
 
@@ -614,5 +614,5 @@ std::cout << "het\n";
 1. RAII là xin tài nguyên trong hàm tạo và trả trong hàm hủy; tài nguyên không chỉ là bộ nhớ mà còn là file, khóa, kết nối, ổ cắm mạng (ví dụ trong chuẩn: `std::ifstream`, `std::lock_guard`).
 2. Hàm hủy của biến cục bộ chạy ở cuối khối `{}` chứa nó, theo thứ tự ngược với lúc tạo, kể cả khi `return` sớm; còn `delete` viết tay thì bị nhảy qua.
 3. Khi `throw` được ném và bị `catch` ở ngoài bắt, chương trình tháo ngăn xếp và hủy mọi đối tượng cục bộ đã ra đời trên đường đi, trước khi chạy khối `catch`; nếu không ai bắt thì gọi `std::terminate` và việc hủy là do cài đặt quyết định, còn hàm hủy thì không nên ném ngoại lệ.
-4. Lớp RAII giữ con trỏ thô rất nguy hiểm khi copy: hai đối tượng cùng giữ một con trỏ nên cùng `delete` một chỗ (cách sửa ở Bài 11).
-5. So với `defer` của Go: `defer` phải nhớ viết ở từng nơi và chạy ở cuối hàm, còn RAII gắn vào kiểu dữ liệu (không cần nhớ viết ở từng nơi) và chạy ở cuối khối; đừng gọi `delete` tay, để một đối tượng lo, và `std::unique_ptr` (Bài 09) là bản làm sẵn cho bộ nhớ.
+4. Lớp RAII giữ con trỏ thô rất nguy hiểm khi copy: hai đối tượng cùng giữ một con trỏ nên cùng `delete` một chỗ (cách sửa ở [Bài 11](11-move-semantics.md)).
+5. So với `defer` của Go: `defer` phải nhớ viết ở từng nơi và chạy ở cuối hàm, còn RAII gắn vào kiểu dữ liệu (không cần nhớ viết ở từng nơi) và chạy ở cuối khối; đừng gọi `delete` tay, để một đối tượng lo, và `std::unique_ptr` ([Bài 09](09-unique-ptr.md)) là bản làm sẵn cho bộ nhớ.

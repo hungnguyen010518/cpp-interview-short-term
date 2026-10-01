@@ -31,7 +31,7 @@ Vật "tạm thời, sắp biến mất", như tờ giấy nháp vừa viết, g
 
 - Nó chỉ ép `x` thành rvalue. Như dán nhãn "cho phép lấy ruột".
 - Việc di chuyển thật sự do **move constructor** (hàm tạo di chuyển) hoặc **move assignment** (toán tử gán di chuyển) làm.
-- Bạn đã gặp `std::move` với `unique_ptr` ở Bài 9.
+- Bạn đã gặp `std::move` với `unique_ptr` ở [Bài 9](09-unique-ptr.md).
 
 **Sau khi move, nguồn ra sao?**
 
@@ -39,7 +39,7 @@ Vật "tạm thời, sắp biến mất", như tờ giấy nháp vừa viết, g
 - Hợp lệ nghĩa là hủy nó hay gán giá trị mới cho nó đều an toàn.
 - Không xác định nghĩa là bạn đừng đoán bên trong có gì. Ví dụ `std::string` đã bị move thì độ dài của nó không được đảm bảo.
 - Vì vậy với kiểu thông thường như `std::string`, sau khi move chỉ nên hủy hoặc gán lại.
-- Có một trường hợp đặc biệt: `unique_ptr` và `shared_ptr`. Chuẩn C++ bảo đảm một cái đã bị move thì rỗng (bằng `nullptr`), nên đọc nó là an toàn. Ví dụ ở Bài 9 đọc `a == nullptr` sau khi move là được vì lý do này.
+- Có một trường hợp đặc biệt: `unique_ptr` và `shared_ptr`. Chuẩn C++ bảo đảm một cái đã bị move thì rỗng (bằng `nullptr`), nên đọc nó là an toàn. Ví dụ ở [Bài 9](09-unique-ptr.md) đọc `a == nullptr` sau khi move là được vì lý do này.
 
 **Move constructor nên có `noexcept`.**
 
@@ -89,7 +89,7 @@ int main() {
 
 Kết quả in ra: `1000` rồi `1000`.
 
-Ví dụ 2: class `Mang` giữ con trỏ thô, tự viết đủ cả năm hàm đặc biệt (Rule of 5). Chú ý `new int[n]` và `delete[]`: `new int[n]` xin một khối gồm nhiều `int` nằm liền nhau, và khối đó phải được trả bằng `delete[]`. [Bài 13](13-memory-leak-ub.md) sẽ nói kỹ về chuyện này.
+Ví dụ 2: class `Mang` giữ con trỏ thô, tự viết đủ cả năm hàm đặc biệt (Rule of 5). Chú ý `new int[n]` và `delete[]`: `new int[n]` xin một khối gồm nhiều `int` nằm liền nhau, và khối đó phải được trả bằng `delete[]`. [Bài 07](07-new-delete.md) đã nói kỹ về chuyện này.
 
 ```cpp
 #include <cstddef>

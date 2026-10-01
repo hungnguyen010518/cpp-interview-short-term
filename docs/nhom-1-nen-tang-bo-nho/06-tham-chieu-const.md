@@ -29,7 +29,7 @@ int a = 10;
 int& b = a;     // b là biệt danh của a
 ```
 
-Chú ý: ở Bài 03, `&a` (dấu `&` đứng **trước một biến**, trong biểu thức) nghĩa là "địa chỉ của `a`". Ở đây `int&` (dấu `&` đứng **sau tên kiểu**, trong khai báo) nghĩa là "tham chiếu". Cùng một ký tự, hai vai trò khác nhau, nhìn vị trí để phân biệt.
+Chú ý: ở [Bài 03](03-con-tro-co-ban.md), `&a` (dấu `&` đứng **trước một biến**, trong biểu thức) nghĩa là "địa chỉ của `a`". Ở đây `int&` (dấu `&` đứng **sau tên kiểu**, trong khai báo) nghĩa là "tham chiếu". Cùng một ký tự, hai vai trò khác nhau, nhìn vị trí để phân biệt.
 
 Sau dòng đó, `a` và `b` là **hai tên của cùng một ô nhớ**, không có ô nhớ thứ hai:
 
@@ -92,7 +92,7 @@ Tham chiếu cũng có `const`: `const int& t = a;` nghĩa là "t là biệt dan
 
 Muốn đưa một món đồ cho hàm, bạn có bốn cách. Để thấy khác biệt, ta dùng một struct có **hàm tạo sao chép** (copy constructor).
 
-**Hàm tạo sao chép là gì?** Nó là một hàm tạo (Bài 02) đặc biệt, **chạy mỗi khi C++ tạo một bản sao** của đối tượng cùng kiểu. Nó nhận đối tượng gốc làm tham số, kiểu `const Cay&`. Bình thường bạn không cần tự viết (trình biên dịch tự sinh ra một hàm chép từng trường), nhưng ở đây ta viết để nó in chữ `copy!`, và nhờ vậy **đếm được số lần sao chép**.
+**Hàm tạo sao chép là gì?** Nó là một hàm tạo ([Bài 02](02-stack-heap-static.md)) đặc biệt, **chạy mỗi khi C++ tạo một bản sao** của đối tượng cùng kiểu. Nó nhận đối tượng gốc làm tham số, kiểu `const Cay&`. Bình thường bạn không cần tự viết (trình biên dịch tự sinh ra một hàm chép từng trường), nhưng ở đây ta viết để nó in chữ `copy!`, và nhờ vậy **đếm được số lần sao chép**.
 
 Bốn hàm, bốn cách truyền (đọc các dòng đánh số trong code):
 
@@ -244,7 +244,7 @@ x = 4
 error: cannot bind non-const lvalue reference of type ‘int&’ to an rvalue of type ‘int’
 ```
 
-Giải nghĩa câu báo lỗi: "bind" là "gắn"; "lvalue" là giá trị có tên như biến `a`; "rvalue" là giá trị tạm như `5` (Bài 11 nói kỹ). Nghĩa là không gắn được tham chiếu không `const` vào giá trị tạm. Lời gọi (1) `docTheoThamChieu(a)` với biến `a` thì vẫn hợp lệ.
+Giải nghĩa câu báo lỗi: "bind" là "gắn"; "lvalue" là giá trị có tên như biến `a`; "rvalue" là giá trị tạm như `5` ([Bài 11](11-move-semantics.md) nói kỹ). Nghĩa là không gắn được tham chiếu không `const` vào giá trị tạm. Lời gọi (1) `docTheoThamChieu(a)` với biến `a` thì vẫn hợp lệ.
 
 ### 6. Đừng trả về tham chiếu tới biến cục bộ
 
@@ -272,7 +272,7 @@ Chương trình này **biên dịch được**, nhưng `g++ -Wall` cảnh báo n
 warning: reference to local variable ‘x’ returned [-Wreturn-local-addr]
 ```
 
-Khi chạy, kết quả không được chuẩn bảo đảm (hành vi không xác định): mình chạy thử một lần thì chương trình sập (mã thoát 139), máy bạn có thể in số rác hoặc `42`, và không ai hứa lần sau giống lần này. Tên gọi "con trỏ treo / tham chiếu treo" cho loại lỗi này sẽ được học kỹ ở Bài 07. Tin tốt: trả về tham chiếu tới thứ **sống lâu hơn hàm** (đối tượng của nơi gọi, biến static, vùng nhớ ở heap) thì không sao.
+Khi chạy, kết quả không được chuẩn bảo đảm (hành vi không xác định): mình chạy thử một lần thì chương trình sập (mã thoát 139), máy bạn có thể in số rác hoặc `42`, và không ai hứa lần sau giống lần này. Tên gọi "con trỏ treo / tham chiếu treo" cho loại lỗi này sẽ được học kỹ ở [Bài 07](07-new-delete.md). Tin tốt: trả về tham chiếu tới thứ **sống lâu hơn hàm** (đối tượng của nơi gọi, biến static, vùng nhớ ở heap) thì không sao.
 
 !!! info "Bạn biết Go?"
     Trong Go, `return &x` với `x` cục bộ là hợp lệ: bộ phân tích thoát (escape analysis) chuyển `x` lên heap và garbage collector dọn sau. C++ không có bước tự cứu đó, nên cùng ý định ấy là lỗi.
