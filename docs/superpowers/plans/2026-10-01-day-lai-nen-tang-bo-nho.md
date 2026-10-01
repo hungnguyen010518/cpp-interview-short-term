@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Thay hai bài cũ về con trỏ/RAII/smart pointer (người học báo "dạy hổng nhiều, không hiểu gì") bằng 9 bài mới dạy từ gốc, không nhảy bước, rồi đánh số lại các bài cũ về move semantics, C++11/14/17 và UB thành Bài 10–12.
+**Goal:** Thay hai bài cũ về con trỏ/RAII/smart pointer (người học báo "dạy hổng nhiều, không hiểu gì") bằng 10 bài mới dạy từ gốc, không nhảy bước, rồi đánh số lại các bài cũ về move semantics, C++11/14/17 và UB thành Bài 11–13.
 
 **Architecture:** Dùng nguyên khung MkDocs, trắc nghiệm, bộ kiểm tra đã có. Thay đổi là nội dung và đánh số: 9 bài mới `01…09` theo "luật dạy v2" (câu chuyện, bảng "chạy từng dòng", kết quả chạy thật, cầu nối Go), ba bài cũ đổi thành `10…12`.
 
@@ -28,15 +28,18 @@
 | 01 | `01-bo-nho-byte-dia-chi.md` | Chương trình C++ đầu tiên, bộ nhớ là dãy ngăn có số, byte, địa chỉ, biến, `sizeof`, `&` |
 | 02 | `02-stack-heap-static.md` | Ba vùng nhớ: stack, heap, vùng tĩnh (global/static); vòng đời |
 | 03 | `03-con-tro-co-ban.md` | Con trỏ: khai báo, `&`, `*`, `nullptr`, `->` |
-| 04 | `04-con-tro-mang-ham.md` | Con trỏ với hàm, mảng, phép tính con trỏ, con trỏ tới con trỏ, chuỗi kiểu C |
-| 05 | `05-tham-chieu-const.md` | Tham chiếu, `const`, truyền tham số: giá trị / con trỏ / tham chiếu / `const&` |
-| 06 | `06-new-delete.md` | Cấp phát động `new`/`delete`, `new[]`/`delete[]`, ba lỗi kinh điển |
-| 07 | `07-raii.md` | RAII: hàm tạo/hàm hủy, phạm vi, ngoại lệ; so với `defer` của Go |
-| 08 | `08-unique-ptr.md` | `std::unique_ptr` |
-| 09 | `09-shared-ptr-weak-ptr.md` | `std::shared_ptr`, `std::weak_ptr`, vòng tham chiếu, cách chọn |
-| 10 | `10-move-semantics.md` | (bài cũ, đánh số lại) |
-| 11 | `11-cpp11-14-17.md` | (bài cũ, đánh số lại) |
-| 12 | `12-memory-leak-ub.md` | (bài cũ, đánh số lại) |
+| 04 | `04-con-tro-ham.md` | Con trỏ với hàm: truyền theo giá trị, truyền con trỏ, `swap`, kiểm tra null, `int**` |
+| 05 | `05-mang-phep-tinh-con-tro.md` | Mảng, thoái hóa thành con trỏ, phép tính con trỏ, bẫy `sizeof`, chuỗi kiểu C |
+| 06 | `06-tham-chieu-const.md` | Tham chiếu, `const`, truyền tham số: giá trị / con trỏ / tham chiếu / `const&` |
+| 07 | `07-new-delete.md` | Cấp phát động `new`/`delete`, `new[]`/`delete[]`, ba lỗi kinh điển |
+| 08 | `08-raii.md` | RAII: hàm tạo/hàm hủy, phạm vi, ngoại lệ; so với `defer` của Go |
+| 09 | `09-unique-ptr.md` | `std::unique_ptr` |
+| 10 | `10-shared-ptr-weak-ptr.md` | `std::shared_ptr`, `std::weak_ptr`, vòng tham chiếu, cách chọn |
+| 11 | `11-move-semantics.md` | (bài cũ, đánh số lại) |
+| 12 | `12-cpp11-14-17.md` | (bài cũ, đánh số lại) |
+| 13 | `13-memory-leak-ub.md` | (bài cũ, đánh số lại) |
+
+*Điều chỉnh sau khi review Bài 04 (2026-10-01): bài con trỏ với hàm/mảng/chuỗi dài 840 dòng và trộn hai ý nên được tách làm Bài 04 và Bài 05; mọi bài sau dịch lên một số (Task 5b làm việc đánh số lại; các Task 6–10 bên dưới đã dùng số mới).*
 
 ---
 
@@ -217,9 +220,17 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 
 ---
 
-### Task 6: Bài 05 — Tham chiếu và const
+### Task 5b: Tách Bài 04 thành Bài 04 và Bài 05, đánh số lại các bài sau
 
-**Files:** Create `docs/nhom-1-nen-tang-bo-nho/05-tham-chieu-const.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="05"`.
+**Lý do:** review Bài 04 (con trỏ với hàm + mảng + phép tính con trỏ + chuỗi kiểu C) cho thấy bài dài 840 dòng, 9 ví dụ, trộn hai ý; người học cần bài ngắn, mỗi bài một ý.
+
+**Việc phải làm (hai bước, hai agent):**
+1. *Đánh số lại (cơ học):* các file bài cũ `10-move-semantics.md`, `11-cpp11-14-17.md`, `12-memory-leak-ub.md` đổi thành `11-…`, `12-…`, `13-…` (git mv; tiêu đề `# Bài N —`; `data-bai`; nav; `docs/tien-do.md`; cột "Bài" trong `docs/glossary.md`; mọi chỗ nhắc số bài). Trong Bài 01–04 (và Bài 11–13) mọi chỗ nhắc dạng chữ thường tới bài có số ≥ 05 cộng thêm 1 (Bài 05 tham chiếu → Bài 06, …, Bài 09 shared_ptr → Bài 10, Bài 10 move → Bài 11, Bài 11 → Bài 12, Bài 12 → Bài 13); nơi nhắc tới "mảng/phép tính con trỏ/chuỗi kiểu C" trỏ tới Bài 05 mới.
+2. *Tách nội dung:* Bài 04 giữ phần "con trỏ với hàm" (truyền theo giá trị, truyền con trỏ, `swap`, kiểm tra null, `int**`); Bài 05 `05-mang-phep-tinh-con-tro.md` nhận phần mảng, thoái hóa mảng, `p[i]`≡`*(p+i)`, phép tính con trỏ, bẫy `sizeof`, chuỗi kiểu C; sửa các góp ý review (dòng "chỉ viết một hàm: main" sai, đoạn dày, câu `&a` chưa dạy). Mỗi bài có quiz riêng, bảng thuật ngữ riêng, `data-bai` riêng.
+
+### Task 6: Bài 06 — Tham chiếu và const
+
+**Files:** Create `docs/nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="06"`.
 
 **Việc người học làm được sau bài:** dùng tham chiếu như biệt danh; chọn đúng cách truyền tham số (giá trị / con trỏ / tham chiếu / `const&`); đọc đúng `const int*`, `int* const`, `const int&`.
 
@@ -243,15 +254,15 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 **Thuật ngữ:** tham chiếu (reference), `const` (hằng), hàm tạo sao chép (copy constructor), giá trị tạm (temporary), truyền theo tham chiếu (pass by reference), `const&`.
 
 - [ ] **Step 1:** Viết bài theo luật dạy v2; chạy thật chương trình đếm "copy!" và các lỗi biên dịch minh họa; ghi thông báo lỗi thật ngắn.
-- [ ] **Step 2:** Nav (05), tiến độ (`data-bai="05"`), thuật ngữ.
+- [ ] **Step 2:** Nav (06), tiến độ (`data-bai="06"`), thuật ngữ.
 - [ ] **Step 3:** Chạy bộ kiểm tra như Task 2 Step 3.
-- [ ] **Step 4:** Commit: `feat: Bài 05 — tham chiếu và const`.
+- [ ] **Step 4:** Commit: `feat: Bài 06 — tham chiếu và const`.
 
 ---
 
-### Task 7: Bài 06 — Cấp phát động `new`/`delete` và ba lỗi kinh điển
+### Task 7: Bài 07 — Cấp phát động `new`/`delete` và ba lỗi kinh điển
 
-**Files:** Create `docs/nhom-1-nen-tang-bo-nho/06-new-delete.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="06"`.
+**Files:** Create `docs/nhom-1-nen-tang-bo-nho/07-new-delete.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="07"`.
 
 **Việc người học làm được sau bài:** cấp phát và giải phóng bộ nhớ động đúng cách; phân biệt `new`/`delete` với `new[]`/`delete[]`; nhận ra rò rỉ, con trỏ treo, giải phóng hai lần; hiểu vì sao phải có RAII.
 
@@ -263,7 +274,7 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 3. Mảng động: `new int[n]`, `delete[] p`; `new Cay[2]` in hai lần tạo; `delete[]` in hai lần hủy.
 4. Ba lỗi, mỗi lỗi: câu chuyện + khối code `// bo-qua-kiem-tra` (chỉ những khối UB; riêng rò rỉ chạy được và chương trình thoát mã 0): (i) **rò rỉ** (leak): quên `delete` (cho thấy dòng "huy" KHÔNG xuất hiện); (ii) **con trỏ treo**/dùng sau khi trả (use-after-free); (iii) **giải phóng hai lần** (double free); thêm (iv) trộn `new[]` với `delete` là UB. Đặt `p = nullptr` sau `delete` là thói quen tốt nhưng không phải thuốc chữa mọi thứ (hedge).
 5. Chạy chương trình rò rỉ với AddressSanitizer thật (`g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer`) và dán báo cáo LeakSanitizer THẬT rút gọn (bỏ số tiến trình, đường dẫn máy; nói đã rút gọn); Valgrind chưa cài trên máy: chỉ ghi lệnh, KHÔNG dán kết quả.
-6. Vì sao thủ công là mong manh: hàm có nhiều `return` hoặc ném ngoại lệ ở giữa dễ quên `delete` (kể bằng lời, ví dụ ngắn trong khối `// bo-qua-kiem-tra` nếu cần) → mở đường cho Bài 07 (RAII).
+6. Vì sao thủ công là mong manh: hàm có nhiều `return` hoặc ném ngoại lệ ở giữa dễ quên `delete` (kể bằng lời, ví dụ ngắn trong khối `// bo-qua-kiem-tra` nếu cần) → mở đường cho Bài 08 (RAII).
 
 **Hộp Go:** Go có GC nên không có `delete`; rò rỉ trong Go thường là giữ tham chiếu mãi (khác bản chất).
 
@@ -274,27 +285,27 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 **Thuật ngữ:** `new`, `delete`, `new[]`/`delete[]`, rò rỉ bộ nhớ (memory leak), con trỏ treo (dangling pointer), use-after-free, giải phóng hai lần (double free), hành vi không xác định (undefined behavior), AddressSanitizer, LeakSanitizer, `malloc`/`free`.
 
 - [ ] **Step 1:** Viết bài theo luật dạy v2; chạy thật mọi chương trình; chạy ASan thật và dán kết quả rút gọn thật; tuyệt đối không bịa kết quả Valgrind.
-- [ ] **Step 2:** Nav (06), tiến độ (`data-bai="06"`), thuật ngữ (có thể tái dùng định nghĩa từ `git show 8848647:docs/glossary.md`).
+- [ ] **Step 2:** Nav (07), tiến độ (`data-bai="07"`), thuật ngữ (có thể tái dùng định nghĩa từ `git show 8848647:docs/glossary.md`).
 - [ ] **Step 3:** Chạy bộ kiểm tra như Task 2 Step 3.
-- [ ] **Step 4:** Commit: `feat: Bài 06 — cấp phát động new/delete và ba lỗi kinh điển`.
+- [ ] **Step 4:** Commit: `feat: Bài 07 — cấp phát động new/delete và ba lỗi kinh điển`.
 
 ---
 
-### Task 8: Bài 07 — RAII
+### Task 8: Bài 08 — RAII
 
-**Files:** Create `docs/nhom-1-nen-tang-bo-nho/07-raii.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="07"`.
+**Files:** Create `docs/nhom-1-nen-tang-bo-nho/08-raii.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="08"`.
 
 **Việc người học làm được sau bài:** giải thích RAII bằng lời và bằng code; viết một lớp nhỏ tự mượn khi tạo và tự trả khi hủy; hiểu hàm hủy chạy cả khi `return` sớm và khi có ngoại lệ; so với `defer` của Go.
 
-**Câu chuyện:** **thư viện**: bạn bước vào thì mượn sách, bước ra khỏi cửa thì sách TỰ ĐỘNG được trả, không cần nhớ. Khác với "tự đi trả" ở Bài 06.
+**Câu chuyện:** **thư viện**: bạn bước vào thì mượn sách, bước ra khỏi cửa thì sách TỰ ĐỘNG được trả, không cần nhớ. Khác với "tự đi trả" ở Bài 07.
 
 **Phải dạy theo thứ tự:**
 1. Ôn: hàm tạo/hàm hủy (từ Bài 02, 06). Lớp `TheMuon` in "muon"/"tra"; một đối tượng cục bộ → hàm hủy chạy ở cuối khối `{}` (chạy thật).
 2. RAII = *Resource Acquisition Is Initialization*: xin tài nguyên trong hàm tạo, trả trong hàm hủy; "tài nguyên" không chỉ là bộ nhớ: file, khóa, kết nối, ổ cắm mạng (nêu tên `std::ifstream`, `std::lock_guard` như ví dụ thật có sẵn, không đi sâu).
 3. Thí nghiệm: (a) hàm dùng `new`/`delete` thủ công có `return` sớm (hàm ví dụ trong khối `// bo-qua-kiem-tra`: dòng "huy" không in) so với (b) cùng hàm với RAII (đối tượng cục bộ) → "huy" LUÔN in. Chạy thật phần (b) và phần (a) bản có thể chạy (không UB) để thấy khác biệt.
 4. Ngoại lệ: dạy 4 dòng cú pháp `throw`, `try`/`catch` (cầu nối Go: `panic`/`recover` và `error`); chương trình ném ngoại lệ ở giữa hàm, hàm hủy VẪN chạy khi "tháo ngăn xếp" (stack unwinding) — chạy thật, ghi thứ tự in. Hedge: nếu ngoại lệ không bị bắt ở đâu cả, chương trình gọi `std::terminate` và việc hủy các đối tượng có thể không xảy ra.
-5. Tự viết một lớp bọc RAII nhỏ cho một "tài nguyên" in được (ví dụ `class Hop` giữ một con trỏ `new int` và `delete` trong hàm hủy). Giải thích rõ chỗ nguy hiểm khi copy một lớp như vậy (hai đối tượng cùng giữ một con trỏ → hủy hai lần) bằng lời và hình, KHÔNG dạy cách sửa (đó là Rule of 3/5, Bài 10); đặt khối nguy hiểm trong `// bo-qua-kiem-tra`.
-6. Chốt: "Đừng gọi `delete` tay; để một đối tượng lo" → Bài 08 là bản làm sẵn cho bộ nhớ.
+5. Tự viết một lớp bọc RAII nhỏ cho một "tài nguyên" in được (ví dụ `class Hop` giữ một con trỏ `new int` và `delete` trong hàm hủy). Giải thích rõ chỗ nguy hiểm khi copy một lớp như vậy (hai đối tượng cùng giữ một con trỏ → hủy hai lần) bằng lời và hình, KHÔNG dạy cách sửa (đó là Rule of 3/5, Bài 11); đặt khối nguy hiểm trong `// bo-qua-kiem-tra`.
+6. Chốt: "Đừng gọi `delete` tay; để một đối tượng lo" → Bài 09 là bản làm sẵn cho bộ nhớ.
 
 **Hộp Go:** `defer f.Close()` ≈ hàm hủy; khác ở chỗ `defer` là việc bạn phải NHỚ viết ở từng nơi dùng, còn RAII gắn vào chính kiểu dữ liệu nên không thể quên; `defer` chạy ở cuối hàm còn hàm hủy ở cuối KHỐI `{}`.
 
@@ -305,25 +316,25 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 **Thuật ngữ:** RAII, tài nguyên (resource), hàm hủy (destructor), ngoại lệ (exception), `throw`/`try`/`catch`, tháo ngăn xếp (stack unwinding), `std::terminate`, `defer` (Go).
 
 - [ ] **Step 1:** Viết bài theo luật dạy v2; chạy thật mọi chương trình, ghi thứ tự in thật (kể cả khi ngoại lệ).
-- [ ] **Step 2:** Nav (07), tiến độ (`data-bai="07"`), thuật ngữ.
+- [ ] **Step 2:** Nav (08), tiến độ (`data-bai="08"`), thuật ngữ.
 - [ ] **Step 3:** Chạy bộ kiểm tra như Task 2 Step 3.
-- [ ] **Step 4:** Commit: `feat: Bài 07 — RAII`.
+- [ ] **Step 4:** Commit: `feat: Bài 08 — RAII`.
 
 ---
 
-### Task 9: Bài 08 — `std::unique_ptr`
+### Task 9: Bài 09 — `std::unique_ptr`
 
-**Files:** Create `docs/nhom-1-nen-tang-bo-nho/08-unique-ptr.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="08"`.
+**Files:** Create `docs/nhom-1-nen-tang-bo-nho/09-unique-ptr.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="09"`.
 
-**Việc người học làm được sau bài:** dùng `std::make_unique`; hiểu "quyền sở hữu duy nhất"; trao quyền bằng `std::move` (hiểu ở mức dùng được; chi tiết ở Bài 10); truyền `unique_ptr` vào/ra hàm đúng cách; biết khi nào dùng con trỏ thô để chỉ "nhìn".
+**Việc người học làm được sau bài:** dùng `std::make_unique`; hiểu "quyền sở hữu duy nhất"; trao quyền bằng `std::move` (hiểu ở mức dùng được; chi tiết ở Bài 11); truyền `unique_ptr` vào/ra hàm đúng cách; biết khi nào dùng con trỏ thô để chỉ "nhìn".
 
 **Câu chuyện:** **chiếc chìa khóa duy nhất** của kho: chỉ một người cầm; muốn người khác dùng thì phải TRAO TAY (người cũ hết chìa); hết người cầm chìa thì kho tự đóng và dọn.
 
 **Phải dạy theo thứ tự:**
-1. Nối Bài 07: `unique_ptr` chính là RAII cho bộ nhớ heap. Cho người học thấy một bản tự viết RẤT ngắn (hàm tạo `new`, hàm hủy `delete`, `operator*`, `operator->`) chỉ để hiểu ý tưởng, rồi nói bản thật còn chặn copy và hỗ trợ move (không viết đủ ở đây); dạy 2–3 câu về `operator*`/`operator->` là "cách kiểu của mình giả vờ làm con trỏ".
+1. Nối Bài 08: `unique_ptr` chính là RAII cho bộ nhớ heap. Cho người học thấy một bản tự viết RẤT ngắn (hàm tạo `new`, hàm hủy `delete`, `operator*`, `operator->`) chỉ để hiểu ý tưởng, rồi nói bản thật còn chặn copy và hỗ trợ move (không viết đủ ở đây); dạy 2–3 câu về `operator*`/`operator->` là "cách kiểu của mình giả vờ làm con trỏ".
 2. Dùng bản thật: `#include <memory>`, `std::make_unique<Cay>(...)`, `*p`, `p->`, `p.get()` (con trỏ thô nhìn, không sở hữu), `if (p)`, `p.reset()`, `p.release()` (lấy ra và KHÔNG tự hủy nữa — cảnh báo).
 3. Không copy được: dòng `auto b = a;` là LỖI BIÊN DỊCH — chạy thật và trích dòng lỗi ngắn (khối `// bo-qua-kiem-tra`). Vì sao: nếu copy được thì có hai chủ và hủy hai lần.
-4. Trao tay bằng `std::move`: `auto b = std::move(a);` → `a` thành `nullptr` (chuẩn bảo đảm cho `unique_ptr`); giải thích `std::move` ở mức: "chỉ là lời nói: tôi đồng ý trao đi", việc trao do `unique_ptr` làm; hứa chi tiết ở Bài 10. Chạy thật, in `a == nullptr`.
+4. Trao tay bằng `std::move`: `auto b = std::move(a);` → `a` thành `nullptr` (chuẩn bảo đảm cho `unique_ptr`); giải thích `std::move` ở mức: "chỉ là lời nói: tôi đồng ý trao đi", việc trao do `unique_ptr` làm; hứa chi tiết ở Bài 11. Chạy thật, in `a == nullptr`.
 5. Truyền vào hàm: (a) hàm chỉ cần NHÌN → nhận `const Cay&` hoặc `Cay*` (gọi `*p`/`p.get()`); (b) hàm cần SỞ HỮU → nhận `std::unique_ptr<Cay>` theo giá trị và gọi bằng `std::move(p)`; (c) trả về từ hàm: `return std::make_unique<Cay>();` (chuyển quyền tự nhiên, trình biên dịch lo). Chạy thật mỗi trường hợp với `Cay` in "tao"/"huy" để thấy hàm hủy chạy đúng một lần ở đúng nơi.
 6. `std::unique_ptr<int[]>` và nhắc: thường dùng `std::vector` thay cho mảng động. `unique_ptr` trong `std::vector<std::unique_ptr<T>>` chỉ nêu một câu.
 7. Chi phí: gần như không tốn thêm (nói hedge: cùng cỡ con trỏ với bộ xóa mặc định). Bộ xóa tùy chỉnh (custom deleter) chỉ nhắc tên.
@@ -338,15 +349,15 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 **Thuật ngữ:** smart pointer (con trỏ thông minh), `unique_ptr`, `make_unique`, quyền sở hữu (ownership), `std::move`, `get()`, `release()`, `reset()`, `operator*`/`operator->`, custom deleter (bộ xóa tùy chỉnh).
 
 - [ ] **Step 1:** Viết bài theo luật dạy v2; chạy thật mọi chương trình (kể cả lỗi biên dịch của copy) và ghi kết quả thật.
-- [ ] **Step 2:** Nav (08), tiến độ (`data-bai="08"`), thuật ngữ.
+- [ ] **Step 2:** Nav (09), tiến độ (`data-bai="09"`), thuật ngữ.
 - [ ] **Step 3:** Chạy bộ kiểm tra như Task 2 Step 3.
-- [ ] **Step 4:** Commit: `feat: Bài 08 — std::unique_ptr`.
+- [ ] **Step 4:** Commit: `feat: Bài 09 — std::unique_ptr`.
 
 ---
 
-### Task 10: Bài 09 — `std::shared_ptr`, `std::weak_ptr` và cách chọn smart pointer
+### Task 10: Bài 10 — `std::shared_ptr`, `std::weak_ptr` và cách chọn smart pointer
 
-**Files:** Create `docs/nhom-1-nen-tang-bo-nho/09-shared-ptr-weak-ptr.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="09"`.
+**Files:** Create `docs/nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md`; Modify `mkdocs.yml`, `docs/glossary.md`, `docs/tien-do.md`. `data-bai="10"`.
 
 **Việc người học làm được sau bài:** dùng `shared_ptr` và đọc `use_count`; hiểu bộ đếm tham chiếu từng bước; nhận ra và phá vòng tham chiếu bằng `weak_ptr`; chọn đúng loại con trỏ cho từng tình huống.
 
@@ -371,21 +382,21 @@ Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 **Thuật ngữ:** `shared_ptr`, `weak_ptr`, bộ đếm tham chiếu (reference count), khối điều khiển (control block), `use_count()`, `make_shared`, vòng tham chiếu (reference cycle), `lock()`, `expired()`, cache (bộ nhớ đệm), observer (người theo dõi), thread-safe (an toàn đa luồng).
 
 - [ ] **Step 1:** Viết bài theo luật dạy v2; chạy thật mọi chương trình, ghi `use_count` và thứ tự "huy" thật; chạy ASan thật cho ví dụ vòng tham chiếu.
-- [ ] **Step 2:** Nav (09), tiến độ (`data-bai="09"`), thuật ngữ.
+- [ ] **Step 2:** Nav (10), tiến độ (`data-bai="10"`), thuật ngữ.
 - [ ] **Step 3:** Chạy bộ kiểm tra như Task 2 Step 3.
-- [ ] **Step 4:** Commit: `feat: Bài 09 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer`.
+- [ ] **Step 4:** Commit: `feat: Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer`.
 
 ---
 
 ### Task 11: Gắn liên kết chéo và cập nhật trang chủ
 
-**Files:** Modify các bài `01…12` trong `docs/nhom-1-nen-tang-bo-nho/`, `docs/index.md`.
+**Files:** Modify các bài `01…13` trong `docs/nhom-1-nen-tang-bo-nho/`, `docs/index.md`.
 
 **Interfaces:**
-- Consumes: mọi bài 01–12 đã tồn tại với tên file ở bảng "Lộ trình mới".
-- Produces: mọi chỗ nhắc "Bài N" (chữ thường được để dành ở Task 1–10) trở thành liên kết Markdown tới đúng file; trang chủ mô tả đúng Nhóm 1 có 12 bài.
+- Consumes: mọi bài 01–13 đã tồn tại với tên file ở bảng "Lộ trình mới".
+- Produces: mọi chỗ nhắc "Bài N" (chữ thường được để dành ở Task 1–10) trở thành liên kết Markdown tới đúng file; trang chủ mô tả đúng Nhóm 1 có 13 bài.
 
 - [ ] **Step 1:** Trong từng bài, tìm các chỗ nhắc "Bài N" dạng chữ thường tới một bài đã tồn tại và đổi thành liên kết `[Bài N](tên-file.md)` (cùng thư mục, đường dẫn tương đối đúng); không đổi nội dung nào khác; không tạo liên kết tới bài không tồn tại.
-- [ ] **Step 2:** `docs/index.md`: sửa đoạn "Học theo thứ tự nào?" cho khớp lộ trình mới (Nhóm 1 gồm 12 bài, từ "bộ nhớ là gì" đến "move semantics, C++11/14/17 và UB"; các nhóm sau thêm dần).
+- [ ] **Step 2:** `docs/index.md`: sửa đoạn "Học theo thứ tự nào?" cho khớp lộ trình mới (Nhóm 1 gồm 13 bài, từ "bộ nhớ là gì" đến "move semantics, C++11/14/17 và UB"; các nhóm sau thêm dần).
 - [ ] **Step 3:** Chạy `python3 -m unittest discover -s tests && python3 scripts/kiem_cau_truc.py && python3 scripts/kiem_code.py && mkdocs build --strict`: sạch. Kiểm tra không còn chữ "Bài N" thường nào trỏ tới bài đã tồn tại mà chưa có liên kết (`grep -nE "Bài (0?[1-9]|1[0-2])" docs/nhom-1-nen-tang-bo-nho/*.md` rồi đối chiếu bằng mắt).
 - [ ] **Step 4:** Commit: `docs: gắn liên kết chéo giữa các bài Nhóm 1 và cập nhật trang chủ`.
