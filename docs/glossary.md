@@ -31,3 +31,9 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | variant | Hộp chứa một trong nhiều kiểu | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
 | string_view | Cửa sổ nhìn vào chuỗi, không copy | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
 | structured binding | Tách một cặp/bộ thành nhiều biến | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| use-after-free | Dùng sau khi trả | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
+| double free | Trả hai lần | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
+| buffer overflow | Ghi vượt biên mảng | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
+| undefined behavior / UB | Hành vi không xác định: luật chơi bị phá, mọi chuyện đều có thể xảy ra | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
+| AddressSanitizer / ASan | Công cụ bắt lỗi bộ nhớ lúc chạy, bật bằng cờ biên dịch | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
+| Valgrind | Công cụ kiểm tra bộ nhớ không cần biên dịch lại | [Bài 5](nhom-1-nen-tang-bo-nho/05-memory-leak-ub.md) |
