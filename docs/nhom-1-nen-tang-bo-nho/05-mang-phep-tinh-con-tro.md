@@ -1,7 +1,7 @@
 # Bài 05 — Mảng và phép tính con trỏ
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
-    - Hiểu mảng `int a[4]` là bốn ngăn liền nhau, và `a[i]` chính là `*(a + i)`.
+    - Hiểu mảng `int a[4]` là bốn phần tử `int` nằm liền nhau, và `a[i]` chính là `*(a + i)`.
     - Biết `p + 1` nhích đúng một phần tử (không phải một byte), và đi ra ngoài mảng là hành vi không xác định.
     - Biết "mảng thoái hóa thành con trỏ", bẫy `sizeof` trong tham số hàm, và đọc được chuỗi kiểu C (`const char*`) kết thúc bằng `'\0'`.
 
@@ -9,16 +9,16 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Trong dãy tủ khóa của [Bài 01](01-bo-nho-byte-dia-chi.md), hãy lấy bốn ngăn **liền nhau** và dán lên đó một nhãn chung: "bốn món đồ cùng loại". Đó là một **mảng**. Bạn không cần bốn tờ giấy riêng, chỉ cần **một** tờ ghi số của ngăn đầu tiên, rồi đếm "đi thêm mấy ngăn".
+Trong dãy tủ khóa của [Bài 01](01-bo-nho-byte-dia-chi.md), nhớ rằng mỗi ngăn là một byte, và một số `int` chiếm (thường) 4 ngăn liền nhau. Giờ xếp **bốn món đồ cùng loại** (bốn số `int`) nằm liền nhau: đó là một **mảng**, và mỗi món là một **phần tử**. Bạn không cần bốn tờ giấy riêng, chỉ cần **một** tờ ghi số của ngăn đầu tiên, rồi đếm "đi thêm mấy món".
 
-Đi thêm một ngăn nghĩa là gì phụ thuộc vào cỡ món đồ: món đồ chiếm 4 ngăn nhỏ thì "một ngăn" là nhích 4 ngăn nhỏ. Đó là chuyện của **phép tính con trỏ**.
+Đi thêm một món nghĩa là gì phụ thuộc vào cỡ món đồ: mỗi món chiếm 4 ngăn thì đi thêm một món là nhích 4 ngăn. Đó là chuyện của **phép tính con trỏ**.
 
 !!! info "Chỗ nào ví dụ hàng tủ không còn đúng?"
-    Tờ giấy chỉ ghi ngăn đầu, nó **không ghi hàng tủ có bao nhiêu ngăn**. Đếm sai thì bạn mở cửa ngăn của người khác mà không hay biết (mục 4), và khi đưa tờ giấy đó cho một hàm thì số ngăn bị mất (mục 5).
+    Tờ giấy chỉ ghi ngăn đầu, nó **không ghi dãy có bao nhiêu món**. Đếm sai thì bạn mở cửa ngăn của người khác mà không hay biết (mục 4), và khi đưa tờ giấy đó cho một hàm thì số món bị mất (mục 5).
 
 ## 📖 Giải thích
 
-### 1. Mảng: dãy ngăn liền nhau
+### 1. Mảng: dãy phần tử liền nhau
 
 **Mảng (array)** là một dãy các biến **cùng kiểu**, nằm **liền nhau** trong bộ nhớ. Mỗi biến trong dãy gọi là một **phần tử (element)**.
 
@@ -56,10 +56,10 @@ Có một sự thật làm mảng và con trỏ dính vào nhau. Trong một bi�
 int* p = a;       // p đựng địa chỉ của a[0]
 ```
 
-Từ đây có quy tắc quan trọng: **`p[i]` là cách viết gọn của `*(p + i)`**, và vì `a` cũng thoái hóa thành con trỏ nên `a[i]` đúng bằng `*(a + i)`. Phần `p + i` là "phép tính con trỏ", mục sau giải thích. Bạn đã quen `p->x` là viết gọn của `(*p).x`; đây là một viết gọn cùng loại.
+Từ đây có quy tắc quan trọng: **`p[i]` là cách viết gọn của `*(p + i)`**, và vì `a` cũng thoái hóa thành con trỏ nên `a[i]` đúng bằng `*(a + i)`. Phần `p + i` là "phép tính con trỏ": nó nhích `i` **phần tử** từ chỗ `p` đang đứng, mục 3 giải thích kỹ. Bạn đã quen `p->x` là viết gọn của `(*p).x`; đây là một viết gọn cùng loại.
 
 !!! warning "Hay nhầm: mảng và con trỏ KHÔNG phải một thứ"
-    Mảng `a` là cả bốn ngăn (nên `sizeof(a)` là 16). Con trỏ `p` chỉ là một ô đựng một địa chỉ (nên `sizeof(p)` thường là 8). Chúng dễ lẫn vì tên mảng *thoái hóa* thành con trỏ khi dùng trong biểu thức, chứ không vì chúng giống nhau.
+    Mảng `a` là cả bốn phần tử, 16 ngăn (nên `sizeof(a)` là 16). Con trỏ `p` chỉ là một ô đựng một địa chỉ (nên `sizeof(p)` thường là 8). Chúng dễ lẫn vì tên mảng *thoái hóa* thành con trỏ khi dùng trong biểu thức, chứ không vì chúng giống nhau.
 
     Quy tắc thoái hóa có ngoại lệ: `sizeof(a)` không làm `a` thoái hóa, nên nó vẫn đo cả mảng. `&a` cũng không làm `a` thoái hóa: đó là địa chỉ của **cả mảng**, không phải của phần tử đầu. Ngoại lệ của `sizeof` là nguồn của cái bẫy ở mục 5.
 
@@ -75,10 +75,10 @@ Nhờ vậy `p + 2` luôn là "phần tử thứ hai kể từ chỗ `p` đang �
 Vài phép khác dùng được:
 
 - `p++` nhích `p` sang phần tử kế tiếp (`p` bị đổi giá trị).
-- `q - p` với hai con trỏ **cùng trỏ vào một mảng** cho ra "cách nhau bao nhiêu **phần tử**" (một số nguyên, kiểu `std::ptrdiff_t`). Chuẩn C++ chỉ định nghĩa phép này khi hai con trỏ nằm trong cùng một mảng.
+- `q - p` với hai con trỏ **cùng trỏ vào một mảng** cho ra "cách nhau bao nhiêu **phần tử**" (một số nguyên có dấu). Chuẩn C++ chỉ định nghĩa phép này khi hai con trỏ nằm trong cùng một mảng.
 - `p + q` (cộng hai con trỏ) **không có nghĩa**, trình biên dịch từ chối (ví dụ 2 có thử).
 
-Con trỏ có thể trỏ tới mọi phần tử của mảng, và thêm **một vị trí ngay sau phần tử cuối** (như `a + 4` với mảng 4 phần tử). Vị trí đó dùng để so sánh ("đã đi hết chưa?") nhưng **không được giải tham chiếu**. Phép `!=` ("khác nhau", cho `true`/`false`) dùng để so hai con trỏ như vậy.
+Con trỏ có thể trỏ tới mọi phần tử của mảng, và thêm **một vị trí ngay sau phần tử cuối** (như `a + 4` với mảng 4 phần tử). Vị trí đó dùng để so sánh ("đã đi hết chưa?") nhưng **không được giải tham chiếu**. Đi xa hơn nữa thì ngay việc tạo ra con trỏ (như `a + 10`) đã là hành vi không xác định, dù chưa giải tham chiếu. Phép `!=` ("khác nhau", cho `true`/`false`) dùng để so hai con trỏ như vậy.
 
 ### 4. Đi ra ngoài mảng
 
@@ -115,7 +115,9 @@ std::size_t n = sizeof(a) / sizeof(a[0]);         // ở main: 16 / 4 = 4
 tong(a, n);
 ```
 
-Ở đây `const` đặt trước `int*` nghĩa là "chỉ đọc, không sửa phần tử qua con trỏ này", còn `std::size_t` là kiểu số không âm hợp để đếm phần tử (cần `#include <cstddef>`). Cách tốt hơn nữa nằm ở nhóm STL: `std::vector` hoặc `std::array`, những kiểu **mang theo độ dài**; ở đây ta chỉ nhắc tên.
+Ở đây `const` đặt trước `int*` nghĩa là "chỉ đọc, không sửa phần tử qua con trỏ này".
+
+`std::size_t` là kiểu số không âm hợp để đếm phần tử (cần `#include <cstddef>`). Cách tốt hơn nữa nằm ở nhóm STL: `std::vector` hoặc `std::array`, những kiểu **mang theo độ dài**; ở đây ta chỉ nhắc tên.
 
 !!! info "Bạn biết Go?"
     Slice của Go là bộ ba (con trỏ tới phần tử đầu, độ dài, sức chứa), nên độ dài luôn đi kèm. Mảng C++ khi truyền vào hàm thoái hóa thành **chỉ con trỏ** và mất độ dài, nên ta phải tự truyền `n`. Mảng Go `[4]int` thì được **chép cả bốn phần tử** khi truyền vào hàm. Go cũng **không cho** số học con trỏ như `p + 1` (trừ gói `unsafe`), còn C++ cho tự do.
@@ -130,7 +132,7 @@ Một **chuỗi** là dãy `char` liền nhau, tức một mảng `char`. Chuỗ
 const char* ten = "An";
 ```
 
-Phần `"An"` (chuỗi trong nháy kép) là **chuỗi hằng**. Nó chiếm **3** ô liền nhau: `'A'`, `'n'` và `'\0'` ở cuối.
+Phần `"An"` (chuỗi trong nháy kép) là **chuỗi hằng**. Nó chiếm **3** ngăn liền nhau (mỗi `char` 1 byte): `'A'`, `'n'` và `'\0'` ở cuối.
 
 ```text
   địa chỉ:    0x2000     0x2001     0x2002
@@ -143,9 +145,11 @@ Phần `"An"` (chuỗi trong nháy kép) là **chuỗi hằng**. Nó chiếm **3
 
 `ten` là con trỏ tới ký tự đầu. Kiểu của chính `"An"` là mảng 3 `const char`, nên nó thoái hóa thành `const char*` khi gán. Chữ `const` nghĩa là các ký tự **chỉ đọc**.
 
-Hàm đọc chuỗi không biết độ dài, nó đi từng ô cho đến khi gặp `'\0'`. `std::cout << ten` làm đúng thế. (Đây là "quy ước cũ từ C" ở Bài 01 khiến `char*` bị in thành chữ chứ không phải địa chỉ.)
+Hàm đọc chuỗi không biết độ dài, nó đi từng ô cho đến khi gặp `'\0'`. `std::cout << ten` làm đúng thế. Chính quy ước này là lý do Bài 01 phải ép `char*` sang `void*` mới in được địa chỉ.
 
-Về việc sửa: `ten[0] = 'B';` với `const char* ten` bị trình biên dịch từ chối (ví dụ 4 có thử). Nếu cố ép bỏ `const` rồi ghi vào chuỗi hằng thì là hành vi không xác định, mình không chạy. Muốn chuỗi sửa được, tạo một **mảng** riêng chép nội dung ra: `char ban[] = "An";`. Với đa số việc thực tế, hãy dùng `std::string` (Bài 02): nó tự lo độ dài và việc chép.
+Về việc sửa: `ten[0] = 'B';` với `const char* ten` bị trình biên dịch từ chối (ví dụ 4 có thử). Nếu cố ép bỏ `const` rồi ghi vào chuỗi hằng thì là hành vi không xác định, mình không chạy.
+
+Muốn chuỗi sửa được, tạo một **mảng** riêng chép nội dung ra: `char ban[] = "An";`. Với đa số việc thực tế, hãy dùng `std::string` (Bài 02): nó tự lo độ dài và việc chép.
 
 ## 💻 Ví dụ code
 
@@ -177,7 +181,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (1) `int a[4] = {...};` | Xin 16 ngăn liền nhau, ghi bốn số | `[10][20][30][40]` bắt đầu ở 0x1000 (địa chỉ minh họa) |
+| (1) `int a[4] = {...};` | Xin 16 ngăn liền nhau (bốn `int`), ghi bốn số | `[10][20][30][40]` bắt đầu ở 0x1000 (địa chỉ minh họa) |
 | (2) `a[1] = 25;` | Ghi đè phần tử thứ hai | `[10][25][30][40]` |
 | (3) vòng `for` | `i` chạy 0..3; mỗi vòng in giá trị và **địa chỉ** của `a[i]` | địa chỉ tăng đều |
 | (4) `sizeof(a)` | Cỡ của **cả mảng**; dòng sau là cỡ một phần tử | in `16` và `4` (thường) |
@@ -393,7 +397,7 @@ Vì `ten` là `const char*`, ký tự của chuỗi hằng chỉ đọc. Muốn 
     Chúng tương đương: `a[i]` được định nghĩa là `*(a + i)`. Tên mảng `a` thoái hóa thành con trỏ tới phần tử đầu, `a + i` là địa chỉ của phần tử thứ `i` (nhích `i` phần tử, không phải `i` byte), và `*` đi theo địa chỉ đó. Cũng vì vậy `p[i]` dùng được với mọi con trỏ `p`, không chỉ với tên mảng.
 
 ??? question "Array decay là gì, và `sizeof` bị ảnh hưởng ra sao?"
-    Trong hầu hết biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; riêng `sizeof` và `&` là ngoại lệ. Khi truyền mảng vào hàm, tham số thực chất là con trỏ (dù viết `int a[4]`), nên `sizeof(a)` trong hàm cho cỡ của con trỏ (thường 8), không phải cỡ mảng (thường 16), và `g++ -Wall` cảnh báo `-Wsizeof-array-argument`. Cách xử lý: truyền kèm số phần tử, hoặc dùng `std::vector`/`std::array` (nhóm STL).
+    Trong hầu hết biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; ngoại lệ chính là `sizeof` và `&`. Khi truyền mảng vào hàm, tham số thực chất là con trỏ (dù viết `int a[4]`), nên `sizeof(a)` trong hàm cho cỡ của con trỏ (thường 8), không phải cỡ mảng (thường 16), và `g++ -Wall` cảnh báo `-Wsizeof-array-argument`. Cách xử lý: truyền kèm số phần tử, hoặc dùng `std::vector`/`std::array` (nhóm STL).
 
 ??? question "Con trỏ `p + 1` nhích bao nhiêu byte?"
     Nhích đúng `sizeof(kiểu mà p trỏ tới)` byte, tức một phần tử chứ không phải một byte. Với `int*` thường là 4 byte, với `double*` thường là 8, với `char*` là 1. Phép trừ hai con trỏ cũng tính bằng phần tử, và chuẩn chỉ định nghĩa nó khi hai con trỏ cùng một mảng.
@@ -523,7 +527,7 @@ std::cout << cuoi - dau << "\n";
 
 ## 🔑 Tóm tắt
 
-1. Mảng `int a[4]` là bốn ngăn liền nhau, chỉ số từ 0; tên mảng trong biểu thức thoái hóa thành con trỏ tới phần tử đầu, nên `p[i]` bằng `*(p + i)` và `a[i]` bằng `*(a + i)`.
+1. Mảng `int a[4]` là bốn phần tử `int` liền nhau, chỉ số từ 0; tên mảng trong biểu thức thoái hóa thành con trỏ tới phần tử đầu, nên `p[i]` bằng `*(p + i)` và `a[i]` bằng `*(a + i)`.
 2. `p + 1` nhích đúng một phần tử (`sizeof(kiểu)` byte, thường 4 với `int*` và 8 với `double*`), `q - p` đếm số phần tử trong cùng một mảng, và không có `p + q`.
 3. Đi ra ngoài mảng là hành vi không xác định, và C++ không tự kiểm tra chỉ số (khác Go).
 4. Truyền mảng vào hàm chỉ truyền con trỏ: `sizeof` tham số trong hàm là cỡ con trỏ (thường 8) khác `sizeof` của mảng ở nơi khai báo (thường 16), nên phải truyền kèm số phần tử, hoặc dùng `std::vector`/`std::array`.

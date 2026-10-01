@@ -33,11 +33,11 @@ void tang(int x) {
 - `void` đứng đầu nghĩa là "hàm này không trả về gì" (khác `int main`, trả về một số `int`).
 - `tang` là tên hàm.
 - `(int x)` là **tham số (parameter)**: một biến riêng của hàm, nhận giá trị lúc gọi. Kiểu viết **trước** tên (`int x`), ngược với Go (`x int`).
-- Hàm phải được viết **phía trên** chỗ gọi nó, vì trình biên dịch đọc file từ trên xuống.
+- Hàm phải được viết **phía trên** chỗ gọi nó, vì trình biên dịch đọc file từ trên xuống (hoặc khai báo trước, sẽ học sau).
 
 Để gọi hàm, viết tên và đặt giá trị truyền vào trong ngoặc: `tang(a);`. Giá trị truyền vào gọi là **đối số (argument)**.
 
-Tham số `x` là **một biến mới**, nằm trong khung stack của riêng lần gọi này (Bài 02). Lúc gọi, C++ **chép giá trị** của `a` vào `x`. Hàm sửa `x` thì chỉ sửa bản photo, còn `a` ở nơi gọi vẫn như cũ. Đó là truyền theo giá trị, cách mặc định của C++.
+Tham số `x` là **một biến mới**, thường nằm trong khung stack của riêng lần gọi này (Bài 02). Lúc gọi, C++ **chép giá trị** của `a` vào `x`. Hàm sửa `x` thì chỉ sửa bản photo, còn `a` ở nơi gọi vẫn như cũ. Đó là truyền theo giá trị, cách mặc định của C++.
 
 !!! info "Bạn biết Go?"
     Go cũng truyền theo giá trị: `func tang(x int)` cho đúng kết quả y hệt. Với con trỏ cũng vậy: Go truyền con trỏ theo giá trị (chép địa chỉ), và C++ làm giống hệt, như mục 3 sẽ cho thấy.
@@ -66,7 +66,7 @@ Con trỏ cũng là một biến, nên nó có địa chỉ, và ta lưu đượ
 
 **Ta muốn gì?** Một hàm "chọn giúp" một con trỏ: sau khi gọi, con trỏ `p` ở nơi gọi phải trỏ sang chỗ khác.
 
-**Vì sao `int*` không đủ?** Hàm nhận `int* con` chỉ nhận **bản sao** của `p` (đúng như mục 1). Gán `con = x` chỉ đổi bản sao, còn `p` ở nơi gọi không đổi.
+**Vì sao `int*` không đủ?** Hàm nhận `int* con` (`con` là tên mình đặt, nghĩa là "con trỏ") chỉ nhận **bản sao** của `p` (đúng như mục 1). Gán `con = x` chỉ đổi bản sao, còn `p` ở nơi gọi không đổi.
 
 **Vì sao `int**` được?** Ta đưa **số ngăn của chính tờ giấy `p`**, tức `&p`, có kiểu `int**`. Rồi viết `*con = x` để đổi tờ giấy gốc. Ví dụ 3 chạy cả hai cách.
 
@@ -97,7 +97,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | `int a = 5;` (trong `main`) | `main` bắt đầu, tạo biến `a` | `a` ở 0x1000 = 5 (địa chỉ minh họa, máy bạn sẽ in số khác) |
-| (3) `tang(a);` | Gọi hàm: C++ **chép** giá trị của `a` vào tham số `x` | khung mới của `tang`: `x` ở 0x0f00 = 5; `a` vẫn ở 0x1000 = 5 |
+| (3) `tang(a);` | Gọi hàm: C++ **chép** giá trị của `a` vào tham số `x` | khung mới của `tang` (thường trên stack): `x` ở 0x0f00 = 5; `a` vẫn ở 0x1000 = 5 |
 | (2) `x = x + 1;` | Sửa `x` (bản sao) | `x` = 6; `a` vẫn = 5 |
 | in trong hàm | In `x` | in `trong tang: x = 6` |
 | hết hàm | Khung của `tang` bị gỡ, `x` biến mất | chỉ còn `a` ở 0x1000 = 5 |
@@ -159,7 +159,7 @@ int main() {
 | (6) `tang(nullptr);` | `x` là `nullptr`, nhánh `if` chạy `return` ngay | không đổi |
 | `int b = 8;` | Tạo `b` | `b` ở 0x1004 = 8 |
 | (7) `doiCho(&a, &b);` | `p` = 0x1000 (trỏ `a`), `q` = 0x1004 (trỏ `b`) | `p ---> a`, `q ---> b` |
-| (4) `tam = *p;` | `tam` giữ tạm giá trị của `a` | `tam` = 6 |
+| `tam = *p;` | `tam` giữ tạm giá trị của `a` | `tam` = 6 |
 | `*p = *q;` | Chép giá trị `b` vào `a` | `a` = 8 |
 | `*q = tam;` | Ghi giá trị cũ của `a` vào `b` | `b` = 6 |
 | in cuối | In cả hai | in `a = 8, b = 6` |
@@ -183,7 +183,7 @@ Hàm cần một địa chỉ (`int*`) nhưng bạn đưa một số `int`, và 
 
 ### Ví dụ 3: `int**` và hàm "cấp cho bạn một con trỏ mới"
 
-Hai chương trình, cùng việc: hàm làm cho `p` (ban đầu trỏ `a`) chuyển sang trỏ `b`. Cái đầu **không đạt mục tiêu**:
+Hai chương trình, cùng việc: hàm làm cho `p` (ban đầu trỏ `a`) chuyển sang trỏ `b`. Cái đầu **không đạt mục tiêu**. Ở đó (1) là dòng gán trong hàm, (2) là dòng gọi hàm:
 
 ```cpp
 #include <iostream>
@@ -287,7 +287,7 @@ error: cannot convert ‘int*’ to ‘int**’ in assignment
 - Địa chỉ của biến `a`, hàm tự lấy bằng dấu `&`
 - Một ô nhớ dùng chung với `a`, đổi một nơi là đổi cả hai
 
-<p class="giai-thich" markdown>Truyền theo giá trị nghĩa là C++ chép giá trị của `a` vào một biến mới `x` trong khung stack của hàm, nên sửa `x` không đụng tới `a`. `x` không phải `a` mang tên khác: hai biến có hai địa chỉ khác nhau. Hàm cũng không tự lấy địa chỉ: muốn nhận địa chỉ thì tham số phải có kiểu `int*` và nơi gọi phải viết `&a`. Ô nhớ dùng chung chỉ có khi truyền con trỏ, đó là tờ giấy cùng ghi một số ngăn.</p>
+<p class="giai-thich" markdown>Truyền theo giá trị nghĩa là C++ chép giá trị của `a` vào một biến mới `x` (thường nằm trong khung stack của hàm), nên sửa `x` không đụng tới `a`. `x` không phải `a` mang tên khác: hai biến có hai địa chỉ khác nhau. Hàm cũng không tự lấy địa chỉ: muốn nhận địa chỉ thì tham số phải có kiểu `int*` và nơi gọi phải viết `&a`. Ô nhớ dùng chung chỉ có khi truyền con trỏ, đó là tờ giấy cùng ghi một số ngăn.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -325,12 +325,12 @@ int main() { int a = 1; int b = 2; doi(&a, &b); std::cout << a << " " << b; }
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 4.** Vì sao muốn hàm đổi chính con trỏ `p` của nơi gọi, ta phải truyền `&p` (kiểu `int**`)?
 
-- Vì hàm chỉ nhận bản sao của `p`, nên cần địa chỉ của `p`
-- Vì `int*` không chứa được địa chỉ của biến kiểu `int`
-- Vì con trỏ có kích thước lớn nên truyền theo giá trị bị lỗi
+- Vì hàm chỉ nhận bản sao của `p`, nên cần `&p`
+- Vì hàm chỉ đọc được `p`, không ghi được vào `p`
+- Vì `*p` luôn chép giá trị của `p` sang hàm
 - Vì `**` bắt hàm phải kiểm tra `nullptr` trước khi dùng
 
-<p class="giai-thich" markdown>Mọi tham số được chép từ đối số, con trỏ cũng vậy: hàm nhận `int*` sửa bản sao của `p`, còn `p` gốc không đổi. Đưa `&p` thì hàm có địa chỉ của chính `p` và đổi được nó bằng `*con = ...`. `int*` chứa địa chỉ của `int` rất bình thường, đó là việc nó làm hằng ngày. Con trỏ chỉ chiếm vài byte nên chép nó không gây lỗi, và `**` không liên quan gì tới việc kiểm tra `nullptr`.</p>
+<p class="giai-thich" markdown>Mọi tham số được chép từ đối số, con trỏ cũng vậy: hàm nhận `int*` sửa bản sao của `p`, còn `p` gốc không đổi. Đưa `&p` thì hàm có địa chỉ của chính `p` và đổi được nó bằng `*con = ...`. Hàm hoàn toàn ghi được vào `p` của nó, nhưng đó là bản sao. `*p` không chép gì cả, nó đi theo địa chỉ. Còn `**` không liên quan gì tới việc kiểm tra `nullptr`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
