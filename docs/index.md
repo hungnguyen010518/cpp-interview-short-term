@@ -21,9 +21,9 @@ cái kho đồ, thư viện...) rồi mới tới tên gọi của các khái ni
 Hãy học **Nhóm 1 — Nền tảng và bộ nhớ** từ [Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) đến Bài 15, đúng thứ tự. Nhóm này có
 15 bài, đi từ "bộ nhớ là gì" đến move semantics, C++11, C++14/17 và UB:
 
-- **[Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md)–[13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md)** được viết theo kiểu "dạy từ gốc": đi từng bước, có ví dụ chạy thật và
+- **[Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md)–[14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md)** được viết theo kiểu "dạy từ gốc": đi từng bước, có ví dụ chạy thật và
   trắc nghiệm.
-- **Bài 14** (C++14/17, đang tách ra từ Bài 13) và **[Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md)** (UB và công cụ phát hiện) đang được viết.
+- **[Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md)** (UB và công cụ phát hiện) đang được viết.
 
 Các nhóm sau (STL, đa luồng, OOP, hệ thống) sẽ được thêm dần.
 

@@ -356,7 +356,7 @@ Nếu sau này bạn cần đổi `unique_ptr` thành `shared_ptr` thì được
 | Đối tượng **thật sự chia sẻ**, không biết ai xong cuối | `std::shared_ptr` |
 | Chỉ **nhìn**, không giữ sống (cache, observer, chiều ngược của vòng) | `std::weak_ptr` |
 | Hàm chỉ **dùng** đối tượng, có chủ ở nơi khác | tham chiếu `const T&` hoặc con trỏ thô `T*` |
-| Cần diễn tả "có thể không có gì" | `nullptr` (con trỏ), hoặc `std::optional` (Bài 14) |
+| Cần diễn tả "có thể không có gì" | `nullptr` (con trỏ), hoặc `std::optional` ([Bài 14](14-cpp14-17.md)) |
 
 ## 💻 Ví dụ code
 

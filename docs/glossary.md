@@ -125,13 +125,13 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | override / final | `override` đánh dấu hàm ghi đè hàm ảo của lớp cha để trình biên dịch báo lỗi nếu sai chữ ký; `final` cấm ghi đè hoặc kế thừa tiếp (C++11); chỉ nêu tên, ví dụ ở nhóm OOP | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | constexpr | Cho phép tính lúc biên dịch: biến `constexpr` bắt buộc và ngầm `const`; hàm `constexpr` gọi với giá trị lúc chạy vẫn chạy lúc chạy (C++11; thân thoải mái hơn từ C++14) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | static_assert | Kiểm tra điều kiện lúc biên dịch; sai thì không biên dịch được (C++11) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| generic lambda | Lambda có tham số `auto`, dùng được cho nhiều kiểu (C++14) | Bài 14 |
-| structured binding | `auto [a, b] = giaTri;` tách cặp hoặc struct thành nhiều biến; `auto` chép, `auto&` là biệt danh (C++17) | Bài 14 |
-| std::optional | Hộp hoặc chứa một giá trị, hoặc rỗng (`std::nullopt`); kiểm tra bằng `if (r)`, lấy bằng `*r` hay `value_or` (C++17) | Bài 14 |
-| std::variant | Giá trị chứa đúng một trong vài kiểu đã liệt kê; dùng `std::holds_alternative`, `std::get` (C++17) | Bài 14 |
-| std::string_view | Cửa sổ không sở hữu nhìn vào các ký tự có sẵn, không sao chép; treo nếu chuỗi gốc chết trước (C++17) | Bài 14 |
-| `if` có khởi tạo | `if (khởi tạo; điều kiện)`: biến khai báo ở đầu chỉ sống trong `if`/`else`; giống `if v, ok := ...; ok` của Go (C++17) | Bài 14 |
-| std::filesystem | Thư viện làm việc với đường dẫn, file, thư mục (C++17); chỉ nêu tên | Bài 14 |
+| generic lambda | Lambda có tham số `auto`, dùng được cho nhiều kiểu (C++14) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| structured binding | `auto [a, b] = giaTri;` tách cặp hoặc struct thành nhiều biến; `auto` chép, `auto&` là biệt danh (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| std::optional | Hộp hoặc chứa một giá trị, hoặc rỗng (`std::nullopt`); kiểm tra bằng `if (r)`, lấy bằng `*r` hay `value_or` (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| std::variant | Giá trị chứa đúng một trong vài kiểu đã liệt kê; dùng `std::holds_alternative`, `std::get` (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| std::string_view | Cửa sổ không sở hữu nhìn vào các ký tự có sẵn, không sao chép; treo nếu chuỗi gốc chết trước (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| `if` có khởi tạo | `if (khởi tạo; điều kiện)`: biến khai báo ở đầu chỉ sống trong `if`/`else`; giống `if v, ok := ...; ok` của Go (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
+| std::filesystem | Thư viện làm việc với đường dẫn, file, thư mục (C++17); chỉ nêu tên | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | buffer overflow | Ghi vượt biên mảng | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
 | Valgrind | Công cụ kiểm tra bộ nhớ không cần biên dịch lại | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
 | crash | Chương trình sập đột ngột | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
