@@ -55,3 +55,10 @@ Bài 19 gộp ba chủ đề của JD2 (database, SDLC, game).
 
 ## Quy trình giao việc
 Mỗi nhóm bài: viết, chạy kiểm tra cục bộ (`mkdocs build --strict`, biên dịch code, kiểm tra cấu trúc), commit, push. Repo GitHub `hungnguyen010518/cpp-interview-short-term` (công khai) được tạo khi push nhóm 1.
+
+## Điều chỉnh lần 2 (2026-10-01): dạy lại phần con trỏ, RAII, smart pointer từ gốc
+Sau khi xuất bản Nhóm 1, người học phản hồi: các bài về con trỏ, RAII và smart pointer "dạy hổng nhiều, không hiểu gì". Nguyên nhân: nhảy bước và dùng thuật ngữ trước khi giải thích. Quyết định:
+- Thay hai bài cũ bằng 9 bài dạy từ gốc (bộ nhớ và địa chỉ → stack/heap/static → con trỏ ×2 → tham chiếu/const → new/delete → RAII → unique_ptr → shared_ptr/weak_ptr); ba bài cũ còn lại đổi thành Bài 10–12.
+- Mọi bài theo "luật dạy v2": không dùng thuật ngữ/cú pháp trước khi giải thích; mỗi đoạn code có bảng "chạy từng dòng", hình vẽ bộ nhớ và kết quả chạy thật; cầu nối từ Go (người học đã quen Go: `defer`, `*T`, escape analysis); câu hỏi trắc nghiệm công bằng (đáp án đúng không dài hơn hẳn, rải đều vị trí, có câu đọc code).
+- Đánh số bài là số toàn khóa liên tục (01, 02, …), không bắt đầu lại ở mỗi nhóm; `data-bai` bằng tiền tố `NN-` của tên file.
+- Các bài cũ (Bài 10–12) sẽ được rà lại theo luật dạy v2 ở một đợt sau; các nhóm 2–5 viết theo luật này.
