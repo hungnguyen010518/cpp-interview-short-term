@@ -93,7 +93,7 @@ int main() {
 
 Kết quả in ra: `42` rồi `1`.
 
-Vì sao đọc `a` ở đây lại an toàn? Vì `unique_ptr` là một trường hợp đặc biệt: chuẩn C++ bảo đảm một `unique_ptr` đã bị move thì rỗng, tức là bằng `nullptr`. Với các kiểu khác thì không được đoán như vậy. [Bài 3](03-move-semantics.md) nói rõ hơn.
+Vì sao đọc `a` ở đây lại an toàn? Vì `unique_ptr` là một trường hợp đặc biệt: chuẩn C++ bảo đảm một `unique_ptr` đã bị move thì rỗng, tức là bằng `nullptr`. Với đa số kiểu khác (như `std::string`) thì không được đoán như vậy. [Bài 3](03-move-semantics.md) nói rõ hơn.
 
 Ví dụ 3: `shared_ptr`, bộ đếm và `weak_ptr`.
 
@@ -144,7 +144,7 @@ Cách sửa: đổi một phía thành `std::weak_ptr`, ví dụ `std::weak_ptr<
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "RAII là gì? Cho ví dụ trong thư viện chuẩn."
-    Gắn vòng đời của tài nguyên với vòng đời của đối tượng: tài nguyên được xin trong hàm khởi tạo và được trả trong hàm hủy, kể cả khi có ngoại lệ (nếu ngoại lệ được bắt; còn ngoại lệ không được bắt có thể gọi `std::terminate` mà không chạy hàm hủy nào).
+    Gắn vòng đời của tài nguyên với vòng đời của đối tượng: tài nguyên được xin trong hàm khởi tạo và được trả trong hàm hủy, kể cả khi có ngoại lệ (nếu ngoại lệ được bắt; còn ngoại lệ không được bắt thì cuối cùng chương trình gọi `std::terminate`, và việc có dọn stack hay không là do cài đặt quy định, nên hàm hủy có thể không chạy).
 
     Ví dụ: `std::lock_guard`, `std::unique_ptr`, `std::ifstream`.
 

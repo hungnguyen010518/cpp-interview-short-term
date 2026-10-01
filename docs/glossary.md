@@ -4,7 +4,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 
 | Thuật ngữ | Nghĩa dễ hiểu | Bài |
 |---|---|---|
-| stack (ngăn xếp) | Nơi chứa biến cục bộ, tự dọn khi hết hàm | [Bài 1](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) |
+| stack (ngăn xếp) | Nơi chứa biến cục bộ, tự dọn khi hết phạm vi | [Bài 1](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) |
 | heap (vùng nhớ cấp phát động) | Nơi tự xin (`new`) và tự trả (`delete`) bộ nhớ | [Bài 1](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) |
 | con trỏ (pointer) | Biến giữ một địa chỉ | [Bài 1](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) |
 | tham chiếu (reference) | Biệt danh của một đối tượng có sẵn | [Bài 1](nhom-1-nen-tang-bo-nho/01-stack-heap-con-tro.md) |
@@ -31,7 +31,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | rule of 0/3/5 | Quy tắc về các hàm đặc biệt của class | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | rvalue reference (tham chiếu rvalue) | Tham chiếu tới giá trị tạm, viết `T&&` | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
-| move constructor (hàm tạo di chuyển) | Hàm tạo đối tượng mới bằng cách lấy ruột của một đối tượng tạm | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| move constructor (hàm tạo di chuyển) | Hàm tạo đối tượng mới bằng cách lấy ruột của một rvalue (đối tượng tạm hoặc đối tượng đã `std::move`) | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | move assignment (toán tử gán di chuyển) | Phép gán lấy ruột của đối tượng khác thay vì sao chép | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | noexcept | Lời hứa rằng hàm này không ném ngoại lệ | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | valid but unspecified (hợp lệ nhưng không xác định) | Đối tượng đã bị move vẫn dùng được để hủy hoặc gán lại, nhưng đừng đoán bên trong có gì | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
