@@ -11,6 +11,11 @@ Sản phẩm: một web tĩnh công khai tại `https://hungnguyen010518.github.
 - Có: 19 bài chia 5 nhóm, 1 đề tổng ôn, trang Tiến độ, trang Thuật ngữ.
 - Không có: code hoặc tên khách hàng của công ty (repo công khai); khóa C++ đầy đủ từ con số 0; bài tập chấm code tự động.
 
+## Phong cách viết
+- Giải thích sao cho học sinh lớp 5 cũng hiểu, giống khóa `database-tu-a-z`: mở bài bằng một câu chuyện hoặc phép ẩn dụ đời thường (cái bàn học, kho đồ, thư viện...) rồi mới tới thuật ngữ.
+- Mỗi thuật ngữ tiếng Anh xuất hiện lần đầu phải kèm nghĩa tiếng Việt dễ hiểu và đưa vào trang Thuật ngữ.
+- Câu ngắn, ví dụ nhỏ, một ý một đoạn. Phần "Câu hỏi phỏng vấn" mới dùng ngôn ngữ chính xác như khi trả lời nhà tuyển dụng.
+
 ## Hướng kỹ thuật
 - MkDocs Material (cùng bộ với repo `database-tu-a-z`), deploy bằng GitHub Actions (`mkdocs gh-deploy`) khi push vào `main`.
 - Trắc nghiệm tương tác: một file `docs/javascripts/quiz.js` đọc câu hỏi được viết trong Markdown, chấm ngay khi chọn, hiện giải thích, tính điểm cuối bài.
@@ -18,28 +23,34 @@ Sản phẩm: một web tĩnh công khai tại `https://hungnguyen010518.github.
 - Trang "Tiến độ" đọc điểm từ `localStorage`, liệt kê bài chưa làm hoặc dưới 70%.
 
 ## Cấu trúc một bài
-1. Mục tiêu (3 gạch đầu dòng)
-2. Giải thích kèm ví dụ code
-3. Câu hỏi phỏng vấn hay gặp, có đáp án mẫu
-4. Lỗi và bẫy thường gặp
-5. Trắc nghiệm 6–8 câu, mỗi câu đúng 1 đáp án và có giải thích
-6. Tóm tắt
+1. 🎯 Mục tiêu (3 gạch đầu dòng)
+2. 🧠 Câu chuyện mở đầu (phép ẩn dụ cho học sinh lớp 5)
+3. 📖 Giải thích
+4. 💻 Ví dụ code
+5. 🎤 Câu hỏi phỏng vấn hay gặp, có gợi ý trả lời
+6. ⚠️ Lỗi và bẫy thường gặp
+7. ✍️ Trắc nghiệm 6–8 câu, mỗi câu 3–4 lựa chọn, đúng 1 đáp án và có giải thích
+8. 🔑 Tóm tắt đúng 5 dòng
+
+Cú pháp trắc nghiệm trong Markdown: mỗi câu là một khối `<div class="cau-hoi" data-dap-an="N" markdown>` (N là số thứ tự đáp án đúng, tính từ 1), các lựa chọn là danh sách gạch đầu dòng, lời giải thích nằm trong `<p class="giai-thich" markdown>` và chỉ hiện sau khi chọn.
 
 ## Giáo trình
+OOP và Design Patterns được xếp sau (theo yêu cầu "OOP sau một tý"): người học đã quen bộ nhớ, STL và đa luồng rồi mới học.
+
 | Nhóm | Bài |
 |---|---|
 | 1. Nền tảng và bộ nhớ | 1 Stack/heap, con trỏ, tham chiếu, const · 2 RAII và smart pointer · 3 Move semantics, rule of 0/3/5 · 4 Tính năng C++11/14/17 · 5 Memory leak, dangling, UB, ASan/Valgrind |
-| 2. OOP và Design Patterns | 6 OOP, virtual, vtable, object slicing · 7 Template cơ bản · 8 Design patterns hay hỏi (Singleton, Factory, Observer, Strategy) |
-| 3. STL và thuật toán | 9 Container và độ phức tạp, iterator invalidation · 10 Algorithm và lambda · 11 Cấu trúc dữ liệu và thuật toán hay hỏi |
-| 4. Đa luồng | 12 thread, mutex, lock · 13 condition_variable, producer-consumer · 14 atomic, async/future · 15 Deadlock và race condition · 16 Thread pool và hiệu năng |
+| 2. STL và thuật toán | 6 Container và độ phức tạp, iterator invalidation · 7 Algorithm và lambda · 8 Cấu trúc dữ liệu và thuật toán hay hỏi |
+| 3. Đa luồng | 9 thread, mutex, lock · 10 condition_variable, producer-consumer · 11 atomic, async/future · 12 Deadlock và race condition · 13 Thread pool và hiệu năng |
+| 4. OOP và Design Patterns | 14 OOP, virtual, vtable, object slicing · 15 Template cơ bản · 16 Design patterns hay hỏi (Singleton, Factory, Observer, Strategy) |
 | 5. Hệ thống và quy trình | 17 Linux (gdb, CMake, perf), Git · 18 Socket, REST, gRPC, TCP/UDP · 19 Database, SDLC, nguyên lý game dev |
 | Tổng ôn | Đề trắc nghiệm trộn từ mọi bài, cộng câu hỏi về dự án thực tế (cách kể STAR, không tên khách hàng) |
 
 Bài 19 gộp ba chủ đề của JD2 (database, SDLC, game).
 
 ## Kiểm tra chất lượng
-- CI biên dịch mọi khối code C++ trong `docs/` bằng `g++ -std=c++17 -pthread`; khối nào lỗi thì chặn deploy. Khối chủ ý minh họa lỗi phải đánh dấu rõ và được bỏ qua.
-- Script kiểm tra cấu trúc: mỗi bài đủ 6 mục; mỗi câu trắc nghiệm có đúng 1 đáp án đúng và có giải thích.
+- CI biên dịch và chạy mọi khối ```` ```cpp ```` trong `docs/` bằng `g++ -std=c++17 -pthread`; khối nào lỗi thì chặn deploy. Khối chủ ý minh họa hành vi không xác định (UB) bắt đầu bằng dòng `// bo-qua-kiem-tra` và được bỏ qua.
+- Script kiểm tra cấu trúc: mỗi bài đủ 8 khối theo đúng thứ tự; mỗi câu trắc nghiệm có đúng 1 đáp án đúng và có giải thích.
 - Nội dung lý thuyết do Claude soạn, chỉ kiểm chứng được phần code biên dịch và chạy; người học báo bài nghi ngờ để sửa.
 
 ## Quy trình giao việc
