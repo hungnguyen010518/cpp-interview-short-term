@@ -23,3 +23,11 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | copy elision / RVO | Trình biên dịch bỏ qua bước copy khi trả về | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | rule of 0/3/5 | Quy tắc về các hàm đặc biệt của class | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
 | perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp | [Bài 3](nhom-1-nen-tang-bo-nho/03-move-semantics.md) |
+| auto | Để trình biên dịch tự đoán kiểu | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| lambda | Hàm vô danh viết ngay tại chỗ | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| constexpr | Tính được lúc biên dịch | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| enum class | Liệt kê có phạm vi riêng | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| optional | Hộp có thể rỗng | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| variant | Hộp chứa một trong nhiều kiểu | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| string_view | Cửa sổ nhìn vào chuỗi, không copy | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
+| structured binding | Tách một cặp/bộ thành nhiều biến | [Bài 4](nhom-1-nen-tang-bo-nho/04-cpp11-14-17.md) |
