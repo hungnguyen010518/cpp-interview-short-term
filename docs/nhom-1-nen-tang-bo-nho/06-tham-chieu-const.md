@@ -40,7 +40,7 @@ Sau dòng đó, `a` và `b` là **hai tên của cùng một ô nhớ**, không 
         +----+
 ```
 
-Tham chiếu có ba luật, chạy ví dụ 1 để thấy cả ba:
+Tham chiếu có ba luật (ví dụ 1 ở phần 💻 bên dưới chạy thật điều này, cứ đọc tiếp):
 
 - **Phải gắn ngay lúc khai báo.** `int& b;` (không gắn vào gì) là lỗi biên dịch.
 - **Không có "tham chiếu rỗng".** Không có `nullptr` cho tham chiếu: tham chiếu hợp lệ luôn là biệt danh của một biến có thật.
@@ -84,7 +84,7 @@ x = 6;              // lỗi biên dịch
 | `int* const q` | q là hằng con trỏ tới int | Sửa `*q`: được. Đổi `q` sang chỗ khác: **không** |
 | `const int* const r` | r là hằng con trỏ tới int hằng | Cả hai đều **không** |
 
-Hình dung: `const int*` là "tờ giấy được viết lại số ngăn khác, nhưng món đồ trong ngăn dán nhãn *chỉ xem*". `int* const` là "tờ giấy bị dán keo không ghi lại được, nhưng món đồ vẫn sửa được". Ví dụ 2 ở phần 💻 chạy cả ba, và mỗi thao tác bị cấm có một dòng thử riêng ở đó.
+Hình dung: `const int*` là "tờ giấy được viết lại số ngăn khác, nhưng món đồ ở chỗ nó trỏ tới dán nhãn *chỉ xem*". `int* const` là "tờ giấy bị dán keo không ghi lại được, nhưng món đồ vẫn sửa được". Ví dụ 2 ở phần 💻 bên dưới chứng minh từng hàng, cứ đọc tiếp.
 
 Tham chiếu cũng có `const`: `const int& t = a;` nghĩa là "t là biệt danh của `a`, nhưng qua cái tên `t` chỉ được xem". Bản thân `a` vẫn sửa được qua tên `a`.
 
@@ -194,9 +194,6 @@ error: assignment of member ‘Cay::cao’ in read-only object
 !!! info "Vì sao sao chép là chuyện đáng bận tâm?"
     `Cay` này chỉ có một số `int`, nên sao chép rẻ. Nhưng một đối tượng chứa mảng lớn thì mỗi lần truyền theo giá trị là một lần chép cả mảng, và hàm tạo sao chép của nó còn có thể làm việc nặng. Vì thế quy tắc thông dụng: **đối tượng to thì truyền `const&`** (chỉ đọc) hoặc `&` (cần sửa); kiểu nhỏ như `int`, `double` thì truyền theo giá trị là đủ.
 
-!!! warning "Hay nhầm"
-    Một số trường hợp sao chép có thể bị trình biên dịch bỏ qua (từ C++17, khi tham số được tạo thẳng từ một giá trị tạm như `Cay(3)`). Vì vậy đừng suy ra "mọi cách truyền theo giá trị đều in `copy!`". Ví dụ trên truyền một biến có tên (`cay`), trường hợp đó thì luôn có sao chép.
-
 ### 5. `const&` nhận được cả giá trị tạm
 
 **Giá trị tạm (temporary)** là một giá trị không có tên, chỉ tồn tại trong một câu lệnh: số `5` viết thẳng trong code, hay kết quả `a + 1`. Nó không phải một biến, nên không có ô nhớ "của ai" để mà sửa.
@@ -241,13 +238,13 @@ x = 5
 x = 4
 ```
 
-**Thử thay đổi: đổi tham số thành `int& x` (bỏ `const`) rồi gọi `sua(5)`.** Mình đã thử, không biên dịch được:
+**Thử thay đổi: đổi dòng khai báo thành `void docTheoThamChieu(int& x)` (bỏ `const`) rồi giữ nguyên lời gọi (2) `docTheoThamChieu(5)`.** Mình đã thử, không biên dịch được:
 
 ```text
 error: cannot bind non-const lvalue reference of type ‘int&’ to an rvalue of type ‘int’
 ```
 
-Câu báo lỗi chia ra: "rvalue" là cách gọi giá trị tạm kiểu này (Bài 11 nói kỹ), còn "bind" là "gắn". Nghĩa là: không gắn được tham chiếu không `const` vào giá trị tạm. Dòng `sua(a)` với biến `a` thì vẫn hợp lệ.
+Giải nghĩa câu báo lỗi: "bind" là "gắn"; "lvalue" là giá trị có tên như biến `a`; "rvalue" là giá trị tạm như `5` (Bài 11 nói kỹ). Nghĩa là không gắn được tham chiếu không `const` vào giá trị tạm. Lời gọi (1) `docTheoThamChieu(a)` với biến `a` thì vẫn hợp lệ.
 
 ### 6. Đừng trả về tham chiếu tới biến cục bộ
 
@@ -282,9 +279,15 @@ Khi chạy, kết quả không được chuẩn bảo đảm (hành vi không x�
 
 ### 7. Hàm thành viên `const` (nhắc ngắn)
 
-Một struct có thể chứa hàm viết bên trong nó, gọi là **hàm thành viên**, và gọi bằng `cay.doc()`. Chữ `const` đặt **sau** danh sách tham số (`int doc() const { ... }`) là cam kết "hàm này không sửa đối tượng". Chỉ hàm thành viên có cam kết đó mới được gọi qua một đối tượng `const` hoặc `const&`.
+Một struct có thể chứa hàm viết bên trong nó, gọi là **hàm thành viên**, và gọi bằng `cay.doc()`. Chữ `const` đặt **sau** danh sách tham số là cam kết "hàm này không sửa đối tượng". Chỉ hàm có cam kết đó mới gọi được qua một đối tượng `const` hoặc `const&`; bài sau sẽ dùng cú pháp này.
 
-Mình đã thử: struct có `int doc() const` và `void tang()`; qua `const Cay& c` gọi `c.doc()` chạy bình thường, còn gọi `c.tang()` thì lỗi `passing ‘const Cay’ as ‘this’ argument discards qualifiers`. Bài sau sẽ dùng cú pháp này khi viết class.
+```text
+struct Cay {
+    int cao;
+    int doc() const { return cao; }       // chỉ xem: gọi được qua const Cay&
+    void tang() { cao = cao + 1; }        // có sửa: không gọi được qua const Cay&
+};
+```
 
 ## 💻 Ví dụ code
 
@@ -346,7 +349,7 @@ error: ‘b’ declared as reference but not initialized
 Tham chiếu phải được gắn ngay lúc khai báo.
 
 !!! question "Hỏi nhanh: `sizeof(b)` là 4, vậy tham chiếu không tốn chỗ à?"
-    `sizeof` của một tham chiếu luôn cho ra kích thước của thứ nó đại diện (ở đây `int`, 4 byte), không phải kích thước của "cái tham chiếu". Còn tham chiếu có thật sự tốn bộ nhớ hay không thì chuẩn C++ không quy định, nên đừng dựa vào. Điều cần nhớ là về mặt ý nghĩa, nó **không phải một biến thứ hai**.
+    `sizeof` của một tham chiếu cho ra kích thước của thứ nó đại diện (ở đây `int`, 4 byte). Về ý nghĩa, tham chiếu **không phải một biến thứ hai**; chuẩn C++ không quy định nó có tốn bộ nhớ hay không.
 
 ### Ví dụ 2: đọc `const` với con trỏ
 
@@ -419,14 +422,7 @@ error: assignment of read-only reference ‘t’
 
 Khối trên không phải một chương trình để biên dịch, chỉ là danh sách "thử một dòng, nhận một lỗi". Điều cần thấy: `const int*` cấm **sửa `*p`** nhưng cho đổi `p`; `int* const` cấm **đổi `q`** nhưng cho sửa `*q`; bản `const int* const` cấm cả hai.
 
-Thêm một lỗi hay gặp: gán `const int*` cho `int*` (bỏ nhãn "chỉ xem" đi) cũng bị chặn:
-
-```text
-const int* p = &a;   int* w = p;
-error: invalid conversion from ‘const int*’ to ‘int*’
-```
-
-Vì nếu được, bạn sẽ sửa được món đồ **qua `w`** dù món đó đã dán nhãn chỉ xem qua `p`. Chiều ngược lại (`int*` gán cho `const int*`) thì được.
+Gán `const int*` cho `int*` (bỏ nhãn "chỉ xem") cũng bị chặn: `error: invalid conversion from ‘const int*’ to ‘int*’`. Chiều ngược lại (`int*` gán cho `const int*`) thì được.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -526,7 +522,7 @@ void h(Cay* c) {}
 Cay x(1);  f(x);  g(x);  h(&x);  f(x);
 ```
 
-- 4 lần, vì cả bốn lời gọi đều sao chép
+- 4 lần, vì cả bốn lời gọi hàm đều sao chép
 - 2 lần, vì chỉ hai lần gọi `f` sao chép
 - 1 lần, vì chỉ lần gọi đầu mới sao chép
 - 0 lần, vì `x` đã tồn tại sẵn rồi
@@ -551,7 +547,7 @@ Cay x(1);  f(x);  g(x);  h(&x);  f(x);
 - Vì tham chiếu không được làm kiểu trả về
 - Vì `x` chưa khai báo `const` nên không trả được
 - Vì muốn trả địa chỉ thì chỉ được dùng con trỏ
-- Vì `x` bị dọn khi `f` xong, nên tham chiếu hỏng
+- Vì `x` bị dọn khi `f` xong, tham chiếu hỏng
 
 <p class="giai-thich" markdown>`x` là biến cục bộ, nằm trên "bàn học" của `f` và bị dọn khi `f` kết thúc, nên tham chiếu trả ra gắn vào chỗ không còn là của `x`: dùng nó là hành vi không xác định. Tham chiếu hoàn toàn được làm kiểu trả về, nếu nó gắn vào thứ sống lâu hơn hàm (ví dụ biến của nơi gọi). Thêm `const` cho `x` không cứu được, vì `x` vẫn bị dọn. Trả về con trỏ tới `x` cũng bị y như vậy, nên đổi sang con trỏ không giải quyết gì.</p>
 </div>
