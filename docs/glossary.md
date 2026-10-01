@@ -85,7 +85,6 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | cache (bộ nhớ đệm) | Chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, khỏi làm lại | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | observer (người theo dõi) | Đối tượng theo dõi một đối tượng khác mà không sở hữu nó | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | thread-safe (an toàn đa luồng) | Dùng được từ nhiều luồng cùng lúc mà không gây tranh chấp dữ liệu; với `shared_ptr` chỉ bộ đếm là an toàn, đối tượng bên trong thì không | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
-| tranh chấp dữ liệu (data race) | Nhiều luồng cùng đụng một chỗ nhớ, có luồng ghi, mà không phối hợp: hành vi không xác định | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 11](nhom-1-nen-tang-bo-nho/11-move-semantics.md) |

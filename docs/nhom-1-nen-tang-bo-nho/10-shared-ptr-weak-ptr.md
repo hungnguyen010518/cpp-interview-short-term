@@ -9,11 +9,11 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Bài 09 có **một chiếc chìa** cho một kho: một chủ, chủ đi thì kho đóng. Nhưng đôi khi nhiều bạn cùng cần kho và **không ai biết ai dùng xong sau cùng**. Ví dụ một bức ảnh mà ba cửa sổ cùng đang hiển thị: cửa sổ nào đóng cuối cùng thì ảnh mới được dọn.
+[Bài 09](09-unique-ptr.md) có **một chiếc chìa** cho một kho: một chủ, chủ đi thì kho đóng. Nhưng đôi khi nhiều bạn cùng cần kho và **không ai biết ai dùng xong sau cùng**. Ví dụ một bức ảnh mà ba cửa sổ cùng đang hiển thị: cửa sổ nào đóng cuối cùng thì ảnh mới được dọn.
 
 Lúc này ta cho **mỗi bạn một tấm thẻ vào kho**, và treo ở cửa một **bảng đếm** "đang có mấy người giữ thẻ". Ai nhận thẻ thì đếm +1, ai trả thẻ thì −1. Người cuối cùng trả thẻ làm bảng về 0: kho đóng và được dọn. Đó là `std::shared_ptr` ("con trỏ chia sẻ").
 
-Còn **người đứng nhìn qua cửa kính** là `std::weak_ptr`: nhìn được xem kho còn mở không, nhưng không có thẻ nên không giữ kho mở. Ví dụ này không còn đúng ở một chỗ: thẻ thật là đồ vật còn `shared_ptr` là một biến chứa địa chỉ; "bảng đếm" thật ra là các con số nằm ở một vùng heap (mục 2).
+Còn **người đứng nhìn qua cửa kính** là `std::weak_ptr`: nhìn được xem kho còn mở không, nhưng không có thẻ nên không giữ kho mở. ("Kho" ở đây là đối tượng nằm ở heap, tức kho đồ của trường.) Phép so sánh này không còn đúng ở một chỗ: thẻ thật là đồ vật còn `shared_ptr` là một biến chứa địa chỉ; "bảng đếm" thật ra là các con số nằm ở một vùng heap (mục 2).
 
 !!! info "Bạn biết Go?"
     Go dọn bộ nhớ bằng GC kiểu **đánh dấu và quét** (tracing): GC đi từ các biến đang sống để tìm mọi thứ còn tới được, phần còn lại bị dọn. Vì vậy hai đối tượng trỏ vòng vào nhau mà không ai ngoài trỏ tới thì Go vẫn dọn bình thường. `shared_ptr` của C++ thì **đếm** tham chiếu, không đi tìm, nên một vòng tham chiếu làm bộ đếm không bao giờ về 0 và bị rò rỉ (mục 3).
@@ -102,18 +102,18 @@ Bộ đếm phải nằm ở đâu đó mà **mọi** `shared_ptr` cùng thấy.
 `std::make_shared<Cay>(5)` xin heap **một lần** cho cả cây lẫn khối điều khiển (thường là vậy; chuẩn không bắt buộc, đây là cách các cài đặt phổ biến làm). Hình sau là ví dụ khi `a` và `b` cùng giữ cây (địa chỉ minh họa, bạn sẽ thấy khác):
 
 ```text
-heap, một khối cấp phát bởi make_shared (bắt đầu ở 0x9000):
+heap, một khối cấp phát bởi make_shared (hình đơn giản hóa, bắt đầu ở 0x9000):
 +----------------------------+-----------+
 | khối điều khiển            | Cay       |
 |   mạnh = 2 (a và b)        |  cao = 5  |
-|   yếu  = 0                 |           |
+|   yếu  = 0 (đơn giản hóa)   |           |
 +----------------------------+-----------+
 
 stack:   a = { 0x9000 (khối điều khiển), 0x9010 (Cay) }
          b = { 0x9000 (khối điều khiển), 0x9010 (Cay) }
 ```
 
-Mỗi `shared_ptr` ghi **hai** địa chỉ: một tới khối điều khiển, một tới cây. Trên máy mình `sizeof(std::shared_ptr<Cay>)` là 16 byte, gấp đôi `unique_ptr` (8 byte); chuẩn không hứa con số này. Khi bộ đếm mạnh về 0, hàm hủy của cây chạy.
+Mỗi `shared_ptr` thường ghi **hai** địa chỉ: một tới khối điều khiển, một tới cây. Trên máy mình `sizeof(std::shared_ptr<Cay>)` là 16 byte, gấp đôi `unique_ptr` (8 byte); chuẩn không hứa con số này. Khi bộ đếm mạnh về 0, hàm hủy của cây chạy.
 
 Có hai cách tạo, và nên ưu tiên cách đầu: `std::make_shared<Cay>(5)` thường xin heap một lần; còn `std::shared_ptr<Cay>(new Cay(5))` phải `new` cây trước rồi `shared_ptr` mới xin thêm khối điều khiển, nên thường là hai lần xin. Một nhược điểm nhỏ của `make_shared` là vì cây và khối chung một khối, vùng nhớ của cây thường chỉ được trả sau khi `weak_ptr` cuối cùng cũng đã mất (dù hàm hủy của cây vẫn chạy ngay khi bộ đếm mạnh về 0).
 
@@ -122,7 +122,7 @@ Có hai cách tạo, và nên ưu tiên cách đầu: `std::make_shared<Cay>(5)`
 
 ### 3. Vòng tham chiếu: vì sao đối tượng không bao giờ bị hủy
 
-Giả sử cây `a` giữ một `shared_ptr` tới cây `b`, và `b` giữ một `shared_ptr` tới `a` (hai người bạn mỗi người cầm thẻ của người kia). Đó là **vòng tham chiếu (reference cycle)**. Ta thêm một thành viên `ban` vào `Cay` và nối vòng:
+Giả sử cây 1 giữ một `shared_ptr` tới cây 2, và cây 2 giữ một `shared_ptr` tới cây 1 (hai người bạn mỗi người cầm thẻ của người kia). Đó là **vòng tham chiếu (reference cycle)**. Ta thêm một thành viên `ban` vào `Cay` (dòng (1)) và nối vòng:
 
 ```cpp
 #include <iostream>
@@ -174,7 +174,7 @@ dem a = 2, dem b = 2
 het main
 ```
 
-Không có dòng `huy` nào, và chương trình vẫn thoát với mã 0: đây là **rò rỉ bộ nhớ**, không phải lỗi làm chương trình dừng. Hai cây vẫn nằm ở heap nhưng không còn biến nào của `main` tới được chúng, nên không ai trả thẻ được nữa. Ta nhờ AddressSanitizer xác nhận (biên dịch thêm `-g -fsanitize=address`, Bài 07). Đây là báo cáo thật, mình đã **rút gọn** (bỏ các dòng gọi hàm nội bộ của thư viện, đường dẫn, và một khối báo thứ hai gần như giống hệt khối đầu):
+Không có dòng `huy` nào, và chương trình vẫn thoát với mã 0: đây là **rò rỉ bộ nhớ**, không phải lỗi làm chương trình dừng. Hai cây vẫn nằm ở heap nhưng không còn biến nào của `main` tới được chúng, nên không ai trả thẻ được nữa. Ta nhờ AddressSanitizer xác nhận (biên dịch thêm `-g -fsanitize=address`, [Bài 07](07-new-delete.md)). Đây là báo cáo thật, mình đã **rút gọn** (bỏ các dòng gọi hàm nội bộ của thư viện, đường dẫn, và một khối báo thứ hai gần như giống hệt khối đầu):
 
 ```text
 ==...==ERROR: LeakSanitizer: detected memory leaks
@@ -183,7 +183,7 @@ Indirect leak of 40 byte(s) in 1 object(s) allocated from:
     #0 ... in operator new(unsigned long)
     ...
     #8 ... in std::shared_ptr<Cay> std::make_shared<Cay, int>(int&&)
-    #9 ... in main p3.cpp:19
+    #9 ... in main bai.cpp:19
 
 SUMMARY: AddressSanitizer: 80 byte(s) leaked in 2 allocation(s).
 ```
@@ -192,7 +192,7 @@ SUMMARY: AddressSanitizer: 80 byte(s) leaked in 2 allocation(s).
 
 ### 4. Phá vòng bằng `std::weak_ptr`
 
-Cách phá: cho **một chiều** của vòng không còn giữ thẻ, chỉ **nhìn**. `std::weak_ptr<Cay>` đứng ở cửa kính: nó biết cây ở đâu nhưng **không cộng vào bộ đếm mạnh**, nên không giữ cây sống. Ta làm lại bài trên theo kiểu cha và con: cha giữ con bằng `shared_ptr`, còn con chỉ nhìn cha bằng `weak_ptr`.
+Cách phá: cho **một chiều** của vòng không còn giữ thẻ, chỉ **nhìn**. `std::weak_ptr<Cay>` đứng ở cửa kính: nó biết cây ở đâu nhưng **không cộng vào bộ đếm mạnh**, nên không giữ cây sống. Ta làm lại bài trên theo kiểu cha và con: cha giữ con bằng `shared_ptr` (dòng (1)), còn con chỉ nhìn cha bằng `weak_ptr` (dòng (2)).
 
 ```cpp
 #include <iostream>
@@ -233,8 +233,8 @@ int main() {
 | 3 | (4) | `b->cha = a`: là `weak_ptr` nên **không** cộng | 1 | 2 |
 | 4 | sau (4) | In `dem a = 1, dem b = 2` | 1 | 2 |
 | 5 | (5) `}` | `b` chết: trả một thẻ của cây 2 (cây 1 vẫn giữ nó) | 1 | 1 |
-| 6 | (5) `}` | `a` chết: đếm cây 1 về **0**, hàm hủy cây 1 chạy, in `huy 1`. Khi đó thành viên `con` của nó bị hủy, trả thẻ cuối của cây 2 | 0 | 0 |
-| 7 | (5) | Đếm cây 2 về 0, in `huy 2` | 0 | 0 |
+| 6 | (5) `}` | `a` chết: đếm cây 1 về **0**, hàm hủy cây 1 chạy, in `huy 1`. Khi đó thành viên `con` của nó bị hủy, trả thẻ cuối của cây 2 | 0 | 1 |
+| 7 | (5) | `con` bị hủy xong: đếm cây 2 về 0, in `huy 2` | 0 | 0 |
 
 **Kết quả khi chạy:**
 
@@ -247,7 +247,7 @@ huy 2
 het main
 ```
 
-Đủ hai `huy`, và thứ tự là `huy 1` rồi `huy 2`: cha chết trước, kéo theo con. Quy tắc dùng: trong một quan hệ hai chiều, hướng "sở hữu" (cha giữ con) dùng `shared_ptr`, hướng ngược lại (con nhìn cha) dùng `weak_ptr`.
+Đủ hai `huy`, và thứ tự là `huy 1` rồi `huy 2`: cây 1 bị hủy trước, kéo theo cây 2. Biến `b` thì chết trước (ở `}`), nhưng nó chỉ trả một thẻ; cây 2 vẫn được `con` của cây 1 giữ, nên chỉ bị hủy như hệ quả của việc cây 1 bị hủy. Quy tắc dùng: trong một quan hệ hai chiều, hướng "sở hữu" (cha giữ con) dùng `shared_ptr`, hướng ngược lại (con nhìn cha) dùng `weak_ptr`.
 
 ### 5. `weak_ptr` dùng thế nào: `expired()` và `lock()`
 
@@ -294,7 +294,7 @@ int main() {
 }
 ```
 
-(`expired()` là `bool`, nên `cout` in `1` cho đúng và `0` cho sai, như Bài 09.)
+(`expired()` là `bool`, nên `cout` in `1` cho đúng và `0` cho sai, như [Bài 09](09-unique-ptr.md).)
 
 **Chạy từng dòng**
 
@@ -330,7 +330,7 @@ error: base operand of '->' has non-pointer type 'const std::weak_ptr<Cay>'
 
 `weak_ptr` cố tình **không** có `->` và `*`: muốn dùng cây thì bạn bắt buộc phải qua `lock()` để lấy `shared_ptr`, và kiểm tra xem cây còn không.
 
-Hai chỗ `weak_ptr` hay được dùng, ngoài việc phá vòng. **Cache (bộ nhớ đệm)** là chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, không phải làm lại. **Observer (người theo dõi)** là một đối tượng muốn biết chuyện của đối tượng khác mà không sở hữu nó. Cả hai chỉ cần "nhìn", không được phép giữ chủ thể sống. Ví dụ cache nằm ở phần 💻.
+Hai chỗ `weak_ptr` hay được dùng, ngoài việc phá vòng. **Cache (bộ nhớ đệm)** là chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, không phải làm lại. **Observer (người theo dõi)** là một đối tượng muốn biết chuyện của đối tượng khác mà không sở hữu nó. Cả hai chỉ cần "nhìn", không nên ép chủ thể sống. Ví dụ cache nằm ở phần 💻.
 
 ### 6. An toàn giữa các luồng
 
@@ -346,7 +346,7 @@ Vì vậy "`shared_ptr` an toàn đa luồng" chỉ đúng cho phần bộ đế
 
 Mỗi `shared_ptr` đi kèm một khối điều khiển ở heap, mỗi lần copy hoặc hủy phải cập nhật bộ đếm bằng thao tác nguyên tử (mục 6), và nó to hơn con trỏ thô (16 byte so với 8 trên máy mình). Chi phí đó không lớn với đa số chương trình, nhưng cũng không đáng chịu nếu bạn chỉ có một chủ rõ ràng. Quan trọng hơn, `shared_ptr` làm **khó thấy** khi nào đối tượng chết, và mở đường cho vòng tham chiếu. Vì vậy **đừng dùng `shared_ptr` "cho chắc"**.
 
-Nếu sau này bạn cần đổi `unique_ptr` thành `shared_ptr` thì được: `std::shared_ptr<Cay> s = std::move(u);` (Bài 09). Mình đã biên dịch và chạy: `u` thành `nullptr` và `s.use_count()` là 1. Chiều ngược lại thì không có.
+Nếu sau này bạn cần đổi `unique_ptr` thành `shared_ptr` thì được: `std::shared_ptr<Cay> s = std::move(u);` ([Bài 09](09-unique-ptr.md)). Mình đã biên dịch và chạy: `u` thành `nullptr` và `s.use_count()` là 1. Chiều ngược lại thì không có.
 
 **Bảng chọn nhanh** (nên chép lại và học thuộc):
 
@@ -356,7 +356,7 @@ Nếu sau này bạn cần đổi `unique_ptr` thành `shared_ptr` thì được
 | Đối tượng **thật sự chia sẻ**, không biết ai xong cuối | `std::shared_ptr` |
 | Chỉ **nhìn**, không giữ sống (cache, observer, chiều ngược của vòng) | `std::weak_ptr` |
 | Hàm chỉ **dùng** đối tượng, có chủ ở nơi khác | tham chiếu `const T&` hoặc con trỏ thô `T*` |
-| Cần diễn tả "có thể không có gì" | `nullptr` (con trỏ), hoặc `std::optional` (Bài 12) |
+| Cần diễn tả "có thể không có gì" | `nullptr` (con trỏ), hoặc `std::optional` ([Bài 12](12-cpp11-14-17.md)) |
 
 ## 💻 Ví dụ code
 
@@ -435,7 +435,7 @@ het main
 huy 7
 ```
 
-Chỉ có hai `tao 7` cho ba lần xin: lần thứ hai dùng lại. Và `Kho` không ngăn `huy 7` ở giữa, vì nó chỉ là người nhìn.
+Chỉ có hai `tao 7` cho ba lần xin: lần thứ hai dùng lại. Và `Kho` không cản `huy 7` ở giữa, vì nó chỉ là người nhìn.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -488,10 +488,10 @@ auto d = std::move(c);
 std::cout << a.use_count() << " " << (c == nullptr) << "\n";
 ```
 
-- `3 0`: `reset` của `b` không làm đếm giảm, và `c` vẫn còn giữ cây
-- `2 1`: `a` và `d` giữ, còn `b` và `c` đã buông
+- `3 0`: `reset` của `b` không làm đếm giảm, `c` vẫn giữ cây
+- `2 1`: `a` và `d` giữ, `b` `c` đã buông, `w` không tính
 - `1 1`: chỉ `a` giữ, vì `d` chỉ là bản nhìn chứ không giữ
-- `4 0`: `a`, `b`, `c`, `d` đều giữ vì `weak_ptr` cũng đếm
+- `4 0`: cả bốn đều giữ, vì `weak_ptr` cũng đếm thẻ
 
 <p class="giai-thich" markdown>Đếm đi từng bước: `a` là 1, `b` và `c` thành 3, `b.reset()` về 2, `w` là `weak_ptr` nên không đổi, rồi `std::move(c)` chỉ đổi chủ từ `c` sang `d` nên vẫn 2, và `c` thành `nullptr` nên in `2 1`; mình đã chạy ra đúng vậy. `reset` có giảm đếm, nên `3 0` sai. `d` là `shared_ptr` giữ thẻ thật, không phải "bản nhìn". `weak_ptr` không cộng vào bộ đếm mạnh, nên không thể ra 4.</p>
 </div>
@@ -506,10 +506,10 @@ a.reset();
 std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 ```
 
-- `tao 1, 00, huy 1`: `weak_ptr` giữ cây sống nên chưa hủy, cả hai sai
+- `tao 1, 00, huy 1`: `weak_ptr` giữ cây sống nên chưa hủy
 - `tao 1, 01, huy 1`: `expired` báo sai, còn `lock` lại trả rỗng
-- `tao 1, huy 1, 00`: cây đã hủy nhưng `weak_ptr` vẫn báo còn cây
-- `tao 1, huy 1, 11`: cây hủy, nên cả hai đều đúng
+- `tao 1, huy 1, 00`: cây hủy mà `weak_ptr` vẫn báo còn cây
+- `tao 1, huy 1, 11`: cây hủy ngay lúc `reset`, cả hai đúng
 
 <p class="giai-thich" markdown>`a` là `shared_ptr` duy nhất, nên `a.reset()` đưa đếm về 0 và in `huy 1` ngay, trước dòng cuối; `w` không giữ cây sống nên không cản được. Sau đó cả `expired()` và `lock() == nullptr` đều đúng nên in `11`; mình đã chạy ra `tao 1, huy 1, 11`. Dãy để `huy 1` ở cuối (hay `00`) tin rằng `weak_ptr` giữ cây sống, mà nó không giữ. Kết quả `01` là mâu thuẫn: cây đã hủy thì hai phép kiểm tra phải cùng đúng.</p>
 </div>
@@ -527,12 +527,12 @@ std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 std::cout << "xong\n";
 ```
 
-- `tao 1, tao 2, xong`
+- `tao 1, tao 2, xong` (không có huy)
 - `tao 1, tao 2, huy 2, huy 1, xong`
-- `tao 1, tao 2, huy 1, huy 2, xong`
+- `tao 1, tao 2, huy 2, xong`: chỉ `b` hủy
 - `tao 1, tao 2, xong, huy 2, huy 1`
 
-<p class="giai-thich" markdown>Hai cây giữ nhau nên khi `a` và `b` chết ở `}`, mỗi cây vẫn còn một thẻ do cây kia giữ: bộ đếm dừng ở 1, không về 0, nên không có `huy` nào; mình đã chạy ra đúng dãy này. Hai dãy có `huy 2, huy 1` hay `huy 1, huy 2` ngay sau khối tin rằng biến chết là đủ để cây bị hủy, mà ở đây còn thẻ trong vòng. Dãy có `huy` sau `xong` tin rằng chương trình dọn lúc thoát, nhưng `shared_ptr` không có bộ dọn cuối chương trình.</p>
+<p class="giai-thich" markdown>Hai cây giữ nhau nên khi `a` và `b` chết ở `}`, mỗi cây vẫn còn một thẻ do cây kia giữ: bộ đếm dừng ở 1, không về 0, nên không có `huy` nào; mình đã chạy ra đúng dãy này. Hai dãy có `huy` ngay sau khối (`huy 2, huy 1`, hay chỉ `huy 2`) tin rằng biến chết là đủ để cây bị hủy, mà ở đây còn thẻ trong vòng. Dãy có `huy` sau `xong` tin rằng chương trình dọn lúc thoát, nhưng `shared_ptr` không có bộ dọn cuối chương trình.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -540,7 +540,7 @@ std::cout << "xong\n";
 
 - Khi `shared_ptr` đầu tiên (nơi tạo ra nó) chết, các bản copy chỉ mượn
 - Khi bất kỳ `shared_ptr` nào chết, mỗi cái hủy một phần của đối tượng
-- Khi bộ đếm mạnh về 0, tức là `shared_ptr` cuối cùng buông
+- Khi bộ đếm mạnh về 0, tức là `shared_ptr` giữ cuối cùng vừa buông
 - Khi chương trình kết thúc, vì `shared_ptr` gom rác vào lúc cuối
 
 <p class="giai-thich" markdown>Đối tượng chết khi không còn ai giữ thẻ, tức là bộ đếm mạnh về 0, dù người buông cuối là bản gốc hay bản copy. Không có "người tạo ra nó" đặc biệt: các bản copy đều là chủ ngang nhau, nên nếu cái đầu tiên chết trước thì đối tượng vẫn sống. Mỗi `shared_ptr` chết chỉ trừ 1, không hủy "một phần". Và C++ không có bộ gom rác lúc cuối, chỉ có hàm hủy chạy đúng lúc đếm về 0.</p>
@@ -549,10 +549,10 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 5.** Một `weak_ptr` trỏ vào cây có làm bộ đếm mạnh (`use_count()`) tăng không?
 
-- Có, mỗi `weak_ptr` cộng 1 vào `use_count()`, nên cây sống thêm
-- Không: `weak_ptr` không giữ cây sống nên không được đếm
+- Có, mỗi `weak_ptr` cộng 1 vào `use_count()`
+- Không: `weak_ptr` không giữ cây sống nên không vào bộ đếm mạnh
 - Không, và `weak_ptr` cũng không có cách nào để dùng được cây
-- Chỉ cộng vào bộ đếm yếu, và cây sống cho đến khi bộ đếm yếu về 0
+- Chỉ cộng vào bộ đếm yếu, và cây vẫn chưa bị hủy cho đến khi nó về 0
 
 <p class="giai-thich" markdown>`weak_ptr` chỉ nhìn: nó cộng vào bộ đếm yếu chứ không cộng vào bộ đếm mạnh, nên cây vẫn bị hủy khi `shared_ptr` cuối cùng buông. Dùng được cây vẫn có cách, là `lock()` trả về `shared_ptr`, nên không phải "không có cách nào". Bộ đếm yếu tồn tại thật, nhưng cây sống hay chết do bộ đếm mạnh quyết định, không phải bộ đếm yếu.</p>
 </div>
@@ -560,10 +560,10 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 6.** `w.lock()` (với `w` là `weak_ptr<Cay>`) trả về gì?
 
-- Con trỏ thô tới cây, hoặc `nullptr` nếu cây đã bị hủy trước đó
-- Một `weak_ptr` mới trỏ cùng cây, và luôn dùng được mọi lúc
-- Một giá trị `bool` cho biết cây còn sống hay đã bị hủy
-- Một `shared_ptr`, rỗng nếu cây đã hủy
+- Con trỏ thô tới cây, hoặc `nullptr` nếu cây đã hủy
+- Một `weak_ptr` mới trỏ cùng cây
+- Một `bool`: cây còn sống hay không
+- Một `shared_ptr`, rỗng nếu cây đã bị hủy rồi
 
 <p class="giai-thich" markdown>`lock()` trả một `shared_ptr`: nếu cây còn sống thì nó là một thẻ thật (đếm +1 trong lúc bạn cầm), nếu cây đã hết thì rỗng, và bạn kiểm tra bằng `if (s)`. Nó không trả con trỏ thô, vì con trỏ thô không giữ cây sống và có thể treo ngay sau đó. Nó cũng không trả `weak_ptr` (không dùng được để truy cập). Việc trả `bool` là của `expired()`, không phải của `lock()`.</p>
 </div>
@@ -573,7 +573,7 @@ std::cout << "xong\n";
 
 - Mỗi cửa sổ giữ một `unique_ptr` tới ảnh
 - Mỗi cửa sổ giữ con trỏ thô, và tự `delete` khi đóng
-- Mỗi cửa sổ giữ một `shared_ptr` tới ảnh
+- Mỗi cửa sổ giữ một `shared_ptr` tới ảnh đó
 - Mỗi cửa sổ giữ một `weak_ptr` tới ảnh
 
 <p class="giai-thich" markdown>Đây là chia sẻ quyền sở hữu thật sự, nên `shared_ptr`: ảnh được dọn khi cửa sổ cuối buông. `unique_ptr` không copy được nên ba cửa sổ không cùng giữ được. Con trỏ thô với `delete` ở mỗi cửa sổ sẽ xóa ảnh nhiều lần. `weak_ptr` thì không giữ ảnh sống, nên nếu cả ba chỉ nhìn thì ảnh không có chủ nào.</p>
@@ -582,12 +582,12 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 8.** Câu nào về an toàn đa luồng của `shared_ptr` là đúng?
 
-- Bộ đếm cập nhật an toàn giữa các luồng, nhưng đối tượng bên trong thì không
-- Cả bộ đếm lẫn đối tượng bên trong đều tự an toàn giữa các luồng khi dùng `shared_ptr`
+- Bộ đếm cập nhật an toàn giữa các luồng, còn đối tượng bên trong thì không
+- Cả bộ đếm lẫn đối tượng bên trong đều tự an toàn khi dùng `shared_ptr`
 - Chỉ an toàn nếu mọi luồng đều chỉ đọc, còn copy `shared_ptr` ở nhiều luồng là tranh chấp
 - Hoàn toàn không an toàn, nên mỗi lần copy `shared_ptr` đều phải tự khóa lại
 
-<p class="giai-thich" markdown>Chuẩn đòi bộ đếm trong khối điều khiển được cập nhật nguyên tử, nên copy và hủy các `shared_ptr` khác nhau cùng trỏ một đối tượng từ nhiều luồng là an toàn. Đối tượng bên trong không được bảo vệ gì, nên tin rằng cả hai đều tự an toàn là sai. Copy ở nhiều luồng không phải tranh chấp (tranh chấp chỉ xảy ra khi nhiều luồng sửa cùng một biến `shared_ptr`). Và bạn cũng không phải tự khóa mỗi lần copy.</p>
+<p class="giai-thich" markdown>Chuẩn bảo đảm bộ đếm trong khối điều khiển được cập nhật an toàn giữa các luồng (nguyên tử), nên copy và hủy các `shared_ptr` khác nhau cùng trỏ một đối tượng từ nhiều luồng là an toàn. Đối tượng bên trong không được bảo vệ gì, nên tin rằng cả hai đều tự an toàn là sai. Copy ở nhiều luồng không phải tranh chấp (tranh chấp xảy ra khi có luồng sửa chính biến `shared_ptr` đó trong lúc luồng khác đọc hoặc sửa nó). Và bạn cũng không phải tự khóa mỗi lần copy.</p>
 </div>
 
 </div>
@@ -595,7 +595,7 @@ std::cout << "xong\n";
 ## 🔑 Tóm tắt
 
 1. `std::shared_ptr<T>` (trong `<memory>`, tạo bằng `std::make_shared<T>(...)`) cho nhiều chủ cùng giữ một đối tượng: copy thì bộ đếm tham chiếu +1, hủy/`reset`/gán lại thì −1, và đối tượng bị hủy khi bộ đếm mạnh về 0 (`use_count()` đọc nó, chỉ để học và gỡ lỗi).
-2. Các bộ đếm nằm ở **khối điều khiển** dùng chung (một bộ đếm mạnh cho `shared_ptr`, một bộ đếm yếu cho `weak_ptr`); mỗi `shared_ptr` ghi hai địa chỉ, và `make_shared` thường xin heap một lần cho cả đối tượng lẫn khối điều khiển.
+2. Các bộ đếm nằm ở **khối điều khiển** dùng chung (một bộ đếm mạnh cho `shared_ptr`, một bộ đếm yếu cho `weak_ptr`); mỗi `shared_ptr` thường ghi hai địa chỉ, và `make_shared` thường xin heap một lần cho cả đối tượng lẫn khối điều khiển.
 3. Hai đối tượng giữ `shared_ptr` của nhau tạo **vòng tham chiếu**: bộ đếm không bao giờ về 0, hàm hủy không bao giờ chạy (rò rỉ, chương trình vẫn thoát bình thường, LeakSanitizer báo); phá bằng cách đổi một chiều thành `std::weak_ptr`.
 4. `weak_ptr` chỉ nhìn, không cộng bộ đếm mạnh nên không giữ đối tượng sống; dùng `expired()` để hỏi còn sống không và `lock()` để lấy `shared_ptr` (rỗng nếu đã hủy); hợp với phá vòng, cache và observer; so với Go, GC tracing dọn được vòng còn đếm tham chiếu thì không.
 5. Bộ đếm cập nhật nguyên tử nên copy/hủy các `shared_ptr` khác nhau từ nhiều luồng là an toàn, nhưng đối tượng bên trong và việc nhiều luồng cùng sửa MỘT biến `shared_ptr` thì không; vì có cái giá (khối điều khiển, thao tác nguyên tử) nên không dùng "cho chắc": một chủ → `unique_ptr`, thật sự chia sẻ → `shared_ptr`, chỉ nhìn → `weak_ptr`/con trỏ thô/tham chiếu, "có thể không có" → `nullptr`/`std::optional`.
