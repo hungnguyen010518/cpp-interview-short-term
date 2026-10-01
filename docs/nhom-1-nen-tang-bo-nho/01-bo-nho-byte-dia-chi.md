@@ -49,9 +49,9 @@ Ta đi từng dòng của bản C++.
 
 **`#include <iostream>`**
 
-- Dòng này nói: "hãy chép vào đây bộ công cụ nhập/xuất của thư viện chuẩn". `iostream` là viết tắt của *input/output stream* (luồng nhập/xuất).
+- Dòng này nói: "hãy chép vào đây bộ công cụ nhập/xuất của thư viện chuẩn (bộ công cụ có sẵn, đi kèm C++)". `iostream` là viết tắt của *input/output stream* (luồng nhập/xuất).
 - Nó giống `import "fmt"` trong Go: muốn in chữ ra màn hình thì phải nói trước là bạn cần công cụ in.
-- Dòng bắt đầu bằng `#` là chỉ thị gửi cho trình biên dịch, **không có dấu `;` ở cuối**.
+- Dòng bắt đầu bằng `#` là chỉ thị gửi cho trình biên dịch (chương trình dịch mã bạn viết thành file máy chạy được, xem mục 2), **không có dấu `;` ở cuối**.
 
 **`int main() {`**
 
@@ -67,7 +67,7 @@ Ta đi từng dòng của bản C++.
 
 - `cout` là "cổng ra" của chương trình, nối với màn hình (tên là *console output*, đầu ra của console).
 - `std::` đọc là "của họ `std`". `std` là viết tắt của *standard* (chuẩn). Thư viện chuẩn của C++ đặt mọi tên của nó vào "họ" `std`, để không đụng tên với code bạn tự viết. `std::cout` nghĩa là "`cout` thuộc họ `std`". Dấu `::` đọc là "thuộc về". Nó cùng vai trò với `fmt.` trong `fmt.Println`: `fmt` là "họ" của `Println`.
-- `<<` đọc là "đẩy vào". `std::cout << "Xin chao"` nghĩa là đẩy chữ `Xin chao` vào cổng ra. Bạn có thể nối nhiều `<<` liền nhau, và chúng được đẩy ra theo thứ tự từ trái sang phải.
+- `<<` là một **toán tử** (ký hiệu thực hiện một phép trên dữ liệu, mục 5 nói thêm), đọc là "đẩy vào". Phần trong nháy kép như `"Xin chao"` là một **chuỗi chữ**, được in ra đúng từng ký tự. `std::cout << "Xin chao"` nghĩa là đẩy chữ `Xin chao` vào cổng ra. Bạn có thể nối nhiều `<<` liền nhau, và chúng được đẩy ra theo thứ tự từ trái sang phải.
 - `"\n"` là ký tự xuống dòng. Khác với `fmt.Println` của Go (tự thêm xuống dòng), `std::cout` **không** tự thêm. Bạn phải tự đẩy `"\n"` vào.
 - `;` kết thúc câu lệnh. Go tự điền `;` giúp bạn khi xuống dòng, còn C++ thì **không**. Quên `;` là lỗi biên dịch.
 
@@ -77,7 +77,7 @@ Ta đi từng dòng của bản C++.
 
 ### 2. Biên dịch và chạy
 
-C++ cũng như Go: bạn viết mã nguồn, một **trình biên dịch (compiler)** dịch nó thành một file chạy được, rồi bạn chạy file đó. Khác một chút là ở C++ bạn tự gõ hai bước. Lệnh sau làm cả hai:
+Từ mã nguồn đến lúc thấy chữ hiện ra có hai bước: mã nguồn → (bước **biên dịch**, do **trình biên dịch (compiler)** làm) → file chạy được → (bước **chạy** file đó). Go có `go run` gộp hai bước làm một; trong C++ ta tự nối hai bước bằng `&&` trên cùng một dòng lệnh:
 
 ```bash
 g++ -std=c++17 -Wall -o bai bai.cpp && ./bai
@@ -99,7 +99,7 @@ Nếu code có lỗi, bước `g++` báo lỗi và dừng, nên `./bai` không b
 
 Máy tính lưu mọi thứ bằng các công tắc chỉ có hai trạng thái: tắt hoặc bật, ta ghi là `0` hoặc `1`. Một công tắc như thế gọi là **bit**.
 
-Tám bit gộp lại thành một **byte**. Vì mỗi bit có hai khả năng, một byte có `2 × 2 × … × 2` (tám lần), tức **256** tổ hợp khác nhau. Có thể dùng chúng để biểu diễn các số từ `0` đến `255`, hoặc một chữ cái, hoặc một mảnh của số lớn hơn.
+Tám bit gộp lại thành một **byte**. Vì mỗi bit có hai khả năng, một byte có `2 × 2 × … × 2` (2 nhân với chính nó 8 lần, viết là 2⁸), tức **256** tổ hợp khác nhau. Có thể dùng chúng để biểu diễn các số từ `0` đến `255`, hoặc một chữ cái, hoặc một mảnh của số lớn hơn.
 
 **Bộ nhớ** là một dãy byte nằm liền nhau, mỗi byte có một địa chỉ. Đó chính là dãy tủ khóa: **một ngăn = một byte**.
 
@@ -115,7 +115,7 @@ Ngăn:     [ 1 byte ][ 1 byte ][ 1 byte ][ 1 byte ][ 1 byte ][ 1 byte ] ...
 - Ví dụ: `0x10` là 16, `0x1f` là 31, `0xff` là 255.
 - Một chữ số hệ 16 tương ứng đúng 4 bit, nên hai chữ số hệ 16 vừa đủ một byte (`00` đến `ff`). Vì vậy dân lập trình thích dùng nó để viết địa chỉ và dữ liệu thô.
 
-Bạn không cần tự đổi qua lại. Bạn chỉ cần nhận ra `0x…` là địa chỉ, và biết cách tính nhẩm hiệu hai địa chỉ ở những chữ số cuối, ví dụ `…374` trừ `…370` bằng `4`.
+Bạn không cần tự đổi qua lại. Bạn chỉ cần nhận ra `0x…` là địa chỉ, và biết so hai địa chỉ ở những chữ số cuối, ví dụ `…374` trừ `…370` bằng `4`. Khi phải "mượn", cứ đếm từng bước là được (ví dụ ở ví dụ 3).
 
 ### 4. Biến có bốn thứ
 
@@ -239,9 +239,13 @@ Con số này là kết quả trên máy mình. Máy bạn rất có thể in y 
 !!! info "Bạn biết Go?"
     Go có `unsafe.Sizeof(x)` với ý nghĩa giống `sizeof`. Nó nằm trong gói `unsafe` vì bình thường code Go không cần quan tâm tới kích thước. Một điểm khác cần nhớ: trong Go, `int` có kích thước đúng bằng một từ máy của nền tảng (thường 8 byte trên máy 64 bit), còn `int` trong C++ thường là 4 byte. Nếu muốn kích thước cố định, Go có `int32`, `int64`; C++ cũng có kiểu như vậy, ta sẽ gặp sau.
 
+    Về địa chỉ: `&x` trong Go cũng có nghĩa là "địa chỉ của `x`", giống hệt C++. Go cũng có địa chỉ (con trỏ), nhưng code Go thường ngày ít khi phải để ý tới chúng; trong C++ bạn sẽ để ý nhiều hơn.
+
 **Thử thay đổi: đổi kiểu thì `sizeof` đổi.** Ở ví dụ 4 ngay bên dưới, mình đổi `int diem` thành `long long diem` và chạy lại: số byte in ra đổi từ `4` thành `8`. Kích thước đi theo **kiểu**, không đi theo giá trị.
 
 ### Ví dụ 3: Địa chỉ của hai ba biến
+
+Trong code dưới đây có hai thứ lạ ở dòng (2): `void*` và `static_cast<void*>(...)`. Dấu `*` sau tên kiểu nghĩa là "địa chỉ của một …" (`char*` là "địa chỉ của một `char`"); Bài 03 sẽ dạy kỹ. Cứ đọc tiếp, ngay sau phần kết quả mình giải thích vì sao cần chúng.
 
 ```cpp
 #include <iostream>
@@ -293,9 +297,13 @@ nam:  0x7ffe381a7934
 chu:  0x7ffe381a792f
 ```
 
-Số trên máy bạn sẽ khác, và chạy lần hai cũng có thể khác lần một. Chỉ có **kiểu mẫu** là đáng để ý: `nam` hơn `tuoi` đúng 4 (vì `tuoi` chiếm 4 byte, `nam` nằm ngay sau), còn `chu` kém `tuoi` đúng 1 (ngăn của `chu` nằm ngay trước `tuoi`). Đây là điều **thường** thấy chứ trình biên dịch không hứa. Nó được quyền xếp các biến theo thứ tự khác.
+Số trên máy bạn sẽ khác, và chạy lần hai cũng có thể khác lần một. Chỉ có **kiểu mẫu** là đáng để ý: `nam` hơn `tuoi` đúng 4 (vì `tuoi` chiếm 4 byte, `nam` nằm ngay sau), còn `chu` kém `tuoi` đúng 1 (ngăn của `chu` nằm ngay trước `tuoi`). Để thấy `…370` kém `…36f` đúng 1, hãy đếm: …36d, …36e, …36f rồi mới tới …370, vì sau chữ `f` (15) hệ 16 qua hàng tiếp theo. Đây là điều **thường** thấy chứ trình biên dịch không hứa. Nó được quyền xếp các biến theo thứ tự khác.
 
-**Vì sao `chu` phải ép sang `void*`?** Ở dòng (2), `&chu` có kiểu "địa chỉ của một `char`", viết là `char*`. Với kiểu `char*`, `std::cout` có một quy ước cũ từ ngôn ngữ C: nó coi đó là **chuỗi chữ**, nên nó **không in địa chỉ** mà đi tới địa chỉ đó, đọc và in các ký tự từ đó trở đi. Để buộc nó in con số địa chỉ, ta đổi nhãn kiểu thành `void*` (địa chỉ không nói rõ trỏ tới loại gì) bằng `static_cast<void*>(...)`. `static_cast<Kiểu>(giá trị)` đọc là "ép giá trị này sang `Kiểu`". Với địa chỉ của `int`, `std::cout` không có quy ước đặc biệt, nên in thẳng được.
+**Vì sao `chu` phải ép sang `void*`?** Ở dòng (2), `&chu` có kiểu "địa chỉ của một `char`", viết là `char*`.
+
+Với kiểu `char*`, `std::cout` có một quy ước cũ từ ngôn ngữ C: nó coi đó là **chuỗi chữ**, nên nó **không in địa chỉ** mà đi tới địa chỉ đó, đọc và in các ký tự từ đó trở đi. Để buộc nó in con số địa chỉ, ta đổi nhãn kiểu thành `void*` (địa chỉ không nói rõ trỏ tới loại gì) bằng `static_cast<void*>(...)`.
+
+`static_cast<Kiểu>(giá trị)` đọc là "ép giá trị này sang `Kiểu`". Với địa chỉ của `int`, `std::cout` không có quy ước đặc biệt, nên in thẳng được.
 
 **Thử thay đổi: in thẳng `&chu` thì sao?** Mình đã thử một chương trình chỉ có `char chu = 'A'; std::cout << &chu << "\n";`. Nó biên dịch được, và lần chạy của mình in `A`, **không phải một địa chỉ**. Vì `chu` chỉ là một ký tự đơn, không có ký tự `\0` báo "hết chuỗi" ngay sau nó, nên `std::cout` đọc tiếp những byte nằm sau đó. Việc này là **hành vi không xác định (undefined behavior)**, tức chuẩn C++ không nói chuyện gì sẽ xảy ra, có thể in ra rác, và chương trình có thể sai theo cách khó đoán. Kết quả `A` ở máy mình chỉ là may mắn.
 
@@ -354,7 +362,7 @@ gia tri: 9, so byte: 8, dia chi: 0x7ffd9a9d9400
 Số byte đổi từ `4` thành `8`: biến giờ chiếm 8 ngăn liền nhau. Giá trị và chuyện "hai dòng cùng địa chỉ" vẫn y như cũ.
 
 !!! question "Hỏi nhanh: sao biến cần cả địa chỉ, tôi chỉ dùng tên?"
-    Trong code thường ngày, bạn dùng tên. Tên là cách *bạn* gọi biến. Địa chỉ là cách *máy* tìm biến. Trình biên dịch dịch mọi tên thành địa chỉ. Ở các bài sau, bạn sẽ thấy có lúc ta cần tự cầm cái địa chỉ để đưa cho người khác, và đó là lúc địa chỉ trở nên quan trọng.
+    Trong code thường ngày, bạn dùng tên. Tên là cách *bạn* gọi biến. Địa chỉ là cách *máy* tìm biến. Trình biên dịch thường dịch tên thành địa chỉ. Ở các bài sau, bạn sẽ thấy có lúc ta cần tự cầm cái địa chỉ để đưa cho người khác, và đó là lúc địa chỉ trở nên quan trọng.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -365,7 +373,7 @@ Số byte đổi từ `4` thành `8`: biến giờ chiếm 8 ngăn liền nhau. 
     `sizeof` là toán tử cho biết số byte mà một kiểu hoặc một biến chiếm. Nó được tính lúc biên dịch. Kết quả có kiểu `std::size_t`, là kiểu số nguyên không âm đủ lớn để biểu diễn kích thước của mọi đối tượng. `sizeof(char)` luôn bằng 1.
 
 ??? question "`int` có luôn là 4 byte không?"
-    Không. Chuẩn C++ chỉ yêu cầu `int` đủ lớn (ít nhất 16 bit) chứ không ép 4 byte. Trên các máy tính và trình biên dịch phổ biến, nó thường là 4 byte. Muốn chắc chắn thì dùng `sizeof(int)`, hoặc dùng kiểu có kích thước cố định như `std::int32_t`.
+    Không. Chuẩn C++ chỉ yêu cầu `int` đủ lớn (ít nhất 16 bit) chứ không ép 4 byte. Trên các máy tính và trình biên dịch phổ biến, nó thường là 4 byte. Muốn chắc chắn thì dùng `sizeof(int)`, hoặc dùng kiểu có kích thước cố định như `std::int32_t` (kiểu số nguyên đúng 32 bit; sẽ gặp lại sau).
 
 ??? question "Chạy chương trình hai lần, địa chỉ của biến có giống nhau không?"
     Không đảm bảo. Nhiều hệ điều hành đặt chương trình vào vùng nhớ khác nhau mỗi lần chạy, nên địa chỉ in ra có thể khác. Điều đó không phải lỗi. Không được viết code dựa vào một địa chỉ cụ thể.
@@ -388,12 +396,12 @@ Số byte đổi từ `4` thành `8`: biến giờ chiếm 8 ngăn liền nhau. 
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** Một byte gồm bao nhiêu bit?
 
-- 4 bit, vì một chữ số hệ 16 vừa đủ một byte
+- 4 bit, vì một chữ số hệ 16 ứng với một byte
 - 16 bit, vì địa chỉ viết bằng hệ 16
-- 8 bit, nên một byte có 256 tổ hợp khác nhau
+- 8 bit, nên có 256 tổ hợp khác nhau
 - 10 bit, vì ta đếm bằng hệ 10
 
-<p class="giai-thich" markdown>Một byte là tám bit, và vì mỗi bit có hai khả năng nên có 2 mũ 8, tức 256 tổ hợp. Con số 4 bit là của **một chữ số** hệ 16, không phải của cả byte (hai chữ số hệ 16 mới đủ một byte). Hệ 16 chỉ là cách viết số, nó không làm thay đổi số bit trong một byte.</p>
+<p class="giai-thich" markdown>Một byte là tám bit, và vì mỗi bit có hai khả năng nên có 256 tổ hợp. Con số 4 bit là của **một chữ số** hệ 16, tức chỉ nửa byte (hai chữ số hệ 16 mới đủ một byte). Hệ 16 và hệ 10 chỉ là cách viết số, chúng không làm đổi số bit trong một byte.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -430,14 +438,21 @@ Số byte đổi từ `4` thành `8`: biến giờ chiếm 8 ngăn liền nhau. 
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
-**Câu 5.** Với `int x = 7;`, biểu thức `&x` cho ra điều gì?
+**Câu 5.** Đọc đoạn code sau. Hai dòng in ra (trên máy tính thông thường) liên quan thế nào?
 
-- Giá trị `7`, chỉ viết theo cách khác
-- Số byte mà `x` chiếm
-- Địa chỉ của `x`, tức số của ngăn đầu tiên mà `x` chiếm
-- Một bản sao thứ hai của biến `x`
+```text
+int diem = 5;
+std::cout << &diem << "\n";
+diem = 9;
+std::cout << &diem << "\n";
+```
 
-<p class="giai-thich" markdown>Toán tử `&` đặt trước tên biến là "địa chỉ của". Cái cho ra số byte là `sizeof(x)`, còn giá trị `7` thì lấy bằng cách viết thẳng `x`. `&x` không tạo ra bản sao nào, nó chỉ cho biết `x` đang nằm ở đâu.</p>
+- Hai địa chỉ khác nhau, vì giá trị mới được ghi vào ngăn mới
+- Địa chỉ thứ hai lớn hơn đúng 4, vì `int` chiếm 4 byte
+- Hai địa chỉ giống nhau, vì phép gán chỉ ghi đè trong chính các ngăn đó
+- Lỗi biên dịch, vì không được lấy địa chỉ một biến hai lần
+
+<p class="giai-thich" markdown>Gán giá trị mới không chuyển biến sang chỗ khác, nó chỉ đổi nội dung của những ngăn biến đã có, nên hai dòng in cùng một địa chỉ (mình đã chạy ví dụ tương tự và thấy đúng vậy). Biến không "dọn nhà" mỗi lần đổi giá trị. Lấy địa chỉ bao nhiêu lần cũng được, và con số 4 là kích thước của biến chứ không phải độ dời địa chỉ.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -460,12 +475,23 @@ std::cout << sizeof(a) + sizeof(c) << "\n";
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Cho `char chu = 'A';`. Vì sao muốn in địa chỉ của `chu` thì phải viết `static_cast<void*>(&chu)` thay vì `&chu`?
 
-- Vì `&chu` có kiểu `char*`, và `std::cout` coi `char*` là chuỗi chữ nên sẽ in ký tự chứ không in địa chỉ
-- Vì địa chỉ của `char` không tồn tại, chỉ có địa chỉ của `int`
-- Vì `&chu` chỉ in được trên máy 32 bit
-- Vì `static_cast` làm `chu` đổi sang chiếm 8 byte
+- Vì `&chu` có kiểu `char*`, mà `std::cout` coi `char*` là chuỗi chữ nên in ký tự thay vì địa chỉ
+- Vì `char` không có địa chỉ riêng, nó dùng chung địa chỉ với `int` đứng cạnh
+- Vì `&chu` in ra địa chỉ hệ 10, còn `void*` mới đổi sang hệ 16
+- Vì `static_cast` làm `chu` chiếm thêm byte để đủ chỗ chứa địa chỉ
 
-<p class="giai-thich" markdown>Với kiểu `char*`, `std::cout` giữ quy ước từ ngôn ngữ C: đây là địa chỉ đầu của chuỗi chữ, nên nó đọc và in ký tự, và có thể đọc quá xa gây hành vi không xác định. Ép sang `void*` để nó in con số địa chỉ. Biến `char` vẫn có địa chỉ như mọi biến khác. `static_cast` chỉ đổi cách *nhìn* địa chỉ, không đổi gì trong bộ nhớ.</p>
+<p class="giai-thich" markdown>Với kiểu `char*`, `std::cout` giữ quy ước từ ngôn ngữ C: đây là địa chỉ đầu của chuỗi chữ, nên nó đọc và in ký tự, có thể đọc quá xa gây hành vi không xác định. Ép sang `void*` để nó in con số địa chỉ. Biến `char` có địa chỉ riêng như mọi biến, và cách viết hệ 16 do `std::cout` quyết định chứ không do kiểu `void*`. `static_cast` chỉ đổi cách *nhìn* địa chỉ, không đổi gì trong bộ nhớ.</p>
+</div>
+
+<div class="cau-hoi" data-dap-an="2" markdown>
+**Câu 8.** Với `int x = 7;`, biểu thức `&x` cho ra điều gì?
+
+- Giá trị `7`, chỉ viết theo cách khác
+- Địa chỉ của `x`: số của ngăn đầu tiên nó chiếm
+- Số byte mà `x` chiếm, giống `sizeof(x)`
+- Một bản sao của `x` đặt ở ngăn mới
+
+<p class="giai-thich" markdown>Toán tử `&` đặt trước tên biến là "địa chỉ của". Số byte phải hỏi bằng `sizeof(x)`, còn giá trị `7` thì lấy bằng cách viết thẳng `x`. `&x` không tạo bản sao nào, nó chỉ cho biết `x` đang nằm ở đâu.</p>
 </div>
 
 </div>
