@@ -116,17 +116,22 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | perfect forwarding (chuyển tiếp hoàn hảo) | Giữ nguyên lvalue/rvalue khi chuyển tiếp đối số bằng `T&&` và `std::forward` (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | forwarding reference (tham chiếu chuyển tiếp) | `T&&` trong template khi `T` được suy ra từ đối số, nhận cả lvalue lẫn rvalue (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
 | std::forward | Chuyển tiếp một đối số mà giữ nguyên nó là lvalue hay rvalue (chỉ nêu tên ở Bài 12) | [Bài 12](nhom-1-nen-tang-bo-nho/12-move-semantics.md) |
-| auto | Để trình biên dịch tự đoán kiểu (lần đầu dùng ở [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md), giải thích ngay tại đó) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| lambda | Hàm vô danh viết ngay tại chỗ | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| constexpr | Cho phép tính lúc biên dịch khi đầu vào cố định | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| enum class | Liệt kê có phạm vi riêng | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| optional | Hộp có thể rỗng | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| variant | Hộp chứa một trong nhiều kiểu | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| string_view | Cửa sổ nhìn vào chuỗi, không copy | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| structured binding | Tách một cặp/bộ thành nhiều biến | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| range-based for | Vòng `for` duyệt cả dãy mà không cần chỉ số, ví dụ `for (auto x : v)` | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| override / final | `override` kiểm tra ghi đè hàm ảo cho đúng; `final` cấm ghi đè hoặc kế thừa tiếp | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
-| generic lambda | Lambda có tham số `auto`, dùng được cho nhiều kiểu (từ C++14) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| auto | Để trình biên dịch tự đoán kiểu (lần đầu dùng ở [Bài 09](nhom-1-nen-tang-bo-nho/09-unique-ptr.md), giải thích ngay tại đó); bẫy: bỏ `&` và `const` ngoài cùng, nên muốn giữ phải viết `auto&` hay `const auto&` | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| range-based for | Vòng `for (khai báo : dãy)` duyệt cả dãy mà không cần chỉ số (C++11); `for (auto x : v)` sao chép từng phần tử, `for (const auto& x : v)` thì không | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| std::vector | Mảng co giãn của thư viện chuẩn, giống slice của Go (`#include <vector>`); các kiểu chứa học kỹ ở nhóm STL | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (dùng cơ bản) |
+| lambda | Hàm không tên viết ngay tại chỗ, cú pháp `[bắt](tham số){ thân }`, cất được vào biến `auto` và gọi như hàm (C++11); giống closure của Go | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| capture (bắt) | Danh sách trong `[ ]` của lambda: `[=]` chép biến dùng tới lúc tạo lambda, `[&]` giữ tham chiếu (treo nếu lambda sống lâu hơn biến), `[x]`/`[&x]` chọn từng biến | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| enum class | Kiểu liệt kê có phạm vi riêng (`MauSac::Tim`) và không tự đổi sang `int` (C++11) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| override / final | `override` đánh dấu hàm ghi đè hàm ảo của lớp cha để trình biên dịch báo lỗi nếu sai chữ ký; `final` cấm ghi đè hoặc kế thừa tiếp (C++11); chỉ nêu tên, ví dụ ở nhóm OOP | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| constexpr | Cho phép tính lúc biên dịch: biến `constexpr` bắt buộc và ngầm `const`; hàm `constexpr` gọi với giá trị lúc chạy vẫn chạy lúc chạy (C++11; thân thoải mái hơn từ C++14) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| static_assert | Kiểm tra điều kiện lúc biên dịch; sai thì không biên dịch được (C++11) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| generic lambda | Lambda có tham số `auto`, dùng được cho nhiều kiểu (C++14) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| structured binding | `auto [a, b] = giaTri;` tách cặp hoặc struct thành nhiều biến; `auto` chép, `auto&` là biệt danh (C++17) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| std::optional | Hộp hoặc chứa một giá trị, hoặc rỗng (`std::nullopt`); kiểm tra bằng `if (r)`, lấy bằng `*r` hay `value_or` (C++17) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| std::variant | Giá trị chứa đúng một trong vài kiểu đã liệt kê; dùng `std::holds_alternative`, `std::get` (C++17) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| std::string_view | Cửa sổ không sở hữu nhìn vào các ký tự có sẵn, không sao chép; treo nếu chuỗi gốc chết trước (C++17) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| `if` có khởi tạo | `if (khởi tạo; điều kiện)`: biến khai báo ở đầu chỉ sống trong `if`/`else`; giống `if v, ok := ...; ok` của Go (C++17) | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
+| std::filesystem | Thư viện làm việc với đường dẫn, file, thư mục (C++17); chỉ nêu tên | [Bài 13](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) |
 | buffer overflow | Ghi vượt biên mảng | [Bài 14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md) |
 | Valgrind | Công cụ kiểm tra bộ nhớ không cần biên dịch lại | [Bài 14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md) |
 | crash | Chương trình sập đột ngột | [Bài 14](nhom-1-nen-tang-bo-nho/14-memory-leak-ub.md) |
