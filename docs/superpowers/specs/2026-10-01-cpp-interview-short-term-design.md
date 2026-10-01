@@ -3,13 +3,13 @@
 Ngày: 2026-10-01 · Trạng thái: đã được người dùng duyệt (giáo trình và hướng làm)
 
 ## Mục tiêu
-Khóa ôn C++ ngắn hạn (dưới 2 tuần) để phỏng vấn vị trí C++ theo hai JD đã cho. Người học là kỹ sư có kinh nghiệm Go và C++ ở mức hẹp, cần ôn lại toàn bộ kiến thức nền, đặc biệt C++ hiện đại, đa luồng và quản lý bộ nhớ.
+Khóa ôn C++ ngắn hạn (dưới 2 tuần) để ôn kiến thức C++. Người học là kỹ sư có kinh nghiệm Go và C++ ở mức hẹp, cần ôn lại toàn bộ kiến thức nền, đặc biệt C++ hiện đại, đa luồng và quản lý bộ nhớ.
 
 Sản phẩm: một web tĩnh công khai tại `https://hungnguyen010518.github.io/cpp-interview-short-term/`, nội dung tiếng Việt, mỗi bài có trắc nghiệm tương tác. Push theo từng nhóm bài.
 
 ## Phạm vi
 - Có: 19 bài chia 5 nhóm, 1 đề tổng ôn, trang Tiến độ, trang Thuật ngữ.
-- Không có: code hoặc tên khách hàng của công ty (repo công khai); khóa C++ đầy đủ từ con số 0; bài tập chấm code tự động.
+- Không có: code hay tên riêng của nơi làm việc (repo công khai); khóa C++ đầy đủ từ con số 0; bài tập chấm code tự động.
 
 ## Phong cách viết
 - Giải thích sao cho học sinh lớp 5 cũng hiểu, giống khóa `database-tu-a-z`: mở bài bằng một câu chuyện hoặc phép ẩn dụ đời thường (cái bàn học, kho đồ, thư viện...) rồi mới tới thuật ngữ.
@@ -46,7 +46,7 @@ OOP và Design Patterns được xếp sau (theo yêu cầu "OOP sau một tý")
 | 5. Hệ thống và quy trình | 17 Linux (gdb, CMake, perf), Git · 18 Socket, REST, gRPC, TCP/UDP · 19 Database, SDLC, nguyên lý game dev |
 | Tổng ôn | Đề trắc nghiệm trộn từ mọi bài, cộng câu hỏi về dự án thực tế (cách kể STAR, không tên khách hàng) |
 
-Bài 19 gộp ba chủ đề của JD2 (database, SDLC, game).
+Bài 19 gộp ba chủ đề bổ sung (database, SDLC, game).
 
 ## Kiểm tra chất lượng
 - CI biên dịch và chạy mọi khối ```` ```cpp ```` trong `docs/` bằng `g++ -std=c++17 -pthread`; khối nào lỗi thì chặn deploy. Khối chủ ý minh họa hành vi không xác định (UB) bắt đầu bằng dòng `// bo-qua-kiem-tra` và được bỏ qua.
