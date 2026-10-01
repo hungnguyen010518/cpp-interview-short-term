@@ -18,4 +18,4 @@
 | [Bài 12 — Move semantics, rule of 5/0](nhom-1-nen-tang-bo-nho/12-move-semantics.md) | <span class="diem" data-bai="12"></span> |
 | [Bài 13 — Tính năng C++11 hay gặp](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) | <span class="diem" data-bai="13"></span> |
 | [Bài 14 — Tính năng C++14/17 hay gặp](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) | <span class="diem" data-bai="14"></span> |
-| [Bài 15 — Memory leak, dangling, UB](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) | <span class="diem" data-bai="15"></span> |
+| [Bài 15 — Hành vi không xác định và công cụ bắt lỗi](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) | <span class="diem" data-bai="15"></span> |

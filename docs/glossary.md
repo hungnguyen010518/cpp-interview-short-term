@@ -35,7 +35,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | null pointer (con trỏ null) | Con trỏ có giá trị `nullptr`; giải tham chiếu nó là hành vi không xác định | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | toán tử `->` | `p->x` là cách viết gọn của `(*p).x`, lấy trường `x` của struct mà con trỏ `p` trỏ tới | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
-| undefined behavior / UB | Hành vi không xác định: luật chơi bị phá, mọi chuyện đều có thể xảy ra | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| undefined behavior / UB | Hành vi không xác định: chuẩn C++ không đặt yêu cầu nào lên kết quả, nên có thể chạy đúng, sai âm thầm hoặc sập, và đổi theo trình biên dịch, cờ tối ưu, máy; khác lỗi biên dịch và lỗi chạy bình thường (có kết quả định nghĩa rõ) | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (danh mục và công cụ) |
 | tham số (parameter) | Biến riêng của hàm, nhận giá trị lúc gọi; đối số (argument) là giá trị truyền vào | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
 | truyền theo giá trị (pass by value) | Hàm nhận bản sao của đối số, nên sửa tham số không đổi biến gốc | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
 | swap (đổi chỗ) | Hàm hoán đổi giá trị của hai biến; viết được bằng con trỏ, không viết được bằng truyền theo giá trị | [Bài 04](nhom-1-nen-tang-bo-nho/04-con-tro-ham.md) |
@@ -62,8 +62,9 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | ngoại lệ (exception) | Cách C++ báo lỗi bằng cách cắt ngang hàm đang chạy và thoát ra ngoài; `new` hết chỗ ném `std::bad_alloc`; cú pháp `throw`/`try`/`catch` ở [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | use-after-free | Dùng sau khi trả: đọc hay ghi qua con trỏ treo; là UB | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | double free | Trả hai lần: `delete` cùng một chỗ hai lần; là UB | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
-| AddressSanitizer / ASan | Công cụ bắt lỗi bộ nhớ lúc chạy, bật bằng cờ biên dịch | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
+| AddressSanitizer / ASan | Công cụ bắt lỗi bộ nhớ lúc chạy, bật bằng cờ biên dịch `-fsanitize=address`; báo ngoài biên (stack/heap), dùng sau khi trả, giải phóng hai lần, và rò rỉ (LeakSanitizer) | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (đọc báo cáo) |
 | LeakSanitizer | Phần của ASan báo vùng nhớ bị rò rỉ khi chương trình kết thúc | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
+| Valgrind | Công cụ kiểm tra bộ nhớ chạy nguyên bản chương trình, không cần biên dịch lại, nhưng chậm hơn ASan; lệnh `valgrind --leak-check=full ./chuongtrinh` | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) (nhắc), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | RAII (Resource Acquisition Is Initialization) | Xin tài nguyên trong hàm tạo, trả trong hàm hủy, để tài nguyên tự được trả khi đối tượng chết | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | tài nguyên (resource) | Thứ mượn rồi phải trả: bộ nhớ heap, file, khóa, kết nối, ổ cắm mạng | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | throw / try / catch | `throw` ném một giá trị ra và cắt ngang hàm; `try { }` là vùng thử; `catch (T x) { }` bắt giá trị kiểu `T` được ném | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
@@ -90,7 +91,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | cache (bộ nhớ đệm) | Chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, khỏi làm lại | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | observer (người theo dõi) | Đối tượng theo dõi một đối tượng khác mà không sở hữu nó | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | thread-safe (an toàn đa luồng) | Dùng được từ nhiều luồng cùng lúc mà không gây tranh chấp dữ liệu; với `shared_ptr` chỉ bộ đếm là an toàn, đối tượng bên trong thì không | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
-| data race | Hai luồng cùng truy cập một biến, ít nhất một luồng ghi, mà không có đồng bộ; là UB | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (nhắc, gọi là tranh chấp dữ liệu), [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
+| data race | Hai luồng cùng truy cập một biến, ít nhất một luồng ghi, mà không có đồng bộ; là UB | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (nhắc, gọi là tranh chấp dữ liệu), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | luồng (thread) | Một dòng chạy riêng trong cùng chương trình, gần giống goroutine của Go | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | nguyên tử (atomic) | Thao tác mà luồng khác không thể chen vào giữa chừng; bộ đếm của `shared_ptr` được cập nhật như vậy | [Bài 10](nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) |
 | sao chép nông (shallow copy) | Chép từng thành viên, nên con trỏ chỉ chép địa chỉ: hai đối tượng cùng giữ một vùng nhớ; là cách sao chép mặc định | [Bài 11](nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) |
@@ -135,7 +136,13 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | std::string_view | Cửa sổ không sở hữu nhìn vào các ký tự có sẵn, không sao chép; treo nếu chuỗi gốc chết trước (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | `if` có khởi tạo | `if (khởi tạo; điều kiện)`: biến khai báo ở đầu chỉ sống trong `if`/`else`; giống `if v, ok := ...; ok` của Go (C++17) | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
 | std::filesystem | Thư viện làm việc với đường dẫn, file, thư mục (C++17); chỉ nêu tên | [Bài 14](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) |
-| buffer overflow | Ghi vượt biên mảng | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
-| Valgrind | Công cụ kiểm tra bộ nhớ không cần biên dịch lại | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
-| crash | Chương trình sập đột ngột | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
-| allocator (bộ cấp phát bộ nhớ) | Phần chương trình lo việc cấp và thu hồi vùng nhớ trên heap | [Bài 15](nhom-1-nen-tang-bo-nho/15-memory-leak-ub.md) |
+| buffer overflow (tràn bộ đệm) | Đọc hoặc ghi vượt biên một mảng hay khối nhớ (ở stack: `stack-buffer-overflow`; ở heap: `heap-buffer-overflow`); là UB | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| crash | Chương trình sập đột ngột | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| sanitizer | Công cụ do g++ chèn vào chương trình lúc biên dịch để bắt lỗi lúc chạy (ASan, UBSan, ThreadSanitizer); chậm hơn, chỉ thấy lỗi xảy ra trong lần chạy đó | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| UndefinedBehaviorSanitizer / UBSan | Sanitizer bắt UB không phải lỗi địa chỉ (tràn số nguyên có dấu, dịch bit quá cỡ, giải tham chiếu `nullptr`...), bật bằng `-fsanitize=undefined`; mặc định báo rồi chạy tiếp | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| ThreadSanitizer / TSan | Sanitizer bắt data race, bật bằng `-fsanitize=thread`, không ghép được với ASan; ứng với `go run -race` của Go; chỉ nêu tên | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| red zone (vùng đệm đỏ) / shadow memory | Ý tưởng của ASan: bảng ghi chú (shadow memory) đánh dấu byte nào được dùng; quanh mảng và khối `new` chừa vài byte "cấm" (red zone), chạm vào là báo | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| `-Wall -Wextra` | Cờ g++ bật các cảnh báo thông dụng; cảnh báo không chặn biên dịch, là lưới thô nên im lặng không có nghĩa là sạch | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| tối ưu hóa (`-O2`) | Trình biên dịch viết lại chương trình cho chạy nhanh hơn, và được phép giả sử UB không bao giờ xảy ra | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| tràn số nguyên có dấu (signed overflow) | `INT_MAX + 1` với `int` là UB (số không dấu thì quấn vòng, có định nghĩa; Go thì số có dấu cũng quấn vòng) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| std::out_of_range | Ngoại lệ do `v.at(i)` ném khi chỉ số ngoài biên (còn `v[i]` ngoài biên là UB) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |

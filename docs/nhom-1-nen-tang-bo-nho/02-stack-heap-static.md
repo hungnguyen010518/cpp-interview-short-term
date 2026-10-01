@@ -237,7 +237,7 @@ ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 4 byte(s) in 1 object(s) allocated from:
 ```
 
-(Công cụ này [Bài 15](15-memory-leak-ub.md) dạy kỹ.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
+(Công cụ này [Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md) dạy kỹ.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
 
 ### Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in
 
@@ -524,7 +524,7 @@ b = 0x5583a17df180
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Trả về địa chỉ của biến cục bộ"
-    Trong Go, `return &x` với `x` cục bộ là hợp lệ. Trong C++, `x` nằm trên stack và chết khi hàm kết thúc, nên địa chỉ trả ra **trỏ vào chỗ đã dọn**. Mình thử một hàm `int* hamXau() { int x = 5; return &x; }` và `g++ -Wall` cảnh báo: `warning: address of local variable ‘x’ returned`. Đọc cái địa chỉ đó sau này là hành vi không xác định ([Bài 15](15-memory-leak-ub.md)). Muốn giá trị sống lâu hơn hàm, hãy đặt nó ở heap, hoặc dùng `static` nếu đúng ý.
+    Trong Go, `return &x` với `x` cục bộ là hợp lệ. Trong C++, `x` nằm trên stack và chết khi hàm kết thúc, nên địa chỉ trả ra **trỏ vào chỗ đã dọn**. Mình thử một hàm `int* hamXau() { int x = 5; return &x; }` và `g++ -Wall` cảnh báo: `warning: address of local variable ‘x’ returned`. Đọc cái địa chỉ đó sau này là hành vi không xác định ([Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md)). Muốn giá trị sống lâu hơn hàm, hãy đặt nó ở heap, hoặc dùng `static` nếu đúng ý.
 
 !!! warning "Lỗi 2: Tưởng global thì không có hàm tạo/hàm hủy chạy"
     Global của kiểu có hàm tạo thì hàm tạo **vẫn chạy**, thường ngay trước `main` mà bạn không thấy dòng nào gọi nó. Hàm hủy cũng vậy, sau `main`. Vì thế một global có hàm tạo in chữ thường sẽ in trước chữ đầu tiên của `main`.
