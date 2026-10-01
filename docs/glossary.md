@@ -32,6 +32,12 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | con trỏ (pointer) | Biến đựng một địa chỉ; `int*` là con trỏ tới một `int`, `*p` là giá trị ở địa chỉ đó | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | new / delete | `new` xin chỗ ở heap và trả địa chỉ; `delete` trả chỗ đó về | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
 | memory leak (rò rỉ bộ nhớ) | Chỗ ở heap đã xin mà không bao giờ được trả | [Bài 02](nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) |
+| con trỏ (pointer) | Biến đựng một địa chỉ, thường là địa chỉ của biến khác; `int* p` là con trỏ tới `int` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| giải tham chiếu (dereference) | Đi theo địa chỉ trong con trỏ để đọc hoặc ghi thứ nằm ở đó, viết `*p` | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| nullptr | Giá trị của con trỏ "chưa trỏ vào đâu" (C++11), có kiểu riêng `std::nullptr_t`; ứng với `nil` của Go | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| null pointer (con trỏ null) | Con trỏ có giá trị `nullptr`; giải tham chiếu nó là hành vi không xác định | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| toán tử `->` | `p->x` là cách viết gọn của `(*p).x`, lấy trường `x` của struct mà con trỏ `p` trỏ tới | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
+| void* | Con trỏ không nói rõ trỏ tới loại gì, nên không giải tham chiếu thẳng được | [Bài 03](nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) |
 | lvalue (giá trị có tên) | Có tên, ở lâu | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
 | rvalue (giá trị tạm) | Tạm thời, sắp biến mất | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
 | move semantics (ngữ nghĩa di chuyển) | Lấy ruột thay vì sao chép | [Bài 10](nhom-1-nen-tang-bo-nho/10-move-semantics.md) |
