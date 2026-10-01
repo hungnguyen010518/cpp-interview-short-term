@@ -14,7 +14,7 @@ Tờ giấy đó **không phải là đồ**. Nó chỉ là một mảnh giấy 
 Con trỏ (**pointer**) chính là tờ giấy đó. Điều quan trọng nhất của bài: **tờ giấy cũng là một vật**. Bạn phải cất nó ở đâu đó, nên nó cũng nằm trong một ngăn nhớ riêng, có địa chỉ riêng. Chỉ khác ở chỗ thứ nó "đựng" là một địa chỉ của ngăn khác.
 
 !!! info "Chỗ nào ví dụ tờ giấy không còn đúng?"
-    Tờ giấy thật có thể ghi sai hoặc để trống. Con trỏ cũng thế: nó có thể chưa ghi gì, hoặc ghi một địa chỉ không còn đồ của bạn. Hai tình huống đó (mục 4) là chỗ sinh ra phần lớn lỗi C++ nguy hiểm. Ngoài ra, máy không "đọc" tờ giấy bằng mắt, mà chương trình tự đi tới địa chỉ khi bạn bảo nó làm vậy.
+    Tờ giấy thật có thể ghi sai hoặc để trống. Con trỏ cũng thế: nó có thể chưa ghi gì, hoặc ghi một địa chỉ không còn đồ của bạn. Hai tình huống đó (mục 4) là chỗ sinh ra phần lớn lỗi C++ nguy hiểm. Ngoài ra, một `int` chiếm nhiều ngăn liền nhau (thường 4), còn tờ giấy chỉ ghi số của ngăn **đầu tiên**. Vậy nên đọc được hết món đồ là nhờ **kiểu** của con trỏ: `int*` cho chương trình biết phải đọc 4 ngăn từ chỗ đó, `char*` thì chỉ đọc 1.
 
 ## 📖 Giải thích
 
@@ -67,13 +67,15 @@ Có địa chỉ rồi, làm sao lấy đồ ra? Bạn đặt dấu `*` **trư�
 
     Cách nhớ: nếu có tên kiểu (`int`, `char`...) đứng ngay trước `*`, đó là khai báo. Nếu không, đó là giải tham chiếu. Tương tự, `&x` (đặt trước tên biến, trong câu lệnh) là "địa chỉ của `x`", **ngược** với `*p`: một cái đi từ biến ra địa chỉ, một cái đi từ địa chỉ về giá trị.
 
+    Hai dấu này còn nghĩa khác ở những chỗ khác: `a * b` là phép nhân, `a & b` là phép "và" theo từng bit, và `&` trong khai báo còn dùng để tạo tham chiếu (Bài 05). Ở bài này chỉ cần các nghĩa vừa nêu.
+
 Hai con trỏ có thể cùng trỏ vào một biến, như hai tờ giấy cùng ghi ngăn 12. Viết `int* q = p;` là chép địa chỉ trong `p` sang `q`: bây giờ `q` cũng trỏ tới `x`, và sửa qua `*q` hay `*p` đều đổi `x`.
 
 ### 3. So sánh hai con trỏ
 
 Hai con trỏ có thể so sánh bằng `==` ("có bằng nhau không", cho ra `true` hoặc `false`). `p == q` hỏi: "hai con trỏ có ghi **cùng một địa chỉ** không?". `p == &x` hỏi: "`p` có đang trỏ tới `x` không?".
 
-Đừng nhầm với `*p == *r`: cái này so **giá trị** nằm ở hai ô đó. Hai ô nhớ khác nhau hoàn toàn có thể đựng cùng số `10`, nhưng địa chỉ của chúng vẫn khác nhau.
+Đừng nhầm với `*p == *r` (giả sử `r` là một con trỏ khác, trỏ tới biến `y` cũng bằng 10): cái này so **giá trị** nằm ở hai ô đó. Hai ô nhớ khác nhau hoàn toàn có thể đựng cùng số `10`, nhưng địa chỉ của chúng vẫn khác nhau.
 
 ### 4. `nullptr`: tờ giấy để trống
 
@@ -199,10 +201,13 @@ int main() {
 | in cuối | `x`, `*p`, `*q` đều là cùng một ô | in `30` ba lần |
 
 ```text
-          x                p                q
-     [ 30 ] <-------- [ 0x1000 ]      [ 0x1000 ]
-        ^                                  |
-        +----------------------------------+
+     p  [ 0x1000 ] ------+
+                            |
+                            v
+     x  [    30    ] <------+
+                            ^
+                            |
+     q  [ 0x1000 ] ---------+
 ```
 
 **Kết quả khi chạy** (`g++ -std=c++17 -Wall`, `g++ 11.4`):
@@ -295,7 +300,7 @@ int main() {
 |---|---|---|
 | (1) `int* p = nullptr;` | `p` ra đời và được ghi giá trị "trống" | `p` ở 0x1008 = (trống), không trỏ đi đâu |
 | (2) `if (p)` | `p` là `nullptr` nên điều kiện sai, chạy nhánh `else` | in `p la nullptr` |
-| (3) in `p` | In **giá trị** của `p` (không giải tham chiếu, nên an toàn) | in `0` |
+| (3) in `p` | In **giá trị** của `p` (không giải tham chiếu, nên hợp lệ) | in `0` (g++ 11.4) |
 | `int x = 7;` | Tạo `x` | `x` ở 0x1000 = 7 |
 | (4) `p = &x;` | Gán lại: `p` giờ ghi địa chỉ của `x` | `p` = 0x1000 ---> `x` |
 | (5) `p != nullptr` | `p` không còn trống, điều kiện đúng; chỉ lúc này mới dám viết `*p` | in `p tro toi x, *p = 7` |
@@ -308,7 +313,7 @@ p = 0
 p tro toi x, *p = 7
 ```
 
-Dòng (3) in `0` trên máy mình. Ta chỉ in giá trị của con trỏ, còn việc cấm là **giải tham chiếu** (`*p`) khi `p` trống. Cũng thấy rõ thứ tự an toàn: **kiểm tra trước, dùng `*p` sau**.
+Dòng (3) in `0` với `g++ 11.4`. In một con trỏ null là việc hợp lệ (không giải tham chiếu gì cả), nhưng chữ cụ thể được in ra do trình cài đặt quyết định, nên đừng dựa vào nó. Ta chỉ in giá trị của con trỏ, còn việc cấm là **giải tham chiếu** (`*p`) khi `p` trống. Cũng thấy rõ thứ tự an toàn: **kiểm tra trước, dùng `*p` sau**.
 
 **Thử thay đổi: viết `int* p = 0;` thay cho `nullptr`.** Mình đã chạy: nó vẫn biên dịch sạch và in đúng như trên. Số `0` viết trực tiếp cũng được chấp nhận làm "con trỏ trống". Nhưng như đã nói ở mục 4, `nullptr` rõ nghĩa hơn và có kiểu riêng, nên hãy dùng nó.
 
@@ -556,7 +561,7 @@ std::cout << x << "\n";
 - `p` trỏ tới ô nhớ số 0, và ta được phép ghi vào đó
 - `p` trỏ tới một số `int` có giá trị bằng 0
 - `p` đã trỏ tới một ô nhớ vừa bị `delete`
-- `p` hiện không trỏ tới ô nhớ hợp lệ nào cả
+- `p` hiện chưa trỏ tới ô nhớ hợp lệ nào cả
 
 <p class="giai-thich" markdown>`nullptr` là giá trị "chưa trỏ vào đâu", tờ giấy được cố ý để trống, và ta kiểm tra được bằng `if (p)`. Nó không phải địa chỉ của một số `int` bằng 0, vì không có ô nhớ nào được trỏ tới. Cũng không được ghi vào "ô số 0": giải tham chiếu `nullptr` là hành vi không xác định. Con trỏ trỏ vào chỗ đã `delete` là chuyện khác (con trỏ treo), nó vẫn đựng một địa chỉ cũ chứ không trống.</p>
 </div>
@@ -564,23 +569,23 @@ std::cout << x << "\n";
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 6.** Cho `struct Nguoi { int tuoi; };` và `Nguoi* ai = &a;`. Cách viết nào tương đương với `ai->tuoi`?
 
-- `*ai.tuoi`
-- `&ai.tuoi`
+- `(&ai).tuoi`
+- `*(ai.tuoi)`
 - `(*ai).tuoi`
-- `ai.tuoi`
+- `&(*ai.tuoi)`
 
-<p class="giai-thich" markdown>`ai->tuoi` là cách viết gọn của `(*ai).tuoi`: giải tham chiếu `ai` để ra struct, rồi lấy trường `tuoi`. Thiếu dấu ngoặc thì `.` được tính trước, nên `*ai.tuoi` bị hiểu thành `*(ai.tuoi)`. Cả `*ai.tuoi`, `&ai.tuoi` và `ai.tuoi` đều là lỗi biên dịch, vì chúng đều bắt đầu bằng `ai.tuoi` mà `ai` là con trỏ chứ không phải struct.</p>
+<p class="giai-thich" markdown>`ai->tuoi` là cách viết gọn của `(*ai).tuoi`: giải tham chiếu `ai` để ra struct, rồi lấy trường `tuoi`. Ba cách còn lại mình đều đã thử biên dịch và đều lỗi. `(&ai).tuoi` nghe giống nhưng `&ai` là địa chỉ của chính con trỏ (kiểu `Nguoi**`), không phải struct. `*(ai.tuoi)` và `&(*ai.tuoi)` đều bắt đầu bằng `ai.tuoi`, mà dấu `.` được tính trước dấu `*`, nên chúng đòi lấy trường từ con trỏ `ai`, điều không làm được.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 7.** Với `int* p = nullptr;`, câu lệnh `*p = 1;` gây ra điều gì?
 
-- Chương trình luôn dừng ngay với lỗi `Segmentation fault`
-- Hành vi không xác định: chuẩn không hứa kết quả gì
-- Chương trình tự cấp ô nhớ mới cho `p` rồi mới ghi `1`
-- Ném một lỗi mà ta bắt lại được bằng `try`/`catch`
+- Chuẩn quy định chương trình phải dừng với `Segmentation fault`
+- Chuẩn không hứa kết quả nào, chuyện gì cũng có thể xảy ra
+- Chuẩn quy định chương trình tự cấp ô nhớ mới cho `p`
+- Chuẩn quy định đó là lỗi ném ra, bắt được bằng `try`/`catch`
 
-<p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải bảo đảm, vì vậy câu "luôn dừng" quá chắc. C++ không tự cấp ô nhớ cho con trỏ trống. Nó cũng không biến việc này thành lỗi ngoại lệ để bắt bằng `try`/`catch`.</p>
+<p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải điều chuẩn quy định, nên không thể khẳng định chương trình phải dừng. C++ không tự cấp ô nhớ cho con trỏ trống. Nó cũng không biến việc này thành lỗi ngoại lệ để bắt bằng `try`/`catch`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
