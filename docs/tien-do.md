@@ -1,3 +1,6 @@
-# Tiến độ
+# Tiến độ của bạn
 
-Trang này sẽ được hoàn thiện ở bước sau.
+Điểm trắc nghiệm được lưu trong trình duyệt này. Bài nào **dưới 70%** hiện màu đỏ: nên ôn lại.
+
+| Bài | Điểm gần nhất |
+|---|---|
