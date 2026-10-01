@@ -516,10 +516,10 @@ Ngoại lệ đi qua **hai khung hàm**, và cả hai đối tượng đều đ�
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 2.** Hàm hủy của một biến cục bộ chạy vào lúc nào?
 
-- Lúc chương trình kết thúc, cùng với mọi biến khác
+- Lúc chương trình kết thúc, cùng mọi biến khác
 - Lúc bạn gọi `delete` cho biến đó
 - Lúc hàm chứa nó trả về, dù biến nằm ở khối nào
-- Lúc ra khỏi khối `{}` chứa nó
+- Lúc ra khỏi khối `{}` mà biến được khai báo trong đó
 
 <p class="giai-thich" markdown>Biến cục bộ chết khi chương trình ra khỏi khối chứa nó, dù bằng chạy hết khối, `return` hay ngoại lệ, và hàm hủy chạy đúng lúc đó. Không phải lúc chương trình kết thúc: đó là thời điểm của biến global. `delete` chỉ dành cho đối tượng xin bằng `new`, còn biến cục bộ không cần và không được `delete`. Nói "lúc hàm trả về" sai với biến nằm trong khối nhỏ bên trong hàm: nó chết sớm hơn, ngay ở `}` của khối nhỏ.</p>
 </div>
@@ -562,9 +562,9 @@ int main() { try { g(); } catch (int e) { std::cout << "bat " << e << "\n"; } }
 - `defer` chạy ở cuối khối còn hàm hủy chạy ở cuối hàm
 - `defer` chỉ dùng được cho bộ nhớ còn RAII dùng cho cả file
 - Hàm hủy phải do người dùng gọi tay còn `defer` thì tự chạy
-- RAII gắn việc trả vào kiểu, không cần nhớ viết mỗi nơi
+- RAII gắn việc trả vào kiểu, nên không phải nhớ viết ở mỗi nơi dùng
 
-<p class="giai-thich" markdown>Với `defer`, bạn phải nhớ viết nó ở từng nơi dùng tài nguyên; với RAII, việc trả nằm trong hàm hủy của kiểu, nên bạn không cần nhớ viết nó ở từng nơi dùng. Hai lựa chọn đầu bị đảo hoặc sai: `defer` chạy ở cuối hàm còn hàm hủy ở cuối khối, và `defer` dùng được cho cả file, khóa, bất cứ việc dọn nào. Còn hàm hủy tự chạy, không ai gọi tay, nên lựa chọn nói ngược lại là sai.</p>
+<p class="giai-thich" markdown>Với `defer`, bạn phải nhớ viết nó ở từng nơi dùng tài nguyên; với RAII, việc trả nằm trong hàm hủy của kiểu, nên bạn không cần nhớ viết nó ở từng nơi dùng. Nói `defer` chạy ở cuối khối còn hàm hủy ở cuối hàm là đảo ngược: `defer` chạy ở cuối hàm, còn hàm hủy chạy ở cuối khối. Nói `defer` chỉ dùng cho bộ nhớ cũng sai: nó dùng được cho file, khóa, bất cứ việc dọn nào. Còn hàm hủy tự chạy, không ai gọi tay, nên nói "hàm hủy phải do người dùng gọi tay" là sai.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>

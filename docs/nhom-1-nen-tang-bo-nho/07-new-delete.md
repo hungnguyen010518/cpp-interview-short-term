@@ -80,7 +80,7 @@ Hai địa chỉ ở máy bạn sẽ là số khác, và chỉ cần thấy chú
 
 #### Vì sao phải xin ở heap?
 
-Có hai lý do, cả hai đã gặp ở [Bài 02](02-stack-heap-static.md). Lý do thứ nhất: biến ở stack chết khi hàm kết thúc, còn chỗ xin bằng `new` **sống đến khi bạn `delete`**. Chương trình sau cho một hàm xin một chỗ rồi giao nó cho nơi gọi:
+Có hai lý do, cả hai đã gặp ở [Bài 02](02-stack-heap-static.md). Lý do thứ nhất: chỗ xin bằng `new` **sống đến khi bạn `delete`**, lâu hơn hàm đã xin nó. Chương trình sau cho một hàm xin một chỗ rồi giao cho nơi gọi:
 
 ```cpp
 #include <iostream>
@@ -98,16 +98,12 @@ int main() {
 }
 ```
 
-Dòng (3) xuất hiện hai lần trong bảng vì nó vừa gọi hàm, vừa nhận kết quả về; bảng đánh số theo thứ tự chạy.
-
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| Bước 1: dòng (3) gọi `taoSo()` | Vào hàm; trên bàn học của `taoSo` có biến `p` | stack: `p` ở 0x7fc0 |
-| Bước 2: dòng (1) | Xin heap một `int`, ghi 42 | heap: 0x9000 chứa 42; `p` = 0x9000 |
-| Bước 3: dòng (2) `return p;` | Trả **địa chỉ** về nơi gọi (sao chép tờ giấy); hết hàm, bàn học của `taoSo` bị dọn, biến `p` mất | stack của `taoSo` biến mất; heap: 0x9000 vẫn chứa 42 |
-| Bước 4: về lại dòng (3) | Kết quả được gán vào `q`: `q` trong `main` nhận địa chỉ 0x9000 | stack: `q` ở 0x7ff0 = 0x9000 |
-| Bước 5: dòng (4) in `*q` | Đọc ra 42, chỗ ở heap vẫn nguyên vẹn dù hàm đã xong | in `*q = 42` |
-| Bước 6: dòng (5) `delete q;` | Nơi gọi trả chỗ về kho | heap: 0x9000 đã trả |
+| (3) gọi `taoSo()`, rồi (1) | Vào hàm; xin heap một `int` ghi 42; `p` (trên bàn học của `taoSo`) giữ địa chỉ | heap: 0x9000 = 42; `p` = 0x9000 |
+| (2) `return p;` | Trả **địa chỉ** về nơi gọi (sao chép tờ giấy); bàn học của `taoSo` bị dọn, biến `p` mất | heap: 0x9000 vẫn chứa 42 |
+| (3) nhận kết quả, (4) in `*q` | `q` trong `main` nhận 0x9000; `*q` đọc ra 42 | stack: `q` = 0x9000; in `*q = 42` |
+| (5) `delete q;` | Nơi gọi trả chỗ về kho | heap: 0x9000 đã trả |
 
 **Kết quả khi chạy:**
 
@@ -209,7 +205,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) `int n = 3;` | Biến `n` ở stack | `n` = 3 |
-| (2) `new int[n]` | Xin heap 3 món `int` liền nhau (cần 12 byte; thực tế thường xin thêm chút chỗ để nhớ kích thước); địa chỉ món đầu đặt vào `a`. Các món **chưa có giá trị xác định** | heap: 0x9000..0x900b là 3 món chưa ghi; `a` = 0x9000 |
+| (2) `new int[n]` | Xin heap 3 món `int` liền nhau (cần 12 byte); địa chỉ món đầu đặt vào `a`. Các món **chưa có giá trị xác định** | heap: 0x9000..0x900b là 3 món chưa ghi; `a` = 0x9000 |
 | (3) vòng `for` | Ghi 10, 20, 30 vào từng món qua `a[i]` | heap: món 0 = 10, món 1 = 20, món 2 = 30 |
 | vòng `for` in | In ba số | in `10 20 30 ` |
 | (4) `delete[] a;` | Trả cả mảng 3 món về kho | heap: vùng 0x9000 đã trả |
@@ -237,11 +233,11 @@ delete[] v;              // gọi hàm hủy hai lần, rồi trả cả vùng
 | `new T[n]` | `delete[] p;` |
 | `malloc(...)` | `free(p);` |
 
-Trả sai cặp (ví dụ xin bằng `new[]` mà trả bằng `delete`) là **hành vi không xác định** (tức chuẩn C++ không hứa chuyện gì sẽ xảy ra; mục 4 giải thích kỹ), xem mục 4.4.
+Trả sai cặp (ví dụ xin bằng `new[]` mà trả bằng `delete`) là **hành vi không xác định** (UB, đã gặp ở [Bài 03](03-con-tro-co-ban.md)), chi tiết ở mục 4.4.
 
 ### 4. Ba lỗi kinh điển (và một lỗi nữa)
 
-Trước khi vào từng lỗi, cần một khái niệm. **Hành vi không xác định (undefined behavior, viết tắt UB)** là khi chương trình phạm một luật mà chuẩn C++ nói "kể từ đây, mọi chuyện đều có thể xảy ra": chạy ra kết quả đúng, in số rác, sập, hoặc chạy đúng hôm nay và hỏng ngày mai. Với UB, **không ai hứa trước kết quả**, nên ta không thể "thử rồi thấy ổn là yên tâm". Vì thế các khối code UB dưới đây đều đánh dấu `// bo-qua-kiem-tra` và mình **không ghi kết quả** của chúng.
+Trước khi vào từng lỗi, nhắc lại từ [Bài 03](03-con-tro-co-ban.md). **Hành vi không xác định (undefined behavior, viết tắt UB)** là khi chương trình phạm một luật mà chuẩn C++ nói "kể từ đây, mọi chuyện đều có thể xảy ra": chạy ra kết quả đúng, in số rác, sập, hoặc chạy đúng hôm nay và hỏng ngày mai. Với UB, **không ai hứa trước kết quả**, nên ta không thể "thử rồi thấy ổn là yên tâm". Vì thế các khối code UB dưới đây đều đánh dấu `// bo-qua-kiem-tra` và mình **không ghi kết quả** của chúng.
 
 Một điểm cần phân biệt ngay từ đầu: trong ba lỗi, **rò rỉ không phải UB** (chương trình vẫn đúng luật, chỉ phí bộ nhớ); còn dùng sau khi trả và giải phóng hai lần **là UB**.
 
@@ -399,13 +395,7 @@ Cách đọc: "Direct leak of 4 byte(s) in 1 object(s)" là có 1 chỗ 4 byte b
 
 Hai lưu ý trung thực. Thứ nhất, ASan chỉ báo những gì **xảy ra trong lần chạy đó**; đoạn code chưa chạy tới thì nó không thấy. Thứ hai, LeakSanitizer đôi khi bỏ sót (ví dụ vì một giá trị cũ còn sót trong bộ nhớ làm nó tưởng "vẫn còn trỏ tới"), nên im lặng không chứng minh là sạch.
 
-**Valgrind** là công cụ khác làm cùng loại việc: bạn **không cần biên dịch lại** chương trình, chỉ chạy nó qua công cụ:
-
-```text
-valgrind --leak-check=full ./chuongtrinh
-```
-
-Valgrind chạy chương trình trong một môi trường do nó dựng lên, theo dõi từng lần xin và trả bộ nhớ, và khi chương trình kết thúc thì liệt kê những khối chưa được trả cùng nơi đã xin chúng. Valgrind **chưa được cài trên máy mình dùng để viết bài**, nên mình chỉ ghi lệnh và mô tả bằng lời, không dán kết quả. [Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md) sẽ nói kỹ hơn về các công cụ này.
+**Valgrind** làm cùng loại việc mà không cần biên dịch lại: bạn chạy `valgrind --leak-check=full ./chuongtrinh` (mình chưa cài nên không dán kết quả; [Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md) nói thêm về các công cụ này).
 
 ### 6. Vì sao quản lý bằng tay mong manh
 
@@ -679,8 +669,8 @@ int main() {
 
 - `delete a;`, vì `a` là một con trỏ
 - `free(a);`, vì đó là mảng
-- `delete *a;`, vì phải xóa giá trị mà `a` trỏ tới
-- `delete[] a;`, vì xin bằng `new[]`
+- `delete *a;`, vì phải xóa giá trị `a` trỏ tới
+- `delete[] a;`, vì chỗ này được xin bằng `new[]`
 
 <p class="giai-thich" markdown>Luật đi cặp: `new[]` đi với `delete[]`, vì `delete[]` biết đây là cả mảng và đi qua từng phần tử để gọi hàm hủy. `delete a;` là dạng dành cho `new` đơn, và dùng với `new[]` là hành vi không xác định. `free` là cặp của `malloc`, không phải của `new`. Còn `delete *a;` là nhầm: `delete` nhận chính con trỏ (địa chỉ của chỗ cần trả), không phải giá trị đọc ra qua `*a`, và `g++` báo lỗi `type ‘int’ argument given to ‘delete’, expected pointer` (mình đã biên dịch).</p>
 </div>
@@ -694,12 +684,12 @@ a[0] = 1;
 delete a;
 ```
 
-- Không có lỗi, vì mảng `int` đơn giản thì `delete` hay `delete[]` đều được
+- Không có lỗi, vì mảng `int` thì `delete` hay `delete[]` đều được
 - Dòng cuối: `new[]` mà trả bằng `delete` là hành vi không xác định
-- Dòng thứ hai: không được ghi vào chỗ vừa xin bằng `new[]` khi chưa khởi tạo
+- Dòng thứ hai: không được ghi vào chỗ vừa xin bằng `new[]`
 - Dòng đầu: `new int[4]` phải được ép kiểu trước khi gán
 
-<p class="giai-thich" markdown>`new[]` phải đi với `delete[]`; trả bằng `delete` thường là hành vi không xác định, kể cả với `int` (ví dụ 4.4). Câu nói "mảng đơn giản thì thế nào cũng được" là sai: chuẩn không phân biệt kiểu đơn giản hay phức tạp, và một lần chạy trông ổn không chứng minh gì. Dòng thứ hai hoàn toàn hợp lệ vì chỗ vừa xin là của bạn để ghi. Dòng đầu cũng đúng cú pháp: `new int[4]` trả về `int*` nên không cần ép kiểu.</p>
+<p class="giai-thich" markdown>`new[]` phải đi với `delete[]`; trả bằng `delete` thường là hành vi không xác định, kể cả với `int` (mục 4.4). Câu nói "mảng đơn giản thì thế nào cũng được" là sai: chuẩn không phân biệt kiểu đơn giản hay phức tạp, và một lần chạy trông ổn không chứng minh gì. Dòng thứ hai hoàn toàn hợp lệ vì chỗ vừa xin là của bạn để ghi. Dòng đầu cũng đúng cú pháp: `new int[4]` trả về `int*` nên không cần ép kiểu.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -725,7 +715,7 @@ std::cout << *q;
 **Câu 6.** Điều nào sau đây KHÔNG phải hành vi không xác định?
 
 - Gọi `delete p;` hai lần liên tiếp cho cùng một chỗ ở heap
-- Xin bằng `new` rồi quên `delete` đến hết chương trình
+- Quên `delete` sau khi xin bằng `new`
 - Đọc `*q` sau khi chỗ mà `q` đang trỏ tới đã bị `delete`
 - Xin bằng `new[]` rồi lại trả bằng `delete` thường
 
@@ -737,8 +727,8 @@ std::cout << *q;
 
 - Nó báo lỗi ngay lúc biên dịch, vì code thiếu lệnh `delete`
 - Nó chạy y hệt bản thường và không in thêm gì ra màn hình
-- Nó tự thêm `delete` vào chỗ còn thiếu rồi chạy tiếp bình thường
-- Nó in LeakSanitizer kèm dòng `new`, mã thoát khác 0
+- Nó tự thêm `delete` vào chỗ còn thiếu rồi chạy tiếp như bình thường
+- Nó in báo cáo LeakSanitizer chỉ ra dòng có `new`, mã thoát khác 0
 
 <p class="giai-thich" markdown>ASan theo dõi các lần xin và trả lúc chạy; với chương trình ở ví dụ 2, lúc kết thúc nó báo `LeakSanitizer: detected memory leaks`, chỉ ra chỗ 4 byte được xin ở dòng nào, và chương trình thoát với mã khác 0 (mình thấy 1). Nó không báo lúc biên dịch, vì thiếu `delete` là chuyện của lúc chạy, không phải lỗi cú pháp. Nó cũng không sửa code giúp bạn. Nói "chạy y hệt bản thường" bỏ qua đúng thứ ASan thêm vào: dòng báo cáo và mã thoát.</p>
 </div>

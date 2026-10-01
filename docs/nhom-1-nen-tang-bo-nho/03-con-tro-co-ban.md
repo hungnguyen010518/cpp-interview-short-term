@@ -11,7 +11,7 @@ Quay lại dãy tủ khóa của [Bài 01](01-bo-nho-byte-dia-chi.md): mỗi ng�
 
 Tờ giấy đó **không phải là đồ**. Nó chỉ là một mảnh giấy ghi đường tới đồ. Ai cầm tờ giấy thì đi tới ngăn 12 và thấy đồ, hoặc thay đồ khác vào. Nếu tờ giấy bị vứt đi, đồ trong ngăn vẫn còn nguyên.
 
-Con trỏ (**pointer**) chính là tờ giấy đó. Điều quan trọng nhất của bài: **tờ giấy cũng là một vật**. Bạn phải cất nó ở đâu đó, nên nó cũng nằm trong một ngăn nhớ riêng, có địa chỉ riêng. Chỉ khác ở chỗ thứ nó "đựng" là một địa chỉ của ngăn khác.
+Con trỏ (**pointer**) chính là tờ giấy đó. Điều quan trọng nhất của bài: **tờ giấy cũng là một vật**. Bạn phải cất nó ở đâu đó, nên nó cũng chiếm chỗ riêng trong dãy tủ (thường 8 ngăn liền nhau trên máy 64 bit), có địa chỉ riêng. Chỉ khác ở chỗ thứ nó "đựng" là một địa chỉ của ngăn khác.
 
 !!! info "Chỗ nào ví dụ tờ giấy không còn đúng?"
     Tờ giấy thật có thể ghi sai hoặc để trống. Con trỏ cũng thế: nó có thể chưa ghi gì, hoặc ghi một địa chỉ không còn đồ của bạn. Hai tình huống đó (mục 4) là chỗ sinh ra phần lớn lỗi C++ nguy hiểm.
@@ -31,11 +31,11 @@ int* p = &x;
 
 Đọc dòng thứ hai từ trái sang phải:
 
-- `int*` là **kiểu** của `p`, đọc là "con trỏ tới `int`". Nó có nghĩa: biến này đựng địa chỉ của một ô nhớ mà trong đó có một số `int`. Ví dụ `char*` là "con trỏ tới `char`", `double*` là "con trỏ tới `double`".
+- `int*` là **kiểu** của `p`, đọc là "con trỏ tới `int`". Nó có nghĩa: biến này đựng địa chỉ của một **ô nhớ** (chỗ của một biến, gồm một hay vài ngăn liền nhau) mà trong đó có một số `int`. Ví dụ `char*` là "con trỏ tới `char`", `double*` là "con trỏ tới `double`".
 - `p` là tên biến.
 - `= &x` đặt giá trị ban đầu cho `p` là địa chỉ của `x`.
 
-Vậy sau hai dòng này, `x` đựng số `10`, còn `p` đựng **địa chỉ của `x`**. Ta nói "`p` trỏ tới `x`".
+Vậy sau hai dòng này, `x` đựng số `10`, còn `p` đựng **địa chỉ của `x`**. Ta nói "`p` trỏ tới `x`". (Ở [Bài 02](02-stack-heap-static.md) ta còn nói "số phòng" trong kho: một phòng chỉ là vài ngăn liền nhau mà kho giao cho bạn, và số phòng cũng chính là số ngăn đầu tiên của nó. Vậy con trỏ tới chỗ ở heap cũng chỉ là một địa chỉ như thế.)
 
 Hình vẽ hai ô nhớ (địa chỉ minh họa, máy bạn sẽ in số khác):
 
@@ -94,7 +94,7 @@ if (p)              // p khác nullptr
 if (p != nullptr)   // viết rõ hơn, cùng ý
 ```
 
-**Không bao giờ giải tham chiếu `nullptr`.** `*p` khi `p` là `nullptr` là đi theo một tờ giấy trống, và chuẩn C++ gọi đó là **hành vi không xác định (undefined behavior, viết tắt UB)**: chuẩn không hứa chuyện gì sẽ xảy ra. Có thể chương trình dừng đột ngột (trên Linux hay thấy `Segmentation fault`), có thể nó chạy tiếp ra kết quả sai, và kết quả có thể đổi giữa các máy hay các lần biên dịch. Đừng dựa vào bất cứ kết quả nào, và đừng nghĩ "luôn luôn crash":
+**Không bao giờ giải tham chiếu `nullptr`.** `*p` khi `p` là `nullptr` là đi theo một tờ giấy trống, và chuẩn C++ gọi đó là **hành vi không xác định (undefined behavior, viết tắt UB)**: chuẩn không hứa chuyện gì sẽ xảy ra. Có thể chương trình dừng đột ngột (trên Linux hay thấy `Segmentation fault`), có thể nó chạy tiếp ra kết quả sai, và kết quả có thể đổi giữa các máy hay các lần biên dịch. Đừng dựa vào bất cứ kết quả nào, và đừng nghĩ "luôn luôn crash" (crash: chương trình sập đột ngột):
 
 ```cpp
 // bo-qua-kiem-tra
@@ -477,7 +477,7 @@ Lỗi này cho thấy rõ `b` không phải con trỏ: nó là `int`, không nh�
     `&x` là toán tử lấy địa chỉ: cho ra địa chỉ của biến `x`. `*p` là toán tử giải tham chiếu: đi theo địa chỉ đang nằm trong `p` và cho ra chính đối tượng ở đó, nên có thể đọc hoặc ghi. Hai toán tử ngược chiều nhau: nếu `p = &x` thì `*p` chính là `x`. (Dấu `*` trong khai báo `int* p` thì là một phần của kiểu, không phải toán tử.)
 
 ??? question "`nullptr`, `NULL` và `0` khác nhau thế nào?"
-    Cả ba đều có thể dùng làm "con trỏ trống", nhưng `nullptr` (C++11) có kiểu riêng là `std::nullptr_t`, còn `NULL` là một macro mà giá trị do cài đặt quyết định (thường là một số nguyên `0`) và `0` là số `int`. Vì vậy với hai hàm nạp chồng `f(int)` và `f(char*)`, `f(nullptr)` luôn chọn `f(char*)`. Mình thử `f(NULL)` với `g++ 11.4` thì báo "ambiguous" (mơ hồ giữa hai hàm). Nên dùng `nullptr`.
+    Cả ba đều có thể dùng làm "con trỏ trống", nhưng `nullptr` (C++11) có kiểu riêng là `std::nullptr_t`, còn `NULL` là một macro mà giá trị do cài đặt quyết định (thường là một số nguyên `0`) và `0` là số `int`. Vì vậy với hai hàm trùng tên `f(int)` và `f(char*)` (gọi là hàm nạp chồng, C++ chọn hàm theo kiểu của đối số), `f(nullptr)` luôn chọn `f(char*)`. Mình thử `f(NULL)` với `g++ 11.4` thì báo "ambiguous" (mơ hồ giữa hai hàm). Nên dùng `nullptr`.
 
 ??? question "Con trỏ chưa khởi tạo khác con trỏ null thế nào?"
     Con trỏ null (`nullptr`) có giá trị xác định và nhận biết được: ta có thể kiểm tra `if (p)` trước khi dùng. Con trỏ chưa khởi tạo mang giá trị rác tùy ý, trông như một địa chỉ bình thường nên không có cách kiểm tra đáng tin; giải tham chiếu nó là hành vi không xác định. Vì vậy luôn khởi tạo con trỏ ngay khi khai báo, bằng địa chỉ hợp lệ hoặc `nullptr`.
@@ -511,7 +511,7 @@ Lỗi này cho thấy rõ `b` không phải con trỏ: nó là `int`, không nh�
 
 - Một bản sao giá trị `int` của biến mà nó trỏ tới
 - Tên của biến `int` mà nó trỏ tới, ghi dưới dạng chữ
-- Địa chỉ của một ô nhớ chứa một số `int`
+- Địa chỉ của một ô nhớ đang chứa số nguyên `int`
 - Số byte của ô nhớ `int` mà nó trỏ tới
 
 <p class="giai-thich" markdown>Con trỏ đựng một địa chỉ, như tờ giấy ghi số ngăn tủ chứ không phải món đồ trong ngăn. Nó không giữ bản sao của giá trị `int`: nếu giữ bản sao thì sửa qua con trỏ sẽ không đổi được biến gốc. Tên biến chỉ là cách ta gọi trong code, máy không lưu nó trong con trỏ. Số byte thì phải hỏi bằng `sizeof`, và đó là thông tin khác hẳn địa chỉ.</p>
@@ -541,7 +541,7 @@ std::cout << x << "\n";
 - `1`, vì `x` chỉ được đặt giá trị ở dòng đầu tiên
 - Một địa chỉ dạng `0x…`, vì `p` đựng địa chỉ của `x`
 - Lỗi biên dịch, vì không được gán giá trị cho `*p`
-- `5`, vì `*p` chính là ô nhớ của `x`
+- `5`, vì `*p = 5;` ghi thẳng vào ô nhớ của chính biến `x`
 
 <p class="giai-thich" markdown>`p` trỏ tới `x`, nên `*p = 5;` ghi `5` đúng vào ô nhớ của `x`, và in `x` ra `5`. Số `1` sẽ đúng nếu `*p` là một bản sao của `x`, nhưng nó là chính `x`. Chương trình in `x` chứ không in `p`, nên không có địa chỉ nào hiện ra. Gán cho `*p` là hợp lệ và là cách chính để sửa một biến qua con trỏ.</p>
 </div>
@@ -583,9 +583,9 @@ std::cout << x << "\n";
 **Câu 7.** Với `int* p = nullptr;`, câu lệnh `*p = 1;` gây ra điều gì?
 
 - Chuẩn quy định chương trình phải dừng với `Segmentation fault`
-- Chuẩn không hứa kết quả nào, chuyện gì cũng có thể xảy ra
+- Chuẩn không hứa kết quả nào: có thể dừng, có thể chạy tiếp mà sai
 - Chuẩn không hứa gì thêm, nhưng `p` sẽ tự có ô nhớ mới
-- Chuẩn quy định đó là lỗi ném ra, bắt được bằng `try`/`catch`
+- Chuẩn quy định chương trình bỏ qua dòng đó và chạy tiếp
 
 <p class="giai-thich" markdown>Giải tham chiếu `nullptr` là hành vi không xác định: chuẩn không hứa kết quả, nên có thể crash, có thể chạy tiếp sai, và còn tùy máy hay cách biên dịch. Việc "thường thấy crash trên Linux" không phải điều chuẩn quy định, nên không thể khẳng định chương trình phải dừng. C++ không tự cấp ô nhớ cho con trỏ trống. Nó cũng không biến việc này thành lỗi ngoại lệ để bắt bằng `try`/`catch`.</p>
 </div>
@@ -602,9 +602,9 @@ p = &b;
 std::cout << a << " " << b << "\n";
 ```
 
-- `1 9`, vì `p` đã được đổi sang trỏ vào `b`
+- `1 9`, vì `p` đã được gán lại để trỏ vào biến `b`
 - `9 2`, vì `p` được khai báo trỏ vào `a` ngay từ đầu
-- `9 9`, vì cả hai biến cùng được ghi qua con trỏ `p`
+- `9 9`, vì cả hai biến cùng được ghi qua `p`
 - `1 2`, vì ghi qua `*p` thì không đổi biến nào cả
 
 <p class="giai-thich" markdown>Dòng `p = &b;` đổi địa chỉ trong `p` từ `a` sang `b`, nên `*p = 9;` ghi vào `b`, còn `a` vẫn là `1`, kết quả `1 9`. Chọn `9 2` là nhớ giá trị ban đầu của `p` mà quên rằng nó đã bị gán lại. `a` và `b` là hai ô riêng, một lần ghi chỉ đổi một ô. Và ghi qua `*p` thật sự đổi biến mà `p` đang trỏ tới, không phải một bản sao.</p>

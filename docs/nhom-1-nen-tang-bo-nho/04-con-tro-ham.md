@@ -314,10 +314,10 @@ void doi(int* p, int* q) { int* t = p; p = q; q = t; }
 int main() { int a = 1; int b = 2; doi(&a, &b); std::cout << a << " " << b; }
 ```
 
-- `1 2`, vì `doi` chỉ đổi hai con trỏ bản sao
+- `1 2`, vì `doi` chỉ đổi chỗ hai con trỏ bản sao trong hàm
 - `2 1`, vì `doi` đã đổi chỗ hai số nên `a` thành 2
-- `1 1`, vì cả hai biến bị ghi đè bằng giá trị cũ của `a`
-- `2 2`, vì cả hai biến bị ghi đè bằng giá trị cũ của `b`
+- `1 1`, vì cả hai biến bị ghi đè bằng giá trị của `a`
+- `2 2`, vì cả hai biến bị ghi đè bằng giá trị của `b`
 
 <p class="giai-thich" markdown>Hàm đổi chỗ hai **con trỏ** `p` và `q`, mà chúng chỉ là bản sao của hai địa chỉ nằm trong khung của hàm. Không dòng nào dùng `*p` hay `*q` để ghi, nên `a` và `b` không bị chạm tới: kết quả `1 2` (mình đã chạy). Để thật sự đổi chỗ hai số phải đổi giá trị mà chúng trỏ tới: `int tam = *p; *p = *q; *q = tam;`. Hai kết quả `1 1` và `2 2` cần có ai đó ghi vào `a` hoặc `b`, mà đoạn code này không làm vậy.</p>
 </div>
@@ -366,7 +366,7 @@ int main() { int a = 1; int b = 2; int* p = &a; chon(p, &b); std::cout << *p; }
 - `2`, vì `p` đã được đổi sang trỏ vào `b`
 - Một địa chỉ, vì `p` giờ chứa địa chỉ của `b`
 - Lỗi biên dịch, vì không được gán `con = x`
-- `1`, vì `con` chỉ là bản sao của `p`
+- `1`, vì `con` chỉ là bản sao của `p` trong hàm
 
 <p class="giai-thich" markdown>`con = x;` đổi bản sao `con` sang trỏ vào `b`, nhưng `p` ở `main` vẫn trỏ vào `a`, nên `*p` là `1` (mình đã chạy). Chọn `2` là tưởng gán trong hàm đổi được `p` gốc: muốn vậy phải dùng `int**`. Chương trình in `*p` chứ không in `p`, nên không có địa chỉ. Gán một con trỏ cho con trỏ cùng kiểu là hợp lệ, không có lỗi biên dịch nào.</p>
 </div>

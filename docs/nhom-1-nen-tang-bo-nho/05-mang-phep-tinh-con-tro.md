@@ -117,7 +117,7 @@ tong(a, n);
 
 Ở đây `const` đặt trước `int*` nghĩa là "chỉ đọc, không sửa phần tử qua con trỏ này".
 
-`std::size_t` là kiểu số không âm hợp để đếm phần tử (cần `#include <cstddef>`). Cách tốt hơn nữa nằm ở nhóm STL: `std::vector` hoặc `std::array`, những kiểu **mang theo độ dài**; ở đây ta chỉ nhắc tên.
+`std::size_t` là kiểu số không âm hợp để đếm phần tử (cần `#include <cstddef>`). Cách tốt hơn nữa nằm ở các kiểu có sẵn của thư viện chuẩn C++ (hay gọi là STL, bộ kiểu chứa dữ liệu dùng sẵn): `std::vector` (đã gặp ở [Bài 02](02-stack-heap-static.md)) hoặc `std::array`, những kiểu **mang theo độ dài**; ở đây ta chỉ nhắc tên.
 
 !!! info "Bạn biết Go?"
     Slice của Go là bộ ba (con trỏ tới phần tử đầu, độ dài, sức chứa), nên độ dài luôn đi kèm. Mảng C++ khi truyền vào hàm thoái hóa thành **chỉ con trỏ** và mất độ dài, nên ta phải tự truyền `n`. Mảng Go `[4]int` thì được **chép cả bốn phần tử** khi truyền vào hàm. Go cũng **không cho** số học con trỏ như `p + 1` (trừ gói `unsafe`), còn C++ cho tự do.
@@ -397,7 +397,7 @@ Vì `ten` là `const char*`, ký tự của chuỗi hằng chỉ đọc. Muốn 
     Chúng tương đương: `a[i]` được định nghĩa là `*(a + i)`. Tên mảng `a` thoái hóa thành con trỏ tới phần tử đầu, `a + i` là địa chỉ của phần tử thứ `i` (nhích `i` phần tử, không phải `i` byte), và `*` đi theo địa chỉ đó. Cũng vì vậy `p[i]` dùng được với mọi con trỏ `p`, không chỉ với tên mảng.
 
 ??? question "Array decay là gì, và `sizeof` bị ảnh hưởng ra sao?"
-    Trong hầu hết biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; ngoại lệ chính là `sizeof` và `&`. Khi truyền mảng vào hàm, tham số thực chất là con trỏ (dù viết `int a[4]`), nên `sizeof(a)` trong hàm cho cỡ của con trỏ (thường 8), không phải cỡ mảng (thường 16), và `g++ -Wall` cảnh báo `-Wsizeof-array-argument`. Cách xử lý: truyền kèm số phần tử, hoặc dùng `std::vector`/`std::array` (nhóm STL).
+    Trong hầu hết biểu thức, tên mảng tự chuyển thành con trỏ tới phần tử đầu; ngoại lệ chính là `sizeof` và `&`. Khi truyền mảng vào hàm, tham số thực chất là con trỏ (dù viết `int a[4]`), nên `sizeof(a)` trong hàm cho cỡ của con trỏ (thường 8), không phải cỡ mảng (thường 16), và `g++ -Wall` cảnh báo `-Wsizeof-array-argument`. Cách xử lý: truyền kèm số phần tử, hoặc dùng `std::vector`/`std::array` (kiểu có sẵn của thư viện chuẩn).
 
 ??? question "Con trỏ `p + 1` nhích bao nhiêu byte?"
     Nhích đúng `sizeof(kiểu mà p trỏ tới)` byte, tức một phần tử chứ không phải một byte. Với `int*` thường là 4 byte, với `double*` thường là 8, với `char*` là 1. Phép trừ hai con trỏ cũng tính bằng phần tử, và chuẩn chỉ định nghĩa nó khi hai con trỏ cùng một mảng.
@@ -429,7 +429,7 @@ std::cout << *(p + 2) << "\n";
 - `20`, vì `p + 2` là phần tử thứ hai nếu đếm từ 1
 - `12`, vì `*(p + 2)` được tính như `*p + 2`
 - `30`, vì `p + 2` nhích hai phần tử từ `a[0]`
-- `40`, vì `p + 2` nhích hai phần tử từ `a[1]`
+- `40`, vì `p + 2` nhích ba phần tử từ `a[0]`
 
 <p class="giai-thich" markdown>`p` trỏ tới `a[0]`, và `p + 2` nhích hai phần tử, tới `a[2]` có giá trị `30`. Chọn `20` là đếm chỉ số từ 1, trong khi chỉ số bắt đầu từ 0. Chọn `12` là bỏ qua ngoặc: ngoặc buộc phép cộng làm trước, còn `*p + 2` mới ra `12`. Chọn `40` là cho rằng `p` bắt đầu ở `a[1]`, nhưng `p` đang ở `a[0]`.</p>
 </div>
@@ -437,7 +437,7 @@ std::cout << *(p + 2) << "\n";
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 2.** Giả sử `sizeof(int)` là 4 và `int* p` đang đựng địa chỉ `0x1000`. Sau `int* q = p + 1;`, `q` đựng địa chỉ nào?
 
-- `0x1004`, vì con trỏ nhích một phần tử `int`
+- `0x1004`, vì con trỏ nhích một phần tử kiểu `int`
 - `0x1001`, vì phép cộng 1 làm địa chỉ tăng 1
 - `0x1008`, vì con trỏ nhích hai lần cỡ của `int`
 - `0x1010`, vì con trỏ nhích 16 byte cả mảng
@@ -472,7 +472,7 @@ std::cout << cuoi - dau << "\n";
 ```
 
 - `12`, vì hai địa chỉ cách nhau 12 byte
-- `3`, vì hiệu hai con trỏ đếm phần tử
+- `3`, vì hiệu hai con trỏ đếm số phần tử cách nhau
 - `30`, vì `cuoi` đang trỏ tới giá trị 30
 - `2`, vì phần tử ở giữa hai con trỏ là 2
 
@@ -493,9 +493,9 @@ std::cout << cuoi - dau << "\n";
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 6.** Cho `int a[4] = {1, 2, 3, 4};`. Theo chuẩn C++, câu lệnh `a[4] = 9;` gây ra chuyện gì?
 
-- Trình biên dịch bắt buộc phải từ chối, nên chương trình không được tạo ra
-- Chương trình bắt buộc dừng lúc chạy với lỗi `index out of range`
-- Mảng tự nới thêm một ô ở cuối để chứa được số `9` vừa ghi
+- Trình biên dịch bắt buộc từ chối, không tạo ra chương trình
+- Chương trình bắt buộc dừng với lỗi `index out of range`
+- Mảng tự nới thêm một ô để chứa được số `9` vừa ghi
 - Chuẩn không hứa kết quả gì, đó là hành vi không xác định
 
 <p class="giai-thich" markdown>`a[4]` nằm ngoài mảng, ngay sau phần tử cuối, và ghi vào đó là hành vi không xác định (UB): chuẩn không hứa gì, có thể chạy tiếp, ghi nhầm biến khác, hoặc dừng đột ngột. Trình biên dịch không bắt buộc phải từ chối (nhiều lúc chỉ cảnh báo, nhiều lúc không biết). C++ cũng không kiểm tra chỉ số lúc chạy như Go (Go dừng với `index out of range`). Mảng có kích thước cố định, nó không tự nới thêm ô.</p>
@@ -504,7 +504,7 @@ std::cout << cuoi - dau << "\n";
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 7.** Với `a` là một mảng, biểu thức `a[i]` tương đương với biểu thức nào?
 
-- `a + i`, địa chỉ của phần tử thứ `i`
+- `a + i`, là địa chỉ của phần tử thứ `i`
 - `*(a + i)`, phần tử nằm ở địa chỉ đó
 - `*a + i`, phần tử đầu rồi cộng thêm `i`
 - `&a + i`, nhích `i` lần qua cả mảng
@@ -517,7 +517,7 @@ std::cout << cuoi - dau << "\n";
 
 - Chuỗi đổi thành `"Bn"`, vì `s[0]` là một ô nhớ như mọi ô khác
 - Chương trình biên dịch được, và chuỗi vẫn là `"An"`
-- `g++` báo lỗi biên dịch, vì ký tự của chuỗi hằng chỉ đọc
+- `g++` báo lỗi biên dịch, vì chuỗi hằng chỉ đọc
 - Chuỗi đổi thành `"B"`, vì ghi `'B'` cắt chuỗi ngay ô đầu
 
 <p class="giai-thich" markdown>`s` là `const char*`, nghĩa là các ký tự mà nó trỏ tới chỉ đọc, nên `g++` từ chối với `assignment of read-only location` (mình đã thử). Nếu cố ép bỏ `const` rồi ghi thì là hành vi không xác định, không phải "sửa được". Chương trình đã không biên dịch được nên không có chuyện chuỗi vẫn là `"An"`. Chuỗi cũng không bị cắt: chỉ ký tự `'\0'` mới đánh dấu hết chuỗi, và ghi `'B'` không tạo ra `'\0'`.</p>

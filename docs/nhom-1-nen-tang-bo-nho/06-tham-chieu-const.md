@@ -272,7 +272,7 @@ Chương trình này **biên dịch được**, nhưng `g++ -Wall` cảnh báo n
 warning: reference to local variable ‘x’ returned [-Wreturn-local-addr]
 ```
 
-Khi chạy, kết quả không được chuẩn bảo đảm (hành vi không xác định): mình chạy thử một lần thì chương trình sập (mã thoát 139), máy bạn có thể in số rác hoặc `42`, và không ai hứa lần sau giống lần này. Tên gọi "con trỏ treo / tham chiếu treo" cho loại lỗi này sẽ được học kỹ ở [Bài 07](07-new-delete.md). Tin tốt: trả về tham chiếu tới thứ **sống lâu hơn hàm** (đối tượng của nơi gọi, biến static, vùng nhớ ở heap) thì không sao.
+Khi chạy, kết quả không được chuẩn bảo đảm (hành vi không xác định): mình chạy thử một lần thì chương trình sập (mã thoát 139, nghĩa là hệ điều hành đã dừng nó vì truy cập sai bộ nhớ), máy bạn có thể in số rác hoặc `42`, và không ai hứa lần sau giống lần này. Tên gọi "con trỏ treo / tham chiếu treo" cho loại lỗi này sẽ được học kỹ ở [Bài 07](07-new-delete.md). Tin tốt: trả về tham chiếu tới thứ **sống lâu hơn hàm** (đối tượng của nơi gọi, biến static, vùng nhớ ở heap) thì không sao.
 
 !!! info "Bạn biết Go?"
     Trong Go, `return &x` với `x` cục bộ là hợp lệ: bộ phân tích thoát (escape analysis) chuyển `x` lên heap và garbage collector dọn sau. C++ không có bước tự cứu đó, nên cùng ý định ấy là lỗi.
@@ -460,7 +460,7 @@ Gán `const int*` cho `int*` (bỏ nhãn "chỉ xem") cũng bị chặn: `error:
 **Câu 1.** Với `int a = 10; int& b = a;` thì "`b` là biệt danh của `a`" nghĩa là gì?
 
 - `b` là một biến mới, chép giá trị của `a`
-- `b` và `a` là hai tên của cùng một ô nhớ
+- `b` và `a` là hai tên khác nhau của cùng một ô nhớ
 - `b` là con trỏ, tự lưu địa chỉ của `a`
 - `b` là một bản sao mà sau này tự theo kịp `a`
 
@@ -475,10 +475,10 @@ int a = 1; int c = 2; int& b = a; b = c; c = 3;
 std::cout << a << " " << b << " " << c;
 ```
 
-- `1 1 3`, vì `b = c` chỉ đổi tên của `b`
-- `3 3 3`, vì `b = c` gắn `b` sang `c`
+- `1 1 3`, vì phép gán `b = c` chỉ đổi tên của `b`
+- `3 3 3`, vì `b` gắn sang `c`
 - `2 2 3`, vì `b = c` gán giá trị vào `a`
-- `1 2 3`, vì `b` giữ giá trị riêng của nó
+- `1 2 3`, vì `b` giữ giá trị riêng
 
 <p class="giai-thich" markdown>`b = c;` không gắn lại tham chiếu, mà chép giá trị 2 của `c` vào ô mà `b` đại diện, tức ô của `a`. Vậy `a` và `b` đều là 2; `c = 3` sau đó chỉ đổi `c`. Kết quả `3 3 3` chỉ đúng nếu `b` đã đổi sang làm biệt danh của `c`, mà tham chiếu không đổi được. Kết quả `1 1 3` bỏ quên rằng `a` đã nhận giá trị mới. Còn `1 2 3` cần `b` là biến riêng, trong khi `b` và `a` là một ô (mình đã chạy: `2 2 3`).</p>
 </div>
@@ -507,7 +507,7 @@ q = &b;              // dòng C
 - Dòng A, vì không được khai báo `const` sau dấu `*`
 - Dòng B, vì `q` bị khóa nên `*q` không sửa được
 - Cả dòng B và dòng C, vì `q` bị khóa hết
-- Chỉ dòng C, vì `q` là hằng nên không đổi được
+- Chỉ dòng C, vì `q` là hằng nên không thể gán lại được
 
 <p class="giai-thich" markdown>`int* const q` đọc là "q là hằng con trỏ tới int": chính `q` bị khóa, còn món đồ nó trỏ tới thì không. Nên `*q = 10;` hợp lệ, và chỉ `q = &b;` lỗi `assignment of read-only variable ‘q’` (mình đã biên dịch). Dòng A đúng cú pháp: `const` đứng sau `*` là một dạng hợp lệ. Dòng B là phương án bị nhầm với `const int*`, kiểu mà `*p` mới bị khóa.</p>
 </div>
@@ -524,7 +524,7 @@ Cay x(1);  f(x);  g(x);  h(&x);  f(x);
 
 - 4 lần, vì cả bốn lời gọi hàm đều sao chép
 - 2 lần, vì chỉ hai lần gọi `f` sao chép
-- 1 lần, vì chỉ lần gọi đầu mới sao chép
+- 1 lần, vì chỉ lần gọi đầu mới chép
 - 0 lần, vì `x` đã tồn tại sẵn rồi
 
 <p class="giai-thich" markdown>Chỉ truyền theo giá trị (`f`) tạo bản sao, và `f` được gọi hai lần nên có hai lần `copy!` (mình đã chạy). `g` nhận biệt danh còn `h` nhận địa chỉ, nên không lần nào sao chép. Không có chuyện "chỉ lần đầu mới sao chép": mỗi lần gọi `f` đều tạo tham số mới. Việc `x` đã tồn tại không ngăn sao chép, vì tham số `c` của `f` là một biến mới.</p>
@@ -544,7 +544,7 @@ Cay x(1);  f(x);  g(x);  h(&x);  f(x);
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 7.** Vì sao `int& f() { int x = 1; return x; }` là sai?
 
-- Vì tham chiếu không được làm kiểu trả về
+- Vì tham chiếu không được dùng làm kiểu trả về
 - Vì `x` chưa khai báo `const` nên không trả được
 - Vì muốn trả địa chỉ thì chỉ được dùng con trỏ
 - Vì `x` bị dọn khi `f` xong, tham chiếu hỏng

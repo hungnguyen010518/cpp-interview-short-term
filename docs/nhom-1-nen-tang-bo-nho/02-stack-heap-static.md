@@ -31,7 +31,7 @@ int nhanDoi(int so) {
 }
 ```
 
-Đọc dòng đầu: `int` đứng trước tên là **kiểu trả về** (hàm trả ra một số nguyên), `nhanDoi` là tên hàm, `int so` trong ngoặc là **tham số** (thứ ta đưa cho hàm khi gọi: kiểu `int`, tên `so`). `return ketQua;` trả giá trị về cho nơi gọi. Gọi hàm: `nhanDoi(10)`.
+Đọc dòng đầu: `int` đứng trước tên là **kiểu trả về** (hàm trả ra một số nguyên), `nhanDoi` là tên hàm, `int so` trong ngoặc là **tham số** (thứ ta đưa cho hàm khi gọi: kiểu `int`, tên `so`). `return ketQua;` trả giá trị về cho nơi gọi. Gọi hàm: `nhanDoi(10)`. Hàm không có gì để trả thì ghi `void` (nghĩa là "không có gì") ở chỗ kiểu trả về, và không cần `return`, như hàm Go không khai báo giá trị trả về.
 
 Điều quan trọng cho bài này: **mỗi lần một hàm được gọi, chương trình dựng cho nó một "khung" riêng** (tiếng Anh: **stack frame**, khung gọi hàm). Khung đó là một mảnh bàn học dành cho lần gọi này. Tham số `so` và biến cục bộ `ketQua` nằm trong khung. Khi hàm `return`, khung bị gỡ bỏ ngay, nên `so` và `ketQua` **mất theo**.
 
@@ -66,7 +66,7 @@ int main() {
 }
 ```
 
-Mỗi lần gọi `dem` chồng thêm một khung lên stack, mà không có lần nào kết thúc để gỡ khung. Stack đầy, chương trình thường bị dừng đột ngột (trên Linux hay thấy lỗi `Segmentation fault`). Ghi chú: một số trình biên dịch có thể tối ưu hàm kiểu này thành vòng lặp, nên kết quả thực tế còn tùy. Tương tự, khai báo một mảng cục bộ khổng lồ như `int mang[100000000];` (khoảng 400 MB nếu `int` là 4 byte) cũng có thể làm tràn stack ngay khi vào hàm. Mảng lớn nên để ở heap, phần dưới nói tới.
+Mỗi lần gọi `dem` chồng thêm một khung lên stack, mà không có lần nào kết thúc để gỡ khung. Stack đầy, chương trình thường bị dừng đột ngột (trên Linux hay thấy lỗi `Segmentation fault`). Ghi chú: một số trình biên dịch có thể tối ưu hàm kiểu này thành vòng lặp, nên kết quả thực tế còn tùy. Tương tự, khai báo một mảng cục bộ khổng lồ như `int mang[100000000];` (mảng: 100 triệu `int` đứng liền nhau, số phần tử viết trong `[ ]`; [Bài 05](05-mang-phep-tinh-con-tro.md) dạy kỹ; khoảng 400 MB nếu `int` là 4 byte) cũng có thể làm tràn stack ngay khi vào hàm. Mảng lớn nên để ở heap, phần dưới nói tới.
 
 ### 2. Heap: kho đồ phải tự xin, tự trả
 
@@ -125,16 +125,15 @@ C++ còn có từ khóa `class`. Với bài này `class` và `struct` dùng như
 
 ### 5. Bốn kiểu thời gian sống
 
-C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là **storage duration** (thời gian sống của vùng lưu trữ). Có bốn kiểu. (Trong bảng có chữ **luồng (thread)**: một dòng chạy code độc lập, một chương trình có thể có nhiều luồng chạy cùng lúc, gần giống goroutine của Go.)
+C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là **storage duration** (thời gian sống của vùng lưu trữ). Có bốn kiểu; bảng dưới liệt kê ba kiểu ta dùng trong bài này, còn kiểu thứ tư tên là **thread**, ta bỏ qua.
 
 | Kiểu | Nằm ở | Ra đời | Chết | Ví dụ |
 |---|---|---|---|---|
 | **automatic** (tự động) | stack | khi chạy qua dòng khai báo | khi ra khỏi khối `{ }` chứa nó | biến cục bộ, tham số |
 | **static** (tĩnh) | vùng tĩnh | global: lúc khởi động, thực tế trước `main`; `static` cục bộ: lần chạy qua đầu tiên | khi chương trình kết thúc | global, `static` cục bộ |
 | **dynamic** (động) | heap | khi chạy `new` | khi bạn chạy `delete` | `new int(5)` |
-| **thread** (theo luồng) | vùng riêng của từng luồng | khi luồng bắt đầu | khi luồng kết thúc | biến khai báo bằng `thread_local` |
 
-Kiểu thứ tư (`thread_local`, mỗi luồng có một bản riêng) mình chỉ nhắc tên, không dùng trong bài này.
+Kiểu thứ tư (`thread`, khai báo bằng `thread_local`) dành cho chương trình chạy nhiều dòng code cùng lúc; mình chỉ nhắc tên, [Bài 10](10-shared-ptr-weak-ptr.md) mới nói tới chuyện đó.
 
 ## 💻 Ví dụ code
 
@@ -237,7 +236,7 @@ ERROR: LeakSanitizer: detected memory leaks
 Direct leak of 4 byte(s) in 1 object(s) allocated from:
 ```
 
-(Công cụ này [Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md) dạy kỹ.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
+(Công cụ này tên là AddressSanitizer: [Bài 07](07-new-delete.md) dạy cách dùng để tìm rò rỉ, [Bài 15](15-hanh-vi-khong-xac-dinh-cong-cu.md) dạy sâu hơn.) Bài học: quên `delete` là lỗi **im lặng**, chương trình vẫn chạy bình thường.
 
 ### Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in
 
@@ -366,8 +365,8 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (1) | `toanCuc` có từ trước `main`, ở vùng tĩnh. (Giá trị `1` là hằng số viết sẵn, nên nó nằm sẵn đó từ lúc chương trình nạp, không có "khoảnh khắc ra đời" như `Dau`) | vùng tĩnh |
-| (2) | `tinh` cũng ở vùng tĩnh và chỉ có một bản dù `ham` gọi bao nhiêu lần. (Vì `2` cũng là hằng số viết sẵn, ở đây không thấy được lúc nó "ra đời"; chuyện "lần đầu" chỉ thấy rõ với `Dau` ở Ví dụ 3) | vùng tĩnh |
+| (1) | `toanCuc` có từ trước `main`, ở vùng tĩnh. (`1` là hằng số viết sẵn nên không thấy "khoảnh khắc ra đời" như `Dau`) | vùng tĩnh |
+| (2) | `tinh` cũng ở vùng tĩnh và chỉ có một bản dù `ham` gọi bao nhiêu lần. (chuyện "lần đầu" chỉ thấy rõ với `Dau` ở Ví dụ 3) | vùng tĩnh |
 | (3) | `cucBo` ra đời trên stack | stack |
 | (4) | Xin heap một `int` chứa `4`; biến con trỏ `heap` (trên stack) giữ địa chỉ | `heap` ở stack, số `4` ở heap |
 | in 3 dòng đầu | `&toanCuc`, `&tinh`, `&cucBo` là địa chỉ của chính các biến đó | |
@@ -384,11 +383,11 @@ heap:    0x5707aa85ceb0
 bien con tro heap (cuc bo): 0x7ffeeb931b20
 ```
 
-Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. `heap` và vùng tĩnh có cùng tiền tố `0x5707…` trong lần chạy này, nhưng mẫu này không được bảo đảm. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
+Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
 
 ### Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
 
-Câu hỏi: đối tượng của class (hay struct) khai báo global thì nằm ở đâu? Ta thử với một struct có chứa `std::vector` (kiểu mảng co giãn, giống slice của Go; muốn dùng thêm `#include <vector>`).
+Câu hỏi: đối tượng của class (hay struct) khai báo global thì nằm ở đâu? Ta thử với một struct có chứa `std::vector` (kiểu mảng co giãn, giống slice của Go; muốn dùng thêm `#include <vector>`). Dấu `<int>` trong `std::vector<int>` cho biết các phần tử là kiểu `int`, như `[]int` của Go.
 
 ```cpp
 #include <iostream>
@@ -452,74 +451,27 @@ Dòng `ham tao Kho chay` hiện **trước** `bat dau main`. Hai địa chỉ kh
     - Nếu struct/class có chứa `std::vector` (hay `std::map`…), thì **bản thân object** nằm ở vùng tĩnh, còn **dữ liệu bên trong** vector (các phần tử) nằm ở **heap**, do vector tự xin. Ví dụ 5 đã in hai địa chỉ khác nhau để chứng minh.
     - Chính vector cũng làm đúng như vậy khi bạn khai báo nó là biến cục bộ: lúc đó object `std::vector` nằm trên stack, còn các phần tử vẫn ở heap. (Riêng `std::string`: chuỗi dài thường nằm ở heap, còn chuỗi ngắn có thể nằm ngay trong object.)
 
-### Ví dụ 6: Static initialization order fiasco, và cách tránh
+### Để biết: thứ tự khởi tạo global giữa các file
 
-Bạn có thể có nhiều file `.cpp` trong một dự án, mỗi file có global riêng. **Thứ tự khởi tạo global giữa các file `.cpp` khác nhau là không xác định**: chuẩn C++ không nói file nào chạy trước. (Trong **một** file, thứ tự theo đúng thứ tự viết.) Hậu quả: nếu hàm tạo của global `A` ở file này dùng global `B` ở file kia, thì lúc `A` chạy `B` có thể **chưa ra đời**, và `A` đọc phải một thứ chưa sẵn sàng. Lỗi này tên là **static initialization order fiasco** (nghĩa là "thảm họa về thứ tự khởi tạo của biến tĩnh"), và nó khó chịu vì có thể chạy đúng ở máy này, sai ở máy khác, hoặc đổi theo thứ tự nối file lúc build. Vấn đề này chỉ xảy ra với global có hàm tạo hoặc giá trị tính lúc chạy; global chỉ có hằng số viết sẵn (như `int x = 1;`) thì không bị.
-
-Cách tránh thường gặp: **không dựng global sẵn, mà dựng nó trong một hàm, bằng `static` cục bộ**. Nhờ vậy nó được khởi tạo **ở lần gọi hàm đầu tiên** (như Ví dụ 3 đã thấy), tức là ngay lúc có người cần. Từ C++11, chuẩn đảm bảo việc khởi tạo `static` cục bộ này an toàn dù có nhiều luồng cùng gọi lần đầu. Mình chỉ cho code trong một file, vì cách làm là như nhau:
-
-```cpp
-#include <iostream>
-#include <string>
-
-struct Logger {
-    std::string ten;
-    Logger(std::string t) {
-        ten = t;
-        std::cout << "tao Logger " << ten << "\n";
-    }
-};
-
-Logger* layLogger() {                       // (1)
-    static Logger duyNhat("chung");         // (2)
-    return &duyNhat;                        // (3)
-}
-
-int main() {
-    std::cout << "bat dau main\n";
-    Logger* a = layLogger();                // (4)
-    Logger* b = layLogger();                // (5)
-    std::cout << "a = " << a << "\n";
-    std::cout << "b = " << b << "\n";
-    return 0;
-}
-```
-
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| `main` bắt đầu | In `bat dau main`. Chưa có `Logger` nào, vì nó không phải global | chưa có |
-| (4) gọi `layLogger()` lần 1 | Chạy qua (2) lần đầu: `duyNhat` ra đời, hàm tạo in `tao Logger chung`. (3) trả địa chỉ của nó | `duyNhat` ở vùng tĩnh |
-| (5) gọi lần 2 | Dòng (2) bị bỏ qua, nó đã có rồi. (3) trả **cùng địa chỉ** | không đổi |
-
-**Kết quả khi chạy**
-
-```text
-bat dau main
-tao Logger chung
-a = 0x5583a17df180
-b = 0x5583a17df180
-```
-
-`a` và `b` có địa chỉ giống nhau (số cụ thể máy bạn sẽ khác, nhưng hai số sẽ trùng nhau). Dòng `tao Logger chung` hiện **sau** `bat dau main`: nó ra đời đúng lúc có người cần. Hàm này trả địa chỉ của một biến nằm bên trong nó mà vẫn **an toàn**, vì `duyNhat` là `static`, sống đến hết chương trình, không như một biến cục bộ thường.
+!!! info "Chỉ cần biết tên lỗi và cách tránh"
+    Dự án thật có nhiều file `.cpp`, mỗi file có global riêng, và chuẩn C++ **không nói file nào khởi tạo trước** (trong một file thì theo thứ tự viết). Nếu hàm tạo của global `A` ở file này dùng global `B` ở file kia, lúc đó `B` có thể **chưa ra đời**. Lỗi này tên là **static initialization order fiasco** ("thảm họa thứ tự khởi tạo biến tĩnh"), và nó khó chịu vì máy này chạy đúng, máy khác lại sai. Cách tránh: đừng dựng global sẵn, mà đặt nó trong một hàm dưới dạng biến `static` cục bộ. Như Ví dụ 3 đã thấy, `static` cục bộ ra đời ở lần gọi hàm đầu tiên, tức đúng lúc có người cần. Bài này không bắt bạn viết code cho chuyện đó, chỉ cần nhớ tên lỗi và cách tránh để trả lời phỏng vấn.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "Stack, heap và vùng tĩnh khác nhau thế nào?"
-    Stack chứa biến cục bộ và tham số, mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm hoặc khối. Nó nhanh nhưng nhỏ (thường vài MB). Heap là vùng xin bằng `new` (hoặc `malloc`), lớn hơn nhưng thường chậm hơn, và sống đến khi tự `delete`; quên trả là rò rỉ. Vùng tĩnh chứa biến global, `static` cục bộ và thành viên `static`, sống suốt chương trình.
+    Stack chứa biến cục bộ và tham số, mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm hoặc khối. Nó nhanh nhưng nhỏ (thường vài MB). Heap là vùng xin bằng `new` (hoặc `malloc`, hàm xin heap kiểu C, xem [Bài 07](07-new-delete.md)), lớn hơn nhưng thường chậm hơn, và sống đến khi tự `delete`; quên trả là rò rỉ. Vùng tĩnh chứa biến global, `static` cục bộ và thành viên `static`, sống suốt chương trình.
 
 ??? question "Một biến global của class nằm ở đâu, hàm tạo và hàm hủy chạy khi nào?"
     Nó nằm ở vùng tĩnh, không phải stack và không phải heap. Hàm tạo chạy khi chương trình khởi động, thực tế là trước `main` (chuẩn cho phép hoãn trong vài trường hợp, nhưng các trình biên dịch phổ biến luôn làm trước); hàm hủy chạy sau khi `main` kết thúc. Nếu class chứa `std::vector`, object ở vùng tĩnh còn các phần tử của vector ở heap.
 
 ??? question "Static initialization order fiasco là gì và tránh thế nào?"
-    Thứ tự khởi tạo các biến global nằm ở các file `.cpp` khác nhau là không xác định, nên global ở file này có thể dùng một global của file khác khi nó chưa được khởi tạo. Cách tránh phổ biến: thay global bằng một hàm chứa biến `static` cục bộ và trả nó ra, vì `static` cục bộ được khởi tạo ở lần gọi đầu, và từ C++11 việc đó an toàn với nhiều luồng.
+    Thứ tự khởi tạo các biến global nằm ở các file `.cpp` khác nhau là không xác định, nên global ở file này có thể dùng một global của file khác khi nó chưa được khởi tạo. Cách tránh phổ biến: thay global bằng một hàm chứa biến `static` cục bộ và trả nó ra, vì `static` cục bộ được khởi tạo ở lần gọi đầu.
 
 ??? question "Vì sao không nên đặt một mảng 100 MB làm biến cục bộ?"
     Biến cục bộ nằm trên stack, mà stack nhỏ (thường vài MB, tùy hệ điều hành và cấu hình). Mảng quá lớn làm tràn stack (stack overflow) và chương trình bị dừng đột ngột. Dữ liệu lớn nên xin ở heap, thường qua `std::vector` hoặc smart pointer.
 
 ??? question "Storage duration là gì?"
-    Là khoảng thời gian vùng lưu trữ của một đối tượng tồn tại. C++ có bốn kiểu: automatic (stack, đến hết khối chứa nó), static (suốt chương trình), dynamic (heap, từ `new` đến `delete`) và thread (suốt đời một luồng, qua `thread_local`).
+    Là khoảng thời gian vùng lưu trữ của một đối tượng tồn tại. C++ có bốn kiểu: automatic (stack, đến hết khối chứa nó), static (suốt chương trình), dynamic (heap, từ `new` đến `delete`) và thread (dành cho biến `thread_local`, bỏ qua ở mức này).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -542,10 +494,10 @@ b = 0x5583a17df180
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 1.** Trong thân một hàm có `int dem = 0;`. Biến `dem` nằm ở đâu và sống đến khi nào?
 
-- Ở vùng tĩnh, và sống đến khi chương trình kết thúc
+- Ở vùng tĩnh, và sống đến hết chương trình
 - Ở heap, và sống đến khi ta gọi `delete` cho nó
 - Ở stack, và chết khi chạy tới `}` của khối chứa nó
-- Ở stack, và chết khi toàn bộ chương trình kết thúc
+- Ở stack, và chỉ chết khi toàn bộ chương trình kết thúc
 
 <p class="giai-thich" markdown>Biến cục bộ thường thuộc stack, trong khung của lần gọi hàm, và chết khi chạy tới `}` đóng khối chứa nó. Vùng tĩnh là chỗ của global và `static`, chứ không phải của biến khai báo trần trong hàm. Heap chỉ dùng khi bạn gọi `new`, và `delete` chỉ trả những thứ đã xin bằng `new`. Nói biến cục bộ sống đến hết chương trình là nhầm nó với biến `static`.</p>
 </div>
@@ -556,7 +508,7 @@ b = 0x5583a17df180
 - Ở vùng tĩnh, có sẵn từ lúc chương trình bắt đầu
 - Ở stack, vì nó chỉ là một số `int` nhỏ, vừa bàn học
 - Ở heap, vì nó không thuộc về hàm nào, nên phải xin
-- Ở stack của `main`, và chết khi `main` kết thúc
+- Ở stack của `main`, và chết khi hàm `main` kết thúc
 
 <p class="giai-thich" markdown>Biến global thuộc vùng tĩnh, có sẵn từ lúc chương trình bắt đầu và sống tới khi chương trình kết thúc. Kích thước nhỏ không quyết định khu nào: khu được chọn theo cách khai báo, không theo cỡ. Heap chỉ có khi bạn gọi `new`, và "không thuộc hàm nào" không có nghĩa là đã gọi `new`. Nó cũng không nằm trong khung của `main`, vì khung `main` chỉ chứa biến cục bộ của `main`.</p>
 </div>
@@ -567,7 +519,7 @@ b = 0x5583a17df180
 - Cả `p` lẫn số `5` đều nằm ở heap, vì có `new`
 - Cả `p` lẫn số `5` đều nằm trên stack, vì là biến cục bộ
 - `p` nằm ở heap, còn số `5` nằm trên stack
-- `p` nằm trên stack, còn số `5` mà nó trỏ tới nằm ở heap
+- `p` nằm trên stack, còn số `5` mà `p` trỏ tới thì nằm ở heap
 
 <p class="giai-thich" markdown>`new int(5)` xin một chỗ ở heap để đựng `5`, còn `p` là biến con trỏ cục bộ, nằm trên stack và đựng địa chỉ của chỗ đó. Cả hai cùng ở heap, hoặc cùng ở stack, đều sai vì chúng là hai thứ khác nhau. Đảo ngược cũng sai: `new` không bao giờ đặt đối tượng lên stack. Và khi hàm kết thúc `p` chết, còn số `5` ở heap vẫn nằm đó cho đến khi `delete`.</p>
 </div>
@@ -612,7 +564,7 @@ void f() { static Dau d("S"); std::cout << "f\n"; }
 int main() { std::cout << "A\n"; f(); f(); }
 ```
 
-- `tao S A f f`, vì `static` được tạo từ đầu chương trình
+- `tao S A f f`, vì `static` có từ đầu chương trình
 - `A tao S f tao S f`, vì mỗi lần gọi `f` lại tạo `d`
 - `A f f tao S`, vì `static` chỉ được tạo khi chương trình kết thúc
 - `A tao S f f`, vì `d` chỉ ra đời ở lần gọi `f` đầu tiên
@@ -624,7 +576,7 @@ int main() { std::cout << "A\n"; f(); f(); }
 **Câu 7.** Vì sao trong Go ta ít khi nghĩ tới chuyện "biến nằm ở stack hay heap" như trong C++?
 
 - Vì Go không dùng stack, nên mọi biến của chương trình đều ở heap
-- Vì trình biên dịch Go tự chọn chỗ đặt biến nhờ escape analysis
+- Vì Go tự chọn chỗ đặt biến nhờ escape analysis
 - Vì Go cấm hàm trả về địa chỉ của biến cục bộ của chính nó
 - Vì Go gộp stack và heap thành một vùng nhớ duy nhất cho mọi biến
 
