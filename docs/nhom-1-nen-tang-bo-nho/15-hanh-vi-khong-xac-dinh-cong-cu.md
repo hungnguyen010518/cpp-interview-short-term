@@ -49,9 +49,6 @@ Kết quả còn có thể đổi theo trình biên dịch, theo phiên bản c�
 
 Hệ quả thực tế: chương trình qua mọi lần thử, chạy ổn nhiều tháng, rồi hỏng sau khi đổi máy chủ hoặc nâng cấp trình biên dịch. Lỗi không mới xuất hiện: nó nằm đó từ đầu, chỉ là chưa ai thấy.
 
-!!! warning "Hay nhầm"
-    "UB nghĩa là chương trình sẽ crash" là sai. Crash (sập) là khả năng **dễ chịu nhất**, vì ít nhất bạn biết có chuyện. Khả năng tệ nhất là chương trình chạy tiếp, in ra kết quả sai mà không báo gì.
-
 ### 3. Danh mục UB hay gặp
 
 Đây là các món bạn sẽ gặp nhiều nhất. Bài này chỉ **nêu tên** từng món; ba món đầu bạn đã gặp ở các bài trước.
@@ -69,7 +66,7 @@ Hệ quả thực tế: chương trình qua mọi lần thử, chạy ổn nhi�
 Còn một điều hay bị xếp nhầm vào đây. **Rò rỉ bộ nhớ không phải UB**: chương trình rò rỉ vẫn đúng luật, kết quả vẫn được định nghĩa, chỉ là phí bộ nhớ ([Bài 07](07-new-delete.md)).
 
 !!! info "Bạn biết Go?"
-    Go **không có khái niệm UB** cho các lỗi trên: chúng có kết quả xác định. Ngoài biên mảng hay slice thì Go kiểm tra lúc chạy và `panic`; giải tham chiếu `nil` cũng `panic`; số nguyên có dấu tràn thì **quấn vòng** (spec Go định nghĩa như vậy). Với race, Go có công cụ `go run -race` ứng với ThreadSanitizer của C++ (mục 7), và `go vet` hơi giống cảnh báo của trình biên dịch (mục 4). "UB" nghĩa như trong bài này là khái niệm của C/C++.
+    Go **không có khái niệm UB** cho các lỗi trên: chúng có kết quả xác định (riêng data race trong Go vẫn là lỗi nguy hiểm, nên có `-race`). Ngoài biên mảng hay slice thì Go kiểm tra lúc chạy và `panic`; giải tham chiếu `nil` cũng `panic`; số nguyên có dấu tràn thì **quấn vòng** (spec Go định nghĩa như vậy). Với race, Go có công cụ `go run -race` ứng với ThreadSanitizer của C++ (mục 7), và `go vet` hơi giống cảnh báo của trình biên dịch (mục 4). "UB" nghĩa như trong bài này là khái niệm của C/C++.
 
 ### 4. Bắt sớm nhất: cảnh báo trình biên dịch
 
@@ -123,11 +120,11 @@ g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer -o chuongtrinh chuo
 
 Quanh mỗi mảng cục bộ và mỗi khối `new`, nó chừa **vùng đệm đỏ (red zone)**: vài byte đánh dấu "cấm". Chỗ vừa `delete` cũng bị đánh dấu "cấm" và được giữ lại một lúc thay vì cho dùng lại ngay. Chạm vào byte bị đánh dấu thì ASan báo lỗi.
 
-Hai hệ quả bạn sẽ thấy. Chương trình **chậm hơn** (thường chậm cỡ vài lần) và ngốn thêm bộ nhớ. ASan **dừng chương trình ở lỗi đầu tiên** (mình thấy mã thoát 1), nên sửa từng lỗi rồi chạy lại.
+Hai hệ quả bạn sẽ thấy. Chương trình **chậm hơn** (thường chậm cỡ vài lần) và ngốn thêm bộ nhớ. ASan **mặc định dừng chương trình ở lỗi đầu tiên** (mình thấy mã thoát 1), nên sửa từng lỗi rồi chạy lại.
 
 #### Cách đọc một báo cáo
 
-Mọi báo cáo ASan có cùng các phần. Bảng sau là bản đồ chung; ở mỗi ca dưới, mình chỉ nói phần mới.
+Mọi báo cáo ASan có cùng các phần. Bảng sau là bản đồ chung; ở mỗi ca dưới, mình chỉ nói phần mới (ca double-free không có dòng `READ`/`WRITE`, vì lỗi nằm ở lần `delete`, không phải một lần đọc hay ghi).
 
 | Phần trong báo cáo | Cho bạn biết |
 |---|---|
@@ -311,13 +308,13 @@ Và khung `#0` lần này là `operator delete`, nằm trong thư viện, vì ch
 
 Vậy khung `#0` không phải lúc nào cũng là dòng code của bạn. Cách chắc ăn: tìm dòng **đầu tiên** có tên tệp `.cpp` của bạn trong chuỗi `#0`, `#1`, `#2`...
 
-Một lưu ý khi tự thử: nếu bạn chuyển hướng đầu ra sang tệp hay ống (`|`), các dòng `std::cout` chạy **trước** lỗi có thể không hiện, vì ASan dừng chương trình đột ngột. Mình đã gặp đúng chuyện này, nên đừng kết luận "chưa chạy tới đó" chỉ vì không thấy chữ.
+Một lưu ý khi tự thử: khi in ra màn hình thường bạn thấy các dòng `std::cout` chạy **trước** lỗi. Nếu chuyển hướng đầu ra sang tệp hay ống (`|`), chữ còn nằm trong bộ đệm của chương trình, chưa kịp ghi thì chương trình đã bị dừng đột ngột. Mình đã gặp đúng chuyện này, nên hãy chạy không chuyển hướng, và đừng kết luận "chưa chạy tới đó" chỉ vì không thấy chữ.
 
 ### 6. UndefinedBehaviorSanitizer: bắt UB không liên quan đến bộ nhớ
 
 ASan lo việc **địa chỉ**. UB còn nhiều loại khác, như tràn số hay dịch bit quá cỡ, mà ASan không để ý. **UndefinedBehaviorSanitizer (UBSan)** lo các loại đó: bật bằng `-fsanitize=undefined`.
 
-Hai món mới trong chương trình dưới: `INT_MAX` (trong `<climits>`) là số `int` lớn nhất, 2147483647. Còn `1 << s` là **dịch bit** trái: lấy 1 và dịch `s` vị trí, nghĩa là nhân với 2 mũ `s`; một `int` có 32 bit nên dịch 40 vị trí là quá cỡ.
+Hai món mới trong chương trình dưới: `INT_MAX` (trong `<climits>`) là số `int` lớn nhất, 2147483647. Còn `1 << s` là **dịch bit** trái: lấy 1 và dịch `s` vị trí, nghĩa là nhân với 2 mũ `s`; một `int` có 32 bit, và dịch một `int` đi 32 vị trí trở lên là UB, nên dịch 40 vị trí là quá cỡ.
 
 ```cpp
 // bo-qua-kiem-tra
@@ -382,7 +379,7 @@ bai.cpp:6:24: runtime error: load of null pointer of type 'int'
 
 ### 7. Ghép công cụ, LeakSanitizer, Valgrind, ThreadSanitizer
 
-**Ghép ASan với UBSan:** `-fsanitize=address,undefined`. Đây là lựa chọn mình dùng mặc định khi kiểm tra một chương trình. Khi hai công cụ cùng thấy một lỗi, bạn có thể nhận **hai** báo cáo. Với chương trình ca (a), mình thấy UBSan lên tiếng trước (rút gọn), rồi ASan in báo cáo `stack-buffer-overflow` như ở mục 5:
+**Ghép ASan với UBSan:** `-fsanitize=address,undefined`. Khi hai công cụ cùng thấy một lỗi, bạn có thể nhận **hai** báo cáo. Với chương trình ca (a), mình thấy UBSan lên tiếng trước (rút gọn), rồi ASan in báo cáo `stack-buffer-overflow` như ở mục 5:
 
 ```text
 bai.cpp:7:8: runtime error: index 3 out of bounds for type 'int [3]'
@@ -419,7 +416,7 @@ Công cụ bắt lỗi là lớp cuối. Lớp đầu là viết sao cho nhiều
 
 ### Ví dụ: sửa các lỗi bằng container và smart pointer
 
-Chương trình dưới làm lại các việc của ca (a) và (c)–(d), nhưng bằng `std::vector`, `at` và `make_unique`.
+Chương trình dưới tránh được các ca (a) và (c)–(d), nhờ dùng `std::vector`, `at` và `make_unique`.
 
 Ba chỗ cần giải thích. `#include <stdexcept>` mang vào kiểu ngoại lệ `std::out_of_range`, kiểu mà `at` ném khi chỉ số ngoài biên. `catch (const std::out_of_range& e)` bắt ngoại lệ đó bằng tham chiếu `const` ([Bài 06](06-tham-chieu-const.md)) để khỏi chép. `e.what()` trả một chuỗi mô tả lỗi.
 
@@ -476,7 +473,7 @@ Chữ chính xác sau `bat duoc:` do thư viện chuẩn của g++ quyết đị
     Ở mức ý tưởng: biên dịch với cờ, g++ chèn một bước kiểm tra trước mỗi lần đọc hay ghi bộ nhớ. ASan giữ bảng ghi chú (shadow memory) đánh dấu byte nào được phép dùng, chừa các vùng đệm đỏ (red zone) quanh mảng cục bộ và khối ở heap, và đánh dấu chỗ vừa trả là cấm. Chạm vào byte bị đánh dấu thì báo lỗi kèm dòng code. Giá phải trả là chậm hơn và tốn thêm bộ nhớ, và nó chỉ thấy lỗi xảy ra trong lần chạy đó (truy cập nhảy qua hẳn vùng đệm tới một vùng hợp lệ khác thì có thể bị bỏ sót).
 
 ??? question "AddressSanitizer khác Valgrind thế nào?"
-    ASan cần biên dịch lại với cờ `-fsanitize=address` và thường nhanh hơn nhiều; Valgrind chạy nguyên bản chương trình đã biên dịch, không cần biên dịch lại, nhưng chậm hơn. Cả hai cùng bắt được nhiều lỗi bộ nhớ (ngoài biên ở heap, dùng sau khi trả, rò rỉ), và mỗi công cụ có thể thấy những ca mà công cụ kia bỏ sót, nên nhiều đội dùng cả hai.
+    ASan cần biên dịch lại với cờ `-fsanitize=address` và thường nhanh hơn nhiều; Valgrind chạy nguyên bản chương trình đã biên dịch, không cần biên dịch lại, nhưng thường chậm hơn nhiều lần. Cả hai cùng bắt được nhiều lỗi bộ nhớ (ngoài biên ở heap, dùng sau khi trả, rò rỉ), và mỗi công cụ có thể thấy những ca mà công cụ kia bỏ sót, nên nhiều đội dùng cả hai.
 
 ??? question "UBSan bắt những gì?"
     Bật bằng `-fsanitize=undefined`, nó bắt các UB **không phải lỗi địa chỉ**: tràn số nguyên có dấu, dịch bit quá cỡ, giải tham chiếu `nullptr`, chỉ số ngoài biên mảng có kích thước biết trước... Mỗi lỗi là một dòng `runtime error: ...` kèm tệp, dòng, cột; mặc định nó in rồi chạy tiếp. Thường ghép với ASan bằng `-fsanitize=address,undefined`.
@@ -490,7 +487,7 @@ Chữ chính xác sau `bat duoc:` do thư viện chuẩn của g++ quyết đị
     Không có cảnh báo, hay sanitizer không báo gì, chỉ nghĩa là công cụ không thấy gì **trong lần chạy này**. Đoạn code chưa chạy tới, hay dữ liệu chưa thử, vẫn có thể có UB. LeakSanitizer đôi khi còn bỏ sót cả rò rỉ có thật.
 
 !!! warning "Lỗi 2: Tin rằng UB nào cũng làm chương trình sập"
-    Crash chỉ là một trong nhiều kết quả. UB hay nguy hiểm nhất khi nó **không** làm gì rõ ràng: in sai, hỏng dữ liệu ở chỗ khác, hoặc chạy đúng hôm nay.
+    Crash (sập) là khả năng dễ chịu nhất, vì ít nhất bạn biết có chuyện; nó chỉ là một trong nhiều kết quả. UB nguy hiểm nhất khi nó **không** làm gì rõ ràng: in sai, hỏng dữ liệu ở chỗ khác, hoặc chạy đúng hôm nay.
 
 !!! warning "Lỗi 3: Xếp rò rỉ bộ nhớ vào UB"
     Rò rỉ không phải UB: chương trình vẫn đúng luật. Nhưng nó vẫn là lỗi cần sửa, và LeakSanitizer (đi kèm ASan) giúp thấy nó. Ngược lại, dùng sau khi trả và giải phóng hai lần **là** UB.
@@ -512,10 +509,10 @@ previously allocated by thread T0 here:
     #1 ... in main bai.cpp:4
 ```
 
-- Dòng 6 ghi tràn ra khỏi khối nhỏ mà dòng 4 đã xin
-- Dòng 8 đọc chỗ mà dòng 6 đã trả sau khi dòng 4 xin
-- Dòng 6 trả hai lần một chỗ mà dòng 4 đã xin trước đó
-- Dòng 8 đọc một chỗ chưa từng được xin
+- Dòng 6 ghi tràn ra khỏi khối quá nhỏ mà dòng 4 đã xin
+- Dòng 8 đọc chỗ dòng 6 đã trả, chỗ dòng 4 từng xin
+- Dòng 6 trả hai lần một chỗ mà dòng 4 đã xin trước đó rồi
+- Dòng 8 đọc một chỗ chương trình chưa xin
 
 <p class="giai-thich" markdown>Tên lỗi `heap-use-after-free` cùng ba mốc nói đủ câu chuyện: chỗ nhớ được xin ở dòng 4, trả ở dòng 6, rồi bị đọc ở dòng 8 (nơi `#0`). Báo cáo không nói "ghi tràn", vì lần truy cập là `READ` và loại lỗi không phải `buffer-overflow`. Cũng không phải trả hai lần, vì loại đó có tên `double-free`, và mốc `allocated` chứng tỏ chỗ này có được xin. Và chỗ bị đọc có xin ở dòng 4, nên không phải "chưa từng xin".</p>
 </div>
@@ -529,10 +526,10 @@ int k = 1 << s;
 std::cout << "xong\n";
 ```
 
-- Không biên dịch được, vì dịch bit quá cỡ là lỗi cú pháp
+- Không biên dịch được, vì dịch bit quá cỡ là một lỗi cú pháp
 - In báo lỗi `shift exponent`, dừng và không in `xong`
 - Không báo gì, vì UBSan chỉ bắt lỗi tràn số
-- In báo lỗi `shift exponent`, rồi vẫn in `xong`
+- In báo lỗi `shift exponent`, rồi chạy tiếp và in `xong`
 
 <p class="giai-thich" markdown>Mình đã chạy đúng đoạn này: UBSan in `runtime error: shift exponent 40 is too large for 32-bit type 'int'` rồi chương trình chạy tiếp, in `xong` và thoát mã 0, vì mặc định UBSan báo mà không dừng. Chương trình vẫn biên dịch được: dịch quá cỡ là UB lúc chạy, không phải lỗi cú pháp. Dịch bit quá cỡ nằm trong danh mục mà UBSan bắt, nên nó không im lặng. Việc dừng ngay ở lỗi đầu tiên là cách ASan hành xử, chứ không phải UBSan.</p>
 </div>
@@ -544,7 +541,7 @@ std::cout << "xong\n";
 0x... is located 0 bytes to the right of 12-byte region
 ```
 
-- Chỗ bị đọc nằm ngay sau khối 12 byte, tức món thứ tư của nó
+- Chỗ của `p[3]`, món thứ tư không thuộc khối, ngay sau khối
 - Chỗ bị đọc nằm trong khối 12 byte, tức món `p[0]` ở đầu khối
 - Khối 12 byte đã bị trả trước đó, nên đây là con trỏ treo
 - Khối 12 byte nằm ở stack, nên `p[3]` rơi ra ngoài bàn học
@@ -555,8 +552,8 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 4.** Một chương trình có dòng `a[3]` với `a` là mảng 3 món. Nó chạy đúng trên máy bạn và qua mọi lần thử. Kết luận nào hợp lý?
 
-- Không có UB, vì UB luôn làm chương trình sập ngay
-- Không có UB, vì `-Wall` không báo cảnh báo nào
+- Không có UB, vì UB làm chương trình sập ngay khi chạy
+- Không có UB, vì `-Wall` không báo cảnh báo nào cả
 - Vẫn có UB, vì chuẩn không đòi hỏi kết quả nào cả
 - Có UB, nhưng chỉ khi đổi sang hệ điều hành khác
 
@@ -568,19 +565,19 @@ std::cout << "xong\n";
 
 - Rò rỉ bộ nhớ: chương trình vẫn đúng luật, không phải UB
 - UB, vì chuẩn cấm kết thúc khi còn khối chưa được trả
-- Lỗi biên dịch, vì g++ nhận ra thiếu `delete` và từ chối
-- Lỗi chạy bình thường, vì `new` ném ngoại lệ khi kết thúc
+- Lỗi biên dịch, vì g++ nhận ra thiếu `delete` nên từ chối hẳn
+- Con trỏ treo, vì `p` còn giữ địa chỉ sau khi kết thúc
 
 <p class="giai-thich" markdown>Quên `delete` là rò rỉ bộ nhớ: chương trình đúng luật, kết quả vẫn được định nghĩa, chỉ là phí bộ nhớ (và LeakSanitizer có thể liệt kê nó). Chuẩn không có điều cấm kết thúc khi còn khối chưa trả, nên đó không phải UB. G++ không biên dịch lỗi vì với trình biên dịch đây là code hợp lệ. Và `new` không ném ngoại lệ lúc kết thúc: nó chỉ ném khi hết chỗ lúc xin.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 6.** Nói về AddressSanitizer và Valgrind, câu nào đúng?
+**Câu 6.** Nói về AddressSanitizer và Valgrind (trường hợp thường gặp), câu nào đúng?
 
 - ASan chạy nguyên bản chương trình, Valgrind cần biên dịch lại
-- Cả hai cần biên dịch lại, nhưng ASan chỉ bắt rò rỉ
-- Valgrind thường nhanh hơn ASan, vì nó chỉ đọc file chạy
-- ASan cần biên dịch lại và thường nhanh hơn Valgrind nhiều
+- Cả hai cần biên dịch lại, nhưng ASan chỉ bắt lỗi rò rỉ
+- Valgrind nhanh hơn ASan, vì nó chỉ đọc file chạy
+- ASan cần biên dịch lại và nhanh hơn Valgrind nhiều
 
 <p class="giai-thich" markdown>ASan chèn các bước kiểm tra lúc biên dịch nên phải biên dịch lại với cờ, và nhờ đó thường chậm ít hơn nhiều so với Valgrind, thứ chạy nguyên bản chương trình trong một môi trường theo dõi. Hai ý đầu đảo ngược hoặc sai: ASan không chạy nguyên bản, và nó bắt cả ngoài biên lẫn dùng sau khi trả, không chỉ rò rỉ. Valgrind không biên dịch lại nhưng cũng không nhanh hơn.</p>
 </div>
@@ -588,10 +585,10 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 7.** Bạn chạy chương trình dưới `-fsanitize=address,undefined`: không có báo cáo nào, mã thoát 0. Kết luận nào đúng nhất?
 
-- Chương trình chắc chắn không có UB nào
-- Sanitizer hỏng, vì chương trình nào cũng có lỗi
+- Chương trình đã được chứng minh là không có UB nào
+- Sanitizer đã hỏng, vì nó phải báo ít nhất một lỗi
 - Lần này không thấy lỗi, nhưng chưa chứng minh là sạch
-- Chỉ cần thêm `-Wall` rồi chạy lại là chắc chắn sạch hẳn
+- Thêm `-Wall` rồi chạy lại là đủ để chứng minh chương trình sạch
 
 <p class="giai-thich" markdown>Sanitizer chỉ thấy lỗi **xảy ra trong lần chạy đó**, trên dữ liệu và đường đi của lần đó, nên im lặng chỉ nói "lần này không thấy gì". Không phải chương trình nào cũng có lỗi, nên không có lý do để nói sanitizer hỏng. Cảnh báo `-Wall` cũng chỉ là một lưới thô khác, thêm nó không biến sự im lặng thành bằng chứng.</p>
 </div>
@@ -599,7 +596,7 @@ std::cout << "xong\n";
 <div class="cau-hoi" data-dap-an="2" markdown>
 **Câu 8.** Với `std::vector<int> v = {1, 2, 3};`, hai lệnh `v.at(3)` và `v[3]` khác nhau thế nào?
 
-- Cả hai ném `std::out_of_range`, chỉ khác tên gọi
+- Cả hai ném `std::out_of_range`, chỉ khác tên gọi hàm
 - `v.at(3)` ném `std::out_of_range`, còn `v[3]` là UB
 - Cả hai là UB, vì vector chỉ có chỉ số 0 đến 2
 - `v.at(3)` là UB, còn `v[3]` mới ném `std::out_of_range`
@@ -613,6 +610,6 @@ std::cout << "xong\n";
 
 1. UB là khi chuẩn C++ không quy định kết quả: khác lỗi biên dịch (bị chặn từ đầu) và lỗi chạy bình thường (có kết quả định nghĩa rõ); kết quả có thể đúng, sai âm thầm hoặc sập, và đổi theo trình biên dịch, cờ tối ưu và máy, nên "chạy đúng ở máy tôi" không chứng minh gì.
 2. UB hay gặp: ngoài biên mảng, dùng sau khi trả, giải phóng hai lần, tràn số nguyên có dấu, giải tham chiếu `nullptr`, đọc biến chưa khởi tạo, data race; rò rỉ bộ nhớ **không** phải UB.
-3. `-Wall -Wextra` là lưới thô nhưng rẻ; AddressSanitizer (`-fsanitize=address -g -fno-omit-frame-pointer`) dừng ở lỗi đầu tiên, báo loại lỗi, dòng `#0`, nơi xin/trả và dòng `SUMMARY`; UBSan (`-fsanitize=undefined`) báo một dòng cho mỗi lỗi không phải địa chỉ như tràn số, dịch bit quá cỡ, `nullptr`.
-4. Ghép bằng `-fsanitize=address,undefined`; LeakSanitizer đi kèm ASan; Valgrind (`valgrind --leak-check=full ./chuongtrinh`) không cần biên dịch lại nhưng chậm hơn; ThreadSanitizer (`-fsanitize=thread`) dành cho data race và không ghép được với ASan.
+3. `-Wall -Wextra` là lưới thô nhưng rẻ; AddressSanitizer (`-fsanitize=address -g -fno-omit-frame-pointer`) mặc định dừng ở lỗi đầu tiên, báo loại lỗi, dòng `#0`, nơi xin/trả và dòng `SUMMARY`; UBSan (`-fsanitize=undefined`) báo một dòng cho mỗi lỗi không phải địa chỉ như tràn số, dịch bit quá cỡ, `nullptr`.
+4. Ghép bằng `-fsanitize=address,undefined`; LeakSanitizer đi kèm ASan; Valgrind (`valgrind --leak-check=full ./chuongtrinh`) không cần biên dịch lại nhưng thường chậm hơn nhiều lần; ThreadSanitizer (`-fsanitize=thread`) dành cho data race và không ghép được với ASan.
 5. Công cụ chỉ thấy lỗi xảy ra trong lần chạy đó nên im lặng không chứng minh là sạch; phòng ngừa tốt nhất là RAII, smart pointer, `std::vector`/`std::string`/`at()`, bật cảnh báo và chạy kiểm thử dưới sanitizer.

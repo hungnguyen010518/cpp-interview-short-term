@@ -64,7 +64,7 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | double free | Trả hai lần: `delete` cùng một chỗ hai lần; là UB | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
 | AddressSanitizer / ASan | Công cụ bắt lỗi bộ nhớ lúc chạy, bật bằng cờ biên dịch `-fsanitize=address`; báo ngoài biên (stack/heap), dùng sau khi trả, giải phóng hai lần, và rò rỉ (LeakSanitizer) | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (đọc báo cáo) |
 | LeakSanitizer | Phần của ASan báo vùng nhớ bị rò rỉ khi chương trình kết thúc | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) |
-| Valgrind | Công cụ kiểm tra bộ nhớ chạy nguyên bản chương trình, không cần biên dịch lại, nhưng chậm hơn ASan; lệnh `valgrind --leak-check=full ./chuongtrinh` | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) (nhắc), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| Valgrind | Công cụ kiểm tra bộ nhớ chạy nguyên bản chương trình, không cần biên dịch lại, nhưng thường chậm hơn ASan nhiều lần; lệnh `valgrind --leak-check=full ./chuongtrinh` | [Bài 07](nhom-1-nen-tang-bo-nho/07-new-delete.md) (nhắc), [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | RAII (Resource Acquisition Is Initialization) | Xin tài nguyên trong hàm tạo, trả trong hàm hủy, để tài nguyên tự được trả khi đối tượng chết | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | tài nguyên (resource) | Thứ mượn rồi phải trả: bộ nhớ heap, file, khóa, kết nối, ổ cắm mạng | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
 | throw / try / catch | `throw` ném một giá trị ra và cắt ngang hàm; `try { }` là vùng thử; `catch (T x) { }` bắt giá trị kiểu `T` được ném | [Bài 08](nhom-1-nen-tang-bo-nho/08-raii.md) |
