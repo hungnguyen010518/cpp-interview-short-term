@@ -15,7 +15,7 @@
 Mọi task đều phải tuân thủ các điều sau (lấy nguyên từ bản thiết kế `2026-10-01-cpp-interview-short-term-design.md`):
 
 - Nội dung bài **bằng tiếng Việt có dấu**; tên thuật ngữ tiếng Anh giữ nguyên, lần đầu xuất hiện kèm nghĩa tiếng Việt và có dòng trong `docs/glossary.md`.
-- **Văn phong cho học sinh lớp 5 cũng hiểu**, giống `database-tu-a-z`: mở bằng câu chuyện/phép ẩn dụ đời thường rồi mới tới thuật ngữ; câu ngắn, một ý một đoạn. Riêng mục "Câu hỏi phỏng vấn" dùng ngôn ngữ chính xác như khi trả lời nhà tuyển dụng.
+- **Văn phong cho học sinh lớp 5 cũng hiểu**, giống `database-tu-a-z`: mở bằng câu chuyện/phép ẩn dụ đời thường rồi mới tới thuật ngữ; câu ngắn, một ý một đoạn. Riêng mục "Câu hỏi phỏng vấn" dùng ngôn ngữ chính xác như khi trả lời phỏng vấn.
 - Repo **công khai**: không có code, tên khách hàng, tên dự án hay chi tiết của công ty.
 - Khóa học **MkDocs Material 9.5.39** (`requirements.txt` ghim đúng phiên bản này); URL site `https://hungnguyen010518.github.io/cpp-interview-short-term/`.
 - Mọi khối ```` ```cpp ```` biên dịch và chạy với `g++ -std=c++17 -pthread`, thoát mã 0, trong 5 giây. Khối cố ý minh họa hành vi không xác định (UB) bắt đầu bằng dòng đầu tiên `// bo-qua-kiem-tra` và bị bỏ qua.
