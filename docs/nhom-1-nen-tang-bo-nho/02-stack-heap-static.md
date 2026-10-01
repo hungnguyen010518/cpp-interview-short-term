@@ -122,6 +122,7 @@ Dau a("abc");   // tạo biến a kiểu Dau, đưa "abc" cho hàm tạo
 Dấu `;` sau `}` đóng struct là bắt buộc: nó kết thúc câu lệnh khai báo kiểu `Dau` (quên là lỗi biên dịch). `Dau a("abc");` đọc là "tạo biến `a` kiểu `Dau`, và đưa `"abc"` cho hàm tạo", nên hàm tạo chạy ngay lúc đó. Khi `a` chết, hàm hủy chạy. Đối tượng xin ở heap cũng vậy: `new Dau("abc")` chạy hàm tạo, và `delete` chạy hàm hủy. Ta sẽ cho hai hàm này **in một dòng** để thấy khi nào chuyện xảy ra.
 
 C++ còn có từ khóa `class`. Với bài này `class` và `struct` dùng như nhau, nên khi đọc chữ "class" cứ hiểu là struct (khác nhau nhỏ sẽ nói ở bài sau). Vì vậy câu hỏi "đối tượng của một class khai báo global nằm ở đâu?" cũng chính là câu hỏi về struct.
+
 ### 5. Bốn kiểu thời gian sống
 
 C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là **storage duration** (thời gian sống của vùng lưu trữ). Có bốn kiểu. (Trong bảng có chữ **luồng (thread)**: một dòng chạy code độc lập, một chương trình có thể có nhiều luồng chạy cùng lúc, gần giống goroutine của Go.)
@@ -334,7 +335,7 @@ Ba dòng cuối cho thấy thêm một quy tắc: các đối tượng chết th
 
     Về stack và heap: Go thường **không bắt bạn chọn**. Trình biên dịch Go có **phân tích thoát (escape analysis)**: nó xem biến có "thoát" khỏi hàm không, và nếu có thì tự đặt biến lên heap. Vì vậy `func taoSo() *int { x := 5; return &x }` hoàn toàn hợp lệ trong Go, và `go build -gcflags=-m` in dòng `moved to heap: x`.
 
-    Biến cấp package của Go thường nằm ở vùng tĩnh như global của C++, nhưng Go quy định rõ thứ tự khởi tạo chúng (theo sự phụ thuộc giữa các biến). C++ thì **không làm hộ** bạn việc chọn stack hay heap. Vì vậy C++ có RAII và **smart pointer** (con trỏ thông minh, một vật bọc tự trả chỗ ở heap; [Bài 09](09-unique-ptr.md)).
+    Biến cấp package của Go thường nằm ở vùng tĩnh như global của C++, nhưng Go quy định rõ thứ tự khởi tạo chúng (theo sự phụ thuộc giữa các biến). C++ thì **không làm hộ** bạn việc chọn stack hay heap. Đó là lý do C++ cần RAII và **smart pointer** (con trỏ thông minh, một vật bọc tự trả chỗ ở heap; [Bài 09](09-unique-ptr.md)).
 
 ### Ví dụ 4: In địa chỉ của bốn loại
 
@@ -383,7 +384,7 @@ heap:    0x5707aa85ceb0
 bien con tro heap (cuc bo): 0x7ffeeb931b20
 ```
 
-Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. Trong lần chạy này `heap` có vẻ gần cả hai, nhưng đó chỉ là tình cờ của lần chạy: kiểu mẫu này không được đảm bảo. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
+Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như [Bài 01](01-bo-nho-byte-dia-chi.md) đã nói). Chỉ có kiểu mẫu đáng nhìn: **thường** thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng `0x7ffe…`) so với địa chỉ ở vùng tĩnh và ở heap, và `cucBo` nằm sát `heap` (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. `global` và `static` cũng nằm sát nhau. `heap` và vùng tĩnh có cùng tiền tố `0x…` trong lần chạy này, nhưng mẫu này không được bảo đảm. Mình **không** khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.
 
 ### Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
 

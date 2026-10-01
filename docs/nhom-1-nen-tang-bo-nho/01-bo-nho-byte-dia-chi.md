@@ -297,7 +297,7 @@ nam:  0x7ffe381a7934
 chu:  0x7ffe381a792f
 ```
 
-Số trên máy bạn sẽ khác, và chạy lần hai cũng có thể khác lần một. Chỉ có **kiểu mẫu** là đáng để ý: `nam` hơn `tuoi` đúng 4 (vì `tuoi` chiếm 4 byte, `nam` nằm ngay sau), còn `chu` kém `tuoi` đúng 1 (ngăn của `chu` nằm ngay trước `tuoi`). Để thấy `…370` kém `…36f` đúng 1, hãy đếm: …36d, …36e, …36f rồi mới tới …370, vì sau chữ `f` (15) hệ 16 qua hàng tiếp theo. Đây là điều **thường** thấy chứ trình biên dịch không hứa. Nó được quyền xếp các biến theo thứ tự khác.
+Số trên máy bạn sẽ khác, và chạy lần hai cũng có thể khác lần một. Chỉ có **kiểu mẫu** là đáng để ý: `nam` hơn `tuoi` đúng 4 (vì `tuoi` chiếm 4 byte, `nam` nằm ngay sau), còn `chu` kém `tuoi` đúng 1 (ngăn của `chu` nằm ngay trước `tuoi`). Kiểu mẫu này (các biến sát nhau, cách đúng 4 và đúng 1) là điều **thường** thấy chứ trình biên dịch không hứa: nó được quyền xếp các biến theo thứ tự khác. Để thấy `…370` kém `…36f` đúng 1, hãy đếm: …36d, …36e, …36f rồi mới tới …370, vì sau chữ `f` (15) hệ 16 qua hàng tiếp theo.
 
 **Vì sao `chu` phải ép sang `void*`?** Ở dòng (2), `&chu` có kiểu "địa chỉ của một `char`", viết là `char*`.
 
@@ -469,7 +469,7 @@ std::cout << sizeof(a) + sizeof(c) << "\n";
 - Lỗi biên dịch, vì không cộng được hai kết quả của `sizeof`
 - 9, vì 8 byte cộng 1 byte
 
-<p class="giai-thich" markdown>`sizeof(a)` là 8 và `sizeof(c)` là 1, cả hai đều là số nguyên nên cộng được, ra 9 (mình đã chạy thử và nhận 9). Đáp án 2 nhầm giữa số biến và số byte. Đáp án 8 quên rằng `char c` cũng chiếm một byte.</p>
+<p class="giai-thich" markdown>`sizeof(a)` là 8 và `sizeof(c)` là 1, cả hai đều là số nguyên nên cộng được, ra 9 (mình đã chạy thử và nhận 9). Kết quả 2 là nhầm giữa số biến và số byte. Kết quả 8 là quên rằng `char c` cũng chiếm một byte.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>

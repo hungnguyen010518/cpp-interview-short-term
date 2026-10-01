@@ -175,7 +175,7 @@ huy 7
 --- xong
 ```
 
-`tao 7` xuất hiện ngay lúc `new`, và `huy 7` ngay lúc `delete`: cặp `new`/`delete` chính là cặp "tạo"/"hủy" của đối tượng ở heap. Nếu không có `delete`, dòng `huy 7` sẽ **không bao giờ in** (mục 4.1 chạy thật điều này).
+`tao 7` xuất hiện ngay lúc `new`, và `huy 7` ngay lúc `delete`: cặp `new`/`delete` chính là cặp "tạo"/"hủy" của đối tượng ở heap. Nếu không có `delete`, dòng `huy 7` sẽ **không bao giờ in** (Ví dụ 2 chạy thật điều này).
 
 !!! info "Còn `malloc` và `free` thì sao?"
     `malloc` và `free` là cặp xin/trả của ngôn ngữ C (C++ vẫn dùng được, nằm trong `<cstdlib>`). Khác biệt then chốt: chúng chỉ xin và trả **bytes thô**, **không gọi hàm tạo hay hàm hủy**, nên với `Cay` bạn sẽ không thấy `tao` hay `huy`. Trong C++ hiện đại, bạn gần như không cần chúng: dùng `new`/`delete` khi buộc phải tự quản lý, và tốt hơn nữa là dùng các công cụ tự trả ở [Bài 08](08-raii.md) đến [Bài 10](10-shared-ptr-weak-ptr.md). Hai cặp này **không được lẫn**: xin bằng `malloc` thì trả bằng `free`; xin bằng `new` thì trả bằng `delete`.
@@ -229,7 +229,7 @@ Cay* v = new Cay[2];     // gọi hàm tạo hai lần (một lần cho mỗi ph
 delete[] v;              // gọi hàm hủy hai lần, rồi trả cả vùng
 ```
 
-Với `new[]`, thực tế thường xin thêm chút chỗ để nhớ số phần tử. `delete[]` biết có bao nhiêu phần tử là việc của thư viện, ta không cần biết cách làm. Luật đi cặp:
+`delete[]` biết có bao nhiêu phần tử là việc của thư viện, ta không cần biết cách làm. Luật đi cặp:
 
 | Xin bằng | Trả bằng |
 |---|---|
@@ -379,7 +379,7 @@ Mình đã chạy lệnh này với chương trình rò rỉ vừa rồi (Ví d�
 15:     std::cout << "--- bat dau\n";
 16:     Cay* p = new Cay(7);
 17:     std::cout << "cao = " << p->cao << "\n";
-18:     // quen delete p;
+18:     // (2) quen delete p;
 ```
 
 Báo cáo thật (đã **rút gọn**: bỏ số tiến trình, địa chỉ và đường dẫn trên máy mình, bỏ bớt dòng):

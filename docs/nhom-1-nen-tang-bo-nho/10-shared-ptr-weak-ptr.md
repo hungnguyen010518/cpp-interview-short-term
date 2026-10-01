@@ -413,7 +413,7 @@ int main() {
 
 | Bước | Dòng | Chuyện gì xảy ra | Đếm |
 |---|---|---|---|
-| 1 | `x = kho.lay()`, (2) | `nho` rỗng nên `lock()` trả rỗng; vào nhánh `else`: in `chua co, tao moi` | 0 |
+| 1 | `x = kho.lay()`, (2) | `nho` (khai báo ở (1)) rỗng nên `lock()` trả rỗng; vào nhánh `else`: in `chua co, tao moi` | 0 |
 | 2 | (3), (4) | Tạo cây 7 (in `tao 7`) vào `s`; `nho` nhìn nó (không cộng). `return s` trao cây cho `x` | 1 |
 | 3 | `y = kho.lay()`, (2) | `lock()` thấy cây còn sống, trả thẻ: in `dung lai cay cu`. `y` là người giữ thứ hai; in `dem = 2` | 2 |
 | 4 | `x.reset()`, `y.reset()` | `x` buông (đếm 1), rồi `y` buông: đếm về 0, in `huy 7`. Rồi in `da buong het` | 0 |
@@ -511,7 +511,7 @@ std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 - `tao 1, huy 1, 00`: cây hủy mà `weak_ptr` vẫn báo còn cây
 - `tao 1, huy 1, 11`: cây hủy ngay lúc `reset`, cả hai đúng
 
-<p class="giai-thich" markdown>`a` là `shared_ptr` duy nhất, nên `a.reset()` đưa đếm về 0 và in `huy 1` ngay, trước dòng cuối; `w` không giữ cây sống nên không cản được. Sau đó cả `expired()` và `lock() == nullptr` đều đúng nên in `11`; mình đã chạy ra `tao 1, huy 1, 11`. Dãy để `huy 1` ở cuối (hay `00`) tin rằng `weak_ptr` giữ cây sống, mà nó không giữ. Kết quả `01` là mâu thuẫn: cây đã hủy thì hai phép kiểm tra phải cùng đúng.</p>
+<p class="giai-thich" markdown>`a` là `shared_ptr` duy nhất, nên `a.reset()` đưa đếm về 0 và in `huy 1` ngay, trước dòng cuối; `w` không giữ cây sống nên không cản được. Sau đó cả `expired()` và `lock() == nullptr` đều đúng nên in `11`; mình đã chạy ra `tao 1, huy 1, 11`. Dãy `tao 1, 00, huy 1` tin rằng `weak_ptr` giữ cây sống, mà nó không giữ. Dãy `tao 1, huy 1, 00` đúng về thứ tự `huy 1`, nhưng sai ở số cuối: cây đã hủy thì `expired()` phải là đúng (`1`), nên không thể in `0`. Kết quả `01` cũng mâu thuẫn: cây đã hủy thì hai phép kiểm tra phải cùng đúng.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -527,10 +527,10 @@ std::cout << w.expired() << (w.lock() == nullptr) << "\n";
 std::cout << "xong\n";
 ```
 
-- `tao 1, tao 2, xong` (không có huy)
-- `tao 1, tao 2, huy 2, huy 1, xong`
+- `tao 1, tao 2, xong`: cả hai cây đều không bị hủy
+- `tao 1, tao 2, huy 2, huy 1, xong`: cả hai hủy ngay
 - `tao 1, tao 2, huy 2, xong`: chỉ `b` hủy
-- `tao 1, tao 2, xong, huy 2, huy 1`
+- `tao 1, tao 2, xong, huy 2, huy 1`: hủy lúc thoát
 
 <p class="giai-thich" markdown>Hai cây giữ nhau nên khi `a` và `b` chết ở `}`, mỗi cây vẫn còn một thẻ do cây kia giữ: bộ đếm dừng ở 1, không về 0, nên không có `huy` nào; mình đã chạy ra đúng dãy này. Hai dãy có `huy` ngay sau khối (`huy 2, huy 1`, hay chỉ `huy 2`) tin rằng biến chết là đủ để cây bị hủy, mà ở đây còn thẻ trong vòng. Dãy có `huy` sau `xong` tin rằng chương trình dọn lúc thoát, nhưng `shared_ptr` không có bộ dọn cuối chương trình.</p>
 </div>
