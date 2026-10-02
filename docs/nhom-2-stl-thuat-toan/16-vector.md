@@ -2,31 +2,31 @@
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Biết STL là gì, đọc được `std::vector<int>` (phần trong `< >` là gì), và dùng `push_back`, `size`, `[]`, `pop_back`, duyệt bằng `for`.
-    - Phân biệt **size** (số phần tử đang có) với **capacity** (số chỗ đã xin), và hiểu vì sao `push_back` khi đầy làm vector chuyển nhà, khiến tham chiếu và con trỏ cũ có thể hỏng.
+    - Phân biệt **size** (số phần tử đang có) với **capacity** (số chỗ đã xin), và hiểu vì sao `push_back` khi đầy làm vector tái cấp phát (xin mảng mới rồi dọn sang), khiến tham chiếu và con trỏ cũ có thể hỏng.
     - Chọn đúng `reserve`, `[]` hay `at`, `const&` hay truyền theo giá trị, `push_back` hay `emplace_back`.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack, heap), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`&`, `const&`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, `try`/`catch`) và [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (`for` duyệt dãy).
+**Bạn cần biết trước:** [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) (`#include`, `std::`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack, heap), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`&`, `const&`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, `try`/`catch`) và [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (sao chép sâu), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (move, `noexcept`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (`for` duyệt dãy) và [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (UB, ASan).
 
 ## 🧠 Câu chuyện mở đầu
 
-Bạn có một **kệ sách** đặt trong nhà. Số sách bạn đang có là **size**; số chỗ trống trên kệ cả đầy lẫn vơi là **capacity**. Mua thêm sách thì cứ xếp vào chỗ trống ở cuối kệ, rất nhanh.
+Bạn có một **kệ sách** đặt ở kho đồ của trường (heap). Tổng số ô trên kệ, có sách hay chưa, là **capacity**; số sách đang xếp trên đó là **size**. Mua thêm sách thì xếp vào ô chưa có sách ở cuối kệ, rất nhanh.
 
-Khi kệ đầy mà vẫn mua sách, bạn thuê một cái kệ **to gấp đôi** ở kho đồ của trường (heap), chuyển toàn bộ sách sang, rồi trả kệ cũ. Lúc này ai còn giữ tờ giấy ghi "sách nằm ở ô số 5 của kệ cũ" thì đi tới một chỗ đã bị dỡ.
+Trên bàn học của bạn (stack) chỉ có một **tờ giấy nhỏ** ghi: kệ đang ở đâu, đang có bao nhiêu sách, kệ có bao nhiêu ô. Kệ đầy mà vẫn mua sách thì bạn thuê một kệ **to gấp đôi** ở kho, dọn sách sang, trả kệ cũ, rồi **sửa tờ giấy** cho trỏ kệ mới. Ai còn giữ một tờ giấy khác ghi "sách nằm ở ô số 5 của kệ cũ" thì sẽ đi tới chỗ đã bị dỡ.
 
 **`std::vector`** chính là cái kệ đó: một dãy phần tử nằm **liền nhau**, tự xin kệ mới khi đầy và tự trả kệ khi bạn xong (RAII, [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)).
 
 !!! info "Chỗ nào ví dụ kệ sách không còn đúng?"
-    Vector không dọn "sách" bằng tay: nó chép (hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)) từng phần tử sang kệ mới, và chuyện đó tốn thời gian tỉ lệ với số phần tử. Con số "gấp đôi" cũng chỉ là cách làm của một bản thư viện, không phải luật (mục 4).
+    Tờ giấy ghi kệ chính là đối tượng `std::vector` (nhỏ, ở stack), còn kệ là mảng ở heap (mục 3). Vector không dọn "sách" bằng tay: nó chép (hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)) từng phần tử sang kệ mới, và chuyện đó tốn thời gian tỉ lệ với số phần tử. Con số "gấp đôi" cũng chỉ là cách làm của một bản thư viện, không phải luật (mục 4).
 
 ## 📖 Giải thích
 
 ### 1. STL là gì, và `std::vector<int>` đọc thế nào
 
-**STL** (Standard Template Library, "thư viện khuôn mẫu chuẩn") là bộ công cụ có sẵn đi kèm C++: các **kiểu chứa dữ liệu** (vector, map, set...), các hàm làm việc với chúng (sắp xếp, tìm kiếm...). Giống phần `slices`, `maps`, `sort` trong thư viện chuẩn của Go, nhưng viết bằng khuôn mẫu nên dùng được với mọi kiểu. Nhóm bài này dạy dần từng món; bài này là món đầu tiên và dùng nhiều nhất.
+**STL** (Standard Template Library, "thư viện khuôn mẫu chuẩn") là bộ công cụ có sẵn đi kèm C++: các **kiểu chứa dữ liệu** (container: vector, map, set...), các hàm làm việc với chúng (sắp xếp, tìm kiếm...). Giống phần `slices`, `maps`, `sort` trong thư viện chuẩn của Go, nhưng viết bằng khuôn mẫu (template, giải thích ngay dưới) nên dùng được với nhiều kiểu. Nhóm bài này dạy dần từng món; bài này là món đầu tiên và dùng nhiều nhất.
 
 Muốn dùng vector, viết `#include <vector>` ở đầu file (nhắc lại [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md): `#include` bảo trình biên dịch nạp phần khai báo của thư viện). Mọi thứ của thư viện chuẩn nằm trong "họ" `std`, nên tên đầy đủ là `std::vector`.
 
-Cái nằm trong `< >` gọi là **tham số khuôn mẫu (template argument)**: nó cho biết vector chứa **loại phần tử nào**. Bạn đã gặp cú pháp này ở `std::unique_ptr<Cay>` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)).
+**Khuôn mẫu (template)** là generics của C++: một đoạn code viết một lần với "kiểu để trống", giống `[]T` hay `func F[T any]` của Go. Khi bạn điền kiểu cụ thể, trình biên dịch sinh ra một kiểu riêng cho kiểu đó. Cái nằm trong `< >` gọi là **tham số khuôn mẫu (template argument)**: nó cho biết vector chứa **loại phần tử nào**. Bạn đã gặp cú pháp này ở `std::unique_ptr<Cay>` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)).
 
 ```text
 std::vector<int>          // dãy các int            (Go: []int)
@@ -70,7 +70,7 @@ int main() {
 }
 ```
 
-Giải nghĩa các thao tác mới: `v.size()` là số phần tử đang có; `v.empty()` cho 1 nếu rỗng; `v[i]` là phần tử thứ `i` (đếm từ 0, như mảng và slice); `v.push_back(x)` thêm `x` vào **cuối**; `v.pop_back()` bỏ phần tử cuối; `v.back()` là phần tử cuối. Dòng (7) là `for` duyệt dãy ([Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md)): `int x` là bản chép của từng phần tử.
+Giải nghĩa các thao tác mới: `v.size()` là số phần tử đang có; `v.empty()` trả `true`/`false` (`std::cout` in thành 1/0); `v[i]` là phần tử thứ `i` (đếm từ 0, như mảng và slice); `v.push_back(x)` thêm `x` vào **cuối**; `v.pop_back()` bỏ phần tử cuối; `v.back()` là phần tử cuối. Dòng (7) là `for` duyệt dãy ([Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md)): `int x` là bản chép của từng phần tử.
 
 **Chạy từng dòng**
 
@@ -97,12 +97,11 @@ a sau push_back: 10 20 30 (size 3, cuoi 30)
 sau pop_back: size 2, cuoi 20
 ```
 
-!!! warning "Hay nhầm: `(5)` và `{5}` khác nhau"
-    `std::vector<int> d(5);` là **năm** phần tử 0. `std::vector<int> e{5};` là **một** phần tử bằng 5 (dòng (5) ở trên). Cùng con số 5 nhưng ngoặc tròn nghĩa là "cỡ", ngoặc nhọn nghĩa là "danh sách giá trị". Đây là lỗi hay gặp khi mới học.
+Ngoặc tròn `(5)` nghĩa là "cỡ", ngoặc nhọn `{5}` nghĩa là "danh sách giá trị": lỗi hay gặp khi mới học (nhắc lại ở phần ⚠️).
 
 ### 3. Vector bên trong: size, capacity và mảng ở heap
 
-Một đối tượng `std::vector` thực chất chỉ giữ **ba thứ**: con trỏ tới mảng các phần tử, **size**, và **capacity**. Bản thân đối tượng nhỏ và (nếu là biến cục bộ) nằm trên stack; còn mảng các phần tử nằm ở heap ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)).
+Một đối tượng `std::vector` về ý niệm chỉ giữ **ba thứ** (thư viện thật thường lưu bằng ba con trỏ; chuẩn không quy định cách bố trí): con trỏ tới mảng các phần tử, **size**, và **capacity**. Bản thân đối tượng nhỏ và (nếu là biến cục bộ) nằm trên stack; còn mảng các phần tử nằm ở heap ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)).
 
 ```text
   Stack                      Heap (địa chỉ minh họa — máy bạn sẽ in số khác)
@@ -124,7 +123,7 @@ Hai ô cuối là chỗ **đã xin nhưng chưa có phần tử**. Chạm vào c
 
 ### 4. Khi đầy: xin kệ mới, và tham chiếu cũ có thể hỏng
 
-`push_back` khi size < capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải **tái cấp phát (reallocation)**: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)), trả mảng cũ. Nhờ vậy `push_back` vẫn nhanh **trung bình**: mỗi lần tăng capacity theo tỉ lệ nên việc chuyển nhà hiếm dần.
+`push_back` khi size < capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải **tái cấp phát (reallocation)**: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)), trả mảng cũ. Nhờ vậy `push_back` vẫn nhanh **trung bình**: capacity tăng theo tỉ lệ nên việc chuyển nhà hiếm dần.
 
 Chương trình dưới đẩy 10 phần tử vào vector rỗng và báo mỗi lần capacity đổi.
 
@@ -158,9 +157,8 @@ int main() {
 | (1) | Vector rỗng: chưa xin heap, size 0, capacity 0 | con trỏ rỗng |
 | (2) i=1 | Đầy ngay (0 = 0): xin mảng 1 ô, ghi 10 | capacity 1, mảng ở địa chỉ A |
 | (3) | capacity đổi 0 → 1: in dòng, kèm địa chỉ mảng | in 1 dòng |
-| (2) i=2 | Đầy (1 = 1): xin mảng 2 ô, chuyển 10 sang, trả mảng cũ, ghi 20 | capacity 2, địa chỉ B |
-| (2) i=3 | Đầy: xin mảng 4 ô, chuyển 2 phần tử, ghi 30 | capacity 4, địa chỉ khác |
-| i=4 | Còn chỗ: ghi vào ô trống, không chuyển nhà | capacity vẫn 4, không in |
+| (2) i=2, i=3 | Đầy: xin mảng 2 ô rồi 4 ô, chuyển phần tử cũ sang, ghi phần tử mới, trả mảng cũ | capacity 2 rồi 4, địa chỉ đổi |
+| i=4 | Còn chỗ: ghi vào ô chưa có phần tử, không chuyển nhà | capacity vẫn 4, không in |
 | i=5, i=9 | Đầy: capacity 4 → 8, rồi 8 → 16 | địa chỉ đổi mỗi lần |
 | (4) | Sau 10 lần: size 10, capacity 16 | 6 ô trống |
 
@@ -176,7 +174,11 @@ them phan tu thu 9: capacity 8 -> 16, dia chi mang 0x636ebbf3bf30
 cuoi: size=10 capacity=16
 ```
 
-Quy luật "gấp đôi" (1, 2, 4, 8, 16) là của `g++ 11` trên máy mình; **chuẩn C++ không quy định** capacity tăng thế nào, bản thư viện khác có thể nhân 1,5 hay bắt đầu ở số khác. Điều chuẩn bảo đảm là: capacity luôn ≥ size, và tăng theo kiểu "nhân" để `push_back` rẻ trung bình. Địa chỉ in ra cũng khác ở máy bạn; chỉ cần thấy nó **đổi** mỗi lần tái cấp phát (dòng i=3 tình cờ trùng lại địa chỉ của lần đầu vì khối cũ vừa được trả, không phải luật).
+Quy luật "gấp đôi" (1, 2, 4, 8, 16) là của `g++ 11` trên máy mình; **chuẩn C++ không quy định** capacity tăng thế nào.
+
+Chuẩn bảo đảm capacity ≥ size và `push_back` rẻ **trung bình** (amortized). Muốn vậy mọi cài đặt thực tế đều tăng capacity theo tỉ lệ, nhưng hệ số (2, 1,5...) tùy thư viện.
+
+Địa chỉ in ra khác ở máy bạn; chỉ cần thấy nó **đổi** mỗi lần tái cấp phát. Dòng i=3 tình cờ trùng địa chỉ lần đầu vì khối cũ vừa được trả, không phải luật.
 
 !!! info "Bạn biết Go?"
     Đây đúng là chuyện của `append` khi `len == cap`: Go cũng xin mảng lớn hơn và chép sang. Khác ở chỗ Go còn giữ mảng cũ sống nếu slice cũ vẫn nhìn vào nó (GC), nên slice cũ vẫn đọc được. C++ **trả luôn** mảng cũ: ai còn giữ địa chỉ vào nó thì cầm một địa chỉ đã chết.
@@ -197,7 +199,11 @@ int main() {
 }
 ```
 
-Đây là UB nên mình chỉ nêu những gì đã thật sự chạy. Biên dịch thường, chương trình thoát bình thường nhưng in một **số rác** (một lần chạy mình thấy `-24203429`; lần khác máy bạn có thể thấy số khác hoặc `1`). Biên dịch với `-fsanitize=address` ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)) thì báo ngay `heap-use-after-free`, `READ of size 4`, trỏ đúng dòng `std::cout << dau`. Ở g++ này, vector `{1, 2, 3}` có capacity 3 nên `push_back(4)` buộc phải chuyển nhà; ở thư viện khác con số có thể khác, nhưng quy tắc "có thể hỏng" thì như nhau.
+Đây là UB nên mình chỉ nêu những gì đã thật sự chạy. Biên dịch thường, chương trình thoát bình thường nhưng in một **số rác** (một lần chạy mình thấy `-24203429`; máy bạn có thể thấy số khác hoặc `1`).
+
+Biên dịch với `-fsanitize=address` ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)) thì báo ngay `heap-use-after-free`, `READ of size 4`, trỏ đúng dòng `std::cout << dau`.
+
+Ở g++ này vector `{1, 2, 3}` có capacity 3 nên `push_back(4)` buộc phải chuyển nhà; thư viện khác có thể khác, nhưng quy tắc "có thể hỏng" thì như nhau.
 
 ### 5. `reserve`: xin chỗ trước
 
@@ -239,13 +245,9 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (2) + gọi | `a` rỗng, đẩy 100 phần tử, đếm số lần capacity đổi | capacity 0 → 1 → 2 → 4 → ... → 128 |
-| in | Số lần đổi của `a` | in `8` |
-| (3) | `b.reserve(100)`: xin sẵn mảng 100 ô; chưa có phần tử | `b`: size 0, capacity 100 |
-| in | size và capacity của `b` | in `size=0 capacity=100` |
-| (4) | Đẩy 100 phần tử: luôn còn chỗ | capacity không đổi |
-| in | Số lần đổi của `b` | in `0` |
-| in cuối | Sau 100 phần tử: size 100, capacity 100 | đầy vừa khít |
+| (2) + gọi | `a` rỗng, đẩy 100 phần tử, đếm số lần capacity đổi: in `8` | capacity 0 → 1 → 2 → 4 → ... → 128 |
+| (3) | `b.reserve(100)`: xin sẵn mảng 100 ô; chưa có phần tử; in `size=0 capacity=100` | `b`: size 0, capacity 100 |
+| (4) | Đẩy 100 phần tử: luôn còn chỗ, capacity không đổi; in `0` rồi `size=100 capacity=100` | `b`: size 100, capacity 100 |
 
 **Kết quả khi chạy:**
 
@@ -256,10 +258,10 @@ co reserve: 0 lan doi capacity
 cuoi: size=100 capacity=100
 ```
 
-Số `8` là của `g++ 11` (nhân đôi từ 1 đến 128); thư viện khác có thể ra số khác. Điều đáng nhớ: có `reserve` thì **không còn lần chuyển nhà nào** trong lúc thêm.
+Số `8` là của `g++ 11` (nhân đôi từ 1 đến 128), và capacity đúng 100 cũng là của g++ (chuẩn chỉ bảo `capacity() >= 100`); thư viện khác có thể ra số khác. Điều đáng nhớ: có `reserve` thì **không còn lần chuyển nhà nào** trong lúc thêm.
 
 !!! warning "Hay nhầm: `reserve` không đổi size"
-    `v.reserve(100)` chỉ tăng **capacity**. Sau đó `v[50] = 1;` vẫn là truy cập ngoài size (UB), vì chưa có phần tử nào. Muốn có 100 phần tử thật thì viết `std::vector<int> v(100);` (mục 2) hoặc `v.resize(100)`, hoặc cứ `reserve` rồi `push_back`.
+    `v.reserve(100)` chỉ tăng **capacity**. Sau đó `v[50] = 1;` vẫn là truy cập ngoài size (UB), vì chưa có phần tử nào. Muốn có 100 phần tử thật thì viết `std::vector<int> v(100);` (mục 2), hoặc gọi `v.resize(100)`, hoặc cứ `reserve` rồi `push_back`. `resize(n)` đổi **size** thành n: thiếu thì thêm phần tử 0 (với `int`), thừa thì cắt bớt. Vậy `reserve` đổi capacity, `resize` đổi size.
 
 ### 6. `[]` và `at`: không kiểm tra và có kiểm tra
 
@@ -306,23 +308,9 @@ at(5) nem out_of_range: vector::_M_range_check: __n (which is 5) >= this->size()
 rong.size() - 1 = 18446744073709551615
 ```
 
-Câu chữ sau `nem out_of_range:` do thư viện của g++ quyết định, máy bạn có thể khác; chỉ kiểu ngoại lệ là chuẩn quy định. Số ở dòng cuối là hai mũ 64 trừ 1, trên máy 64 bit; số không dấu quấn vòng là hợp lệ (khác số có dấu, [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)). Hệ quả: vòng `for (std::size_t i = 0; i <= v.size() - 1; i++)` trên vector rỗng chạy gần như mãi và truy cập ngoài biên.
+Câu chữ sau `nem out_of_range:` do thư viện của g++ quyết định, máy bạn có thể khác; chỉ kiểu ngoại lệ là chuẩn quy định. Số ở dòng cuối là hai mũ 64 trừ 1, trên máy 64 bit; số không dấu quấn vòng là hợp lệ (khác số có dấu, [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)). Hệ quả: vòng `for (std::size_t i = 0; i <= v.size() - 1; i++)` trên vector rỗng truy cập ngoài biên ngay từ vòng đầu (và nếu không sập thì chạy rất lâu).
 
-**Thử thay đổi: đổi `v.at(5)` thành `v[5]`.** Mình đã chạy bản đó (khối dưới, bỏ qua kiểm tra vì là UB):
-
-```cpp
-// bo-qua-kiem-tra
-#include <iostream>
-#include <vector>
-
-int main() {
-    std::vector<int> v = {10, 20, 30};
-    std::cout << v[5] << "\n";
-    return 0;
-}
-```
-
-Chạy thường: chương trình in `0` rồi thoát mã 0, không báo lỗi gì (số in ra là rác, máy bạn có thể khác). Chạy với `-fsanitize=address`: báo `heap-buffer-overflow`, `READ of size 4`, đúng dòng `std::cout << v[5]`. Tức `[]` im lặng cho qua, còn `at` dừng lại đúng chỗ.
+**Thử thay đổi: đổi `v.at(5)` thành `v[5]`** (UB, nên không chạy trong bộ kiểm tra). Mình đã chạy bản đó: chạy thường in `0` rồi thoát mã 0, không báo gì (số in ra là rác, máy bạn có thể khác); với `-fsanitize=address` thì báo `heap-buffer-overflow`, `READ of size 4`, đúng dòng có `v[5]`. Tức `[]` im lặng cho qua, còn `at` dừng lại đúng chỗ.
 
 ### 7. Truyền vector vào hàm, và sao chép vector
 
@@ -382,13 +370,9 @@ int main() {
 | `tong(a)` (1) | `v` là biệt danh của `a`, cộng 1+2+3 | không chép; in `tong = 6` |
 | (2) | Duyệt bằng `int& x` (biệt danh từng phần tử), cộng 1 vào mỗi phần tử của `a` | `a`: `[2 3 4]`; in `2 3 4` |
 | (5) vào (3) | Theo giá trị: `v` là **bản sao** có mảng riêng | `a` ở mảng A, `v` ở mảng B khác |
-| (3) | Gán `v[0] = 999` chỉ đổi bản sao; so `v.data() == goc` ra 0 | in `v[0] = 999 ... 0` |
-| ra khỏi (3) | Bản sao bị hủy (RAII trả mảng B) | `a` vẫn `[2 3 4]` |
-| in | `a[0]` không bị đổi | in `a[0] = 2` |
+| (3) | `v[0] = 999` chỉ đổi bản sao (so `data()` ra 0); hết hàm, bản sao bị hủy (RAII) | `a` vẫn `[2 3 4]`, in `a[0] = 2` |
 | (6) vào (4) | `const&`: `v` là biệt danh của `a`, chung mảng, so ra 1 | in `v[0] = 2 ... 1` |
-| (7) | `b = a`: sao chép sâu, `b` có mảng riêng | `b`: `[2 3 4]` ở mảng khác |
-| `b[0] = 50` | Chỉ đổi `b` | `a`: `[2 3 4]`, `b`: `[50 3 4]` |
-| in cuối | `a[0] = 2, b[0] = 50`, mảng không chung | in `... chung mang? 0` |
+| (7) | `b = a` sao chép sâu (mảng riêng); `b[0] = 50` chỉ đổi `b` | `a`: `[2 3 4]`, `b`: `[50 3 4]`; in `chung mang? 0` |
 
 **Kết quả khi chạy:**
 
@@ -406,76 +390,17 @@ a[0] = 2, b[0] = 50, chung mang? 0
 
 Một điều nhẹ nhõm: **trả vector theo giá trị** từ hàm (`std::vector<int> tao() { ... return v; }`) không bị chép tốn kém, nhờ move và tối ưu hóa ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)).
 
-### 8. `push_back` và `emplace_back`
+### 8. `emplace_back`, `vector<bool>` và những thao tác chưa dạy
 
-`push_back(x)` nhận một đối tượng **đã được tạo** rồi đưa nó vào vector. `emplace_back(...)` nhận **các đối số của hàm tạo** và tạo đối tượng **ngay trong ô cuối** của vector, không qua đối tượng trung gian. Với kiểu cơ bản như `int` hai cách như nhau; khác biệt chỉ lộ ra với kiểu có hàm tạo. Dùng một struct `Cay` có hàm tạo, hàm tạo sao chép và hàm tạo di chuyển ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)), mỗi cái in một dòng:
+`push_back(x)` nhận một đối tượng **đã được tạo** rồi đưa vào vector. `emplace_back(...)` nhận **các đối số của hàm tạo** và dựng đối tượng ngay trong ô cuối, không qua đối tượng tạm. Với `int` hai cách như nhau. Với kiểu có hàm tạo, mình đã chạy thử một struct `Cay` có hàm tạo `Cay(int)`, hàm tạo sao chép và hàm tạo di chuyển `noexcept` (sau `reserve`): `push_back(Cay(1))` in `tao Cay 1` rồi `move Cay 1`, còn `emplace_back(2)` chỉ in `tao Cay 2`. Chênh lệch chỉ là một lần move, nên có sẵn đối tượng thì cứ `push_back`, muốn tạo mới từ vài đối số thì `emplace_back`. (Nếu không `reserve` và hàm tạo di chuyển không có `noexcept`, lúc chuyển nhà vector sẽ **chép** thay vì move: [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md), mục 8.)
 
-```cpp
-#include <iostream>
-#include <vector>
+`std::vector<bool>` là **trường hợp đặc biệt**: bên trong nén mỗi phần tử thành 1 bit, nên `v[i]` không trả về tham chiếu thật tới một `bool`. Cần vector `bool` bình thường thì dùng `std::vector<char>`.
 
-struct Cay {
-    int cao;
-    Cay(int c) : cao(c) { std::cout << "  tao Cay " << cao << "\n"; }                       // (1)
-    Cay(const Cay& o) : cao(o.cao) { std::cout << "  chep Cay " << cao << "\n"; }           // (2)
-    Cay(Cay&& o) noexcept : cao(o.cao) { std::cout << "  move Cay " << cao << "\n"; }       // (3)
-};
-
-int main() {
-    std::vector<Cay> v;
-    v.reserve(4);                                    // (4)
-    std::cout << "push_back(Cay(1)):\n";
-    v.push_back(Cay(1));                             // (5)
-    std::cout << "emplace_back(2):\n";
-    v.emplace_back(2);                               // (6)
-    Cay c(3);
-    std::cout << "push_back(c):\n";
-    v.push_back(c);                                  // (7)
-    std::cout << "size = " << v.size() << "\n";
-    return 0;
-}
-```
-
-Cú pháp `Cay(int c) : cao(c) { ... }` (dấu `:` sau tham số) là **danh sách khởi tạo**: cách ngắn gọn để đặt `cao = c` trước khi thân hàm chạy; ở đây nó tương đương `cao = c;` trong thân. `(4)` dùng `reserve` để mọi thứ trong chương trình **không bị chuyển nhà**, nhờ đó các dòng in chỉ phản ánh `push_back`/`emplace_back`.
-
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| (4) | Xin chỗ cho 4 `Cay`, chưa có phần tử | capacity 4, size 0 |
-| (5) | `Cay(1)` là đối tượng tạm: hàm tạo (1) chạy rồi `push_back` **move** nó vào vector (3) | in `tao Cay 1`, `move Cay 1` |
-| (6) | `emplace_back(2)`: số 2 được đưa thẳng cho hàm tạo, đối tượng sinh ngay trong vector | in `tao Cay 2`, không có move |
-| `Cay c(3)` | Tạo `c` bình thường, ở ngoài vector | in `tao Cay 3` |
-| (7) | `c` có tên (lvalue), cần giữ lại, nên `push_back` **chép** nó (2) | in `chep Cay 3` |
-| in | size = 3 | in `size = 3` |
-
-**Kết quả khi chạy:**
-
-```text
-push_back(Cay(1)):
-  tao Cay 1
-  move Cay 1
-emplace_back(2):
-  tao Cay 2
-  tao Cay 3
-push_back(c):
-  chep Cay 3
-size = 3
-```
-
-Dòng `tao Cay 3` nằm giữa là của `Cay c(3);`, không phải của `emplace_back`. Tóm lại: `emplace_back` bớt một lần move so với `push_back(Cay(...))`.
-
-**Thử thay đổi 1: bỏ dòng `v.reserve(4);`.** Mình đã chạy: lần `emplace_back(2)` in thêm `move Cay 1` (vector đầy nên chuyển phần tử cũ sang mảng mới), và lần `push_back(c)` in thêm `move Cay 1`, `move Cay 2` sau `chep Cay 3`. Đây là chuyện tái cấp phát ở mục 4, và nhờ `noexcept` mà nó dùng move thay vì chép.
-
-**Thử thay đổi 2: bỏ cả `reserve(4)` lẫn chữ `noexcept` ở (3).** Mình đã chạy: lúc chuyển nhà các dòng `move Cay` đổi thành `chep Cay` (sau `tao Cay 2` có `chep Cay 1`; sau `chep Cay 3` có `chep Cay 1`, `chep Cay 2`). Vì hàm tạo di chuyển không hứa `noexcept` nên vector chọn chép cho an toàn ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md), mục 8). Giữ `reserve(4)` và chỉ bỏ `noexcept` thì output y như bảng trên, vì chưa có chuyển nhà nào.
-
-Đừng thần thánh `emplace_back`: với `int` hay kiểu nhẹ, chẳng khác gì; với `push_back(Cay(1))` trên compiler hiện đại, hiệu quả chênh lệch chỉ là một lần move. Quy ước thông dụng: có sẵn đối tượng thì `push_back`; muốn tạo mới từ vài đối số thì `emplace_back(đối số...)`.
-
-Cuối cùng một câu: `std::vector<bool>` là **trường hợp đặc biệt** (bên trong nén mỗi phần tử thành 1 bit, nên `v[i]` không trả về tham chiếu thật tới một `bool`), nên đừng dùng khi bạn cần một vector `bool` bình thường; dùng `std::vector<char>` hoặc `std::vector<int>` thay thế.
+Bài này chưa dạy chèn hoặc xóa ở giữa vector (`insert`, `erase`, `clear`): chúng phải dời các phần tử phía sau nên tốn thời gian tỉ lệ với số phần tử, và Bài 19 sẽ dạy `erase`. Gọi `pop_back` hay `back()` trên vector rỗng là UB.
 
 ## 💻 Ví dụ code
 
-Các chương trình ở phần 📖 (mục 2, 4, 5, 6, 7, 8) là ví dụ để chạy. Dưới đây là một bài ngắn dùng chung những gì đã học: lấy các số chẵn từ một dãy.
+Các chương trình ở phần 📖 (mục 2, 4, 5, 6, 7) là ví dụ để chạy. Dưới đây là một bài ngắn dùng chung những gì đã học: lấy các số chẵn từ một dãy.
 
 ```cpp
 #include <iostream>
@@ -505,14 +430,7 @@ int main() {
 
 `x % 2` là phần dư khi chia 2 (bằng 0 nghĩa là số chẵn).
 
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| gọi `layChan(so)` | (1): `nguon` là biệt danh của `so`, không chép | `so`: `[5 8 3 6 2 7]` |
-| (2) | Xin sẵn chỗ cho tối đa 6 phần tử, size vẫn 0 | `kq`: capacity 6 |
-| (3) | Duyệt, gặp 8, 6, 2 thì thêm vào `kq`, không chuyển nhà nhờ `reserve` | `kq`: `[8 6 2]` |
-| (4) | Trả `kq` theo giá trị: mảng được chuyển (move) hoặc bỏ hẳn bước chép, không chép từng phần tử | `chan` nhận mảng của `kq` |
+**Chạy từng dòng:** (1) `nguon` là biệt danh của `so`, không chép. (2) `kq` xin sẵn chỗ cho 6 phần tử, size vẫn 0. (3) gặp 8, 6, 2 thì thêm vào `kq`, không chuyển nhà nhờ `reserve`. (4) trả `kq` theo giá trị: mảng được chuyển (move) hoặc bỏ hẳn bước chép, nên `chan` nhận mảng của `kq` mà không chép từng phần tử.
 
 **Kết quả khi chạy:**
 
@@ -636,7 +554,7 @@ std::cout << a.size();
 - `v[10]` ném ngoại lệ, còn `at(10)` trả về 0
 - Cả hai đều là UB vì chỉ số quá lớn
 
-<p class="giai-thich" markdown>`at` có kiểm tra biên nên báo lỗi bằng ngoại lệ `std::out_of_range` (mình đã chạy ở mục 6), còn `[]` bỏ qua kiểm tra để nhanh, nên chỉ số sai là UB: có thể in rác, có thể sập, có thể trông như chạy đúng. Hai thao tác không giống nhau, nên không thể cùng ném ngoại lệ. `at` không trả 0 thay cho phần tử thiếu. Và `at` được chuẩn định nghĩa rõ ràng, nên không phải UB.</p>
+<p class="giai-thich" markdown>`at` có kiểm tra biên nên báo lỗi bằng ngoại lệ `std::out_of_range` (mình đã chạy ở mục 6), còn `[]` bỏ qua kiểm tra để nhanh, nên chỉ số sai là UB: có thể in rác, có thể sập, có thể trông như chạy đúng. `[]` không kiểm tra biên nên không có gì để ném. `at` không trả 0 thay cho phần tử thiếu. Và `at` được chuẩn định nghĩa rõ ràng, nên không phải UB.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -647,7 +565,7 @@ std::cout << a.size();
 - `emplace_back` dựng đối tượng ngay trong vector
 - `emplace_back` chỉ dùng được khi đã gọi `reserve`
 
-<p class="giai-thich" markdown>`emplace_back(2)` chuyển đối số cho hàm tạo và sinh `Cay` ngay trong ô cuối, nên không có đối tượng tạm để move (mục 8: không có dòng `move`). `push_back(Cay(2))` tạo tạm rồi move vào. Nhưng chênh lệch thường chỉ là một lần move, không phải "rất nhiều lần". `push_back` nhận đối tượng tạm bình thường (đúng ví dụ mục 8). Và `reserve` chỉ giúp tránh chuyển nhà, không phải điều kiện để dùng `emplace_back`.</p>
+<p class="giai-thich" markdown>`emplace_back(2)` chuyển đối số cho hàm tạo và sinh `Cay` ngay trong ô cuối, nên không có đối tượng tạm để move (mình đã chạy: chỉ có dòng `tao`, không có dòng `move`). `push_back(Cay(2))` tạo tạm rồi move vào. Nhưng chênh lệch thường chỉ là một lần move, không phải "rất nhiều lần". `push_back` nhận đối tượng tạm bình thường (mình đã chạy được). Và `reserve` chỉ giúp tránh chuyển nhà, không phải điều kiện để dùng `emplace_back`.</p>
 </div>
 
 </div>
@@ -658,4 +576,4 @@ std::cout << a.size();
 2. size là số phần tử đang có, capacity là số chỗ đã xin (luôn ≥ size); `push_back` khi đầy làm vector tái cấp phát sang mảng lớn hơn, cách tăng là tùy cài đặt, nên tham chiếu, con trỏ, iterator lấy từ trước có thể hỏng (Bài 19 nói kỹ).
 3. `reserve(n)` xin sẵn chỗ để khỏi chuyển nhà nhưng không tạo phần tử; `[]` không kiểm tra biên (ngoài biên là UB), `at` kiểm tra và ném `std::out_of_range`; `size() - 1` trên vector rỗng quấn thành số rất lớn.
 4. Truyền theo giá trị và `b = a` đều sao chép sâu cả mảng; chỉ đọc thì nhận `const std::vector<T>&`, cần sửa bản gốc thì `std::vector<T>&`; khác slice của Go vốn chung mảng.
-5. `push_back(x)` nhận đối tượng đã tạo, `emplace_back(đối số...)` dựng ngay trong vector để bớt một lần move; `std::vector<bool>` là trường hợp đặc biệt (nén thành bit), nên tránh khi cần `bool` thường.
+5. `push_back(x)` nhận đối tượng đã tạo, `emplace_back(đối số...)` dựng ngay trong vector để bớt một lần move; `std::vector<bool>` là trường hợp đặc biệt (nén thành bit), nên tránh khi cần `bool` thường; `reserve` đổi capacity còn `resize` đổi size.
