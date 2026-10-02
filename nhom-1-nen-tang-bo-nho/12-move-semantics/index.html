@@ -1,0 +1,2024 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-1-nen-tang-bo-nho/12-move-semantics/">
+      
+      
+        <link rel="prev" href="../11-sao-chep-rule-of-3/">
+      
+      
+        <link rel="next" href="../13-cpp11-14-17/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 12 — Move semantics, rule of 5/0 - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-12-move-semantics-rule-of-50" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 12 — Move semantics, rule of 5/0
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-van-e-sao-chep-sau-qua-ton-khi-nguon-sap-bien-mat" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Vấn đề: sao chép sâu quá tốn khi nguồn sắp biến mất
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-lvalue-va-rvalue-bang-loi-thuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. lvalue và rvalue bằng lời thường
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-tham-chieu-rvalue-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Tham chiếu rvalue T&amp;&amp;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ham-tao-di-chuyen-va-phep-gan-di-chuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Hàm tạo di chuyển và phép gán di chuyển
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-stdmove-khong-di-chuyen-gi-ca" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. std::move không di chuyển gì cả
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-oi-tuong-sau-khi-bi-move" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Đối tượng sau khi bị move
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-rule-of-5-va-rule-of-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Rule of 5 và Rule of 0
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-noexcept-va-stdvector" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. noexcept và std::vector
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-tra-ve-theo-gia-tri-viet-return-v" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Trả về theo giá trị: viết return v;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-rule-of-0-chay-that" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: Rule of 0 chạy thật
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-van-e-sao-chep-sau-qua-ton-khi-nguon-sap-bien-mat" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Vấn đề: sao chép sâu quá tốn khi nguồn sắp biến mất
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-lvalue-va-rvalue-bang-loi-thuong" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. lvalue và rvalue bằng lời thường
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-tham-chieu-rvalue-t" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Tham chiếu rvalue T&amp;&amp;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ham-tao-di-chuyen-va-phep-gan-di-chuyen" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Hàm tạo di chuyển và phép gán di chuyển
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-stdmove-khong-di-chuyen-gi-ca" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. std::move không di chuyển gì cả
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-oi-tuong-sau-khi-bi-move" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Đối tượng sau khi bị move
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-rule-of-5-va-rule-of-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Rule of 5 và Rule of 0
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-noexcept-va-stdvector" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. noexcept và std::vector
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-tra-ve-theo-gia-tri-viet-return-v" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Trả về theo giá trị: viết return v;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-rule-of-0-chay-that" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: Rule of 0 chạy thật
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-12-move-semantics-rule-of-50">Bài 12 — Move semantics, rule of 5/0<a class="headerlink" href="#bai-12-move-semantics-rule-of-50" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Phân biệt <strong>lvalue</strong> và <strong>rvalue</strong> bằng lời thường, và nói đúng <code>std::move</code> chỉ là một phép ép kiểu ("tôi đồng ý cho lấy ruột"), chưa di chuyển gì.</li>
+<li>Tự viết hàm tạo di chuyển và phép gán di chuyển cho lớp giữ con trỏ, biết đối tượng sau khi bị move chỉ nên được hủy hoặc gán lại, và biết Rule of 5 / Rule of 0.</li>
+<li>Hiểu vì sao <code>noexcept</code> quan trọng với <code>std::vector</code>, và vì sao trả biến cục bộ theo giá trị thì viết <code>return v;</code> chứ không viết <code>return std::move(v);</code>.</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../06-tham-chieu-const/">Bài 06</a> (tham chiếu <code>&amp;</code>, <code>const&amp;</code>), <a href="../09-unique-ptr/">Bài 09</a> (<code>std::move</code> với <code>unique_ptr</code>) và <a href="../11-sao-chep-rule-of-3/">Bài 11</a> (sao chép sâu, hàm tạo sao chép, phép gán sao chép, Rule of 3).</p>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Quay lại quyển vở dày ở <a href="../11-sao-chep-rule-of-3/">Bài 11</a>. Bạn của bạn cần nó.</p>
+<p>Cách 1: <strong>photo cả quyển</strong>, đó là sao chép sâu: tốn giấy, tốn thời gian. Cách 2: <strong>đưa luôn quyển vở</strong> cho bạn, đó là <strong>di chuyển (move)</strong>: gần như tức thì, nhưng người đưa chỉ còn lại cái bìa rỗng.</p>
+<p>Cách 2 chỉ hợp lý khi bạn <strong>không cần quyển vở nữa</strong>, ví dụ nó là tờ nháp sắp bỏ. Bài này dạy C++ phân biệt "vật còn cần" với "vật sắp bỏ", và cách viết cho lớp của bạn biết đưa luôn ruột thay vì photo.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví dụ quyển vở không còn đúng?</p>
+<p>Cái bìa rỗng của người đưa vẫn là một đối tượng thật, và <strong>hàm hủy của nó vẫn chạy</strong> khi hết phạm vi. Vì thế bìa rỗng phải ở trạng thái mà hàm hủy xử lý được (mục 4 và 6).</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-van-e-sao-chep-sau-qua-ton-khi-nguon-sap-bien-mat">1. Vấn đề: sao chép sâu quá tốn khi nguồn sắp biến mất<a class="headerlink" href="#1-van-e-sao-chep-sau-qua-ton-khi-nguon-sap-bien-mat" title="Permanent link">&para;</a></h3>
+<p>Ở <a href="../11-sao-chep-rule-of-3/">Bài 11</a>, sao chép sâu nghĩa là xin vùng nhớ mới và chép toàn bộ nội dung. Giả sử một hàm dựng một mảng một triệu <code>int</code> rồi trả về. Nếu nơi gọi nhận bằng cách sao chép, ta tốn một lần xin và chép khoảng bốn triệu byte, rồi <strong>mảng gốc lập tức bị hủy</strong> vì nó chỉ là tạm.</p>
+<p>Chép xong rồi vứt bản gốc thì thật lãng phí: thay vì chép, ta chỉ cần <strong>lấy con trỏ</strong> của bản gốc. Muốn làm vậy, C++ phải có cách nhận ra "bản gốc này sắp bỏ, lấy ruột được". Cách đó là phân loại giá trị thành lvalue và rvalue.</p>
+<h3 id="2-lvalue-va-rvalue-bang-loi-thuong">2. lvalue và rvalue bằng lời thường<a class="headerlink" href="#2-lvalue-va-rvalue-bang-loi-thuong" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>lvalue</strong>: có <strong>tên</strong> và có chỗ trong bộ nhớ để quay lại dùng ở dòng sau. Ví dụ biến <code>x</code> (và vài thứ khác như <code>*p</code>).</li>
+<li><strong>rvalue</strong>: giá trị <strong>tạm thời</strong>, hết câu lệnh là biến mất. Ví dụ kết quả của <code>x + 1</code>, số viết thẳng <code>3</code>, đối tượng tạm <code>Cay(3)</code>, hay giá trị một hàm trả về theo giá trị.</li>
+</ul>
+<p>Mẹo hay dùng: nếu lấy được địa chỉ bằng <code>&amp;</code> thì thường là lvalue. Mình đã thử <code>&amp;(x + 1)</code>: g++ báo <code>lvalue required as unary '&amp;' operand</code>, vì kết quả tạm không có chỗ ổn định để trỏ tới. Đây là cách hiểu đủ dùng cho bài này; chuẩn C++ chia mịn hơn, ta không cần.</p>
+<p>Điều quan trọng: lấy ruột của <strong>rvalue</strong> thì không ai tiếc (nó sắp biến mất), còn lấy ruột của <strong>lvalue</strong> thì người dùng biến đó sẽ bất ngờ. Vì vậy C++ cần một loại tham chiếu chỉ nhận rvalue.</p>
+<p>Ngoại lệ có chủ ý: <code>std::move(x)</code> bắt C++ <strong>coi</strong> <code>x</code> như một giá trị tạm, dù <code>x</code> vẫn sống (mục 5 nói rõ).</p>
+<h3 id="3-tham-chieu-rvalue-t">3. Tham chiếu rvalue <code>T&amp;&amp;</code><a class="headerlink" href="#3-tham-chieu-rvalue-t" title="Permanent link">&para;</a></h3>
+<p>Viết <code>int&amp;&amp;</code> (đọc "tham chiếu rvalue tới <code>int</code>") là một tham chiếu <strong>chỉ gắn được với giá trị tạm</strong>. Tham chiếu <code>int&amp;</code> quen thuộc (<a href="../06-tham-chieu-const/">Bài 06</a>) thì ngược lại, chỉ gắn với lvalue. C++ cho phép hai hàm <strong>cùng tên</strong> nếu tham số khác kiểu, và chọn hàm khớp nhất với đối số. Nhờ đó ta nhìn thấy rõ cách C++ phân loại:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kt">void</span><span class="w"> </span><span class="nf">ham</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                                </span><span class="c1">// (1)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"lvalue, x = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kt">void</span><span class="w"> </span><span class="nf">ham</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                               </span><span class="c1">// (2)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"rvalue, x = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="kt">void</span><span class="w"> </span><span class="nf">chuyen</span><span class="p">(</span><span class="kt">int</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                            </span><span class="c1">// (3)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">ham</span><span class="p">(</span><span class="n">r</span><span class="p">);</span><span class="w">                                       </span><span class="c1">// (4)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="n">ham</span><span class="p">(</span><span class="n">x</span><span class="p">);</span><span class="w">                                       </span><span class="c1">// (5)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="n">ham</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">                                   </span><span class="c1">// (6)</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="n">ham</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w">                                       </span><span class="c1">// (7)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">ham</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">x</span><span class="p">));</span><span class="w">                            </span><span class="c1">// (8)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sau move, x = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="n">chuyen</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w">                                    </span><span class="c1">// (9)</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>int x = 1;</code></td>
+<td>Biến <code>x</code> bằng 1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>(5) <code>ham(x)</code></td>
+<td><code>x</code> là lvalue nên chọn hàm (1), in <code>lvalue, x = 1</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>(6) <code>ham(x + 1)</code></td>
+<td>Kết quả tạm <code>2</code> là rvalue nên chọn hàm (2), in <code>rvalue, x = 2</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>(7) <code>ham(3)</code></td>
+<td><code>3</code> là rvalue, chọn hàm (2), in <code>rvalue, x = 3</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>(8) <code>ham(std::move(x))</code></td>
+<td><code>std::move(x)</code> biến <code>x</code> thành rvalue, nên chọn hàm (2), in <code>rvalue, x = 1</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>in</td>
+<td><code>x</code> vẫn là 1: <code>std::move</code> không đổi gì trong <code>x</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>(9) <code>chuyen(5)</code></td>
+<td><code>5</code> là rvalue nên gắn được vào tham số <code>r</code> của (3)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>(4) <code>ham(r)</code></td>
+<td>Trong thân hàm, <code>r</code> <strong>có tên</strong> nên là lvalue: chọn hàm (1), in <code>lvalue, x = 5</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (<code>g++ -std=c++17 -Wall</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>lvalue, x = 1
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>rvalue, x = 2
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>rvalue, x = 3
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>rvalue, x = 1
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>sau move, x = 1
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>lvalue, x = 5
+</code></pre></div>
+<p>Có hai điều cần nhớ từ output. Một: hai dòng <code>rvalue, x = 1</code> và <code>sau move, x = 1</code> cho thấy <code>std::move(x)</code> làm <code>x</code> được đối xử như rvalue, nhưng giá trị của <code>x</code> không hề đổi. Hai: dòng cuối cho thấy một tham số kiểu <code>int&amp;&amp;</code> khi đã có tên thì bên trong hàm là lvalue (cái bẫy này gặp lại ở mục 4).</p>
+<p><strong>Thử thay đổi: xóa hàm (2).</strong> Mình đã chạy (bỏ cả <code>chuyen</code> và dòng (8)): g++ báo lỗi biên dịch <code>cannot bind non-const lvalue reference of type 'int&amp;' to an rvalue of type 'int'</code> ở các dòng <code>ham(x + 1)</code> và <code>ham(3)</code>. Không có hàm nhận rvalue thì giá trị tạm không có chỗ gắn vào.</p>
+<h3 id="4-ham-tao-di-chuyen-va-phep-gan-di-chuyen">4. Hàm tạo di chuyển và phép gán di chuyển<a class="headerlink" href="#4-ham-tao-di-chuyen-va-phep-gan-di-chuyen" title="Permanent link">&para;</a></h3>
+<p>Giờ viết cho <code>Mang</code> (giống <code>Day</code> ở <a href="../11-sao-chep-rule-of-3/">Bài 11</a>, đổi tên), thêm hai hàm có <code>&amp;&amp;</code> và cho các hàm sao chép/di chuyển in một dòng để đếm. Phần mới chỉ là các dòng (1)–(6). Phép gán sao chép bị bỏ cho gọn: vì ta khai báo hàm di chuyển, phép gán sao chép tự sinh bị <strong>xóa</strong> (mục 7), nên <code>d = lvalue</code> sẽ là lỗi biên dịch; ví dụ này không cần tới nó.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Mang</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">d</span><span class="p">;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">Mang</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">so</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">so</span><span class="p">;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="n">n</span><span class="p">];</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">Mang</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Mang</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                         </span><span class="c1">// sao chép (Bài 11)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="p">;</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="n">n</span><span class="p">];</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"copy!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="n">Mang</span><span class="p">(</span><span class="n">Mang</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w">                     </span><span class="c1">// (1)</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">        </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="p">;</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">;</span><span class="w">                                  </span><span class="c1">// (2)</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span><span class="w">                            </span><span class="c1">// (3)</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"move!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="n">Mang</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Mang</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w">          </span><span class="c1">// (4)</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                         </span><span class="c1">// (5)</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">            </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">d</span><span class="p">;</span><span class="w">                           </span><span class="c1">// (6)</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">            </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="p">;</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">            </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">;</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">            </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">            </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"move gan!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="k">this</span><span class="p">;</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">    </span><span class="o">~</span><span class="n">Mang</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">d</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="p">};</span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="kt">void</span><span class="w"> </span><span class="nf">nhan</span><span class="p">(</span><span class="n">Mang</span><span class="w"> </span><span class="n">m</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"nhan "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" phan tu</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="p">}</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">    </span><span class="n">Mang</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">    </span><span class="n">Mang</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">                                   </span><span class="c1">// (7)</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="w">    </span><span class="n">Mang</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">                        </span><span class="c1">// (8)</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a.n = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", c.n = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">    </span><span class="n">nhan</span><span class="p">(</span><span class="n">b</span><span class="p">);</span><span class="w">                                      </span><span class="c1">// (9)</span>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="w">    </span><span class="n">nhan</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">b</span><span class="p">));</span><span class="w">                           </span><span class="c1">// (10)</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">    </span><span class="n">Mang</span><span class="w"> </span><span class="n">d</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">    </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mang</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">);</span><span class="w">                               </span><span class="c1">// (11)</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"d.n = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">n</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="p">}</span>
+</code></pre></div>
+<p>Đọc hàm tạo di chuyển (1): nó nhận <code>Mang&amp;&amp; o</code>, một <code>Mang</code> tạm hoặc đã được cho phép lấy ruột. </p>
+<p>Việc làm là <strong>lấy con trỏ</strong> của nguồn (2), rồi <strong>đặt con trỏ nguồn về <code>nullptr</code></strong> (3) để nguồn không còn giữ vùng nhớ nữa. Tham số không có <code>const</code> vì ta phải sửa nguồn ở (3).</p>
+<p>Chữ <code>noexcept</code> là lời hứa "hàm này không ném ngoại lệ": hàm chỉ chép vài con số nên giữ được lời hứa; vì sao lời hứa quan trọng, mục 8 giải thích.</p>
+<p>Phép gán di chuyển (4) làm giống hàm tạo, nhưng <code>this</code> đã giữ một vùng cũ nên phải xử lý thêm như phép gán sao chép ở <a href="../11-sao-chep-rule-of-3/">Bài 11</a>: kiểm tra tự gán (5), trả vùng cũ (6), rồi lấy con trỏ và đặt nguồn về <code>nullptr</code>. Nếu thiếu kiểm tra (5), <code>a = std::move(a)</code> sẽ trả vùng của chính <code>a</code> rồi "lấy" lại con trỏ vừa trả. Ở lần thử của mình, kết quả là <code>a</code> mất sạch dữ liệu (<code>n</code> = 0, <code>d</code> = <code>nullptr</code>), không báo lỗi gì.</p>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này (địa chỉ minh họa)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Mang a(3, 1)</code></td>
+<td>Xin mảng 3 <code>int</code></td>
+<td><code>a.d</code> = 0x9000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>(7) <code>Mang b = a;</code></td>
+<td><code>a</code> là lvalue: hàm tạo sao chép, mảng mới, in <code>copy!</code></td>
+<td><code>b.d</code> = 0xA000</td>
+</tr>
+<tr>
+<td>3</td>
+<td>(8) <code>Mang c = std::move(a);</code></td>
+<td><code>std::move(a)</code> là rvalue nên chọn hàm tạo di chuyển (1): (2) <code>c.d</code> = 0x9000, (3) <code>a.d</code> = <code>nullptr</code>, <code>a.n</code> = 0; in <code>move!</code></td>
+<td><code>c.d</code> = 0x9000; <code>a.d</code> = <code>nullptr</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>in</td>
+<td><code>a.n = 0, c.n = 3</code></td>
+<td>không đổi</td>
+</tr>
+<tr>
+<td>5</td>
+<td>(9) <code>nhan(b)</code></td>
+<td><code>m</code> tạo từ lvalue <code>b</code>: sao chép, in <code>copy!</code>; in <code>nhan 3 phan tu</code>; <code>m</code> chết, trả mảng chép</td>
+<td><code>m.d</code> = 0xB000 rồi đã trả</td>
+</tr>
+<tr>
+<td>6</td>
+<td>(10) <code>nhan(std::move(b))</code></td>
+<td><code>m</code> tạo từ rvalue: di chuyển, in <code>move!</code>; in <code>nhan 3 phan tu</code>; <code>m</code> chết, trả 0xA000</td>
+<td><code>m.d</code> = 0xA000 rồi đã trả; <code>b.d</code> = <code>nullptr</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>Mang d(2, 0)</code></td>
+<td>Xin mảng 2 <code>int</code></td>
+<td><code>d.d</code> = 0xC000</td>
+</tr>
+<tr>
+<td>8</td>
+<td>(11) <code>d = Mang(4, 9);</code></td>
+<td>Vế phải là tạm (rvalue) nên chọn (4): (5) khác nhau, (6) trả 0xC000, lấy con trỏ của tạm, tạm về <code>nullptr</code>; in <code>move gan!</code>. Tạm chết cuối câu lệnh, <code>delete[]</code> trên <code>nullptr</code> không làm gì</td>
+<td><code>d.d</code> = mảng của tạm (4 <code>int</code>)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>in</td>
+<td><code>d.n = 4</code></td>
+<td>không đổi</td>
+</tr>
+<tr>
+<td>10</td>
+<td>cuối <code>main</code></td>
+<td><code>d</code>, <code>c</code>, <code>b</code>, <code>a</code> chết theo thứ tự ngược; <code>b</code> và <code>a</code> đã <code>nullptr</code> nên <code>delete[]</code> của chúng không làm gì (chỉ <code>d</code> và <code>c</code> trả mảng)</td>
+<td>heap trống</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>copy!
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>move!
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>a.n = 0, c.n = 3
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>copy!
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>nhan 3 phan tu
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>move!
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>nhan 3 phan tu
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>move gan!
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>d.n = 4
+</code></pre></div>
+<p>Mình đã chạy bản này với AddressSanitizer: không báo gì, thoát mã 0. Dòng <code>a.n = 0</code> là do <strong>lớp này tự đặt</strong> <code>o.n = 0</code> ở (3); đó là lựa chọn của người viết lớp, không phải quy tắc chung của C++.</p>
+<p>Có một chi tiết đáng nhắc ở bước 8: vế phải là giá trị tạm nên <strong>không cần</strong> viết <code>std::move</code>, C++ tự chọn phép gán di chuyển. Đó là lý do ở <a href="../09-unique-ptr/">Bài 09</a>, dòng <code>p = std::make_unique&lt;Cay&gt;(7);</code> gán được: kết quả của <code>make_unique</code> là rvalue, nên <code>unique_ptr</code> dùng phép gán di chuyển của nó.</p>
+<div class="admonition warning">
+<p class="admonition-title">Hay nhầm</p>
+<p>Trong thân hàm tạo di chuyển, tham số <code>o</code> có tên nên <strong>là lvalue</strong> (như <code>r</code> ở mục 3), dù kiểu của nó là <code>Mang&amp;&amp;</code>. Vì vậy <code>d = o.d;</code> chỉ chép con trỏ, và để lấy ruột của một thành viên khác ta lại phải viết <code>std::move</code> cho nó. Với con trỏ thô thì chép con trỏ là đủ.</p>
+</div>
+<h3 id="5-stdmove-khong-di-chuyen-gi-ca">5. <code>std::move</code> không di chuyển gì cả<a class="headerlink" href="#5-stdmove-khong-di-chuyen-gi-ca" title="Permanent link">&para;</a></h3>
+<p>Bây giờ nhìn lại dòng (8) ở mục 4: <code>Mang c = std::move(a);</code>. Việc lấy con trỏ không do <code>std::move</code> làm. <code>std::move(a)</code> chỉ <strong>ép <code>a</code> thành rvalue</strong>, nghĩa là nói với trình biên dịch "tôi đồng ý cho lấy ruột của <code>a</code>". </p>
+<p>Sau đó trình biên dịch chọn hàm tạo di chuyển vì đối số bây giờ là rvalue, và <strong>chính hàm tạo đó</strong> mới lấy con trỏ. </p>
+<p>Bạn đã thấy điều này ở <a href="../09-unique-ptr/">Bài 09</a>: <code>unique_ptr</code> trao tay vì hàm tạo di chuyển của nó làm vậy, không phải vì <code>std::move</code>.</p>
+<p>Hệ quả: nếu lớp không có hàm tạo di chuyển thì <code>std::move</code> không làm được gì đặc biệt. Thử với <code>Cu</code> chỉ có hàm tạo sao chép:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Cu</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="n">Cu</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="n">Cu</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Cu</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                             </span><span class="c1">// (1)</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">        </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"copy!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">};</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="n">Cu</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="n">Cu</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">                          </span><span class="c1">// (2)</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"b.v = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>Cu a(5)</code></td>
+<td><code>a.v</code> = 5</td>
+</tr>
+<tr>
+<td>2</td>
+<td>(2) <code>Cu b = std::move(a);</code></td>
+<td><code>std::move(a)</code> là rvalue, nhưng <code>Cu</code> không có hàm tạo di chuyển; hàm (1) nhận <code>const Cu&amp;</code> mà tham chiếu hằng gắn được cả giá trị tạm, nên (1) được chọn: in <code>copy!</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>in</td>
+<td><code>b.v = 5</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>copy!
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>b.v = 5
+</code></pre></div>
+<p><strong>Thử thay đổi: thêm <code>Cu(Cu&amp;&amp; o) { v = o.v; std::cout &lt;&lt; "move!\n"; }</code> ngay trước (1).</strong> Mình đã chạy: lần này in <code>move!</code> rồi <code>b.v = 5</code>. Cùng một dòng <code>std::move</code>, kết quả đổi theo việc lớp có hàm tạo di chuyển hay không.</p>
+<h3 id="6-oi-tuong-sau-khi-bi-move">6. Đối tượng sau khi bị move<a class="headerlink" href="#6-oi-tuong-sau-khi-bi-move" title="Permanent link">&para;</a></h3>
+<p>Đối tượng bị move <strong>vẫn còn sống</strong>, hàm hủy của nó vẫn chạy khi hết phạm vi. Với các kiểu của thư viện chuẩn (<code>std::string</code>, <code>std::vector</code>...), chuẩn chỉ hứa đối tượng ở trạng thái <strong>hợp lệ nhưng không xác định (valid but unspecified)</strong>. "Hợp lệ" nghĩa là hủy nó hay gán giá trị mới cho nó đều an toàn. "Không xác định" nghĩa là bạn <strong>không được đoán</strong> nội dung: nhiều máy thấy chuỗi rỗng, nhưng chuẩn không hứa.</p>
+<p>Quy tắc dùng an toàn: sau khi move, chỉ <strong>hủy</strong> nó hoặc <strong>gán lại</strong> nó. </p>
+<p>Ngoại lệ có bảo đảm riêng: chuẩn nói <code>unique_ptr</code> và <code>shared_ptr</code> sau khi bị move thì <strong>rỗng</strong> (<code>nullptr</code>), nên viết <code>a == nullptr</code> hợp lệ, đúng như <a href="../09-unique-ptr/">Bài 09</a>. Với lớp tự viết như <code>Mang</code>, "trạng thái sau move" do chính bạn quy định: ở trên ta chọn <code>n = 0</code> và <code>d = nullptr</code>, đó cũng là trạng thái mà hàm hủy <code>delete[] d</code> xử lý được.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Go không có hàm hủy và không có khái niệm move. Gán một struct luôn chép từng byte (con trỏ, slice, map bên trong chỉ chép "đầu mối", nên bản sao dùng chung dữ liệu, như <a href="../11-sao-chep-rule-of-3/">Bài 11</a> đã nói), và bộ gom rác lo việc dọn khi không còn ai trỏ tới. Vì không có "người phải trả vùng nhớ đúng một lần", Go không cần cách trao quyền: không có thứ nào tương đương <code>std::move</code>. Gán biến về <code>nil</code> ở Go chỉ là gán, không kích hoạt gì.</p>
+</div>
+<h3 id="7-rule-of-5-va-rule-of-0">7. Rule of 5 và Rule of 0<a class="headerlink" href="#7-rule-of-5-va-rule-of-0" title="Permanent link">&para;</a></h3>
+<p><a href="../11-sao-chep-rule-of-3/">Bài 11</a> có Rule of 3: hàm hủy, hàm tạo sao chép, phép gán sao chép. Thêm hai hàm di chuyển ta được năm hàm đặc biệt.</p>
+<p><strong>Rule of 5</strong>: nếu lớp quản lý tài nguyên bằng tay (như <code>Mang</code> giữ <code>int*</code>) thì <strong>thường</strong> phải tự quyết định cả năm hàm: viết, hoặc cấm bằng <code>= delete</code>, hoặc giữ mặc định bằng <code>= default</code> (nêu tên ở <a href="../11-sao-chep-rule-of-3/">Bài 11</a>).</p>
+<p>Trình biên dịch tự sinh hàm nào còn tùy bạn đã khai báo gì. Có hai quy tắc, và mình đã thử cả hai.</p>
+<p><strong>Quy tắc 1: tự khai báo một hàm di chuyển thì hai hàm sao chép tự sinh bị xóa.</strong> Mình thử một struct <code>Rieng</code> chỉ có hàm tạo từ <code>int</code> và một hàm tạo di chuyển, rồi viết <code>Rieng b = a;</code>. <code>g++</code> báo (rút gọn, bỏ chữ <code>constexpr</code> trước tên hàm):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>error: use of deleted function 'Rieng::Rieng(const Rieng&amp;)'
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>note: 'Rieng::Rieng(const Rieng&amp;)' is implicitly declared as deleted because 'Rieng' declares a move constructor or move assignment operator
+</code></pre></div>
+<p><strong>Quy tắc 2: tự khai báo hàm hủy hay một hàm sao chép thì các hàm di chuyển không được tự sinh.</strong> Chương trình sau chứng minh. <code>Cu</code> là kiểu <code>Cu</code> của mục 5 có thêm hàm tạo di chuyển, in <code>copy!</code> hoặc <code>move!</code> để ta thấy hàm nào chạy; <code>M1</code> và <code>M2</code> cùng bọc một <code>Cu</code>, chỉ khác là <code>M1</code> có thêm một hàm hủy rỗng do ta viết.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Cu</span><span class="w"> </span><span class="p">{</span><span class="w">                                       </span><span class="c1">// in copy! hoặc move! để ta thấy hàm nào chạy</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="n">Cu</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="n">Cu</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Cu</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">v</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"copy!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="n">Cu</span><span class="p">(</span><span class="n">Cu</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">v</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"move!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">};</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="k">struct</span><span class="w"> </span><span class="nc">M1</span><span class="w"> </span><span class="p">{</span><span class="w">                                       </span><span class="c1">// có hàm hủy rỗng do ta tự viết</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="n">Cu</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="o">~</span><span class="n">M1</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="p">};</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="k">struct</span><span class="w"> </span><span class="nc">M2</span><span class="w"> </span><span class="p">{</span><span class="w">                                       </span><span class="c1">// y hệt nhưng KHÔNG viết hàm hủy</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="n">Cu</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">};</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">    </span><span class="n">M1</span><span class="w"> </span><span class="n">a</span><span class="p">{</span><span class="n">Cu</span><span class="p">(</span><span class="mi">1</span><span class="p">)};</span><span class="w">                                  </span><span class="c1">// (1)</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">    </span><span class="n">M2</span><span class="w"> </span><span class="n">x</span><span class="p">{</span><span class="n">Cu</span><span class="p">(</span><span class="mi">2</span><span class="p">)};</span><span class="w">                                  </span><span class="c1">// (2)</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"M1: "</span><span class="p">;</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">    </span><span class="n">M1</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">                          </span><span class="c1">// (3)</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"M2: "</span><span class="p">;</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">    </span><span class="n">M2</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">x</span><span class="p">);</span><span class="w">                          </span><span class="c1">// (4)</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"y.c.v = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">c</span><span class="p">.</span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="p">}</span>
+</code></pre></div>
+<p>(Cặp ngoặc nhọn ở dòng (1) và (2) đưa <code>Cu(1)</code> hay <code>Cu(2)</code> cho thành viên <code>c</code>: cách dựng một struct không có hàm tạo riêng.)</p>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1), (2)</td>
+<td>Dựng <code>a</code> (bọc <code>Cu</code> giá trị 1) và <code>x</code> (bọc <code>Cu</code> giá trị 2); chưa in gì</td>
+<td><code>a.c.v = 1</code>, <code>x.c.v = 2</code></td>
+</tr>
+<tr>
+<td>(3) <code>M1 b = std::move(a);</code></td>
+<td><code>M1</code> có hàm hủy tự viết nên <strong>không</strong> có hàm di chuyển tự sinh; <code>std::move</code> âm thầm thành sao chép, và <code>Cu</code> được chép: in <code>copy!</code></td>
+<td><code>b.c.v = 1</code></td>
+</tr>
+<tr>
+<td>(4) <code>M2 y = std::move(x);</code></td>
+<td><code>M2</code> không viết gì nên có hàm di chuyển tự sinh, và nó di chuyển <code>Cu</code>: in <code>move!</code></td>
+<td><code>y.c.v = 2</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>M1: copy!
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>M2: move!
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>y.c.v = 2
+</code></pre></div>
+<p>Chỉ vì thêm một hàm hủy rỗng mà <code>M1</code> mất hàm di chuyển tự sinh, và <code>std::move</code> âm thầm thành sao chép.</p>
+<p>Vì vậy có <strong>Rule of 0</strong>: nếu mọi thành viên của lớp <strong>tự quản lý mình</strong> (<code>std::vector</code>, <code>std::string</code>, <code>std::unique_ptr</code>), bạn <strong>không viết hàm đặc biệt nào</strong> và để trình biên dịch tự sinh; chúng chép và di chuyển từng thành viên đúng cách. Bạn nên ưu tiên cách này mỗi khi có thể.</p>
+<p>Chương trình ở mục 💻 chạy thật để chứng minh, với lớp <code>Lop</code> chỉ gồm một <code>std::vector&lt;int&gt;</code> và một <code>std::string</code>, không viết hàm đặc biệt nào.</p>
+<h3 id="8-noexcept-va-stdvector">8. <code>noexcept</code> và <code>std::vector</code><a class="headerlink" href="#8-noexcept-va-stdvector" title="Permanent link">&para;</a></h3>
+<p><code>std::vector</code> là mảng co giãn: các phần tử nằm liền nhau trong một khối heap. Khi <code>push_back</code> mà khối đã đầy, vector xin một khối <strong>lớn hơn</strong>, chuyển các phần tử cũ sang, rồi trả khối cũ. Chuyển bằng move thì rẻ, nhưng có một rủi ro: nếu move ném ngoại lệ khi mới chuyển được nửa số phần tử, khối cũ đã bị lấy ruột một phần và vector không thể khôi phục. (Nhân tiện: nếu một hàm đã hứa <code>noexcept</code> mà ngoại lệ vẫn thoát ra khỏi nó, chương trình gọi <code>std::terminate</code> và dừng hẳn; ngoại lệ là chuyện của <a href="../08-raii/">Bài 08</a>.)</p>
+<p>Để an toàn, vector dùng <code>std::move_if_noexcept</code>: <strong>chỉ move khi hàm tạo di chuyển hứa <code>noexcept</code></strong> (hoặc kiểu không sao chép được); nếu không thì <strong>sao chép</strong>, vì sao chép không phá khối cũ. Nghĩa là quên <code>noexcept</code> làm vector âm thầm chậm đi. Đếm thử với hai kiểu giống hệt nhau, chỉ khác <code>noexcept</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">CayA</span><span class="w"> </span><span class="p">{</span><span class="w">                                     </span><span class="c1">// move có noexcept</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cao</span><span class="p">;</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="n">CayA</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="n">CayA</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">CayA</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  copy "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">    </span><span class="n">CayA</span><span class="p">(</span><span class="n">CayA</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  move "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">};</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="k">struct</span><span class="w"> </span><span class="nc">CayB</span><span class="w"> </span><span class="p">{</span><span class="w">                                     </span><span class="c1">// move KHÔNG noexcept</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cao</span><span class="p">;</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="n">CayB</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">    </span><span class="n">CayB</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">CayB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  copy "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="n">CayB</span><span class="p">(</span><span class="n">CayB</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  move "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="p">};</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">CayA</span><span class="o">&gt;</span><span class="w"> </span><span class="n">va</span><span class="p">;</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"CayA (noexcept):</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" push_back "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">        </span><span class="n">va</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">CayA</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">CayB</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vb</span><span class="p">;</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"CayB (khong noexcept):</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" push_back "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="w">        </span><span class="n">vb</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">CayB</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>push_back</code> thêm một phần tử vào cuối. Mỗi lần ta đưa vào một <code>CayX(i)</code> tạm (rvalue), nên phần tử mới được dựng bằng hàm tạo di chuyển; các dòng còn lại là chuyển phần tử cũ khi vector tăng khối.</p>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra (thứ tự là thứ tự <strong>mình quan sát</strong> trên g++)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>push_back</code> 1</td>
+<td>Vector rỗng, xin khối đầu tiên; phần tử mới dựng từ tạm: <code>move 1</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>push_back</code> 2</td>
+<td>Khối đầy, xin khối lớn hơn; phần tử mới: <code>move 2</code>; rồi chuyển phần tử cũ: <code>CayA</code> in <code>move 1</code>, <code>CayB</code> in <code>copy 1</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>push_back</code> 3</td>
+<td>Khối đầy lần nữa; <code>move 3</code>; chuyển phần tử cũ: <code>CayA</code> in <code>move 1</code>, <code>move 2</code>, <code>CayB</code> in <code>copy 1</code>, <code>copy 2</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>push_back</code> 4</td>
+<td>Khối còn chỗ, không phải chuyển ai: chỉ <code>move 4</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>CayA (noexcept):
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a> push_back 1
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  move 1
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a> push_back 2
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  move 2
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>  move 1
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a> push_back 3
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  move 3
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>  move 1
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>  move 2
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a> push_back 4
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>  move 4
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>CayB (khong noexcept):
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a> push_back 1
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>  move 1
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a> push_back 2
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>  move 2
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>  copy 1
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a> push_back 3
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>  move 3
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>  copy 1
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>  copy 2
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a> push_back 4
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>  move 4
+</code></pre></div>
+<p>Chỉ khác một chữ <code>noexcept</code>, các phần tử cũ của <code>CayB</code> bị <strong>sao chép</strong> mỗi khi vector tăng khối.</p>
+<p>Con số cụ thể ở trên là của g++ trên máy mình: dung lượng tăng 1, 2, 4 và thứ tự dòng in có thể <strong>khác</strong> giữa các cài đặt thư viện chuẩn, nhưng quy tắc "không <code>noexcept</code> thì sao chép khi tăng khối" là ý chính. <strong>Thử thay đổi: thêm <code>vb.reserve(4);</code> ngay sau <code>std::vector&lt;CayB&gt; vb;</code></strong> (<code>reserve(4)</code> xin sẵn chỗ cho 4 phần tử). Mình đã chạy: <code>CayB</code> chỉ còn bốn dòng <code>move</code>, không có <code>copy</code>, vì vector không còn phải tăng khối.</p>
+<h3 id="9-tra-ve-theo-gia-tri-viet-return-v">9. Trả về theo giá trị: viết <code>return v;</code><a class="headerlink" href="#9-tra-ve-theo-gia-tri-viet-return-v" title="Permanent link">&para;</a></h3>
+<p>Khi hàm trả một đối tượng theo giá trị, đừng viết <code>std::move</code>. Trình biên dịch có thể bỏ hẳn bước sao chép hoặc di chuyển: gọi là <strong>copy elision</strong> (bỏ qua sao chép), thường gọi là RVO (Return Value Optimization, tối ưu giá trị trả về). Từ C++17 điều này <strong>bắt buộc</strong> khi trả về một giá trị tạm (<code>return Cay(3);</code>): không có sao chép hay di chuyển nào, kể cả khi hai hàm đó bị xóa.</p>
+<p>Với biến cục bộ có tên (<code>return c;</code>) thì gọi là <strong>NRVO</strong>, được phép nhưng <strong>không bắt buộc</strong>. Nếu không bỏ qua được, trả về biến cục bộ được thử như rvalue trước, tức là dùng <strong>move</strong> chứ không phải copy. Mình đã thử một hàm có hai biến cục bộ và trả một trong hai tùy nhánh: g++ in đúng một <code>move!</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Cay</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cao</span><span class="p">;</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="n">Cay</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"tao "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="n">Cay</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Cay</span><span class="o">&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"copy!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="n">Cay</span><span class="p">(</span><span class="n">Cay</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cao</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">cao</span><span class="p">;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"move!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="p">};</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="n">Cay</span><span class="w"> </span><span class="nf">taoTam</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Cay</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w">                                </span><span class="c1">// (1)</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">}</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="n">Cay</span><span class="w"> </span><span class="nf">taoCoTen</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">c</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w">                                     </span><span class="c1">// (2)</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="p">}</span>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"--- taoTam</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">taoTam</span><span class="p">();</span><span class="w">                             </span><span class="c1">// (3)</span>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"--- taoCoTen</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">taoCoTen</span><span class="p">();</span><span class="w">                           </span><span class="c1">// (4)</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"--- xong "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">cao</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>in</td>
+<td><code>--- taoTam</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>(3) → (1)</td>
+<td><code>Cay(3)</code> là giá trị tạm trả về: từ C++17 nó được dựng thẳng vào <code>a</code>. Chỉ in <code>tao 3</code>, không <code>copy!</code> hay <code>move!</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>in</td>
+<td><code>--- taoCoTen</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>(4) → (2)</td>
+<td><code>c</code> có tên. Trên g++ của mình, <code>c</code> được dựng thẳng vào <code>b</code> (NRVO): chỉ in <code>tao 4</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>in</td>
+<td><code>--- xong 3 4</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>--- taoTam
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>tao 3
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>--- taoCoTen
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>tao 4
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>--- xong 3 4
+</code></pre></div>
+<p>Chỉ dòng <code>tao 3</code> ở (1) là được <strong>bảo đảm</strong> bởi chuẩn C++17. Việc <code>taoCoTen</code> không in gì thêm là điều mình <strong>quan sát</strong> trên g++ này; chuẩn không bắt buộc.</p>
+<p>Vậy nếu viết <code>return std::move(c);</code> thì sao? Mình đã chạy một bản của <code>taoCoTen</code> viết như vậy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">Cay</span><span class="w"> </span><span class="nf">taoMove</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">c</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>g++ với <code>-Wall</code> cảnh báo (rút gọn, bỏ vị trí): <code>warning: moving a local object in a return statement prevents copy elision [-Wpessimizing-move]</code>, và chương trình in <code>tao 5</code> rồi <code>move!</code>.</p>
+<p>Tức là <code>std::move</code> làm mất cơ hội dựng thẳng, bạn phải trả thêm một lần di chuyển mà không được gì. Quy tắc: <strong>trả biến cục bộ theo giá trị thì cứ <code>return v;</code></strong>. (Ở <a href="../09-unique-ptr/">Bài 09</a> bảng cũng ghi trả <code>unique_ptr</code> thì không cần <code>std::move</code>.)</p>
+<div class="admonition info">
+<p class="admonition-title">Để biết: perfect forwarding (chỉ nêu tên)</p>
+<p>Trong code thư viện (như <code>emplace_back</code>) bạn sẽ gặp <code>T&amp;&amp;</code> kèm <code>std::forward&lt;T&gt;(x)</code>: kỹ thuật giữ nguyên "x là lvalue hay rvalue" khi đưa <code>x</code> cho hàm khác, gọi là <strong>perfect forwarding</strong>; <code>T&amp;&amp;</code> kiểu này (với <code>T</code> suy ra từ đối số) gọi là <strong>forwarding reference</strong>. Bài này không dạy; ở đây <code>T&amp;&amp;</code> luôn chỉ là tham chiếu rvalue của mục 3.</p>
+</div>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="vi-du-rule-of-0-chay-that">Ví dụ: Rule of 0 chạy thật<a class="headerlink" href="#vi-du-rule-of-0-chay-that" title="Permanent link">&para;</a></h3>
+<p>Lớp <code>Lop</code> dưới đây (đã nêu ở mục 7) <strong>không viết hàm đặc biệt nào</strong>. Ta kiểm tra: sao chép có sâu không, di chuyển có thật là lấy ruột không.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Lop</span><span class="w"> </span><span class="p">{</span><span class="w">                                      </span><span class="c1">// không viết hàm đặc biệt nào</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">d</span><span class="p">;</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">ten</span><span class="p">;</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="p">};</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="n">Lop</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">ten</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"abc"</span><span class="p">;</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">truoc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">data</span><span class="p">();</span><span class="w">                </span><span class="c1">// (1)</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">    </span><span class="n">Lop</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">                                    </span><span class="c1">// (2)</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sao chep: a.d[0] = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", b.d[0] = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a><span class="w">    </span><span class="n">Lop</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">                         </span><span class="c1">// (3)</span>
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"di chuyen: c co "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" so, ten "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">ten</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cung vung nho voi truoc? "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">d</span><span class="p">.</span><span class="n">data</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">truoc</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>a.d.data()</code> là địa chỉ khối heap chứa các phần tử của vector; ta lưu lại ở (1) để so sánh sau. Ta không in <code>a</code> sau khi move, vì nội dung của nó không được bảo đảm.</p>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này (địa chỉ minh họa)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>a.d = {1, 2, 3}</code>, <code>a.ten = "abc"</code></td>
+<td><code>a</code> giữ ba số (một dấu <code>{}</code> gán ba số vào vector) và chuỗi <code>abc</code></td>
+<td><code>a.d.data()</code> = 0x9000</td>
+</tr>
+<tr>
+<td>2</td>
+<td>(1)</td>
+<td>Lưu địa chỉ khối của <code>a.d</code> vào <code>truoc</code></td>
+<td><code>truoc</code> = 0x9000</td>
+</tr>
+<tr>
+<td>3</td>
+<td>(2) <code>Lop b = a;</code></td>
+<td>Hàm sao chép tự sinh chép từng thành viên: vector chép sâu sang khối mới, chuỗi cũng vậy</td>
+<td><code>b.d.data()</code> = 0xA000</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>b.d[0] = 9</code> + in</td>
+<td>Chỉ đổi khối của <code>b</code>: in <code>sao chep: a.d[0] = 1, b.d[0] = 9</code></td>
+<td>không đổi</td>
+</tr>
+<tr>
+<td>5</td>
+<td>(3) <code>Lop c = std::move(a);</code></td>
+<td>Hàm di chuyển tự sinh di chuyển từng thành viên: vector của <code>c</code> lấy khối của <code>a</code>, chuỗi cũng được di chuyển</td>
+<td><code>c.d.data()</code> = 0x9000</td>
+</tr>
+<tr>
+<td>6</td>
+<td>in</td>
+<td><code>c</code> có 3 số, tên <code>abc</code></td>
+<td>không đổi</td>
+</tr>
+<tr>
+<td>7</td>
+<td>in</td>
+<td><code>c.d.data() == truoc</code> đúng, in <code>1</code></td>
+<td>không đổi</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>sao chep: a.d[0] = 1, b.d[0] = 9
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>di chuyen: c co 3 so, ten abc
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>cung vung nho voi truoc? 1
+</code></pre></div>
+<p>Dòng cuối là bằng chứng: sau khi move, <code>c</code> giữ <strong>đúng khối nhớ cũ</strong> của <code>a</code>, không có khối mới nào được xin. Con số <code>1</code> là kết quả mình thấy trên máy này; chuẩn bảo đảm di chuyển một vector là thao tác hằng thời gian, nên thực tế nó chỉ chuyển con trỏ. Mình đã chạy với AddressSanitizer: không báo gì, thoát mã 0.</p>
+<p>Nếu <code>Lop</code> có thêm thành viên <code>std::unique_ptr&lt;int&gt; p</code>, mình đã thử và <code>Lop b = a;</code> thành lỗi biên dịch (<code>use of deleted function 'Lop::Lop(const Lop&amp;)'</code>, vì <code>unique_ptr</code> không copy được), còn di chuyển vẫn dùng được: lớp tự động không sao chép được nhưng di chuyển được, đúng ý sở hữu duy nhất, mà bạn không viết dòng nào.</p>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>lvalue và rvalue khác nhau thế nào?</summary>
+<p>lvalue có tên và có chỗ ổn định trong bộ nhớ, dùng lại được ở các dòng sau (như một biến). rvalue là giá trị tạm sắp biến mất sau câu lệnh (như <code>x + 1</code>, <code>Cay(3)</code>, giá trị hàm trả về theo giá trị). Phân biệt này cho phép C++ "lấy ruột" an toàn: chỉ lấy ruột của rvalue, vì không ai còn dùng nó. Tham chiếu rvalue <code>T&amp;&amp;</code> là loại tham chiếu chỉ gắn với rvalue.</p>
+</details>
+<details class="question">
+<summary><code>std::move</code> làm gì?</summary>
+<p>Nó <strong>không di chuyển gì cả</strong>: chỉ ép đối số thành rvalue (kiểu <code>T&amp;&amp;</code>), tức là nói "tôi cho phép lấy ruột". Việc di chuyển thật do hàm tạo di chuyển hoặc phép gán di chuyển được chọn sau đó làm. Nếu kiểu không có hàm di chuyển, <code>std::move</code> kết thúc bằng sao chép.</p>
+</details>
+<details class="question">
+<summary>Viết hàm tạo di chuyển cho lớp giữ con trỏ thô.</summary>
+<p>Lấy con trỏ của nguồn, đặt con trỏ (và kích thước) của nguồn về rỗng (<code>nullptr</code>), và đánh dấu <code>noexcept</code>: <code>Mang(Mang&amp;&amp; o) noexcept { n = o.n; d = o.d; o.n = 0; o.d = nullptr; }</code>. Đặt nguồn về <code>nullptr</code> để hai đối tượng không cùng <code>delete</code> một vùng. Phép gán di chuyển thêm hai việc: kiểm tra tự gán và trả vùng cũ trước khi lấy.</p>
+</details>
+<details class="question">
+<summary>Vì sao hàm tạo di chuyển nên <code>noexcept</code>?</summary>
+<p>Khi <code>std::vector</code> hết chỗ và phải chuyển phần tử sang khối lớn hơn, nó dùng <code>std::move_if_noexcept</code>: chỉ move nếu hàm tạo di chuyển hứa không ném ngoại lệ, nếu không (và kiểu sao chép được) thì sao chép để khối cũ còn nguyên nếu lỡ có ngoại lệ. Thiếu <code>noexcept</code> nghĩa là vector chậm đi âm thầm; mình đã đếm bằng bộ đếm in <code>copy</code>/<code>move</code>. Cách xử lý cụ thể có thể khác giữa các cài đặt, nhưng ý chính là vậy.</p>
+</details>
+<details class="question">
+<summary>Rule of 3, Rule of 5, Rule of 0?</summary>
+<p>Rule of 3: cần tự viết một trong {hàm hủy, hàm tạo sao chép, phép gán sao chép} thì thường cần cả ba. Rule of 5 thêm hàm tạo di chuyển và phép gán di chuyển: lớp quản lý tài nguyên bằng tay thì thường phải quyết định cả năm (viết, <code>= delete</code> hoặc <code>= default</code>). Rule of 0: dùng thành viên tự quản lý (<code>std::vector</code>, <code>std::unique_ptr</code>, <code>std::string</code>) và không viết hàm nào trong năm hàm đó; đây là cách nên ưu tiên.</p>
+</details>
+<details class="question">
+<summary><code>return std::move(x);</code> có sai không?</summary>
+<p>Với biến cục bộ trả theo giá trị thì có, nó là thói quen xấu: nó <strong>ngăn</strong> copy elision/NRVO (g++ có cảnh báo <code>-Wpessimizing-move</code>) và buộc thêm một lần di chuyển. Cứ viết <code>return x;</code>: trình biên dịch có thể bỏ qua bước sao chép hoặc di chuyển, và nếu không thì cũng dùng move. C++17 còn bảo đảm bỏ qua hoàn toàn khi trả về giá trị tạm như <code>return Cay(3);</code>.</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Dùng đối tượng sau khi move rồi đoán nội dung của nó</p>
+<p>Đối tượng bị move chỉ ở trạng thái "hợp lệ nhưng không xác định": chỉ hủy nó hoặc gán lại. Đừng viết code dựa trên việc "chắc nó rỗng". Ngoại lệ chuẩn bảo đảm là <code>unique_ptr</code>/<code>shared_ptr</code>, rỗng sau khi move.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Viết <code>return std::move(bienCucBo);</code></p>
+<p>Nó cản copy elision (mục 9). Hãy viết <code>return bienCucBo;</code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Hàm tạo di chuyển quên đặt nguồn về <code>nullptr</code></p>
+<p>Khi đó nguồn và đích cùng giữ một con trỏ, và cả hai hàm hủy cùng <code>delete[]</code> một vùng: giải phóng hai lần, hành vi không xác định (<a href="../07-new-delete/">Bài 07</a>). Mình không chạy đoạn dưới và không ghi kết quả.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">Mang</span><span class="p">(</span><span class="n">Mang</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">o</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">n</span><span class="p">;</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">d</span><span class="p">;</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="c1">// thiếu: o.d = nullptr;  -&gt; hai hàm hủy cùng delete[] một vùng</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="12">
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 1.</strong> Đọc đoạn code sau. <code>Mang</code> có hàm tạo sao chép in <code>copy!</code> và hàm tạo di chuyển in <code>move!</code>. Ba dòng in ra theo thứ tự nào?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Mang a(3);
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>Mang b = a;
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>Mang c = std::move(a);
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>Mang d = std::move(b);
+</code></pre></div>
+<ul>
+<li><code>copy!</code>, <code>copy!</code>, <code>copy!</code>: <code>std::move</code> chỉ đổi tên</li>
+<li><code>copy!</code>, <code>move!</code>, <code>move!</code>: <code>a</code> là lvalue, hai dòng sau là rvalue</li>
+<li><code>move!</code>, <code>move!</code>, <code>move!</code>: mọi khởi tạo cùng loại đều di chuyển</li>
+<li><code>copy!</code>, <code>move!</code>, <code>copy!</code>: dòng cuối chép tiếp từ <code>b</code></li>
+</ul>
+<p class="giai-thich">Dòng <code>Mang b = a;</code> có <code>a</code> là lvalue (có tên, không có <code>std::move</code>) nên chọn hàm tạo sao chép. Hai dòng sau có <code>std::move</code>, ép thành rvalue, nên chọn hàm tạo di chuyển (mình đã chạy ra <code>copy! move! move!</code>). <code>std::move</code> không "chỉ đổi tên": nó quyết định hàm nào được chọn. Việc <code>b</code> từng là bản sao không ngăn nó bị lấy ruột tiếp, và dòng đầu không thể là <code>move!</code> vì <code>a</code> không được ép thành rvalue.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 2.</strong> Đọc đoạn code sau (đã <code>#include &lt;memory&gt;</code> và <code>&lt;utility&gt;</code>). Dòng cuối in ra gì?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>std::unique_ptr&lt;int&gt; a = std::make_unique&lt;int&gt;(7);
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>std::unique_ptr&lt;int&gt; b = std::move(a);
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>std::cout &lt;&lt; (a == nullptr) &lt;&lt; " " &lt;&lt; *b;
+</code></pre></div>
+<ul>
+<li><code>0 7</code>: <code>a</code> vẫn giữ số 7 vì <code>std::move</code> không xóa gì</li>
+<li><code>1 0</code>: <code>b</code> được tạo mới nên bắt đầu từ 0</li>
+<li><code>0 0</code>: cả hai đều bị <code>std::move</code> làm rỗng đi</li>
+<li><code>1 7</code>: <code>a</code> rỗng sau khi trao, <code>b</code> giữ 7</li>
+</ul>
+<p class="giai-thich">Chuẩn bảo đảm <code>unique_ptr</code> bị move thì thành rỗng, nên <code>a == nullptr</code> đúng và in <code>1</code>; <code>b</code> nhận số 7 (mình đã chạy ra <code>1 7</code>). Lập luận "<code>std::move</code> không xóa gì" đúng về bản thân <code>std::move</code>, nhưng hàm tạo di chuyển của <code>unique_ptr</code> mới là chỗ đặt nguồn về <code>nullptr</code>. <code>b</code> nhận giá trị của <code>a</code> chứ không bắt đầu từ 0, và <code>b</code> không thể rỗng vì nó là bên nhận.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 3.</strong> Đọc khai báo sau của kiểu <code>T</code>, rồi nghĩ về <code>std::vector&lt;T&gt;</code> khi <code>push_back</code> làm nó hết chỗ. Chuyện gì <strong>thường</strong> xảy ra với các phần tử cũ?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>struct T {
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    T(const T&amp;);
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    T(T&amp;&amp;);
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>};
+</code></pre></div>
+<ul>
+<li>Chúng được di chuyển, vì chỉ cần có hàm di chuyển là đủ</li>
+<li>Không biên dịch được, vì thiếu <code>noexcept</code></li>
+<li>Chúng được sao chép, vì hàm di chuyển không <code>noexcept</code></li>
+<li>Chúng bị bỏ lại ở khối cũ, vector giữ hai khối</li>
+</ul>
+<p class="giai-thich">Vector dùng <code>std::move_if_noexcept</code>: hàm di chuyển không hứa <code>noexcept</code> và kiểu còn sao chép được thì nó sao chép các phần tử cũ, để khối cũ còn nguyên nếu có ngoại lệ (mình đã đếm bằng <code>CayB</code> ra các dòng <code>copy</code>; chi tiết có thể khác giữa các cài đặt). Có hàm di chuyển là chưa đủ để vector chọn nó. <code>noexcept</code> không bắt buộc về cú pháp nên vẫn biên dịch được. Vector luôn giữ đúng một khối, khối cũ được trả sau khi chuyển.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 4.</strong> Đọc đoạn code sau. <code>Cay</code> in <code>tao 3</code> khi tạo, <code>copy!</code> khi sao chép và <code>move!</code> khi di chuyển. Biên dịch bằng C++17, chương trình in ra gì?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Cay taoTam() { return Cay(3); }
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>Cay a = taoTam();
+</code></pre></div>
+<ul>
+<li>Chỉ <code>tao 3</code>: giá trị tạm được dựng thẳng vào chính biến <code>a</code> luôn</li>
+<li><code>tao 3</code> rồi <code>move!</code>: giá trị tạm được chuyển vào <code>a</code></li>
+<li><code>tao 3</code> rồi <code>copy!</code>: giá trị tạm được sao chép vào <code>a</code></li>
+<li><code>tao 3</code> rồi hai <code>move!</code>: một ở lệnh <code>return</code>, một ở lệnh gán</li>
+</ul>
+<p class="giai-thich">Từ C++17, trả về một giá trị tạm (<code>return Cay(3);</code>) được bảo đảm dựng thẳng vào nơi nhận, nên chỉ có <code>tao 3</code> (mình đã chạy). Không có bước chuyển nào, nên cả <code>move!</code> lẫn <code>copy!</code> đều không in. Kiểu nghĩ "một lần ở <code>return</code>, một lần ở lệnh gán" là cách mô tả thời trước C++17, khi tối ưu này còn tùy trình biên dịch. Còn <code>=</code> ở dòng khai báo <code>Cay a = ...</code> là khởi tạo chứ không phải phép gán.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 5.</strong> Đọc đoạn code sau. <code>Cu</code> chỉ có hàm tạo từ <code>int</code> và một hàm tạo sao chép (in <code>copy!</code>), không có hàm tạo di chuyển. Dòng cuối làm gì?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Cu a(5);
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>Cu b = std::move(a);
+</code></pre></div>
+<ul>
+<li>In <code>move!</code>, vì <code>std::move</code> luôn gọi hàm move</li>
+<li>Lỗi biên dịch, vì <code>Cu</code> chưa có hàm tạo di chuyển để gọi</li>
+<li>Không in gì, vì <code>std::move</code> chỉ là phép ép kiểu, không gọi hàm nào</li>
+<li>In <code>copy!</code>, vì không có hàm di chuyển nào để chọn cả</li>
+</ul>
+<p class="giai-thich"><code>std::move(a)</code> chỉ ép <code>a</code> thành rvalue. <code>Cu</code> không có hàm tạo di chuyển nên hàm duy nhất khớp là hàm tạo sao chép, vì <code>const Cu&amp;</code> gắn được cả rvalue; kết quả là <code>copy!</code> (mình đã chạy). Nói <code>std::move</code> "luôn gọi hàm di chuyển" là hiểu sai: nó chỉ cho phép, hàm có tồn tại hay không là chuyện khác. Cũng không có lỗi biên dịch, và "không in gì" sai vì vẫn phải tạo <code>b</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 6.</strong> Đọc đoạn code sau. Có hai hàm <code>f</code>: <code>f(int&amp;)</code> in <code>L</code>, <code>f(int&amp;&amp;)</code> in <code>R</code>. Nó in ra gì?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>int x = 1;
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>f(x);  f(x + 1);  f(std::move(x));  f(3);
+</code></pre></div>
+<ul>
+<li><code>L L R R</code>: <code>x + 1</code> gọi lại được như một biến</li>
+<li><code>R R R R</code>: mọi đối số đều là rvalue</li>
+<li><code>L R R R</code>: chỉ <code>x</code> là lvalue, ba cái kia là rvalue</li>
+<li><code>L R L R</code>: ngay sau <code>std::move</code>, <code>x</code> trở lại là lvalue</li>
+</ul>
+<p class="giai-thich"><code>x</code> có tên nên là lvalue (in <code>L</code>). <code>x + 1</code> là kết quả tạm, <code>std::move(x)</code> đã ép thành rvalue, và <code>3</code> là số viết thẳng, nên cả ba in <code>R</code> (mình đã chạy một bản tương tự ra <code>lvalue rvalue rvalue rvalue</code>). <code>x + 1</code> không gọi lại được như biến vì hết câu lệnh là mất. Đối số không mặc nhiên là rvalue: <code>x</code> truyền thẳng vẫn là lvalue. Còn <code>std::move</code> không có tác dụng kéo dài sang lần gọi sau.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 7.</strong> Hàm trả một biến cục bộ <code>v</code> theo giá trị. Cách viết lệnh <code>return</code> nào là tốt nhất?</p>
+<ul>
+<li><code>return v;</code> để trình biên dịch tự chọn cách tốt nhất</li>
+<li><code>return std::move(v);</code> để chắc chắn chọn hàm di chuyển</li>
+<li><code>return v;</code> nhưng phải tự viết hàm tạo sao chép trước</li>
+<li><code>return std::move(v);</code> vì nó luôn bỏ qua được bước sao chép</li>
+</ul>
+<p class="giai-thich"><code>return v;</code> cho trình biên dịch cơ hội bỏ qua hẳn bước sao chép hoặc di chuyển (NRVO, được phép chứ không bắt buộc), và nếu không bỏ qua được thì cũng dùng di chuyển. <code>return std::move(v);</code> ngược lại ngăn tối ưu đó (g++ cảnh báo <code>-Wpessimizing-move</code>) và buộc thêm một lần di chuyển, nên "chắc chắn chọn di chuyển" là lợi ích giả. Không cần viết hàm sao chép riêng để <code>return v;</code> chạy. Còn nói <code>std::move</code> "luôn bỏ qua được sao chép" sai vì nó không bỏ qua gì: nó chỉ ép kiểu.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>lvalue</strong> có tên và dùng lại được ở dòng sau (<code>x</code>); <strong>rvalue</strong> là giá trị tạm sắp biến mất (<code>x + 1</code>, <code>Cay(3)</code>, kết quả hàm); tham chiếu <code>T&amp;&amp;</code> chỉ gắn với rvalue, nhưng bên trong hàm thì tham số <code>&amp;&amp;</code> có tên nên là lvalue.</li>
+<li><strong>Di chuyển</strong> = lấy con trỏ của nguồn rồi đặt con trỏ nguồn về <code>nullptr</code> (kèm <code>noexcept</code>); phép gán di chuyển còn phải chống tự gán và trả vùng cũ. <code>std::move(x)</code> <strong>không di chuyển gì</strong>: nó chỉ ép <code>x</code> thành rvalue, hàm tạo/gán di chuyển được chọn mới làm việc; không có hàm đó thì kết thúc bằng sao chép.</li>
+<li>Sau khi move, chỉ <strong>hủy</strong> hoặc <strong>gán lại</strong> đối tượng (trạng thái "hợp lệ nhưng không xác định" với kiểu chuẩn; riêng <code>unique_ptr</code>/<code>shared_ptr</code> được bảo đảm rỗng).</li>
+<li><strong>Rule of 5</strong>: lớp quản lý tài nguyên bằng tay thì quyết định cả năm hàm đặc biệt; <strong>Rule of 0</strong>: dùng thành viên tự quản lý (<code>vector</code>, <code>unique_ptr</code>, <code>string</code>) và không viết hàm nào. Thiếu <code>noexcept</code> trên hàm tạo di chuyển thì <code>std::vector</code> sao chép khi tăng khối.</li>
+<li>Trả theo giá trị thì viết <code>return v;</code>, không viết <code>return std::move(v);</code> (có thể cản copy elision); C++17 bảo đảm bỏ qua với giá trị tạm, còn NRVO không bắt buộc. Perfect forwarding chỉ cần biết tên.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../11-sao-chep-rule-of-3/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 11 — Sao chép đúng cách và Rule of 3">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 11 — Sao chép đúng cách và Rule of 3
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../13-cpp11-14-17/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 13 — Tính năng C++11 hay gặp">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 13 — Tính năng C++11 hay gặp
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>

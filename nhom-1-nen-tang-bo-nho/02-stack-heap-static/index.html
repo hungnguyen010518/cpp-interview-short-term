@@ -1,0 +1,1898 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-1-nen-tang-bo-nho/02-stack-heap-static/">
+      
+      
+        <link rel="prev" href="../01-bo-nho-byte-dia-chi/">
+      
+      
+        <link rel="next" href="../03-con-tro-co-ban/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-02-ba-vung-nho-stack-heap-va-vung-tinh" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ham-goi-ham-va-khung-cua-moi-lan-goi" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Hàm gọi hàm, và "khung" của mỗi lần gọi
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-heap-kho-o-phai-tu-xin-tu-tra" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Heap: kho đồ phải tự xin, tự trả
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-vung-tinh-bang-treo-suot-lop-hoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Vùng tĩnh: bảng treo suốt lớp học
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-hoc-nhanh-struct-ham-tao-va-ham-huy-e-lam-thi-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Học nhanh struct, hàm tạo và hàm hủy (để làm thí nghiệm)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-bon-kieu-thoi-gian-song" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Bốn kiểu thời gian sống
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-1-ham-goi-ham-khung-xuat-hien-roi-bien-mat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 1: Hàm gọi hàm, khung xuất hiện rồi biến mất
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-2-xin-va-tra-mot-cho-o-heap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 2: Xin và trả một chỗ ở heap
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-3-ba-kieu-thoi-gian-song-cung-mot-luc-xem-thu-tu-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-4-in-ia-chi-cua-bon-loai" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 4: In địa chỉ của bốn loại
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-5-cau-hoi-cua-ban-bang-thuc-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-biet-thu-tu-khoi-tao-global-giua-cac-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Để biết: thứ tự khởi tạo global giữa các file
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ham-goi-ham-va-khung-cua-moi-lan-goi" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Hàm gọi hàm, và "khung" của mỗi lần gọi
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-heap-kho-o-phai-tu-xin-tu-tra" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Heap: kho đồ phải tự xin, tự trả
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-vung-tinh-bang-treo-suot-lop-hoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Vùng tĩnh: bảng treo suốt lớp học
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-hoc-nhanh-struct-ham-tao-va-ham-huy-e-lam-thi-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Học nhanh struct, hàm tạo và hàm hủy (để làm thí nghiệm)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-bon-kieu-thoi-gian-song" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Bốn kiểu thời gian sống
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-1-ham-goi-ham-khung-xuat-hien-roi-bien-mat" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 1: Hàm gọi hàm, khung xuất hiện rồi biến mất
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-2-xin-va-tra-mot-cho-o-heap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 2: Xin và trả một chỗ ở heap
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-3-ba-kieu-thoi-gian-song-cung-mot-luc-xem-thu-tu-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-4-in-ia-chi-cua-bon-loai" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 4: In địa chỉ của bốn loại
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-5-cau-hoi-cua-ban-bang-thuc-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-biet-thu-tu-khoi-tao-global-giua-cac-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Để biết: thứ tự khởi tạo global giữa các file
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-02-ba-vung-nho-stack-heap-va-vung-tinh">Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh<a class="headerlink" href="#bai-02-ba-vung-nho-stack-heap-va-vung-tinh" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Nói được một biến nằm ở stack, heap hay vùng tĩnh, và nó sống đến khi nào.</li>
+<li>Đọc được thứ tự "ra đời, chết" của đối tượng cục bộ, global, <code>static</code> và đối tượng xin bằng <code>new</code>.</li>
+<li>Trả lời được câu hỏi phỏng vấn: "đối tượng của một class khai báo global nằm ở heap hay stack?".</li>
+</ul>
+</div>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Ở <a href="../01-bo-nho-byte-dia-chi/">Bài 01</a> ta có một dãy tủ khóa dài, mỗi ngăn đựng một byte. Nhưng dãy tủ đó không dùng chung một kiểu cho mọi thứ. Chương trình C++ chia nó thành ba khu (còn một khu chứa chính code chương trình, tạm bỏ qua), và mỗi khu có luật riêng. Hãy hình dung một lớp học:</p>
+<ul>
+<li><strong>Cái bàn học của bạn (stack).</strong> Nhỏ, ngay trước mặt, lấy đồ ra rất nhanh. Khi hết giờ học, bàn tự được dọn sạch mà bạn không cần làm gì. Chỗ này là nơi sống của <strong>biến cục bộ</strong> (biến khai báo trong một hàm).</li>
+<li><strong>Kho đồ của trường (heap).</strong> Rộng hơn bàn học rất nhiều, nhưng bạn phải <strong>tự xin</strong> thủ kho một chỗ, và phải <strong>tự trả</strong> khi xong. Quên trả thì chỗ đó bị giữ mãi.</li>
+<li><strong>Bảng treo trên tường lớp (vùng tĩnh).</strong> Được treo từ lúc lớp mở cửa và chỉ gỡ khi lớp đóng cửa. Nó ở đó suốt thời gian lớp học. Chỗ này là nơi của <strong>biến global</strong> (biến khai báo ngoài mọi hàm) và các biến <code>static</code>.</li>
+</ul>
+<p>Cả bài này chỉ trả lời hai câu hỏi cho từng biến: <strong>nó nằm ở khu nào</strong>, và <strong>nó sống đến bao giờ</strong>.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví dụ lớp học không còn đúng?</p>
+<p>Trong máy thật, "bàn học", "kho" và "bảng tường" không phải ba căn phòng riêng. Chúng là ba vùng của cùng một dãy địa chỉ, mà hệ điều hành chia cho chương trình của bạn. Và "thủ kho" không phải một người, mà là một đoạn code có sẵn đi kèm chương trình, lo việc tìm chỗ trống.</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-ham-goi-ham-va-khung-cua-moi-lan-goi">1. Hàm gọi hàm, và "khung" của mỗi lần gọi<a class="headerlink" href="#1-ham-goi-ham-va-khung-cua-moi-lan-goi" title="Permanent link">&para;</a></h3>
+<p><strong>Hàm</strong> là một đoạn code có tên, bạn có thể gọi nhiều lần. Bạn đã gặp một hàm là <code>main</code>. Đây là một hàm do ta tự viết, giống <code>func nhanDoi(so int) int</code> trong Go:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>int nhanDoi(int so) {
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    int ketQua = so * 2;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    return ketQua;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>}
+</code></pre></div>
+<p>Đọc dòng đầu: <code>int</code> đứng trước tên là <strong>kiểu trả về</strong> (hàm trả ra một số nguyên), <code>nhanDoi</code> là tên hàm, <code>int so</code> trong ngoặc là <strong>tham số</strong> (thứ ta đưa cho hàm khi gọi: kiểu <code>int</code>, tên <code>so</code>). <code>return ketQua;</code> trả giá trị về cho nơi gọi. Gọi hàm: <code>nhanDoi(10)</code>. Hàm không có gì để trả thì ghi <code>void</code> (nghĩa là "không có gì") ở chỗ kiểu trả về, và không cần <code>return</code>, như hàm Go không khai báo giá trị trả về.</p>
+<p>Điều quan trọng cho bài này: <strong>mỗi lần một hàm được gọi, chương trình dựng cho nó một "khung" riêng</strong> (tiếng Anh: <strong>stack frame</strong>, khung gọi hàm). Khung đó là một mảnh bàn học dành cho lần gọi này. Tham số <code>so</code> và biến cục bộ <code>ketQua</code> nằm trong khung. Khi hàm <code>return</code>, khung bị gỡ bỏ ngay, nên <code>so</code> và <code>ketQua</code> <strong>mất theo</strong>.</p>
+<p>Khi <code>main</code> gọi <code>nhanDoi</code>, khung của <code>nhanDoi</code> được đặt chồng lên trên khung của <code>main</code>. Hàm gọi hàm khác thì lại chồng thêm một khung nữa. Một chồng khung như vậy gọi là <strong>stack</strong> (ngăn xếp: cái gì đặt vào sau thì lấy ra trước, như chồng đĩa). Hàm nào kết thúc trước thì khung của nó được gỡ trước.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Khi đang chạy bên trong nhanDoi (địa chỉ minh họa):
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>   | khung của nhanDoi:  so = 10, ketQua = 20 |   &lt;- vừa đặt lên, gỡ trước
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   | khung của main:     a = 10 (sắp thấy ở Ví dụ 1) |
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>   +------------------------------------------+
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                    chồng stack
+</code></pre></div>
+<p><strong>Phạm vi (scope)</strong> là đoạn code mà trong đó một tên còn dùng được. Với biến cục bộ, phạm vi là từ chỗ khai báo đến dấu <code>}</code> đóng khối <code>{ }</code> chứa nó. Khối <code>{ }</code> có thể là thân hàm, hoặc chỉ là một cặp ngoặc nhọn đứng riêng bạn tự đặt.</p>
+<p><strong>Vòng đời (lifetime)</strong> là khoảng thời gian từ lúc biến ra đời đến lúc nó chết. Với biến cục bộ, vòng đời thường trùng với phạm vi: ra khỏi khối là biến bị hủy.</p>
+<p><strong>Stack thường rất nhanh và gọn, nhưng nhỏ.</strong> Dựng hay gỡ một khung thường chỉ cần nhích một "mốc" trên chồng khung (một con số ghi chỗ đỉnh chồng), nên thường rất nhanh. Đổi lại, stack có dung lượng giới hạn: mỗi chương trình thường chỉ được cấp khoảng một đến vài MB (con số cụ thể tùy hệ điều hành và cách cấu hình, trên nhiều máy Linux mặc định thường là 8 MB). Vì vậy đừng đặt một mảng cục bộ cỡ trăm MB lên stack.</p>
+<p>Nếu stack đầy thì sao? Lỗi đó gọi là <strong>tràn stack (stack overflow)</strong>. Cách dễ gặp nhất là một hàm tự gọi lại chính nó mãi không dừng (<strong>đệ quy</strong> vô hạn):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">// CHỈ ĐỂ ĐỌC, mình không chạy chương trình này.</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kt">int</span><span class="w"> </span><span class="nf">dem</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">dem</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">   </span><span class="c1">// gọi chính nó, mỗi lần chồng thêm một khung</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">dem</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Mỗi lần gọi <code>dem</code> chồng thêm một khung lên stack, mà không có lần nào kết thúc để gỡ khung. Stack đầy, chương trình thường bị dừng đột ngột (trên Linux hay thấy lỗi <code>Segmentation fault</code>). Ghi chú: một số trình biên dịch có thể tối ưu hàm kiểu này thành vòng lặp, nên kết quả thực tế còn tùy. Tương tự, khai báo một mảng cục bộ khổng lồ như <code>int mang[100000000];</code> (mảng: 100 triệu <code>int</code> đứng liền nhau, số phần tử viết trong <code>[ ]</code>; <a href="../05-mang-phep-tinh-con-tro/">Bài 05</a> dạy kỹ; khoảng 400 MB nếu <code>int</code> là 4 byte) cũng có thể làm tràn stack ngay khi vào hàm. Mảng lớn nên để ở heap, phần dưới nói tới.</p>
+<h3 id="2-heap-kho-o-phai-tu-xin-tu-tra">2. Heap: kho đồ phải tự xin, tự trả<a class="headerlink" href="#2-heap-kho-o-phai-tu-xin-tu-tra" title="Permanent link">&para;</a></h3>
+<p>Biến cục bộ chết khi hàm kết thúc. Nhưng đôi khi bạn cần một thứ <strong>sống lâu hơn hàm đã tạo ra nó</strong>, hoặc một thứ quá lớn cho stack. Với những thứ đó, bạn xin chỗ ở <strong>heap</strong> (tiếng Anh <em>heap</em> nghĩa là "đống"; ta cứ gọi là heap). Từ khóa để xin là <strong><code>new</code></strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>int* p = new int(5);
+</code></pre></div>
+<p>Đọc từng phần, từ phải sang trái:</p>
+<ul>
+<li><code>new int(5)</code> nghĩa là "xin heap một chỗ vừa đủ cho một <code>int</code>, và ghi giá trị <code>5</code> vào đó". <code>new</code> <strong>trả về địa chỉ</strong> của chỗ vừa xin.</li>
+<li><code>int*</code> là kiểu "địa chỉ của một <code>int</code>". Dấu <code>*</code> đứng sau tên kiểu nghĩa là "địa chỉ của một …" (<a href="../01-bo-nho-byte-dia-chi/">Bài 01</a> đã nhắc qua, <a href="../03-con-tro-co-ban/">Bài 03</a> sẽ dạy kỹ). Một biến kiểu <code>int*</code> gọi là <strong>con trỏ (pointer)</strong>: nó đựng một địa chỉ.</li>
+<li><code>p</code> là tên biến con trỏ. Bản thân <code>p</code> là biến cục bộ nằm trên stack, nhưng nó <strong>chỉ tới</strong> một chỗ ở heap. Giống tờ giấy ghi số phòng trong kho: tờ giấy nằm trên bàn học, còn đồ nằm trong kho.</li>
+</ul>
+<p>Muốn đi theo địa chỉ để lấy giá trị, viết <code>*p</code> (dấu <code>*</code> đặt <strong>trước</strong> tên con trỏ, đọc là "thứ nằm ở địa chỉ <code>p</code>"). Viết <code>*p = 8;</code> là ghi <code>8</code> vào chỗ đó.</p>
+<p>Chỗ xin bằng <code>new</code> <strong>không tự mất</strong>. Nó tồn tại đến khi bạn tự trả bằng <strong><code>delete p;</code></strong>. Hàm kết thúc mà bạn chưa <code>delete</code> thì tờ giấy <code>p</code> mất (vì nó là biến cục bộ), nhưng chỗ trong kho <strong>vẫn bị giữ</strong>, và giờ không còn ai biết số phòng để trả. Lỗi đó tên là <strong>rò rỉ bộ nhớ (memory leak)</strong>. Ta sẽ học kỹ <code>new</code>, <code>delete</code> và cách tránh rò rỉ ở <a href="../07-new-delete/">Bài 07</a>; hôm nay chỉ cần nhớ hình dạng.</p>
+<p>Heap rộng hơn stack nhiều, nhưng <strong>thường chậm hơn</strong>: mỗi lần xin, đoạn code thủ kho phải đi tìm một chỗ trống đủ lớn, rồi ghi sổ.</p>
+<h3 id="3-vung-tinh-bang-treo-suot-lop-hoc">3. Vùng tĩnh: bảng treo suốt lớp học<a class="headerlink" href="#3-vung-tinh-bang-treo-suot-lop-hoc" title="Permanent link">&para;</a></h3>
+<p>Có những biến không thuộc về một lần gọi hàm nào, mà thuộc về <strong>cả chương trình</strong>. Chúng nằm ở <strong>vùng tĩnh (static storage)</strong>. Ba loại:</p>
+<ul>
+<li><strong>Biến global</strong> (toàn cục): khai báo <strong>ngoài mọi hàm</strong>, ở tầng ngoài cùng của file. Giống biến cấp package trong Go.</li>
+<li><strong>Biến <code>static</code> cục bộ</strong>: khai báo <strong>trong</strong> một hàm nhưng có thêm từ khóa <code>static</code> đằng trước, ví dụ <code>static int dem = 0;</code>. Biến vẫn chỉ dùng được trong hàm đó, nhưng khác biến cục bộ thường ở chỗ <strong>nó không chết khi hàm kết thúc</strong>, và các lần gọi sau thấy lại đúng biến cũ.</li>
+<li><strong>Thành viên <code>static</code> của struct/class</strong>: một thành viên khai báo với <code>static</code> bên trong struct (hoặc class, xem mục 4), cả kiểu đó dùng chung một bản. Ở bài này ta chỉ cần biết nó cũng nằm ở vùng tĩnh.</li>
+</ul>
+<p>Vùng tĩnh có từ lúc chương trình bắt đầu (hoặc, với <code>static</code> cục bộ, từ lúc chạy qua dòng khai báo lần đầu) và <strong>kéo dài đến khi chương trình kết thúc</strong>.</p>
+<h3 id="4-hoc-nhanh-struct-ham-tao-va-ham-huy-e-lam-thi-nghiem">4. Học nhanh <code>struct</code>, hàm tạo và hàm hủy (để làm thí nghiệm)<a class="headerlink" href="#4-hoc-nhanh-struct-ham-tao-va-ham-huy-e-lam-thi-nghiem" title="Permanent link">&para;</a></h3>
+<p>Để xem tận mắt vòng đời, ta cần một thứ biết "báo tin" khi ra đời và khi chết. Ta dùng một <strong><code>struct</code></strong>. Nếu bạn quen Go, <code>struct</code> của C++ là một kiểu gộp nhiều trường lại, giống <code>type Dau struct { ... }</code>. Điểm khác: <code>struct</code> của C++ có thể chứa luôn <strong>hàm</strong>.</p>
+<p><em>Đối tượng (object)</em> là một biến có kiểu là một struct, ví dụ biến <code>a</code> kiểu <code>Dau</code> ở dưới. Struct có hai hàm đặc biệt:</p>
+<ul>
+<li><strong>Hàm tạo (constructor):</strong> tên <strong>trùng tên struct</strong>, không có kiểu trả về. Nó chạy <strong>một lần, đúng lúc đối tượng ra đời</strong>.</li>
+<li><strong>Hàm hủy (destructor):</strong> tên là <code>~</code> rồi tên struct. Nó chạy <strong>một lần, đúng lúc đối tượng chết</strong>.</li>
+</ul>
+<p>Ta cũng dùng <code>std::string</code>, kiểu chuỗi chữ của thư viện chuẩn, giống <code>string</code> của Go; muốn dùng phải thêm <code>#include &lt;string&gt;</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>struct Dau {
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    std::string ten;                  // một trường đựng tên
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    Dau(std::string t) { ... }        // hàm tạo: nhận tên t
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    ~Dau() { ... }                    // hàm hủy
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>};
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>Dau a("abc");   // tạo biến a kiểu Dau, đưa "abc" cho hàm tạo
+</code></pre></div>
+<p>Dấu <code>;</code> sau <code>}</code> đóng struct là bắt buộc: nó kết thúc câu lệnh khai báo kiểu <code>Dau</code> (quên là lỗi biên dịch). <code>Dau a("abc");</code> đọc là "tạo biến <code>a</code> kiểu <code>Dau</code>, và đưa <code>"abc"</code> cho hàm tạo", nên hàm tạo chạy ngay lúc đó. Khi <code>a</code> chết, hàm hủy chạy. Đối tượng xin ở heap cũng vậy: <code>new Dau("abc")</code> chạy hàm tạo, và <code>delete</code> chạy hàm hủy. Ta sẽ cho hai hàm này <strong>in một dòng</strong> để thấy khi nào chuyện xảy ra.</p>
+<p>C++ còn có từ khóa <code>class</code>. Với bài này <code>class</code> và <code>struct</code> dùng như nhau, nên khi đọc chữ "class" cứ hiểu là struct (khác nhau nhỏ sẽ nói ở bài sau). Vì vậy câu hỏi "đối tượng của một class khai báo global nằm ở đâu?" cũng chính là câu hỏi về struct.</p>
+<h3 id="5-bon-kieu-thoi-gian-song">5. Bốn kiểu thời gian sống<a class="headerlink" href="#5-bon-kieu-thoi-gian-song" title="Permanent link">&para;</a></h3>
+<p>C++ gọi "thứ này sống bao lâu và nằm ở khu nào" là <strong>storage duration</strong> (thời gian sống của vùng lưu trữ). Có bốn kiểu; bảng dưới liệt kê ba kiểu ta dùng trong bài này, còn kiểu thứ tư tên là <strong>thread</strong> (khai báo bằng <code>thread_local</code>, dành cho chương trình chạy nhiều dòng code cùng lúc), ta bỏ qua; <a href="../10-shared-ptr-weak-ptr/">Bài 10</a> mới nói tới chuyện đó.</p>
+<table>
+<thead>
+<tr>
+<th>Kiểu</th>
+<th>Nằm ở</th>
+<th>Ra đời</th>
+<th>Chết</th>
+<th>Ví dụ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>automatic</strong> (tự động)</td>
+<td>stack</td>
+<td>khi chạy qua dòng khai báo</td>
+<td>khi ra khỏi khối <code>{ }</code> chứa nó</td>
+<td>biến cục bộ, tham số</td>
+</tr>
+<tr>
+<td><strong>static</strong> (tĩnh)</td>
+<td>vùng tĩnh</td>
+<td>global: lúc khởi động, thực tế trước <code>main</code>; <code>static</code> cục bộ: lần chạy qua đầu tiên</td>
+<td>khi chương trình kết thúc</td>
+<td>global, <code>static</code> cục bộ</td>
+</tr>
+<tr>
+<td><strong>dynamic</strong> (động)</td>
+<td>heap</td>
+<td>khi chạy <code>new</code></td>
+<td>khi bạn chạy <code>delete</code></td>
+<td><code>new int(5)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="vi-du-1-ham-goi-ham-khung-xuat-hien-roi-bien-mat">Ví dụ 1: Hàm gọi hàm, khung xuất hiện rồi biến mất<a class="headerlink" href="#vi-du-1-ham-goi-ham-khung-xuat-hien-roi-bien-mat" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kt">int</span><span class="w"> </span><span class="nf">nhanDoi</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">so</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                                   </span><span class="c1">// (1)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ketQua</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">                                </span><span class="c1">// (2)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"trong nhanDoi: ketQua = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ketQua</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ketQua</span><span class="p">;</span><span class="w">                                      </span><span class="c1">// (3)</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                                         </span><span class="c1">// (4)</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nhanDoi</span><span class="p">(</span><span class="n">a</span><span class="p">);</span><span class="w">                                 </span><span class="c1">// (5)</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"trong main: b = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="p">{</span><span class="w">                                                   </span><span class="c1">// (6)</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">tam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">99</span><span class="p">;</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"trong khoi: tam = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tam</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="p">}</span><span class="w">                                                   </span><span class="c1">// (7)</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(4) <code>int a = 10;</code></td>
+<td><code>main</code> có khung riêng; <code>a</code> sinh ra trong khung đó</td>
+<td><code>[main: a=10]</code></td>
+</tr>
+<tr>
+<td>(5) gọi <code>nhanDoi(a)</code></td>
+<td>Dựng khung mới cho <code>nhanDoi</code>. Tham số <code>so</code> nhận một <strong>bản sao</strong> của <code>a</code></td>
+<td><code>[nhanDoi: so=10]</code> đè lên <code>[main: a=10]</code></td>
+</tr>
+<tr>
+<td>(2) <code>int ketQua = so * 2;</code></td>
+<td><code>ketQua</code> sinh ra trong khung của <code>nhanDoi</code></td>
+<td><code>[nhanDoi: so=10, ketQua=20]</code></td>
+</tr>
+<tr>
+<td>(3) <code>return ketQua;</code></td>
+<td>Trả <code>20</code> về cho nơi gọi, <strong>khung của <code>nhanDoi</code> bị gỡ</strong>: <code>so</code> và <code>ketQua</code> mất</td>
+<td>còn <code>[main: a=10]</code></td>
+</tr>
+<tr>
+<td>(5) tiếp</td>
+<td><code>b</code> sinh ra trong khung <code>main</code> và nhận <code>20</code></td>
+<td><code>[main: a=10, b=20]</code></td>
+</tr>
+<tr>
+<td>(6) <code>{</code></td>
+<td>Mở khối riêng. <code>tam</code> sinh ra</td>
+<td><code>[main: a=10, b=20, tam=99]</code></td>
+</tr>
+<tr>
+<td>(7) <code>}</code></td>
+<td>Hết khối. <code>tam</code> chết</td>
+<td><code>[main: a=10, b=20]</code></td>
+</tr>
+</tbody>
+</table>
+<p>(Bảng vẽ gọn, không phải địa chỉ thật; chương trình thật có thể cất thêm những thứ phụ khác trong khung.)</p>
+<p><strong>Kết quả khi chạy</strong> (<code>g++ -std=c++17 -Wall</code>, <code>g++ 11.4</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>trong nhanDoi: ketQua = 20
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>trong main: b = 20
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>trong khoi: tam = 99
+</code></pre></div>
+<p><strong>Thử thay đổi: dùng <code>tam</code> sau dấu <code>}</code> ở dòng (7).</strong> Mình thêm dòng <code>std::cout &lt;&lt; tam &lt;&lt; "\n";</code> ngay sau <code>}</code> đó. Chương trình <strong>không biên dịch được</strong>, <code>g++</code> báo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>v1.cpp:17:18: error: ‘tam’ was not declared in this scope; did you mean ‘tm’?
+</code></pre></div>
+<p><code>was not declared in this scope</code> nghĩa là "chưa được khai báo trong phạm vi này". Ra khỏi khối thì tên <code>tam</code> không còn dùng được: đó chính là biến cục bộ hết phạm vi.</p>
+<h3 id="vi-du-2-xin-va-tra-mot-cho-o-heap">Ví dụ 2: Xin và trả một chỗ ở heap<a class="headerlink" href="#vi-du-2-xin-va-tra-mot-cho-o-heap" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w">                  </span><span class="c1">// (1)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"gia tri: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">   </span><span class="c1">// (2)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w">                               </span><span class="c1">// (3)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"gia tri moi: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">p</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">                             </span><span class="c1">// (4)</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1) <code>int* p = new int(5);</code></td>
+<td>Xin heap 4 byte, ghi <code>5</code>. Địa chỉ của chỗ đó đặt vào biến <code>p</code></td>
+<td>stack: <code>p = 0x9000</code>; heap: <code>0x9000 = 5</code> (địa chỉ minh họa)</td>
+</tr>
+<tr>
+<td>(2) <code>*p</code></td>
+<td>Đi theo địa chỉ trong <code>p</code>, đọc ra <code>5</code></td>
+<td>không đổi</td>
+</tr>
+<tr>
+<td>(3) <code>*p = 8;</code></td>
+<td>Đi theo địa chỉ trong <code>p</code>, ghi <code>8</code> vào chỗ đó</td>
+<td>heap: <code>0x9000 = 8</code></td>
+</tr>
+<tr>
+<td>(4) <code>delete p;</code></td>
+<td>Trả chỗ <code>0x9000</code> về kho</td>
+<td>heap: chỗ đó không còn của ta</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>STACK (bàn học)             HEAP (kho)
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>+-------------+            +----------+
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>| p = 0x9000  | ---------&gt; | 8        |  (địa chỉ 0x9000, minh họa)
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>+-------------+            +----------+
+</code></pre></div>
+<p><strong>Kết quả khi chạy</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>gia tri: 5
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>gia tri moi: 8
+</code></pre></div>
+<p><strong>Thử thay đổi: bỏ dòng (4) <code>delete p;</code>.</strong> Mình đã thử. Chương trình biên dịch sạch và in <strong>y hệt</strong> hai dòng trên, nên bạn không thấy gì sai. Nhưng chỗ ở heap chưa được trả: đó là rò rỉ. Để bắt được, mình biên dịch lại với công cụ kiểm tra bộ nhớ (<code>g++ -std=c++17 -fsanitize=address -g</code>), và khi chạy nó báo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>ERROR: LeakSanitizer: detected memory leaks
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Direct leak of 4 byte(s) in 1 object(s) allocated from:
+</code></pre></div>
+<p>(Công cụ này tên là AddressSanitizer: <a href="../07-new-delete/">Bài 07</a> dạy cách dùng để tìm rò rỉ, <a href="../15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> dạy sâu hơn.) Bài học: quên <code>delete</code> là lỗi <strong>im lặng</strong>, chương trình vẫn chạy bình thường.</p>
+<h3 id="vi-du-3-ba-kieu-thoi-gian-song-cung-mot-luc-xem-thu-tu-in">Ví dụ 3: Ba kiểu thời gian sống cùng một lúc, xem thứ tự in<a class="headerlink" href="#vi-du-3-ba-kieu-thoi-gian-song-cung-mot-luc-xem-thu-tu-in" title="Permanent link">&para;</a></h3>
+<p>Đây là chương trình quan trọng nhất của bài. Mỗi đối tượng <code>Dau</code> in một dòng khi ra đời và một dòng khi chết. Ta đặt bốn đối tượng ở bốn chỗ khác nhau.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Dau</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">ten</span><span class="p">;</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="n">Dau</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">        </span><span class="n">ten</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  [ra doi] "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ten</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="o">~</span><span class="n">Dau</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  [chet]   "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ten</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="p">};</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="n">Dau</span><span class="w"> </span><span class="n">toanCuc</span><span class="p">(</span><span class="s">"toan cuc"</span><span class="p">);</span><span class="w">                       </span><span class="c1">// (1)</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="kt">void</span><span class="w"> </span><span class="nf">goiHam</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"vao goiHam</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">Dau</span><span class="w"> </span><span class="n">tinh</span><span class="p">(</span><span class="s">"static trong ham"</span><span class="p">);</span><span class="w">       </span><span class="c1">// (2)</span>
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ra khoi goiHam</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="p">}</span>
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bat dau main</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">    </span><span class="n">Dau</span><span class="w"> </span><span class="n">cucBo</span><span class="p">(</span><span class="s">"cuc bo"</span><span class="p">);</span><span class="w">                       </span><span class="c1">// (3)</span>
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">    </span><span class="n">Dau</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Dau</span><span class="p">(</span><span class="s">"new"</span><span class="p">);</span><span class="w">                   </span><span class="c1">// (4)</span>
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="w">    </span><span class="n">goiHam</span><span class="p">();</span><span class="w">                                  </span><span class="c1">// (5)</span>
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">    </span><span class="n">goiHam</span><span class="p">();</span><span class="w">                                  </span><span class="c1">// (6)</span>
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">        </span><span class="n">Dau</span><span class="w"> </span><span class="n">trongKhoi</span><span class="p">(</span><span class="s">"trong khoi"</span><span class="p">);</span><span class="w">           </span><span class="c1">// (7)</span>
+<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a><span class="w">    </span><span class="p">}</span><span class="w">                                          </span><span class="c1">// (8)</span>
+<a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a><span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">                                  </span><span class="c1">// (9)</span>
+<a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ket thuc main</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong> (theo đúng thứ tự thật chương trình chạy, kể cả phần xảy ra <strong>trước</strong> <code>main</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Lúc nào</th>
+<th>Chuyện gì xảy ra</th>
+<th>Nằm ở đâu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trước khi <code>main</code> bắt đầu (thực tế, xem caveat ở mục Hỏi nhanh)</td>
+<td>(1) <code>toanCuc</code> ra đời, hàm tạo in <code>[ra doi] toan cuc</code></td>
+<td>vùng tĩnh</td>
+</tr>
+<tr>
+<td><code>main</code> bắt đầu</td>
+<td>In <code>bat dau main</code></td>
+<td></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>cucBo</code> ra đời</td>
+<td>stack</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>new Dau("new")</code> xin heap, hàm tạo in <code>[ra doi] new</code>; <code>p</code> (trên stack) giữ địa chỉ</td>
+<td>đối tượng ở heap, <code>p</code> ở stack</td>
+</tr>
+<tr>
+<td>(5) lần gọi đầu</td>
+<td>In <code>vao goiHam</code>. Chạy tới dòng (2): lần đầu nên <code>tinh</code> ra đời, in <code>[ra doi] static trong ham</code>. In <code>ra khoi goiHam</code></td>
+<td>vùng tĩnh</td>
+</tr>
+<tr>
+<td>(6) lần gọi thứ hai</td>
+<td>In <code>vao goiHam</code>. Dòng (2) <strong>bị bỏ qua</strong>, vì <code>tinh</code> đã có rồi. In <code>ra khoi goiHam</code></td>
+<td></td>
+</tr>
+<tr>
+<td>(7) và (8)</td>
+<td><code>trongKhoi</code> ra đời ở (7); đến <code>}</code> ở (8) nó chết, hàm hủy in <code>[chet] trong khoi</code></td>
+<td>stack</td>
+</tr>
+<tr>
+<td>(9) <code>delete p;</code></td>
+<td>Hàm hủy in <code>[chet] new</code>, rồi chỗ ở heap được trả</td>
+<td>heap</td>
+</tr>
+<tr>
+<td>Cuối <code>main</code></td>
+<td>In <code>ket thuc main</code>. Tới <code>}</code> của <code>main</code>, biến cục bộ <code>cucBo</code> chết</td>
+<td>stack</td>
+</tr>
+<tr>
+<td>Sau khi <code>main</code> kết thúc</td>
+<td>Các đối tượng vùng tĩnh chết: <code>tinh</code> rồi <code>toanCuc</code></td>
+<td>vùng tĩnh</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (một lần chạy thật; thứ tự này là hành vi của các trình biên dịch phổ biến và không phụ thuộc vào địa chỉ):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>  [ra doi] toan cuc
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>bat dau main
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  [ra doi] cuc bo
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>  [ra doi] new
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>vao goiHam
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  [ra doi] static trong ham
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>ra khoi goiHam
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>vao goiHam
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>ra khoi goiHam
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>  [ra doi] trong khoi
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>  [chet]   trong khoi
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>  [chet]   new
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>ket thuc main
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>  [chet]   cuc bo
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>  [chet]   static trong ham
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>  [chet]   toan cuc
+</code></pre></div>
+<p>Bốn điều đọc ra từ kết quả:</p>
+<ul>
+<li><strong>Global ra đời trước <code>main</code></strong> (trên các trình biên dịch phổ biến): dòng <code>[ra doi] toan cuc</code> hiện lên trước <code>bat dau main</code>. Và nó <strong>chết SAU <code>main</code></strong>: nó ở cuối cùng.</li>
+<li><strong><code>static</code> cục bộ ra đời ở lần gọi hàm đầu tiên</strong>, không phải lúc chương trình bắt đầu. Lần gọi thứ hai không tạo lại nó. Nó chết sau <code>main</code>, cùng nhóm với global.</li>
+<li><strong>Biến cục bộ chết ở cuối khối chứa nó</strong>: <code>trongKhoi</code> chết ngay ở <code>}</code> của khối nhỏ; <code>cucBo</code> chết ở <code>}</code> của <code>main</code> (nên dòng <code>[chet] cuc bo</code> hiện sau <code>ket thuc main</code>).</li>
+<li><strong>Đối tượng ở heap chết đúng lúc bạn <code>delete</code></strong>, không sớm hơn, không muộn hơn.</li>
+</ul>
+<p>Ba dòng cuối cho thấy thêm một quy tắc: các đối tượng chết theo thứ tự <strong>ngược</strong> với thứ tự chúng ra đời (<code>cucBo</code> ra đời sau <code>toanCuc</code> nên chết trước nó; <code>tinh</code> ra đời sau <code>toanCuc</code> nên chết trước <code>toanCuc</code>).</p>
+<p><strong>Thử thay đổi 1: bỏ dòng (9) <code>delete p;</code>.</strong> Mình đã chạy. Dòng <code>[chet]   new</code> <strong>biến mất</strong> khỏi kết quả: hàm hủy của đối tượng ở heap không bao giờ chạy, và chỗ ở heap bị bỏ lại (rò rỉ). Tất cả dòng khác giữ nguyên.</p>
+<p><strong>Thử thay đổi 2: xóa hai dòng gọi <code>goiHam();</code> ở (5) và (6).</strong> Mình đã chạy. Dòng <code>[ra doi] static trong ham</code> và dòng <code>[chet]   static trong ham</code> <strong>đều không xuất hiện</strong>. Không ai chạy qua dòng (2) nên <code>tinh</code> chưa bao giờ ra đời, và cũng không có gì để hủy. Điều này chứng minh <code>static</code> cục bộ ra đời lúc chạy qua dòng khai báo chứ không phải lúc chương trình bắt đầu.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Trong Go không có "hàm hủy" chạy đúng lúc một biến hết phạm vi, vì bộ thu gom rác (garbage collector) dọn bộ nhớ vào lúc nó chọn. Cái gần nhất với "việc dọn dẹp chạy đúng lúc rời hàm" là <code>defer</code>. C++ chạy hàm hủy đúng lúc ra khỏi khối, một cách xác định, và đó là nền của kỹ thuật <strong>RAII</strong> (gắn việc trả tài nguyên vào hàm hủy, để nó tự chạy đúng lúc) mà ta học ở <a href="../08-raii/">Bài 08</a>.</p>
+<p>Về stack và heap: Go thường <strong>không bắt bạn chọn</strong>. Trình biên dịch Go có <strong>phân tích thoát (escape analysis)</strong>: nó xem biến có "thoát" khỏi hàm không, và nếu có thì tự đặt biến lên heap. Vì vậy <code>func taoSo() *int { x := 5; return &amp;x }</code> hoàn toàn hợp lệ trong Go, và <code>go build -gcflags=-m</code> in dòng <code>moved to heap: x</code>.</p>
+<p>Biến cấp package của Go thường nằm ở vùng tĩnh như global của C++, nhưng Go quy định rõ thứ tự khởi tạo chúng (theo sự phụ thuộc giữa các biến). C++ thì <strong>không làm hộ</strong> bạn việc chọn stack hay heap. Đó là lý do C++ cần RAII và <strong>smart pointer</strong> (con trỏ thông minh, một vật bọc tự trả chỗ ở heap; <a href="../09-unique-ptr/">Bài 09</a>).</p>
+</div>
+<h3 id="vi-du-4-in-ia-chi-cua-bon-loai">Ví dụ 4: In địa chỉ của bốn loại<a class="headerlink" href="#vi-du-4-in-ia-chi-cua-bon-loai" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="kt">int</span><span class="w"> </span><span class="n">toanCuc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                                            </span><span class="c1">// (1)</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kt">void</span><span class="w"> </span><span class="nf">ham</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tinh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">                                    </span><span class="c1">// (2)</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">cucBo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">                                          </span><span class="c1">// (3)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">heap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w">                                 </span><span class="c1">// (4)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"global:  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">toanCuc</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"static:  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tinh</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cuc bo:  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cucBo</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"heap:    "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">heap</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">               </span><span class="c1">// (5)</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bien con tro heap (cuc bo): "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">heap</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">heap</span><span class="p">;</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="p">}</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">    </span><span class="n">ham</span><span class="p">();</span>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>toanCuc</code> có từ trước <code>main</code>, ở vùng tĩnh. (<code>1</code> là hằng số viết sẵn nên không thấy "khoảnh khắc ra đời" như <code>Dau</code>)</td>
+<td>vùng tĩnh</td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>tinh</code> cũng ở vùng tĩnh và chỉ có một bản dù <code>ham</code> gọi bao nhiêu lần. (chuyện "lần đầu" chỉ thấy rõ với <code>Dau</code> ở Ví dụ 3)</td>
+<td>vùng tĩnh</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>cucBo</code> ra đời trên stack</td>
+<td>stack</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Xin heap một <code>int</code> chứa <code>4</code>; biến con trỏ <code>heap</code> (trên stack) giữ địa chỉ</td>
+<td><code>heap</code> ở stack, số <code>4</code> ở heap</td>
+</tr>
+<tr>
+<td>in 3 dòng đầu</td>
+<td><code>&amp;toanCuc</code>, <code>&amp;tinh</code>, <code>&amp;cucBo</code> là địa chỉ của chính các biến đó</td>
+<td></td>
+</tr>
+<tr>
+<td>(5) in <code>heap</code></td>
+<td><code>heap</code> (không có <code>&amp;</code>) là địa chỉ <strong>chỗ ở heap</strong> mà biến con trỏ trỏ tới</td>
+<td>địa chỉ của chỗ ở heap</td>
+</tr>
+<tr>
+<td>in <code>&amp;heap</code></td>
+<td><code>&amp;heap</code> là địa chỉ của <strong>chính biến con trỏ</strong>, nằm trên stack</td>
+<td>địa chỉ ở stack</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (một lần chạy thật trên máy mình):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>global:  0x570794ebb010
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>static:  0x570794ebb014
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>cuc bo:  0x7ffeeb931b1c
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>heap:    0x5707aa85ceb0
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>bien con tro heap (cuc bo): 0x7ffeeb931b20
+</code></pre></div>
+<p>Số trên máy bạn sẽ khác (và chạy lại cũng đổi, như <a href="../01-bo-nho-byte-dia-chi/">Bài 01</a> đã nói). Chỉ có kiểu mẫu đáng nhìn: <strong>thường</strong> thì các địa chỉ ở stack trông khác hẳn (ở đây bắt đầu bằng <code>0x7ffe…</code>) so với địa chỉ ở vùng tĩnh và ở heap, và <code>cucBo</code> nằm sát <code>heap</code> (biến con trỏ), vì cả hai là biến cục bộ cùng một khung. <code>global</code> và <code>static</code> cũng nằm sát nhau. Mình <strong>không</strong> khẳng định vùng nào có địa chỉ lớn hơn vùng nào: điều đó tùy hệ điều hành và trình biên dịch.</p>
+<h3 id="vi-du-5-cau-hoi-cua-ban-bang-thuc-nghiem">Ví dụ 5: Câu hỏi của bạn, bằng thực nghiệm<a class="headerlink" href="#vi-du-5-cau-hoi-cua-ban-bang-thuc-nghiem" title="Permanent link">&para;</a></h3>
+<p>Câu hỏi: đối tượng của class (hay struct) khai báo global thì nằm ở đâu? Ta thử với một struct có chứa <code>std::vector</code> (kiểu mảng co giãn, giống slice của Go; muốn dùng thêm <code>#include &lt;vector&gt;</code>). Dấu <code>&lt;int&gt;</code> trong <code>std::vector&lt;int&gt;</code> cho biết các phần tử là kiểu <code>int</code>, như <code>[]int</code> của Go.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Kho</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">so</span><span class="p">;</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="n">Kho</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">        </span><span class="n">so</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">        </span><span class="n">so</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">        </span><span class="n">so</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ham tao Kho chay</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="p">};</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="n">Kho</span><span class="w"> </span><span class="n">khoToanCuc</span><span class="p">;</span><span class="w">                                          </span><span class="c1">// (1)</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bat dau main</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"object khoToanCuc: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">khoToanCuc</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"du lieu trong vector: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">khoToanCuc</span><span class="p">.</span><span class="n">so</span><span class="p">.</span><span class="n">data</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">  </span><span class="c1">// (2)</span>
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"so phan tu: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">khoToanCuc</span><span class="p">.</span><span class="n">so</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="p">}</span>
+</code></pre></div>
+<p>(<code>push_back(x)</code> thêm một phần tử vào cuối vector. <code>.so.data()</code> cho địa chỉ vùng chứa các phần tử. Dấu <code>.</code> truy cập một thành viên của đối tượng, như Go.)</p>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1) trước <code>main</code></td>
+<td><code>khoToanCuc</code> ra đời, hàm tạo chạy: vector xin heap rồi nhận 1, 2, 3, in <code>ham tao Kho chay</code></td>
+<td>object ở vùng tĩnh; mảng <code>1,2,3</code> ở heap</td>
+</tr>
+<tr>
+<td><code>main</code> bắt đầu</td>
+<td>In <code>bat dau main</code></td>
+<td></td>
+</tr>
+<tr>
+<td>in</td>
+<td>In địa chỉ của object, rồi (2) địa chỉ của dữ liệu bên trong vector</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>VÙNG TĨNH                         HEAP
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>+-------------------------+      +---+---+---+
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>| khoToanCuc              |      | 1 | 2 | 3 |   &lt;- dữ liệu của vector
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>|   so: [con trỏ tới heap] ----&gt;  +---+---+---+
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>+-------------------------+
+</code></pre></div>
+<p><strong>Kết quả khi chạy</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>ham tao Kho chay
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>bat dau main
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>object khoToanCuc: 0x62f0e0abc160
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>du lieu trong vector: 0x62f0e70a3eb0
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>so phan tu: 3
+</code></pre></div>
+<p>Dòng <code>ham tao Kho chay</code> hiện <strong>trước</strong> <code>bat dau main</code>. Hai địa chỉ khác nhau rõ rệt: một cái ở vùng tĩnh, một cái ở heap. Số cụ thể trên máy bạn sẽ khác.</p>
+<div class="admonition question">
+<p class="admonition-title">Hỏi nhanh: đối tượng của class khai báo global nằm ở heap hay stack?</p>
+<p><strong>Cả hai đều không: nó nằm ở vùng tĩnh (static storage).</strong> Cụ thể:</p>
+<ul>
+<li><strong>Hàm tạo</strong> chạy khi chương trình khởi động, <strong>trước <code>main</code></strong> (đó là cách các trình biên dịch làm trong thực tế). Chuẩn C++ thực ra cho phép hoãn việc khởi tạo này tới sau đầu <code>main</code> trong vài trường hợp; các trình biên dịch phổ biến luôn làm trước <code>main</code>, và bài này (cũng như buổi phỏng vấn) dựa vào hành vi đó. <strong>Hàm hủy</strong> chạy khi chương trình kết thúc, <strong>sau <code>main</code></strong>. Ví dụ 3 đã cho thấy đúng thứ tự này.</li>
+<li>Nếu struct/class có chứa <code>std::vector</code> (hay <code>std::map</code>…), thì <strong>bản thân object</strong> nằm ở vùng tĩnh, còn <strong>dữ liệu bên trong</strong> vector (các phần tử) nằm ở <strong>heap</strong>, do vector tự xin. Ví dụ 5 đã in hai địa chỉ khác nhau để chứng minh.</li>
+<li>Chính vector cũng làm đúng như vậy khi bạn khai báo nó là biến cục bộ: lúc đó object <code>std::vector</code> nằm trên stack, còn các phần tử vẫn ở heap. (Riêng <code>std::string</code>: chuỗi dài thường nằm ở heap, còn chuỗi ngắn có thể nằm ngay trong object.)</li>
+</ul>
+</div>
+<h3 id="e-biet-thu-tu-khoi-tao-global-giua-cac-file">Để biết: thứ tự khởi tạo global giữa các file<a class="headerlink" href="#e-biet-thu-tu-khoi-tao-global-giua-cac-file" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Chỉ cần biết tên lỗi và cách tránh</p>
+<p>Dự án thật có nhiều file <code>.cpp</code>, mỗi file có global riêng, và chuẩn C++ <strong>không nói file nào khởi tạo trước</strong> (trong một file thì theo thứ tự viết). Nếu hàm tạo của global <code>A</code> ở file này dùng global <code>B</code> ở file kia, lúc đó <code>B</code> có thể <strong>chưa ra đời</strong>. Lỗi này tên là <strong>static initialization order fiasco</strong> ("thảm họa thứ tự khởi tạo biến tĩnh"), và nó khó chịu vì máy này chạy đúng, máy khác lại sai. Cách tránh: đừng dựng global sẵn, mà đặt nó trong một hàm dưới dạng biến <code>static</code> cục bộ. Như Ví dụ 3 đã thấy, <code>static</code> cục bộ ra đời ở lần gọi hàm đầu tiên, tức đúng lúc có người cần. Bài này không bắt bạn viết code cho chuyện đó, chỉ cần nhớ tên lỗi và cách tránh để trả lời phỏng vấn.</p>
+</div>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>Stack, heap và vùng tĩnh khác nhau thế nào?</summary>
+<p>Stack chứa biến cục bộ và tham số, mỗi lần gọi hàm có một khung, tự dọn khi ra khỏi hàm hoặc khối. Nó nhanh nhưng nhỏ (thường vài MB). Heap là vùng xin bằng <code>new</code> (hoặc <code>malloc</code>, hàm xin heap kiểu C, xem <a href="../07-new-delete/">Bài 07</a>), lớn hơn nhưng thường chậm hơn, và sống đến khi tự <code>delete</code>; quên trả là rò rỉ. Vùng tĩnh chứa biến global, <code>static</code> cục bộ và thành viên <code>static</code>, sống suốt chương trình.</p>
+</details>
+<details class="question">
+<summary>Một biến global của class nằm ở đâu, hàm tạo và hàm hủy chạy khi nào?</summary>
+<p>Nó nằm ở vùng tĩnh, không phải stack và không phải heap. Hàm tạo chạy khi chương trình khởi động, thực tế là trước <code>main</code> (chuẩn cho phép hoãn trong vài trường hợp, nhưng các trình biên dịch phổ biến luôn làm trước); hàm hủy chạy sau khi <code>main</code> kết thúc. Nếu class chứa <code>std::vector</code>, object ở vùng tĩnh còn các phần tử của vector ở heap.</p>
+</details>
+<details class="question">
+<summary>Static initialization order fiasco là gì và tránh thế nào?</summary>
+<p>Thứ tự khởi tạo các biến global nằm ở các file <code>.cpp</code> khác nhau là không xác định, nên global ở file này có thể dùng một global của file khác khi nó chưa được khởi tạo. Cách tránh phổ biến: thay global bằng một hàm chứa biến <code>static</code> cục bộ và trả nó ra, vì <code>static</code> cục bộ được khởi tạo ở lần gọi đầu.</p>
+</details>
+<details class="question">
+<summary>Vì sao không nên đặt một mảng 100 MB làm biến cục bộ?</summary>
+<p>Biến cục bộ nằm trên stack, mà stack nhỏ (thường vài MB, tùy hệ điều hành và cấu hình). Mảng quá lớn làm tràn stack (stack overflow) và chương trình bị dừng đột ngột. Dữ liệu lớn nên xin ở heap, thường qua <code>std::vector</code> hoặc smart pointer.</p>
+</details>
+<details class="question">
+<summary>Storage duration là gì?</summary>
+<p>Là khoảng thời gian vùng lưu trữ của một đối tượng tồn tại. C++ có bốn kiểu: automatic (stack, đến hết khối chứa nó), static (suốt chương trình), dynamic (heap, từ <code>new</code> đến <code>delete</code>) và thread (dành cho biến <code>thread_local</code>, bỏ qua ở mức này).</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Trả về địa chỉ của biến cục bộ</p>
+<p>Trong Go, <code>return &amp;x</code> với <code>x</code> cục bộ là hợp lệ. Trong C++, <code>x</code> nằm trên stack và chết khi hàm kết thúc, nên địa chỉ trả ra <strong>trỏ vào chỗ đã dọn</strong>. Mình thử một hàm <code>int* hamXau() { int x = 5; return &amp;x; }</code> và <code>g++ -Wall</code> cảnh báo: <code>warning: address of local variable ‘x’ returned</code>. Đọc cái địa chỉ đó sau này là hành vi không xác định (<a href="../15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>). Muốn giá trị sống lâu hơn hàm, hãy đặt nó ở heap, hoặc dùng <code>static</code> nếu đúng ý.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Tưởng global thì không có hàm tạo/hàm hủy chạy</p>
+<p>Global của kiểu có hàm tạo thì hàm tạo <strong>vẫn chạy</strong>, thường ngay trước <code>main</code> mà bạn không thấy dòng nào gọi nó. Hàm hủy cũng vậy, sau <code>main</code>. Vì thế một global có hàm tạo in chữ thường sẽ in trước chữ đầu tiên của <code>main</code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Nghĩ biến nào có <code>new</code> thì cả biến nằm ở heap</p>
+<p><code>int* p = new int(5);</code> tạo <strong>hai</strong> thứ: biến con trỏ <code>p</code> (cục bộ, trên stack) và chỗ <code>int</code> ở heap mà <code>p</code> chỉ tới. Tương tự, <code>std::vector</code> cục bộ là một object nhỏ trên stack còn các phần tử ở heap. Khi hỏi "cái này nằm đâu", hãy tách rõ <strong>bản thân biến</strong> và <strong>thứ nó trỏ tới</strong>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 4: Mảng khổng lồ làm biến cục bộ, hoặc đệ quy không điểm dừng</p>
+<p>Cả hai đều ngốn stack mà stack chỉ vài MB, và có thể gây tràn stack. Dữ liệu lớn nên để ở heap; đệ quy phải có điều kiện dừng.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="02">
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 1.</strong> Trong thân một hàm có <code>int dem = 0;</code>. Biến <code>dem</code> nằm ở đâu và sống đến khi nào?</p>
+<ul>
+<li>Ở vùng tĩnh, và sống đến hết chương trình</li>
+<li>Ở heap, và sống đến khi ta gọi <code>delete</code> cho nó</li>
+<li>Ở stack, và chết khi chạy tới <code>}</code> của khối chứa nó</li>
+<li>Ở stack, và chỉ chết khi toàn bộ chương trình kết thúc</li>
+</ul>
+<p class="giai-thich">Biến cục bộ thường thuộc stack, trong khung của lần gọi hàm, và chết khi chạy tới <code>}</code> đóng khối chứa nó. Vùng tĩnh là chỗ của global và <code>static</code>, chứ không phải của biến khai báo trần trong hàm. Heap chỉ dùng khi bạn gọi <code>new</code>, và <code>delete</code> chỉ trả những thứ đã xin bằng <code>new</code>. Nói biến cục bộ sống đến hết chương trình là nhầm nó với biến <code>static</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 2.</strong> Một biến <code>int tong = 0;</code> được khai báo ngoài mọi hàm, ở tầng ngoài cùng của file. Nó nằm ở đâu?</p>
+<ul>
+<li>Ở vùng tĩnh, có sẵn từ lúc chương trình bắt đầu</li>
+<li>Ở stack, vì nó chỉ là một số <code>int</code> nhỏ, vừa bàn học</li>
+<li>Ở heap, vì nó không thuộc về hàm nào, nên phải xin</li>
+<li>Ở stack của <code>main</code>, và chết khi hàm <code>main</code> kết thúc</li>
+</ul>
+<p class="giai-thich">Biến global thuộc vùng tĩnh, có sẵn từ lúc chương trình bắt đầu và sống tới khi chương trình kết thúc. Kích thước nhỏ không quyết định khu nào: khu được chọn theo cách khai báo, không theo cỡ. Heap chỉ có khi bạn gọi <code>new</code>, và "không thuộc hàm nào" không có nghĩa là đã gọi <code>new</code>. Nó cũng không nằm trong khung của <code>main</code>, vì khung <code>main</code> chỉ chứa biến cục bộ của <code>main</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 3.</strong> Với <code>int* p = new int(5);</code> trong một hàm, câu nào đúng?</p>
+<ul>
+<li>Cả <code>p</code> lẫn số <code>5</code> đều nằm ở heap, vì có <code>new</code></li>
+<li>Cả <code>p</code> lẫn số <code>5</code> đều nằm trên stack, vì là biến cục bộ</li>
+<li><code>p</code> nằm ở heap, còn số <code>5</code> nằm trên stack</li>
+<li><code>p</code> nằm trên stack, còn số <code>5</code> mà <code>p</code> trỏ tới thì nằm ở heap</li>
+</ul>
+<p class="giai-thich"><code>new int(5)</code> xin một chỗ ở heap để đựng <code>5</code>, còn <code>p</code> là biến con trỏ cục bộ, nằm trên stack và đựng địa chỉ của chỗ đó. Cả hai cùng ở heap, hoặc cùng ở stack, đều sai vì chúng là hai thứ khác nhau. Đảo ngược cũng sai: <code>new</code> không bao giờ đặt đối tượng lên stack. Và khi hàm kết thúc <code>p</code> chết, còn số <code>5</code> ở heap vẫn nằm đó cho đến khi <code>delete</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 4.</strong> Đọc đoạn code sau. Hàm tạo của <code>Dau</code> in <code>+ten</code>, hàm hủy in <code>-ten</code>. Chương trình in ra theo thứ tự nào (trên trình biên dịch phổ biến)?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Dau g("G");
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>int main() {
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    Dau a("A");
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    { Dau b("B"); }
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    std::cout &lt;&lt; "X\n";
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    return 0;
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>}
+</code></pre></div>
+<ul>
+<li><code>+A +B -B X -A +G -G</code></li>
+<li><code>+G +A +B -B X -A -G</code></li>
+<li><code>+G +A +B X -B -A -G</code></li>
+<li><code>+A +B -B X -A</code></li>
+</ul>
+<p class="giai-thich"><code>g</code> là global nên ra đời trước <code>main</code> (<code>+G</code> đầu tiên) và chết sau <code>main</code> (<code>-G</code> cuối cùng). Trong <code>main</code>, <code>a</code> ra đời, rồi <code>b</code> ra đời và chết ngay ở <code>}</code> của khối nhỏ (<code>+B -B</code>), rồi in <code>X</code>, và <code>a</code> chết ở <code>}</code> của <code>main</code>. Dãy có <code>+G</code> giữa chừng nhầm rằng global ra đời khi vào <code>main</code>. Dãy có <code>-B</code> sau <code>X</code> quên rằng biến cục bộ chết ở cuối khối chứa nó. Dãy không có <code>G</code> quên rằng global có hàm tạo và hàm hủy thì vẫn chạy chúng, chỉ là ngoài <code>main</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 5.</strong> Trên các trình biên dịch phổ biến, điều nào đúng về hàm tạo của một đối tượng khai báo global?</p>
+<ul>
+<li>Nó chạy ở dòng đầu tiên bên trong <code>main</code></li>
+<li>Nó chạy ở lần đầu tiên có code dùng tới đối tượng</li>
+<li>Nó chạy trước khi <code>main</code> bắt đầu, không ai gọi</li>
+<li>Nó không chạy, vì global không phải đối tượng thật</li>
+</ul>
+<p class="giai-thich">Đối tượng global ra đời lúc chương trình khởi động, nên hàm tạo của nó chạy trước <code>main</code> mà không ai phải gọi, đó là lý do dòng in từ hàm tạo hiện lên trước dòng đầu của <code>main</code>. "Dòng đầu tiên của <code>main</code>" thì quá muộn, <code>main</code> chưa bắt đầu. "Lần đầu có người dùng" là cách chạy của <code>static</code> cục bộ, không phải của global. Global là đối tượng thật như mọi đối tượng, nên hàm tạo vẫn chạy.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 6.</strong> Đọc đoạn code sau. <code>Dau</code> ở đây có hàm tạo in <code>tao ten</code>. Chương trình in ra gì (các dòng nối bằng dấu cách)?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>void f() { static Dau d("S"); std::cout &lt;&lt; "f\n"; }
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>int main() { std::cout &lt;&lt; "A\n"; f(); f(); }
+</code></pre></div>
+<ul>
+<li><code>tao S A f f</code>, vì <code>static</code> có từ đầu chương trình</li>
+<li><code>A tao S f tao S f</code>, vì mỗi lần gọi <code>f</code> lại tạo <code>d</code></li>
+<li><code>A f f tao S</code>, vì <code>static</code> chỉ được tạo khi chương trình kết thúc</li>
+<li><code>A tao S f f</code>, vì <code>d</code> chỉ ra đời ở lần gọi <code>f</code> đầu tiên</li>
+</ul>
+<p class="giai-thich"><code>static</code> cục bộ ra đời lúc chạy qua dòng khai báo <strong>lần đầu</strong>, tức trong lần gọi <code>f()</code> thứ nhất, sau chữ <code>A</code>, và lần gọi thứ hai bỏ qua nó vì nó đã có. Vì vậy <code>tao S</code> chỉ xuất hiện một lần, giữa <code>A</code> và <code>f</code> đầu tiên. Nghĩ nó có từ đầu chương trình là nhầm với global. Nghĩ nó tạo lại mỗi lần gọi là nhầm với biến cục bộ thường. Và nó cũng không đợi đến cuối chương trình, vì lúc đó nó chỉ bị hủy.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 7.</strong> Vì sao trong Go ta ít khi nghĩ tới chuyện "biến nằm ở stack hay heap" như trong C++?</p>
+<ul>
+<li>Vì Go không dùng stack, nên mọi biến của chương trình đều ở heap</li>
+<li>Vì Go tự chọn chỗ đặt biến nhờ escape analysis</li>
+<li>Vì Go cấm hàm trả về địa chỉ của biến cục bộ của chính nó</li>
+<li>Vì Go gộp stack và heap thành một vùng nhớ duy nhất cho mọi biến</li>
+</ul>
+<p class="giai-thich">Trình biên dịch Go phân tích xem biến có "thoát" khỏi hàm không (ví dụ khi hàm trả <code>&amp;x</code>), và nếu có thì tự đặt biến lên heap, nên lập trình viên không phải chọn. Go vẫn có stack, mỗi goroutine có stack riêng, nên "mọi biến ở heap" và "một vùng duy nhất" đều sai. Và trả <code>&amp;x</code> trong Go là hợp lệ, không bị cấm, chính nhờ escape analysis. C++ không làm hộ việc này, nên bạn phải tự nghĩ.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Stack (bàn học) chứa biến cục bộ, mỗi lần gọi hàm có một khung, nhỏ và nhanh, tự dọn khi ra khỏi khối; mảng khổng lồ hoặc đệ quy vô hạn làm tràn stack.</li>
+<li>Heap (kho) xin bằng <code>new</code>, sống đến khi tự <code>delete</code>; quên trả là rò rỉ, và <code>int* p = new int(5);</code> gồm biến con trỏ <code>p</code> ở stack cộng chỗ <code>int</code> ở heap.</li>
+<li>Vùng tĩnh (bảng tường) chứa biến global, <code>static</code> cục bộ và thành viên <code>static</code>, sống suốt chương trình; hàm tạo của global thực tế chạy trước <code>main</code>, hàm hủy sau <code>main</code>, <code>static</code> cục bộ ra đời ở lần chạy qua đầu tiên.</li>
+<li>Đối tượng class khai báo global nằm ở vùng tĩnh (không phải heap hay stack), và dữ liệu bên trong <code>std::vector</code> của nó nằm ở heap.</li>
+<li>Bốn storage duration: automatic, static, dynamic, thread; thứ tự khởi tạo global giữa các file <code>.cpp</code> là không xác định (static initialization order fiasco), tránh bằng <code>static</code> cục bộ trong hàm.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../01-bo-nho-byte-dia-chi/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../03-con-tro-co-ban/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 03 — Con trỏ cơ bản">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 03 — Con trỏ cơ bản
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>
