@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Ở Bài 16, `vector` là **một kệ sách liền khối**. Bài này là cả cửa hàng đồ nội thất. `std::string` là kệ sách chỉ đựng chữ cái, có nhiều món tiện cho chữ.
+Ở Bài 16, `vector` là **một kệ sách liền khối**. Bài này là cả cửa hàng đồ nội thất. `std::string` là kệ sách chỉ đựng chữ cái, có nhiều món tiện cho chữ (chuỗi ngắn thì kệ nhỏ treo ngay trên người cuốn sổ, ví dụ này dừng ở đó; mục 2).
 
 `std::array` là kệ **đóng cố định vào tường**: cỡ chốt từ lúc xây, không nở ra. `std::deque` là **dãy nhiều kệ nhỏ** xếp nối nhau, kèm một bảng chỉ dẫn: thêm kệ ở đầu hay cuối đều dễ.
 
@@ -22,9 +22,10 @@
 
 ### 1. `std::string`: dùng hằng ngày
 
-`std::string` (`#include <string>`) là kiểu chuỗi chữ của thư viện chuẩn, đã gặp ở [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md). Nó giống `std::vector<char>` ở chỗ tự quản lý bộ nhớ (RAII), nhưng có thêm nhiều thao tác cho chữ. Chương trình dưới thử các thao tác hay dùng nhất. Các vị trí đếm từ 0.
+`std::string` (`#include <string>`) là kiểu chuỗi chữ của thư viện chuẩn, đã gặp ở [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md). Nó giống `std::vector<char>` ở chỗ tự quản lý bộ nhớ (RAII), nhưng có thêm nhiều thao tác cho chữ. Chương trình dưới thử các thao tác hay dùng nhất; các vị trí đếm từ 0.
 
 ```cpp
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -52,25 +53,32 @@ int main() {
     std::string b = full;                            // (9)
     b[1] = 'X';
     std::cout << full << " | " << b << "\n";
+
+    const char* p = full.c_str();                    // (10)
+    std::cout << std::strlen(p) << " " << full.size() << "\n";
+    std::string vn = "xin chào";                     // (11)
+    std::cout << "size = " << vn.size() << "\n";
     return 0;
 }
 ```
 
-`std::string::npos` là một hằng của thư viện, nghĩa là "không có vị trí nào": `find` trả nó khi không tìm thấy. Kiểu của vị trí là `std::size_t` (số không dấu, [Bài 16](16-vector.md)), nên `npos` là số không dấu lớn nhất, **không phải -1**.
+`std::string::npos` là một hằng của thư viện, nghĩa là "không có vị trí nào": `find` trả nó khi không tìm thấy. Kiểu của vị trí là `std::size_t` (số không dấu, [Bài 16](16-vector.md)), nên `npos` là số không dấu lớn nhất, **không phải -1**. `std::strlen` (trong `<cstring>`) đếm ký tự cho tới `'\0'`.
 
 **Chạy từng dòng**
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) | `ho` và `ten` được dựng từ chuỗi hằng (chép chữ vào string) | `ho`: `Nguyen`; `ten`: `An` |
-| (2) | `+` nối: tạo một string **mới** `Nguyen An` (vế đầu phải là `std::string`) | `full`: `Nguyen An`, size 9 |
+| (2) | `+` nối: tạo một string **mới** `Nguyen An` (ít nhất một vế phải là `std::string`) | `full`: `Nguyen An`, size 9 |
 | (3) | `+=` nối thêm vào chính `full` | `full`: `Nguyen An!`, size 10 |
 | (4) | `[0]` là ký tự đầu, **sửa được** tại chỗ | `full`: `Mguyen An!` |
 | (5) | `==` so nội dung; `<` so theo thứ tự từ điển (từng ký tự theo mã): `N` đứng sau `A` | in `1 0 1` |
-| (6) | `find("An")` trả vị trí bắt đầu của lần gặp đầu tiên: ký tự thứ 7 | `vt` = 7 |
+| (6) | `find("An")` trả vị trí bắt đầu của lần gặp đầu tiên: vị trí 7 (đếm từ 0) | `vt` = 7 |
 | (7) | `find("xyz")` không thấy nên trả `npos`; so với `npos` mới đúng | in `khong thay xyz` |
 | (8) | `substr(vt, 2)`: lấy 2 ký tự từ vị trí 7, ra string **mới** | `con`: `An` |
 | (9) | `b = full` sao chép sâu ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)); sửa `b[1]` không đụng `full` | `b`: `MXuyen An!` |
+| (10) | `c_str()` đưa con trỏ `const char*` kiểu C ([Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md)) cho hàm C đòi chuỗi kiểu C; `strlen` và `size()` cùng ra 10 | `p` ---> `M g u y e n _ A n ! \0` |
+| (11) | `"xin chào"` có 8 chữ nhưng `size()` là 9 (xem dưới) | in `size = 9` |
 
 **Kết quả khi chạy** (`g++ -std=c++17 -Wall -pthread`):
 
@@ -82,55 +90,22 @@ find An: 7
 khong thay xyz
 substr: An
 Mguyen An! | MXuyen An!
-```
-
-`size()` và `length()` là một. **Thử thay đổi:** viết `std::string s = "xin" + " chao";` (cộng hai chuỗi hằng). Mình đã biên dịch: g++ báo `invalid operands of types 'const char [4]' and 'const char [6]' to binary 'operator+'`. Chuỗi hằng là mảng `char` ([Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md)), không có phép `+`; chỉ cần một vế là `std::string` thì `+` chạy.
-
-!!! info "Bạn biết Go?"
-    Chuỗi Go **bất biến**: `s[0] = 'M'` không biên dịch được, và `s += "x"` trong vòng lặp tạo chuỗi mới mỗi lần. `std::string` thì **sửa được** tại chỗ và cũng có size/capacity như vector (cuối mục 2), nên `+=` nhiều lần rẻ trung bình. Phần giống: cả hai đều là dãy **byte** (mục 2). Cái giống chuỗi Go hơn cả là `std::string_view` (mục 3): một cặp (địa chỉ, độ dài) nhìn vào byte có sẵn.
-
-### 2. `c_str`, byte, và SSO
-
-Hàm của thư viện C (và nhiều API cũ) chỉ nhận chuỗi kiểu C: con trỏ `const char*` tới các ký tự kết thúc bằng `'\0'` ([Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md)). `s.c_str()` đưa ra đúng loại con trỏ đó từ một `std::string`.
-
-```cpp
-#include <cstring>
-#include <iostream>
-#include <string>
-
-int main() {
-    std::string s = "xin chao";
-    const char* p = s.c_str();                       // (1)
-    std::cout << std::strlen(p) << " " << s.size() << "\n";   // (2)
-    std::cout << p << "\n";
-
-    std::string vn = "xin chào";                     // (3)
-    std::cout << "size = " << vn.size() << "\n";
-    return 0;
-}
-```
-
-`std::strlen` (trong `<cstring>`) đếm ký tự cho tới `'\0'`.
-
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| (1) | `p` trỏ vào ký tự đầu của `s`, sau 8 chữ có `'\0'` | `p` ---> `x i n _ c h a o \0` |
-| (2) | `strlen(p)` = 8, `s.size()` = 8 | in `8 8`, rồi `xin chao` |
-| (3) | `"xin chào"` có 8 chữ nhưng `à` chiếm **2 byte** (mã hóa UTF-8) | in `size = 9` |
-
-**Kết quả khi chạy:**
-
-```text
-8 8
-xin chao
+10 10
 size = 9
 ```
 
-`size()` đếm **byte**, không đếm "chữ cái": Go cũng vậy, `len("xin chào")` là 9. Con trỏ từ `c_str()` chỉ dùng được khi `s` còn sống và chưa bị sửa; sau đó nó treo như địa chỉ phần tử của vector ở Bài 16.
+`size()` và `length()` là một, và đều đếm **byte**, không đếm "chữ cái". Chữ viết ra thành byte theo **UTF-8**: chữ không dấu như `a` chiếm 1 byte, chữ có dấu như `à` chiếm 2 byte (hoặc hơn), nên "xin chào" là 9 byte. Go dùng cùng UTF-8 và `len("xin chào")` cũng ra 9. Con trỏ của `c_str()` chỉ dùng được khi chuỗi còn sống và chưa bị sửa, giống địa chỉ phần tử của vector ở Bài 16.
 
-**SSO (Small String Optimization, "tối ưu chuỗi nhỏ").** Phần lớn chuỗi thực tế rất ngắn, nên nhiều bản thư viện chừa trong **chính đối tượng** `std::string` một vùng nhỏ để chứa luôn chữ của chuỗi ngắn: khỏi xin heap. Chuỗi dài hơn thì chữ nằm ở heap. Chuẩn C++ **không đòi hỏi** SSO và không quy định ngưỡng: đó là chuyện cài đặt. Chương trình dưới xem thử trên máy mình:
+**Thử thay đổi:** viết `std::string s = "xin" + " chao";` (cộng hai chuỗi hằng). Mình đã biên dịch: g++ báo `invalid operands of types 'const char [4]' and 'const char [6]' to binary 'operator+'`. Chuỗi hằng là mảng `char` ([Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md)), không có phép `+`; chỉ cần một vế là `std::string` thì `+` chạy.
+
+!!! info "Bạn biết Go?"
+    Chuỗi Go **bất biến**: `s[0] = 'M'` không biên dịch được, và `s += "x"` trong vòng lặp tạo chuỗi mới mỗi lần. `std::string` thì **sửa được** tại chỗ và cũng có size/capacity như vector, nên `+=` nhiều lần rẻ trung bình. Phần giống: cả hai đều là dãy **byte**. Cái giống chuỗi Go hơn cả là `std::string_view` (mục 3): một cặp (địa chỉ, độ dài) nhìn vào byte có sẵn.
+
+### 2. SSO: chuỗi ngắn nằm ngay trong đối tượng
+
+**SSO (Small String Optimization, "tối ưu chuỗi nhỏ")**: phần lớn chuỗi thực tế rất ngắn, nên nhiều bản thư viện chừa trong **chính đối tượng** `std::string` một vùng nhỏ để chứa luôn chữ của chuỗi ngắn, khỏi xin heap. Chuỗi dài hơn thì chữ nằm ở heap.
+
+Chuẩn C++ **không đòi hỏi** SSO và không quy định ngưỡng: đó là chuyện cài đặt, nên mọi con số dưới đây chỉ là của `g++ 11` (thư viện libstdc++) trên máy mình.
 
 ```cpp
 #include <iostream>
@@ -145,13 +120,7 @@ int main() {
 }
 ```
 
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| (1) | Chuỗi 3 ký tự | chữ nằm trong đối tượng (xem dưới) |
-| (2) | Chuỗi 100 ký tự | chữ nằm ở heap |
-| (3) | In cỡ đối tượng và capacity của hai chuỗi | xem kết quả |
+Dòng (2): `std::string(n, c)` tạo chuỗi gồm `n` ký tự `c`, giống `vector(n, giá trị)` ở Bài 16.
 
 **Kết quả khi chạy:**
 
@@ -160,13 +129,13 @@ sizeof(std::string) = 32
 capacity ngan = 15, dai = 100
 ```
 
-Với `g++ 11` trên máy mình: đối tượng `std::string` to 32 byte, và chuỗi `"abc"` có capacity 15 ngay từ đầu, tức vùng nhỏ trong đối tượng chứa được 15 ký tự (mình cũng đã kiểm tra bằng địa chỉ: chữ của `ngan` nằm trong 32 byte đó, còn chữ của `dai` thì không). Thư viện khác có thể cho con số khác. Điều cần nhớ: chuỗi ngắn thường không tốn lần xin heap nào, nhưng **đừng dựa** vào ngưỡng hay địa chỉ cụ thể.
+Đối tượng `std::string` to 32 byte, và chuỗi `"abc"` có capacity 15 ngay từ đầu: vùng nhỏ trong đối tượng chứa được 15 ký tự (chuỗi `dai` thì ở heap). Thư viện khác có thể cho số khác. Điều cần nhớ: chuỗi ngắn thường không tốn lần xin heap nào, nhưng **đừng dựa** vào ngưỡng hay địa chỉ cụ thể.
 
 ### 3. `std::string_view`: nhắc lại và hai kiểu dangling mới
 
 [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) đã dạy: `std::string_view` là cửa sổ (địa chỉ đầu + độ dài), **không sở hữu, không chép**, hợp làm tham số hàm; `substr` của nó cũng chỉ cắt cửa sổ chứ không chép chữ (khác `substr` của `std::string`, mục 1, ra chuỗi mới). Nó **không bảo đảm có `'\0'`** ở cuối, nên đừng đưa `sv.data()` cho hàm C đòi chuỗi kiểu C: chép ra `std::string` rồi dùng `c_str()`.
 
-Bài 14 nêu hai kiểu dangling (trả `string_view` của biến cục bộ, gán từ chuỗi tạm). Có thêm hai kiểu nữa. Kiểu thứ nhất: chuỗi gốc **dài ra**, nên xin vùng nhớ mới và trả vùng cũ. Kiểu thứ hai: chuỗi gốc chết ở cuối một khối `{ }` trong khi cửa sổ sống tiếp. Cả hai là hành vi không xác định, nên mình chỉ nêu những gì đã thật sự chạy:
+Bài 14 nêu hai kiểu dangling (trả `string_view` của biến cục bộ, gán từ chuỗi tạm). Có thêm hai kiểu nữa. Kiểu thứ nhất: chuỗi gốc **dài ra**, nên xin vùng nhớ mới và trả vùng cũ. Cả hai kiểu là hành vi không xác định (UB), nên mình chỉ nêu những gì đã thật sự chạy.
 
 ```cpp
 // bo-qua-kiem-tra
@@ -183,26 +152,11 @@ int main() {
 }
 ```
 
-Biên dịch thường: chương trình thoát bình thường và in `20` rồi một ký tự rác (không in được). `-fsanitize=address` ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)) báo `heap-use-after-free`, `READ of size 1`, đúng dòng `std::cout`. Chuỗi 20 ký tự ở heap, `+=` 200 ký tự buộc nó chuyển nhà.
+Dòng 7 tạo chuỗi 20 ký tự `a`, dòng 8 cho `sv` nhìn vào nó, dòng 9 nối thêm 200 ký tự (`std::string(200, 'b')`), buộc `s` xin vùng nhớ lớn hơn và trả vùng cũ. Lần chạy thường của mình in `20` rồi một ký tự rác (UB: máy bạn có thể in khác, hoặc sập).
 
-```cpp
-// bo-qua-kiem-tra
-#include <iostream>
-#include <string>
-#include <string_view>
+Biên dịch thêm `-fsanitize=address` ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)) thì chương trình báo `heap-use-after-free`, `READ of size 1`, đúng dòng `std::cout`. Chuỗi 20 ký tự nằm ở heap là chuyện của `g++ 11`; thư viện khác (ngưỡng SSO cao hơn) có thể chứa nó trong đối tượng, và cơ chế hỏng sẽ khác, nhưng theo chuẩn vẫn là UB.
 
-int main() {
-    std::string_view sv;
-    {
-        std::string s = "abc";
-        sv = s;
-    }
-    std::cout << sv << "\n";
-    return 0;
-}
-```
-
-Biên dịch thường: in `abc` và thoát mã 0, **trông như chạy đúng**. ASan lại báo `stack-use-after-scope`. Chuỗi `"abc"` nhỏ nên nằm trong đối tượng `s` trên stack; khối `{ }` kết thúc thì `s` hết sống, nhưng byte còn đó chưa ai ghi đè. Đó là cái bẫy của UB: một lần chạy may mắn không chứng minh gì.
+Kiểu thứ hai: chuỗi chết ở cuối một khối `{ }` ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)) trong khi `sv` (khai báo rỗng ở ngoài khối, rồi gán `sv = s;` bên trong) sống tiếp. Mình đã chạy bản này: chạy thường in `abc` và thoát mã 0, **trông như chạy đúng**; ASan lại báo `stack-use-after-scope`. Lý do: chuỗi `"abc"` nhỏ nên (trên `g++ 11`) nằm trong đối tượng `s` trên stack, khối kết thúc thì `s` hết sống nhưng byte còn đó chưa ai ghi đè. Một lần chạy may mắn không chứng minh gì.
 
 ### 4. `std::array`: mảng cỡ cố định, có trọn bộ tiện ích
 
@@ -237,13 +191,13 @@ int main() {
 }
 ```
 
-Hàm `tongC` ở (1) viết chỉ để so sánh: tham số `int a[]` là con trỏ, nên phải kèm `n`.
+Hàm `tongC` ở (1) viết chỉ để so sánh: tham số `int a[]` là con trỏ, nên phải kèm `n`. Hệ quả của "cỡ là một phần của kiểu": `tong` ở (2) chỉ nhận `std::array<int, 4>`, không nhận dãy 5 phần tử (muốn nhận mọi cỡ cần khuôn mẫu hàm, học sau).
 
 **Chạy từng dòng**
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (3)–(4) | Hai dãy 4 số: mảng C và `std::array`, đều trên stack | mỗi cái 16 byte liền nhau |
+| (3)–(4) | Hai dãy 4 số: mảng C và `std::array`, đều trên stack | mỗi cái 16 byte (4 số, thường 4 byte/`int`) |
 | in `sizeof` | Cả hai 16 byte: `std::array` không tốn thêm gì; `a.size()` = 4 | in `16`, `16`, `4` |
 | `tongC` (1) / `tong` (2) | Mảng C phải truyền kèm `4`; `std::array` mang cỡ theo kiểu, truyền `const&` không chép | cả hai ra 10 |
 | (5) | `b = a` **chép từng phần tử** sang `b` (mảng C không làm được) | `a`: `[1 2 3 4]`, `b`: `[1 2 3 4]` rồi `[100 2 3 4]` |
@@ -266,7 +220,7 @@ Khác `vector`: `array` **không có** `push_back`, không đổi cỡ, không d
 
 ### 5. `std::deque`: thêm nhanh ở cả hai đầu
 
-`std::deque` (`#include <deque>`, từ *double-ended queue*, "hàng đợi hai đầu") có mọi thứ `vector` có (`[]`, `at`, `size`, `back`) và thêm `push_front`, `pop_front`, `front` ở đầu. Bên trong nó **không** là một mảng liền: các phần tử nằm trong **nhiều khối nhỏ**, và một bảng nhỏ ghi địa chỉ từng khối. `d[i]` tính ra khối rồi vị trí trong khối, nên vẫn nhanh.
+`std::deque` (`#include <deque>`, từ *double-ended queue*, "hàng đợi hai đầu") có phần lớn những thứ `vector` có (`[]`, `at`, `size`, `back`...), **không có** `capacity`/`reserve`, và thêm `push_front`, `pop_front`, `front` ở đầu. Bên trong nó **không** là một mảng liền: các phần tử nằm trong **nhiều khối nhỏ**, và một bảng nhỏ ghi địa chỉ từng khối. `d[i]` tính ra khối rồi vị trí trong khối, nên vẫn nhanh.
 
 ```cpp
 #include <deque>
@@ -301,11 +255,10 @@ int main() {
 |---|---|---|
 | (1)–(2) | Rỗng; `push_back` thêm 2, rồi 3 vào **cuối** | `[2 3]` |
 | (3) | `push_front` thêm 1, rồi 0 vào **đầu** | `[0 1 2 3]` |
-| in | Duyệt in, `d[2]`, `front`, `back` | in `d: 0 1 2 3 \| d[2] = 2, front = 0, back = 3` |
+| in | Duyệt in, rồi in `d[2]`, `front`, `back` | in dòng đầu của kết quả |
 | (4) | `pop_front` bỏ 0, `pop_back` bỏ 3 | `[1 2]`, in `size = 2, front = 1` |
 | (5) | `r` là tham chiếu tới phần tử đầu (giá trị 1), `truoc` giữ địa chỉ của nó | `r` ---> phần tử `1` |
-| thêm 2000 | Thêm 1000 phần tử ở cuối, 1000 ở đầu; phần tử cũ giờ ở chỉ số 1000 | size 2002 |
-| in | Địa chỉ phần tử `1` **không đổi**, `r` vẫn đọc ra 1 | in `size = 2002, r van cung dia chi? 1, r = 1` |
+| thêm 2000 | Thêm 1000 phần tử ở cuối, 1000 ở đầu; phần tử cũ giờ ở chỉ số 1000; địa chỉ của nó **không đổi**, `r` vẫn đọc ra 1 | in `size = 2002, r van cung dia chi? 1, r = 1` |
 
 **Kết quả khi chạy:**
 
@@ -315,7 +268,9 @@ sau pop: size = 2, front = 1
 size = 2002, r van cung dia chi? 1, r = 1
 ```
 
-Hai điều đáng học. Một: **tham chiếu tới phần tử vẫn sống** khi bạn thêm ở hai đầu (khác vector, [Bài 16](16-vector.md), mục 4); chuẩn bảo đảm điều này cho tham chiếu và con trỏ tới phần tử, nhưng **không** cho iterator (Bài 19). Hai: `deque` không liền khối: mình đã chạy thử một bản đếm các lần hai phần tử kề nhau không cách đúng 4 byte, và `deque` 2002 số của `g++ 11` có 15 chỗ nhảy sang khối khác (khối to cỡ nào là chuyện cài đặt), còn `vector` thì chuẩn bảo đảm liền khối. Chèn hay xóa ở **giữa** vẫn phải dời phần tử như vector.
+Điều đáng học thứ nhất: **tham chiếu tới phần tử vẫn sống** khi bạn thêm ở hai đầu (khác vector, [Bài 16](16-vector.md), mục 4). Chuẩn bảo đảm điều này cho tham chiếu và con trỏ tới phần tử với thao tác ở hai đầu, nhưng **không** cho iterator (Bài 19). Chèn hay xóa ở **giữa** thì phải dời phần tử như vector và làm hỏng cả tham chiếu.
+
+Điều thứ hai: `deque` **không liền khối**, nên hai phần tử kề nhau đôi khi nằm ở hai khối khác nhau (khối to cỡ nào là tùy bản thư viện).
 
 Dùng `deque` khi cần thêm/lấy nhanh ở **cả hai đầu** mà vẫn muốn `d[i]`: hàng đợi, cửa sổ trượt. Bài 21 sẽ cho thấy `std::queue` mặc định dựng trên `deque`.
 
@@ -373,32 +328,19 @@ front van o cho cu? 1, *p = 5
 
 **Thử thay đổi: viết `l[1]`.** Mình đã biên dịch: `no match for 'operator[]' (operand types are 'std::list<int>' and 'int')`. `list` cố ý không có `[]`.
 
-Giá phải trả của các nút rời: chương trình dưới in khoảng cách (byte) giữa hai phần tử đầu của `vector` và của `list`, cùng chứa `1, 2, 3, 4`.
-
-`reinterpret_cast<std::uintptr_t>(&x)` đổi địa chỉ của `x` thành một số nguyên để trừ cho nhau. Với mỗi dãy, vòng lặp ghi lại địa chỉ của hai phần tử đầu (1, rồi 2), cuối cùng in hiệu của chúng.
+Giá phải trả của các nút rời: mỗi phần tử cần chỗ cho cả hai con trỏ. Chương trình dưới dựng một cái nút giả có hình dạng như vậy rồi đo cỡ bằng `sizeof` ([Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md)).
 
 ```cpp
-#include <cstdint>
 #include <iostream>
-#include <list>
-#include <vector>
+
+struct Nut {
+    Nut* truoc;
+    Nut* sau;
+    int giaTri;
+};
 
 int main() {
-    std::vector<int> v = {1, 2, 3, 4};
-    std::list<int> l = {1, 2, 3, 4};
-    std::uintptr_t a[2], b[2];                                   // (1)
-    int i = 0;
-    for (const int& x : v) {
-        if (i < 2) a[i] = reinterpret_cast<std::uintptr_t>(&x);  // (2)
-        i++;
-    }
-    i = 0;
-    for (const int& x : l) {
-        if (i < 2) b[i] = reinterpret_cast<std::uintptr_t>(&x);
-        i++;
-    }
-    std::cout << "vector, cach nhau (byte): " << a[1] - a[0] << "\n";
-    std::cout << "list  , cach nhau (byte): " << b[1] - b[0] << "\n";
+    std::cout << "sizeof(Nut) = " << sizeof(Nut) << ", sizeof(int) = " << sizeof(int) << "\n";
     return 0;
 }
 ```
@@ -406,17 +348,18 @@ int main() {
 **Kết quả khi chạy:**
 
 ```text
-vector, cach nhau (byte): 4
-list  , cach nhau (byte): 32
+sizeof(Nut) = 24, sizeof(int) = 4
 ```
 
-`vector` đặt các số `int` sát nhau (4 byte một món), nên CPU đọc cả cụm trong một lượt. `list` ở `g++ 11` mất 32 byte cho mỗi `int` (hai con trỏ 16 byte, `int` 4 byte, phần đệm), tức nhiều gấp 8 lần dữ liệu thật; và mỗi nút là một lần xin heap. Con số 32 chỉ là của máy mình và của lúc bốn nút vừa được xin liền nhau: sau nhiều lần thêm, xóa, các nút **rải rác** khắp heap và phải đi theo con trỏ từng bước. Nên duyệt `list` thường chậm hơn duyệt `vector` nhiều.
+Hai con trỏ (16 byte) cộng `int` (4 byte, thường là thế) cộng 4 byte đệm cho tròn: 24 byte, gấp khoảng 6 lần chỉ riêng số `int`. Nút thật của `g++ 11` cỡ đó; mình còn đo thấy hai nút kề nhau trong một `list` bốn số cách nhau 32 byte, vì bộ cấp phát cộng thêm phần quản lý của nó. Các con số này chỉ là của máy mình.
+
+Mỗi nút còn là một lần xin heap riêng. Sau nhiều lần thêm, xóa, các nút **rải rác** khắp heap và phải đi theo con trỏ từng bước, trong khi `vector` đặt các `int` sát nhau (4 byte một món) và CPU đọc sẵn các byte kề nhau rất nhanh. Nên duyệt `list` thường chậm hơn duyệt `vector` nhiều.
 
 !!! warning "Hay nhầm: 'chèn giữa nhanh nên dùng list'"
-    Chèn/xóa một nút của `list` chỉ tốn vài bước **khi bạn đã cầm sẵn vị trí** (iterator, Bài 19). Nhưng để **tìm** vị trí đó bạn lại phải đi qua từng nút. Cộng thêm chi phí nút rời nói trên, `vector` thường vẫn thắng cả khi chèn giữa, trừ khi dữ liệu lớn và bạn thực sự đã có vị trí trong tay. Chỉ chọn `list` khi cần **địa chỉ phần tử ổn định** (như ví dụ `p` ở trên) cùng việc chèn/xóa giữa dày đặc.
+    Chèn/xóa một nút chỉ tốn vài bước **khi bạn đã cầm sẵn vị trí** (iterator, Bài 19); để **tìm** vị trí đó vẫn phải đi qua từng nút. Cộng chi phí nút rời nói trên, `vector` thường vẫn thắng cả khi chèn giữa. Chỉ chọn `list` khi cần **địa chỉ phần tử ổn định** (như `p` ở trên) cùng việc chèn/xóa giữa dày đặc.
 
 !!! info "Bạn biết Go?"
-    Go có `container/list` (danh sách liên kết đôi, chứa kiểu `any`) trong thư viện chuẩn nhưng rất ít người dùng; Go **không có** deque chuẩn. Người viết Go dùng slice cho hầu hết việc (hàng đợi hay bỏ phần đầu bằng `s = s[1:]`). C++ cũng nên mặc định kiểu "dãy liền khối" (`vector`), nhưng có sẵn `deque` và `list` khi cần.
+    Go có `container/list` trong thư viện chuẩn, đúng là danh sách liên kết đôi (chứa kiểu `any`), nhưng rất ít người dùng; Go **không có** deque chuẩn. Người viết Go dùng slice cho hầu hết việc (hàng đợi hay bỏ phần đầu bằng `s = s[1:]`). C++ cũng nên mặc định kiểu "dãy liền khối" (`vector`), nhưng có sẵn `deque` và `list` khi cần.
 
 ### 7. Chọn container nào?
 
@@ -429,7 +372,6 @@ list  , cach nhau (byte): 32
 | thêm ở đầu | O(n) | O(1) | O(1) | không thêm được |
 | chèn/xóa ở giữa | O(n) | O(n) | O(1) *khi đã có vị trí* | không |
 | bộ nhớ | liền khối ở heap | nhiều khối nhỏ ở heap | mỗi nút một khối ở heap | ngay trong đối tượng |
-| cỡ đổi được | có | có | có | không (cố định lúc biên dịch) |
 
 | Bạn cần | Chọn | Lý do |
 |---|---|---|
@@ -485,8 +427,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | gọi `tachTu(cau)` | (1): `cau` ở `main` chuyển thành cửa sổ, không chép; hàm trả vector chuỗi mới, nên **không dangling** | `cau` còn sống suốt lúc gọi |
-| (2) | `find(' ', dau)` tìm dấu cách từ vị trí `dau` trở đi (`string_view` cũng có `npos` cùng ý nghĩa) | `cach` là vị trí, hoặc `npos` |
-| (3) | Không còn dấu cách nữa thì từ cuối chạy tới hết chuỗi | `cach = size` |
+| (2)–(3) | `find(' ', dau)` tìm dấu cách từ vị trí `dau` (`string_view` cũng có `npos`); không còn thì từ cuối chạy tới hết chuỗi | `cach` là vị trí hoặc `size` |
 | (4) | Chỉ khi từ không rỗng mới cắt và **chép** thành `std::string` (chuyển từ `string_view` phải viết rõ) đưa vào `kq` | thêm `mot`, `hai`, `ba` |
 | (5) | Nhảy qua dấu cách để tìm từ kế | `dau` tăng |
 
@@ -501,9 +442,6 @@ co 3 tu: [mot] [hai] [ba]
 ??? question "`std::string` và `std::string_view` khác nhau thế nào?"
     `std::string` **sở hữu** các ký tự (chép và tự giải phóng); `std::string_view` chỉ là cặp (con trỏ, độ dài) nhìn vào ký tự của người khác, nên không chép và không bảo đảm có `'\0'`. Dùng `string_view` làm tham số chỉ-đọc để nhận cả `std::string` lẫn chuỗi hằng mà không chép. Không cất lâu hay trả về từ hàm: nếu chuỗi gốc chết hoặc đổi chỗ (dài ra) thì nó dangling.
 
-??? question "SSO là gì?"
-    Small String Optimization: nhiều bản cài đặt `std::string` chừa một vùng nhỏ ngay trong đối tượng để chứa chuỗi ngắn, nên không phải xin heap. Chuẩn C++ không đòi hỏi và không quy định ngưỡng (g++ 11 trên máy mình là 15 ký tự), nên đừng viết code dựa vào ngưỡng hay địa chỉ đó.
-
 ??? question "`std::array` khác mảng C và `std::vector` thế nào?"
     So với mảng C: `array` mang cỡ trong kiểu (có `size()`), không thoái hóa thành con trỏ, gán và so sánh được, không tốn thêm bộ nhớ. So với `vector`: cỡ cố định lúc biên dịch, không dùng heap, không có `push_back`. Cỡ biết lúc biên dịch thì `array`, không thì `vector`.
 
@@ -512,14 +450,11 @@ co 3 tu: [mot] [hai] [ba]
 
 ## ⚠️ Lỗi thường gặp
 
-!!! warning "Lỗi 1: Để `string_view` nhìn vào chuỗi sẽ đổi chỗ hoặc chết"
-    `std::string_view sv = s;` rồi `s += "..."` dài thêm, hoặc `s` ra khỏi khối: `sv` dangling (mục 3). Có thể trông như chạy đúng với chuỗi ngắn. Dùng ASan để bắt, và chỉ giữ `string_view` trong phạm vi ngắn.
+!!! warning "Lỗi 1: `string_view` nhìn vào chuỗi sẽ đổi chỗ hoặc chết"
+    `sv = s;` rồi `s` dài thêm hoặc ra khỏi khối: `sv` dangling (mục 3), kể cả khi trông như chạy đúng. Giữ `string_view` trong phạm vi ngắn, và dùng ASan để bắt.
 
-!!! warning "Lỗi 2: Cộng hai chuỗi hằng, và quên `npos`"
-    `"xin" + " chao"` không biên dịch được (mục 1): để một vế là `std::string`. Còn `if (s.find("x") == -1)` hoặc dùng kết quả `find` làm chỉ số mà không so với `std::string::npos` là lỗi logic thầm lặng.
-
-!!! warning "Lỗi 3: Chọn `list` chỉ vì nghe 'chèn nhanh'"
-    Chèn O(1) cần vị trí đã có trong tay, còn nút rời nhau làm mọi thao tác khác chậm (mục 6). Mặc định `vector`; `list` chỉ khi cần địa chỉ ổn định.
+!!! warning "Lỗi 2: Cộng hai chuỗi hằng, quên so với `npos`"
+    `"xin" + " chao"` không biên dịch được (mục 1). Dùng kết quả `find` làm chỉ số mà không so với `std::string::npos` là lỗi logic thầm lặng.
 
 ## ✍️ Trắc nghiệm
 
@@ -558,9 +493,9 @@ std::cout << s.find("na") << " " << s.find("x") << " " << s.substr(1, 3);
 - Chuẩn không bắt buộc; nhiều thư viện làm, ngưỡng tùy bản
 - Chuẩn bắt buộc chuỗi dưới 16 ký tự phải nằm trong đối tượng
 - Chỉ chuỗi hằng viết trong nháy kép mới được hưởng SSO
-- Mọi `std::string` đều ở heap, SSO chỉ là tên khác của RAII
+- SSO làm `std::string` không bao giờ xin heap, kể cả chuỗi dài
 
-<p class="giai-thich" markdown>SSO là chuyện cài đặt: chuẩn C++ không đòi hỏi và không quy định ngưỡng, trên g++ 11 mình đo ngưỡng là 15 ký tự nhưng bản khác có thể khác. Vì thế không có con số 16 do chuẩn bắt buộc. SSO cũng không giới hạn ở chuỗi hằng: mọi `std::string` ngắn đều có thể được chứa ngay trong đối tượng. Và nó không liên quan tới RAII: mình đã chạy và thấy chuỗi ngắn nằm ngay trong đối tượng chứ không ở heap.</p>
+<p class="giai-thich" markdown>SSO là chuyện cài đặt: chuẩn C++ không đòi hỏi và không quy định ngưỡng, trên g++ 11 mình đo ngưỡng là 15 ký tự nhưng bản khác có thể khác. Vì thế không có con số 16 do chuẩn bắt buộc. SSO cũng không giới hạn ở chuỗi hằng: mọi `std::string` ngắn đều có thể được chứa ngay trong đối tượng. Và SSO chỉ giúp chuỗi ngắn: chuỗi dài vẫn xin heap (mình đã chạy: chuỗi 100 ký tự có capacity 100, tức chữ ở heap).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -619,17 +554,6 @@ std::cout << a[0];
 - `list` phải tái cấp phát khi duyệt hết capacity của nó
 
 <p class="giai-thich" markdown>Mỗi phần tử của `list` ở trong một nút xin riêng ở heap, nên để sang phần tử kế phải đi theo con trỏ tới chỗ khác, còn `vector` chỉ bước tiếp 4 byte (mình đo được 32 so với 4 byte giữa hai phần tử kề nhau). Không có kiểm tra biên nào ở mỗi bước duyệt bằng `for`. Duyệt cũng không sao chép gì cả. Và `list` không có capacity: nó không có mảng chung để mà đầy.</p>
-</div>
-
-<div class="cau-hoi" data-dap-an="1" markdown>
-**Câu 8.** Bạn cần lưu một dãy số nguyên, hay thêm ở cuối và duyệt toàn bộ, không có yêu cầu gì đặc biệt khác. Chọn mặc định nào?
-
-- `std::vector`, vì liền khối và rẻ nhất ở đa số việc cần
-- `std::list`, vì việc chèn luôn nhanh hơn các kiểu khác
-- `std::deque`, vì có thêm cả `push_front` nên hơn hẳn
-- `std::array`, vì không cần tái cấp phát nên luôn nhanh nhất
-
-<p class="giai-thich" markdown>Với việc thêm ở cuối và duyệt thì `std::vector` là lựa chọn mặc định: các phần tử liền khối nên duyệt rất nhanh, và thêm cuối rẻ trung bình. `list` chèn nhanh chỉ khi đã có sẵn vị trí, còn duyệt thì chậm vì nút rời. `deque` có `push_front` nhưng bạn không cần nó, và nó không liền khối. `array` có cỡ cố định lúc biên dịch nên không thêm phần tử được.</p>
 </div>
 
 </div>
