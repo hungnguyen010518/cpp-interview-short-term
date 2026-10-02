@@ -1,11 +1,11 @@
 # Bài 18 — map, set, unordered_map: tra cứu theo khóa
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
-    - Dùng `std::map`/`std::set` (có thứ tự theo khóa, tìm/chèn/xóa O(log n)) và `std::unordered_map`/`std::unordered_set` (băm, O(1) trung bình, không có thứ tự).
+    - Dùng `std::map`/`std::set` (có thứ tự theo khóa, tìm/chèn/xóa O(log n), giải thích ở mục 1) và `std::unordered_map`/`std::unordered_set` (băm, O(1) trung bình, không có thứ tự).
     - Tránh bẫy `m[k]`: đọc một khóa chưa có bằng `operator[]` sẽ **chèn** khóa đó; biết dùng `find`, `count`, `at`, và phân biệt `insert`, `emplace`, `try_emplace`.
     - Duyệt map bằng `for (const auto& [khoa, giaTri] : m)`, chọn `map` hay `unordered_map`, và biết khóa tự định nghĩa cần gì.
 
-**Bạn cần biết trước:** [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`std::pair`, structured binding, `if` có khởi tạo), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 16](16-vector.md) (vector, `at`) và [Bài 17](17-string-array-deque-list.md) (`std::string`, ký hiệu O(1)/O(n)).
+**Bạn cần biết trước:** [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`std::pair`, structured binding, `if` có khởi tạo), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`const`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (`try`/`catch`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (`operator*`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 16](16-vector.md) (vector, `at`) và [Bài 17](17-string-array-deque-list.md) (`std::string`, ký hiệu O(1)/O(n)).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -14,7 +14,9 @@ Bạn có một **cuốn danh bạ**: mỗi dòng gồm một **khóa** (tên ng
 Có hai cách tổ chức. **`std::map`** xếp các dòng **theo thứ tự tên** (A, B, C...): tra bằng cách so tên với một dòng rồi bỏ đi khoảng một nửa số dòng còn lại, lặp lại. **`std::unordered_map`** là một **phòng thư nhiều hộp thư**: người gác lấy tên, tính ra một con số (**hàm băm**), con số đó chọn hộp, rồi chỉ lục trong hộp ấy. Các hộp không xếp theo thứ tự nào.
 
 !!! info "Chỗ nào ví dụ này không còn đúng?"
-    Thật ra thư viện không giữ một cuốn sổ phẳng: `map` xếp các **nút** rời ở heap thành một **cây cân bằng** (so khóa với một nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải; "cân bằng" là cây không lệch hẳn về một bên, nên mỗi lần rẽ loại bỏ cỡ một nửa). `unordered_map` thì giữ một dãy "hộp" thật và chuyện chọn hộp do hàm băm làm. Cách cài đặt chi tiết là việc của từng bản thư viện; bài này chỉ dùng những gì **chuẩn C++ nói**.
+    Thật ra không có cuốn sổ phẳng nào. Chuẩn C++ chỉ bảo đảm `map` giữ khóa theo thứ tự và tìm trong O(log n); trong các bản thư viện phổ biến, nó xếp các **nút** rời ở heap thành một **cây cân bằng**.
+
+    Cây đó hoạt động thế này: so khóa với một nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải. "Cân bằng" là cây không lệch hẳn về một bên, nên mỗi lần rẽ loại bỏ cỡ một nửa số nút còn lại. `unordered_map` thì thường giữ một dãy "hộp" thật, và hàm băm chọn hộp.
 
 ## 📖 Giải thích
 
@@ -66,7 +68,7 @@ int main() {
 | (7) | `count(k)` trả số dòng có khóa `k`: với map chỉ là 0 hoặc 1 | in `1 0` |
 | (8) | `erase(k)` xóa dòng có khóa `k` | `{An:10, Chi:8}`, size 2 |
 
-Cột cuối chỉ là hình dung; thật ra là các nút rời ở heap.
+Cột cuối chỉ là hình dung; thường là các nút rời ở heap.
 
 **Kết quả khi chạy** (`g++ -std=c++17 -Wall -pthread`):
 
@@ -79,7 +81,9 @@ khong co Dung
 sau erase: 2
 ```
 
-Ở (4), kiểu của mỗi phần tử là `std::pair<const std::string, int>`: **khóa là `const`**, vì sửa khóa sẽ làm sai thứ tự của cả cây. **Thử thay đổi:** viết `for (auto& [ten, d] : m) { d++; ten += "x"; }`. Mình đã biên dịch: g++ báo lỗi ở `ten += "x"` (`no match for 'operator+='`, vì `ten` là `const std::string`); bỏ riêng dòng đó thì `d++` chạy tốt, vì giá trị sửa được còn khóa thì không. Muốn "đổi khóa" thì `erase` khóa cũ rồi thêm khóa mới.
+Ở (4), kiểu của mỗi phần tử là `std::pair<const std::string, int>`: **khóa là `const`**, vì sửa khóa sẽ làm sai thứ tự của cả cây. Muốn "đổi khóa" thì `erase` khóa cũ rồi thêm khóa mới.
+
+**Thử thay đổi:** viết `for (auto& [ten, d] : diem) { d++; ten += "x"; }`. Mình đã biên dịch: g++ báo lỗi ở `ten += "x"` (`no match for 'operator+='`, vì `ten` là `const std::string`). Bỏ riêng dòng đó thì `d++` chạy tốt: giá trị sửa được, khóa thì không.
 
 ### 2. `std::set`: danh bạ chỉ có tên
 
@@ -153,7 +157,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) | `"cam"` chưa có: map **chèn** `cam` với giá trị 0 rồi trả 0 | `{cam:0, tao:5}` |
-| (2) | Chỉ có `tao` thì size 1, nhưng giờ có hai dòng | in `size = 2` |
+| (2) | Trước đó chỉ có `tao` (1 dòng); `cam` vừa được chèn nên giờ là 2 dòng | in `size = 2` |
 | (3) | `count` chỉ **hỏi**, không chèn | size vẫn 2 |
 | (4) | `at` ném `std::out_of_range` khi không có khóa (Bài 16), cũng không chèn | in `at: khong co xoai` |
 | (5) | `tao` đã có: tăng 5 lên 6 | `tao:6` |
@@ -170,9 +174,11 @@ size = 2
 tao = 6, le = 1
 ```
 
-Ba cách hỏi khóa, ba hành vi: `m[k]` chèn nếu thiếu; `m.at(k)` ném ngoại lệ nếu thiếu; `m.find(k)` / `m.count(k)` chỉ hỏi và không đổi map. Từ **C++20** có thêm `m.contains(k)` trả `true`/`false`; ở `-std=c++17` thì chưa có (mình đã biên dịch: `'class std::map<int, int>' has no member named 'contains'`; với `-std=c++20` thì chạy). Nên với C++17, kiểm tra tồn tại bằng `count(k) != 0` hoặc `find(k) != end()`.
+Ba cách hỏi khóa, ba hành vi: `m[k]` chèn nếu thiếu; `m.at(k)` ném ngoại lệ nếu thiếu; `m.find(k)` / `m.count(k)` chỉ hỏi và không đổi map.
 
-**Thử thay đổi:** gọi `m["x"]` trong hàm nhận `const std::map<...>&`. Mình đã biên dịch: g++ báo `passing 'const std::map<...>' as 'this' argument discards qualifiers`. Vì `[]` có thể chèn nên không dùng được trên map `const`; ở đó phải dùng `at` hoặc `find`.
+Từ **C++20** có thêm `m.contains(k)` trả `true`/`false`; ở `-std=c++17` thì chưa có (mình đã biên dịch: `'class std::map<int, int>' has no member named 'contains'`; với `-std=c++20` thì chạy). Với C++17, dùng `count(k) != 0` hoặc `find(k) != end()`.
+
+**Thử thay đổi:** gọi `m["x"]` trong hàm nhận `const std::map<...>&`. Mình đã biên dịch: g++ báo `... discards qualifiers`. `[]` có thể chèn nên không dùng được trên map `const`; ở đó dùng `at` hoặc `find`.
 
 !!! info "Bạn biết Go?"
     Trong Go, `v := m[k]` với khóa chưa có trả **zero value** và **không** thêm gì vào map; `v, ok := m[k]` cho biết có hay không. Bên C++, `m[k]` cũng cho `0` với `int`, nhưng **chèn** khóa vào. `v, ok := m[k]` gần nhất với `auto it = m.find(k); it != m.end()` (`ok` ↔ so với `end()`, `v` ↔ `it->second`). Còn `m[k]++` thì cả hai đều chạy được trên khóa mới: Go và C++ đều coi giá trị khởi đầu là 0.
@@ -227,7 +233,9 @@ ten[1]=mot, s1=[], s2=[hai]
 size = 2
 ```
 
-`s1` rỗng vì đã bị move đi (Bài 12: sau khi move thì chuỗi hợp lệ nhưng chuẩn không nói giá trị gì; g++ ra rỗng). **Thử thay đổi:** đổi dòng (5) thành `ten.emplace(1, std::move(s2));`. Mình đã chạy trên g++ 11: `s2` thành rỗng dù khóa đã có, vì `emplace` có thể dựng dòng tạm trước rồi mới phát hiện trùng khóa. Chuẩn **không hứa** điều đó; chuẩn chỉ hứa cho `try_emplace` (đối số nguyên vẹn khi trùng). Vì vậy khi bạn truyền một thứ vừa move vào mà khóa có thể đã tồn tại, hãy dùng `try_emplace`.
+`s1` rỗng vì đã bị move đi (Bài 12: sau khi move thì chuỗi hợp lệ nhưng chuẩn không nói giá trị gì; g++ ra rỗng).
+
+**Thử thay đổi:** đổi dòng (5) thành `ten.emplace(1, std::move(s2));`. Mình đã chạy trên g++ 11: `s2` thành rỗng dù khóa đã có, vì `emplace` có thể dựng dòng tạm trước rồi mới phát hiện trùng khóa. Chuẩn **không hứa** điều đó; chuẩn chỉ hứa cho `try_emplace` (đối số nguyên vẹn khi trùng). Vì vậy khi truyền vào một thứ vừa move mà khóa có thể đã tồn tại, hãy dùng `try_emplace`.
 
 ### 5. `std::unordered_map` và `std::unordered_set`: bảng băm
 
@@ -263,7 +271,10 @@ int main() {
     std::cout << "tong = " << tong << "\n";
 
     std::unordered_set<int> da;
-    for (int x : {3, 1, 3, 2, 1}) da.insert(x);             // (5)
+    std::vector<int> so = {3, 1, 3, 2, 1};
+    for (int x : so) {
+        da.insert(x);                                       // (5)
+    }
     std::cout << "set: " << da.size() << " phan tu, co 2? " << da.count(2) << "\n";
     return 0;
 }
@@ -275,7 +286,7 @@ int main() {
 | (2) | Đếm: `a` ba lần, `b` hai, `c` một | `{a:3, b:2, c:1}` (thứ tự bên trong không biết) |
 | (3) | Tra từng từ **bằng `find`** để khỏi chèn nhầm `z` | in 3, 2, 1, rồi 0 cho `z` |
 | (4) | Duyệt cả bảng: **không in từng dòng** vì thứ tự tùy máy; chỉ cộng các số đếm | `tong` = 6 |
-| (5) | Bỏ trùng: ba số khác nhau | `{1, 2, 3}` |
+| (5) | Thêm từng số của `so` vào tập: số lặp bị bỏ qua, còn ba số khác nhau | `{1, 2, 3}` |
 
 **Kết quả khi chạy:**
 
@@ -304,9 +315,13 @@ Mình cố ý không chép thứ tự duyệt ra: chương trình nào in nó th
 | Khóa tự định nghĩa, chỉ có sẵn phép `<` | `map` / `set` | không cần viết hàm băm |
 | Rất ít phần tử (vài chục) | cái nào cũng được, kể cả `vector` duyệt thẳng | chênh lệch nhỏ; **đo** trước khi đổi |
 
-Cả hai đều lưu mỗi phần tử trong nút/hộp riêng ở heap, nên tốn bộ nhớ và duyệt chậm hơn `vector`, nhưng tra theo khóa thì nhanh hơn nhiều khi dữ liệu lớn.
+**Khóa tự định nghĩa.** `map`/`set` cần so thứ tự hai khóa, nên kiểu khóa phải có `operator<` (đặt tên hàm là `operator<` thì viết `a < b` gọi hàm đó, như `operator*` ở Bài 09). Chuẩn đòi hỏi vài quy tắc, và đây là ba cái dễ vi phạm nhất:
 
-**Khóa tự định nghĩa.** `map`/`set` cần so thứ tự hai khóa, nên kiểu khóa phải có `operator<` (đặt tên hàm là `operator<` thì viết `a < b` gọi hàm đó, như `operator*` ở Bài 09). Quy tắc: `a < a` phải luôn sai, và `a < b` rồi thì `b < a` phải sai; vì vậy dùng `<`, đừng dùng `<=`. Hai khóa mà không cái nào nhỏ hơn cái kia được coi là **trùng**; `map` không dùng `==`.
+- `a < a` phải luôn sai (nên dùng `<`, đừng dùng `<=`).
+- `a < b` đúng thì `b < a` phải sai.
+- Bắc cầu: `a < b` và `b < c` thì `a < c`.
+
+Hai khóa mà không cái nào nhỏ hơn cái kia được coi là **trùng**; `map` không dùng `==`.
 
 ```cpp
 #include <iostream>
@@ -345,7 +360,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) | So `x` trước, bằng nhau mới so `y`; `const` ở cuối cho phép gọi trên khóa `const` (Bài 06) | quy tắc xếp |
-| (2) | `{1, 5}` lần hai: không cái nào nhỏ hơn cái kia, nên là trùng, bị bỏ qua | `{(1,2), (1,5), (2,1)}` |
+| (2) | `{2, 1}`, `{1, 5}`... điền `x`, `y` theo thứ tự (Bài 14); `{1, 5}` lần hai: không cái nào nhỏ hơn cái kia, nên là trùng, bị bỏ qua | `{(1,2), (1,5), (2,1)}` |
 | (3) | `{0, 0}` dựng một `Toa` làm khóa; `ten[...]` thêm dòng | `{(0,0):"goc", (3,4):"xa"}` |
 
 **Kết quả khi chạy:**
@@ -357,7 +372,9 @@ xa 2
 
 **Thử thay đổi:** xóa `operator<` rồi `std::set<Toa> s; s.insert({1, 2});`. Mình đã biên dịch: lỗi `no match for 'operator<' (operand types are 'const Toa' and 'const Toa')`.
 
-Với `unordered_map`/`unordered_set`, khóa tự định nghĩa cần **hai** thứ: một **hàm băm** cho ra con số từ khóa, và `operator==` để phân biệt hai khóa cùng hộp; hai khóa bằng nhau phải cho cùng con số. Kiểu có sẵn (`int`, `std::string`...) đã có hàm băm. Với `Toa` không có hàm băm thì g++ báo (mình đã biên dịch) `use of deleted function ... std::hash<Toa>`. Cách viết hàm băm vượt phạm vi bài này.
+Với `unordered_map`/`unordered_set`, khóa tự định nghĩa cần **hai** thứ: một **hàm băm** cho ra con số từ khóa, và `operator==` để phân biệt hai khóa cùng hộp; hai khóa bằng nhau phải cho cùng con số.
+
+Kiểu có sẵn (`int`, `std::string`...) đã có hàm băm. Với `Toa` không có hàm băm thì g++ báo (mình đã biên dịch) `use of deleted function ... std::hash<Toa>`. Cách viết hàm băm vượt phạm vi bài này.
 
 ## 💻 Ví dụ code
 
@@ -409,26 +426,20 @@ nhieu nhat: go (3 lan)
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "`std::map` và `std::unordered_map` khác nhau thế nào? Khi nào chọn cái nào?"
-    `map` giữ khóa theo thứ tự (cây cân bằng), tìm/chèn/xóa O(log n), cần `operator<` cho khóa. `unordered_map` là bảng băm: O(1) trung bình nhưng xấu nhất O(n), không có thứ tự, cần hàm băm và `==`. Chọn `unordered_map` khi chỉ tra theo khóa; chọn `map` khi cần duyệt theo thứ tự, truy vấn khoảng, hoặc kết quả ổn định giữa các máy. Quan trọng nhất là nói được cái giá của mỗi bên.
+    `map` giữ khóa theo thứ tự (thường cài bằng cây cân bằng), tìm/chèn/xóa O(log n), cần `operator<` cho khóa. `unordered_map` là bảng băm: O(1) trung bình nhưng xấu nhất O(n), không có thứ tự, cần hàm băm và `==`. Chọn `unordered_map` khi chỉ tra theo khóa; chọn `map` khi cần duyệt theo thứ tự, truy vấn khoảng, hoặc kết quả ổn định giữa các máy. Quan trọng nhất là nói được cái giá của mỗi bên.
 
 ??? question "`m[k]` khác `m.at(k)` và `m.find(k)` thế nào?"
     `m[k]` nếu `k` chưa có thì **chèn** một dòng với giá trị mặc định rồi trả tham chiếu (nên không dùng được trên map `const`, và đọc cũng có thể làm map to ra). `m.at(k)` ném `std::out_of_range` nếu thiếu. `m.find(k)` trả iterator, `end()` nếu thiếu, không đổi map. Để kiểm tra tồn tại ở C++17 dùng `count` hoặc `find`; `contains` chỉ có từ C++20.
 
-??? question "Vì sao khóa của map là `const`? Muốn đổi khóa thì làm sao?"
-    Vị trí của dòng trong cây (hoặc hộp trong bảng băm) được quyết định bởi khóa; sửa khóa tại chỗ sẽ làm sai cấu trúc. Nên phần tử có kiểu `std::pair<const K, V>`. Muốn đổi khóa thì xóa khóa cũ rồi thêm khóa mới.
-
-??? question "Khóa là struct tự viết thì cần gì?"
-    Với `map`/`set`: `operator<` nhất quán (`a < a` sai, không dùng `<=`). Với `unordered_map`/`unordered_set`: hàm băm cho kiểu đó và `operator==`, hai khóa bằng nhau phải có cùng giá trị băm. Thiếu thì biên dịch lỗi.
+??? question "`emplace` khác `try_emplace` thế nào?"
+    Cả hai dựng dòng mới ngay trong map. `try_emplace` (C++17) chỉ dựng khi khóa chưa có, và chuẩn bảo đảm khi trùng khóa thì đối số không bị đụng tới. `emplace` thì không hứa: có thể dựng tạm rồi mới bỏ, nên thứ bạn vừa `std::move` vào có thể đã mất.
 
 ## ⚠️ Lỗi thường gặp
 
-!!! warning "Lỗi 1: Dùng `m[k]` để kiểm tra tồn tại"
-    `if (m["x"] == 0)` vừa không phân biệt "không có" với "có và bằng 0", vừa **chèn** khóa `"x"` (mục 3). Dùng `find` hoặc `count`.
-
-!!! warning "Lỗi 2: Dựa vào thứ tự duyệt của `unordered_map`"
+!!! warning "Lỗi 1: Dựa vào thứ tự duyệt của `unordered_map`"
     Bài kiểm tra so sánh chuỗi in ra, hoặc code giả định "phần tử thêm trước thì duyệt trước", có thể chạy đúng trên máy bạn và sai trên máy khác (mục 5). Cần thứ tự thì dùng `map`, hoặc lấy ra `vector` rồi sắp xếp (Bài 20).
 
-!!! warning "Lỗi 3: `operator<` viết sai cho khóa tự định nghĩa"
+!!! warning "Lỗi 2: `operator<` viết sai cho khóa tự định nghĩa"
     Quên so các trường sau khi trường đầu bằng nhau, hoặc dùng `<=`, làm hai khóa khác nhau bị coi là trùng (mất dòng) hoặc vi phạm yêu cầu của chuẩn (hành vi không xác định). Hãy so từng trường theo thứ tự như `Toa` ở mục 6.
 
 ## ✍️ Trắc nghiệm
@@ -440,7 +451,7 @@ nhieu nhat: go (3 lan)
 
 - `std::unordered_map`, vì băm xếp các khóa tăng dần
 - `std::map`, vì nó giữ các khóa theo thứ tự `<`
-- `std::unordered_set`, vì tập luôn có thứ tự
+- `std::unordered_set`, vì tập nào cũng sắp xếp
 - `std::vector`, vì nó tự giữ thứ tự khóa khi thêm
 
 <p class="giai-thich" markdown>`std::map` giữ khóa theo thứ tự `<` (chuẩn bảo đảm), nên duyệt ra tăng dần ở mọi máy. Bảng băm không có thứ tự và thứ tự còn khác nhau giữa các bản thư viện, nên `unordered_map` và `unordered_set` không dùng được cho việc này. `vector` thì duyệt được, nhưng không có phép tra theo khóa và không tự sắp xếp.</p>
@@ -500,7 +511,7 @@ std::cout << m["a"] << " " << m["b"];
 - `std::set`, vì set lưu được cả cặp khóa lẫn số đếm đi kèm
 - `std::list`, vì chèn ở giữa chỉ tốn vài bước, nên rất rẻ
 
-<p class="giai-thich" markdown>Chỉ tra và đếm theo khóa, không cần thứ tự, nên `std::unordered_map` với chi phí trung bình O(1) là lựa chọn hợp lý (nếu lo thì đo trước). Câu "O(log n) nhanh hơn O(1)" sai: log n tăng theo n còn hằng số thì không. `std::set` chỉ lưu khóa, không có giá trị đi kèm. `std::list` không tra theo khóa được và phải đi từng nút.</p>
+<p class="giai-thich" markdown>Chỉ tra và đếm theo khóa, không cần thứ tự, nên `std::unordered_map` với chi phí trung bình O(1) là lựa chọn hợp lý (nếu lo thì đo trước). Thứ tự khóa không làm tra nhanh hơn: `map` tốn O(log n), còn băm trung bình O(1). `std::set` chỉ lưu khóa, không có giá trị đi kèm. `std::list` không tra theo khóa được và phải đi từng nút.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -514,19 +525,8 @@ std::cout << m["a"] << " " << m["b"];
 <p class="giai-thich" markdown>`std::set` giữ phần tử theo thứ tự nên cần `operator<`; hai phần tử mà không cái nào nhỏ hơn cái kia được coi là trùng, nên `set` không dùng `==`. Hàm băm là yêu cầu của `std::unordered_set`, không phải của `std::set`. Còn "tự so từng byte" không có: thiếu `operator<` thì g++ báo lỗi biên dịch (mình đã chạy).</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
-**Câu 7.** Điều nào về `std::unordered_map` là chuẩn bảo đảm?
-
-- Tìm trung bình hằng số, xấu nhất có thể tăng theo n
-- Duyệt luôn ra theo đúng thứ tự mà bạn đã thêm vào
-- Thêm phần tử không bao giờ làm iterator cũ bị hỏng
-- Tìm kiếm luôn O(1), kể cả khi mọi khóa dồn vào một hộp
-
-<p class="giai-thich" markdown>Chuẩn nói tìm kiếm là O(1) **trung bình** và O(n) trong trường hợp xấu nhất (khóa dồn vào cùng một hộp). Chuẩn không hứa thứ tự duyệt, nên "theo thứ tự thêm vào" sai. Khi rehash, iterator cũ bị vô hiệu (Bài 19), nên "không bao giờ hỏng" cũng sai. Còn "luôn O(1)" quá mạnh so với những gì chuẩn bảo đảm.</p>
-</div>
-
 <div class="cau-hoi" data-dap-an="3" markdown>
-**Câu 8.** Đọc đoạn code sau. Nó in ra gì?
+**Câu 7.** Đọc đoạn code sau. Nó in ra gì?
 
 ```text
 std::map<int, int> m;
@@ -539,7 +539,7 @@ std::cout << m[1] << " " << m[2] << " " << m.size();
 
 - `20 6 2`, vì `insert` lần thứ hai ghi đè giá trị cũ
 - `10 5 3`, vì mỗi lệnh gọi đều thêm một dòng mới vào map của bạn
-- `10 6 2`: `insert` không ghi đè, còn gán `=` thì ghi đè
+- `10 6 2`, vì `insert` không ghi đè, còn gán `=` thì ghi đè
 - `10 6 3`, vì `m[2]` chèn thêm một dòng ở mỗi lần gán
 
 <p class="giai-thich" markdown>`insert({1, 20})` khi khóa 1 đã có thì không làm gì, nên `m[1]` còn 10. `m[2] = 5` chèn khóa 2, rồi `m[2] = 6` ghi đè nên còn 6. Map chỉ có hai khóa là 1 và 2 nên `size` là 2. Việc mỗi lệnh thêm một dòng mới sai vì khóa trùng không tạo dòng thứ hai; map không bao giờ có hai dòng cùng khóa.</p>
@@ -549,7 +549,7 @@ std::cout << m[1] << " " << m[2] << " " << m.size();
 
 ## 🔑 Tóm tắt
 
-1. `std::map<K, V>` (`<map>`) và `std::set<K>` (`<set>`) giữ khóa không trùng theo thứ tự `<` (cây cân bằng), tìm/chèn/xóa O(log n); phần tử của map là `std::pair<const K, V>` nên khóa là `const`, duyệt bằng `for (const auto& [khoa, giaTri] : m)`.
+1. `std::map<K, V>` (`<map>`) và `std::set<K>` (`<set>`) giữ khóa không trùng theo thứ tự `<` (thường cài bằng cây cân bằng), tìm/chèn/xóa O(log n); phần tử của map là `std::pair<const K, V>` nên khóa là `const`, duyệt bằng `for (const auto& [khoa, giaTri] : m)`.
 2. `std::unordered_map`/`unordered_set` là bảng băm: tìm/chèn/xóa O(1) trung bình, xấu nhất O(n), **không có thứ tự duyệt** (khác nhau giữa các thư viện), rehash làm iterator cũ hỏng (Bài 19); `map[K]V` của Go tương đương nó, và Go cố ý xáo thứ tự duyệt.
 3. `m[k]` với khóa chưa có **chèn** giá trị mặc định (Go thì không chèn); `m.at(k)` ném `std::out_of_range`; `find(k)` / `count(k)` chỉ hỏi (`v, ok := m[k]` của Go ↔ `find`); `contains` chỉ có từ C++20.
 4. `insert` và `try_emplace` không ghi đè khi khóa đã có (`insert` trả `pair<iterator, bool>`), `m[k] = v` thì ghi đè; `try_emplace` được chuẩn bảo đảm không đụng đối số khi trùng khóa, `emplace` thì không hứa.
