@@ -19,3 +19,4 @@
 | [Bài 13 — Tính năng C++11 hay gặp](nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) | <span class="diem" data-bai="13"></span> |
 | [Bài 14 — Tính năng C++14/17 hay gặp](nhom-1-nen-tang-bo-nho/14-cpp14-17.md) | <span class="diem" data-bai="14"></span> |
 | [Bài 15 — Hành vi không xác định và công cụ bắt lỗi](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) | <span class="diem" data-bai="15"></span> |
+| [Bài 16 — std::vector: mảng co giãn](nhom-2-stl-thuat-toan/16-vector.md) | <span class="diem" data-bai="16"></span> |

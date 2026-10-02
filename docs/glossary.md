@@ -160,3 +160,12 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | tràn số nguyên có dấu (signed overflow) | `INT_MAX + 1` với `int` là UB (số không dấu thì quấn vòng, có định nghĩa; Go thì số có dấu cũng quấn vòng) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | std::out_of_range | Ngoại lệ do `v.at(i)` ném khi chỉ số ngoài biên (còn `v[i]` ngoài biên là UB) | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
 | dịch bit (bit shift) | Phép `1 << s` dịch các bit sang trái `s` vị trí, tức nhân với 2 mũ `s`; dịch một `int` 32 bit đi 32 vị trí trở lên là UB | [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) |
+| STL (Standard Template Library) | Bộ kiểu chứa dữ liệu và hàm có sẵn của thư viện chuẩn C++ (vector, map, set, sort...), viết bằng khuôn mẫu nên dùng được với nhiều kiểu | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| tham số khuôn mẫu (template argument) | Phần trong `< >`, như `int` ở `std::vector<int>`: cho biết kiểu phần tử; `vector<int>` và `vector<double>` là hai kiểu khác nhau | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| push_back / pop_back | `v.push_back(x)` thêm `x` vào cuối vector; `v.pop_back()` bỏ phần tử cuối; giống `append` của Go nhưng sửa chính vector, không trả gì | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| size / capacity | size là số phần tử đang có; capacity là số chỗ mảng bên trong đã xin (luôn ≥ size); `reserve` đổi capacity, `resize` đổi size | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| tái cấp phát (reallocation) | Khi vector đầy mà thêm phần tử, nó xin mảng lớn hơn ở heap, chuyển phần tử sang và trả mảng cũ; cách tăng capacity là tùy cài đặt, mọi tham chiếu/con trỏ/iterator cũ có thể hỏng | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| reserve | `v.reserve(n)` xin sẵn chỗ cho n phần tử để khỏi chuyển nhà khi thêm dần; không đổi size, không tạo phần tử | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| at | `v.at(i)` lấy phần tử thứ i có kiểm tra biên, ngoài biên thì ném `std::out_of_range`; còn `v[i]` không kiểm tra (ngoài biên là UB) | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| emplace_back | `v.emplace_back(đối số...)` dựng đối tượng ngay trong ô cuối của vector từ các đối số của hàm tạo, bỏ được đối tượng tạm; với kiểu cơ bản không khác `push_back` | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
+| std::vector<bool> | Trường hợp đặc biệt của vector: nén mỗi phần tử thành 1 bit nên `v[i]` không là tham chiếu `bool` thật; tránh khi cần `bool` thường | [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) |
