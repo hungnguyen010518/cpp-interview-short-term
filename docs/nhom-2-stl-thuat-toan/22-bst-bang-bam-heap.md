@@ -5,7 +5,7 @@
     - Phác được **bảng băm kiểu chaining** (mỗi hộp là một danh sách): hàm băm, `% số hộp`, đụng độ, hệ số tải, rehash, và vì sao tìm là O(1) trung bình.
     - Hiểu **heap** lưu trong mảng (con của `i` là `2i+1`, `2i+2`), vì sao `top` O(1) còn `push`/`pop` O(log n), dùng `std::priority_queue` (max-heap, min-heap bằng `greater`) và giải **top-K**.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (khung hàm, đệ quy vô hạn làm tràn stack), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`, `nullptr`), [Bài 07](../nhom-1-nen-tang-bo-nho/07-new-delete.md) (`new`/`delete`, ASan báo rò rỉ), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 16](16-vector.md), [Bài 17](17-string-array-deque-list.md) và [Bài 18](18-map-set-unordered.md) (container), [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O, `Nut`, `std::queue`).
+**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (khung hàm, đệ quy vô hạn làm tràn stack), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`, `nullptr`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (hàm `const`), [Bài 07](../nhom-1-nen-tang-bo-nho/07-new-delete.md) (`new`/`delete`, ASan báo rò rỉ), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`%`), [Bài 16](16-vector.md), [Bài 17](17-string-array-deque-list.md) và [Bài 18](18-map-set-unordered.md) (container), [Bài 20](20-algorithm-lambda.md) (`std::max`) và [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O, `Nut`, `std::queue`).
 
 !!! note "Phạm vi bài này"
     Ba cấu trúc này được tách từ Bài 21 cho đỡ dài. BST và bảng băm ở đây **chỉ để hiểu cách `map` và `unordered_map` hoạt động**: đi làm bạn dùng bản có sẵn của thư viện, còn đi phỏng vấn người ta có thể bắt bạn viết BST và nói về bảng băm. Xóa một nút khỏi BST và cây cân bằng đầy đủ nằm ngoài bài.
@@ -15,10 +15,10 @@
 Ba hình ảnh cho ba cấu trúc. **BST** là trò đoán số từ 1 đến 100: mỗi câu "lớn hơn hay nhỏ hơn 50?" loại bỏ một nửa. **Bảng băm** là phòng thư nhiều hộp của [Bài 18](18-map-set-unordered.md): người gác tính từ tên ra số hộp rồi chỉ lục trong hộp đó. **Heap** là phòng cấp cứu: ai nặng nhất được khám trước, và lúc nào cũng biết ngay ai đang nặng nhất.
 
 !!! info "Chỗ nào các hình ảnh này không còn đúng?"
-    Trò đoán số chỉ nhanh nếu mỗi câu hỏi chia đôi được; nếu người ra đề toàn chọn số làm câu hỏi chỉ loại thêm được một số, bạn phải hỏi tới 100 lần. Đó đúng là chỗ BST xấu đi (mục 2). Phòng cấp cứu thì khác heap ở chỗ: heap chỉ biết rõ **người đứng đầu**, không biết thứ tự những người còn lại; nó không phải một dãy đã xếp.
+    Trò đoán số chỉ nhanh nếu mỗi câu hỏi chia đôi được khoảng còn lại. Nếu bạn hỏi "có phải 1 không? có phải 2 không?..." thì mỗi câu chỉ loại một số và có thể phải hỏi tới 100 lần. BST xấu đi đúng như vậy (mục 2). Phòng cấp cứu thì khác heap ở chỗ: heap chỉ biết rõ **người đứng đầu**, không biết thứ tự những người còn lại; nó không phải một dãy đã xếp.
 
 !!! warning "Hay nhầm: hai nghĩa của chữ heap"
-    "Heap" ở [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) là **vùng nhớ** để `new` xin chỗ. "Heap" trong bài này là một **cách sắp phần tử** trong mảng. Hai thứ chỉ trùng tên. Một `MaxHeap` (cấu trúc) hoàn toàn có thể là biến cục bộ nằm trên stack, dù dữ liệu bên trong `vector` của nó nằm ở vùng heap.
+    "Heap" ở [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) là **vùng nhớ** để `new` xin chỗ. "Heap" trong bài này là một **cách sắp phần tử** trong mảng. Hai thứ chỉ trùng tên. Một `std::priority_queue` khai báo trong `main` là biến cục bộ nằm trên stack, dù dữ liệu trong `vector` bên trong nó nằm ở vùng heap.
 
 ## 📖 Giải thích
 
@@ -55,7 +55,7 @@ int main() {
 tongDen(3) = 6
 ```
 
-Số khung chồng lên nhau là **độ sâu** đệ quy (ở đây 4, kể cả `n`=0); quá sâu thì tràn stack. Với cây, độ sâu bằng độ cao của cây.
+Số khung chồng lên nhau là **độ sâu** đệ quy (ở đây 4, kể cả `n`=0); quá sâu thì tràn stack. Với cây, độ sâu cỡ độ cao của cây (cộng thêm một lần gọi tới `nullptr`).
 
 ### 2. Cây nhị phân tìm kiếm (BST)
 
@@ -63,7 +63,11 @@ Số khung chồng lên nhau là **độ sâu** đệ quy (ở đây 4, kể c�
 
 Nút vẫn là `struct Nut` như Bài 21, chỉ khác là có hai mũi tên thay vì một. Luật trên cho ta cách tìm như trò đoán số: so `x` với nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải, bằng thì xong. Chèn cũng đi đường đó cho tới khi gặp chỗ trống (`nullptr`) và đặt nút mới vào chỗ ấy.
 
-Mấy cú pháp mới trong listing: `std::max(a, b)` (`<algorithm>`, [Bài 20](20-algorithm-lambda.md)) trả số lớn hơn trong hai số. Hàm `chenNut` **trả về con trỏ** tới gốc của cây con sau khi chèn, và ta gán lại `n->trai = chenNut(n->trai, x)`: nếu cây con rỗng thì gán nút mới, nếu không thì chính con trỏ cũ được gán lại cho nó (không đổi). Cuối cùng `std::vector<int>{4, 2, 6}` dựng tạm một vector chỉ để duyệt.
+Ba điều cần biết trước khi đọc listing:
+
+- `std::max(a, b)` (`<algorithm>`, [Bài 20](20-algorithm-lambda.md)) trả số lớn hơn trong hai số.
+- `std::vector<int>{4, 2, 6}` dựng tạm một vector chỉ để duyệt.
+- `chenNut` **trả về con trỏ** tới gốc của cây con sau khi chèn, và ta gán lại `n->trai = chenNut(n->trai, x)`. Cây con rỗng thì lời gọi trả nút mới nên gán nút mới vào; cây con có nút thì lời gọi trả lại chính nút cũ nên gán lại cũng không đổi gì. Bảng "Chạy từng dòng" có một hàng cho bước quay về này.
 
 ```cpp
 #include <algorithm>
@@ -105,7 +109,7 @@ void giai(Nut* n) {                    // trả cả cây: con trước, rồi m
 struct Cay {
     Nut* goc = nullptr;                // nullptr = cây rỗng
 
-    Cay() = default;
+    Cay() = default;                   // ba dòng này giống DanhSach (Bài 21)
     Cay(const Cay&) = delete;
     Cay& operator=(const Cay&) = delete;
     ~Cay() { giai(goc); }
@@ -145,8 +149,8 @@ int main() {
 |---|---|---|
 | (3) chèn 4 | Cây rỗng nên tạo nút `4` làm gốc | `goc` → [4] |
 | (4) chèn 2 | `2 < 4` nên đi trái; con trái của 4 là `nullptr`: (3) tạo nút `2` ở đó | [4] có trái → [2] |
+| (4) lúc quay về | `chenNut(n->trai, 2)` trả con trỏ nút `2`, được gán vào `n->trai` của `4`; rồi `return n` trả lại chính `4` cho `goc` | `goc` vẫn → [4] |
 | (5) chèn 6 | `6 > 4` nên đi phải: tạo nút `6` | [4] có trái [2], phải [6] |
-| (6) | Giá trị đã có (ví dụ chèn lại 4): không làm gì, cây không có hai nút bằng nhau | |
 | (7)-(8) | Trung tự: đi hết cây con trái, **rồi** in nút, **rồi** đi cây con phải | in `1 2 3 4 5 6 7` |
 | (9) | Hủy: đi xuống tận lá, `delete` lá trước, rồi lên `delete` cha; xóa cha trước thì mất đường tới con | |
 | (10) | `tim` rẽ theo luật: `7 > 4` rẽ phải, `7 > 6` rẽ phải, gặp `7`: ghé 3 nút | |
@@ -173,7 +177,7 @@ Cây `a` cao 3 với 7 nút, và nói chung cây đầy đủ `n` nút chỉ cao
 
 **Cây cân bằng** sửa điều đó bằng cách tự sắp xếp lại. Sau mỗi lần chèn hay xóa, nếu một nhánh quá dài so với nhánh kia thì nó **xoay** vài nút cho cây thấp xuống, mà vẫn giữ luật "trái nhỏ hơn, phải lớn hơn". Nhờ vậy độ cao luôn cỡ log n bất kể thứ tự chèn.
 
-Đó là cái `std::map`/`std::set` ([Bài 18](18-map-set-unordered.md)) dùng để bảo đảm O(log n). Chuẩn C++ chỉ đòi O(log n); bản g++ dùng một loại cây cân bằng tên "cây đỏ-đen", bài này không cài.
+`std::map`/`std::set` ([Bài 18](18-map-set-unordered.md)) thường được cài bằng cây cân bằng (chuẩn chỉ đòi O(log n)); bản g++ dùng loại tên "cây đỏ-đen", bài này không cài.
 
 **Thử thay đổi: đổi hàm hủy thành `~Cay() {}` (bỏ lời gọi `giai`).** Mình đã biên dịch với `-fsanitize=address` và chạy: chương trình vẫn in kết quả như cũ rồi LeakSanitizer báo `336 byte(s) leaked in 14 allocation(s)`. Đúng là hai cây, mỗi cây 7 nút, mỗi nút 24 byte (một `int` cộng đệm và hai con trỏ). Với `giai` thì ASan và UBSan đều sạch.
 
@@ -182,9 +186,7 @@ Cây `a` cao 3 với 7 nút, và nói chung cây đầy đủ `n` nút chỉ cao
 
 ### 3. Bảng băm kiểu chaining
 
-Mục tiêu: nhận khóa (ví dụ một cái tên) và đi **thẳng** tới chỗ cất nó, không so từng cái một. Cách làm có ba bước. **Hàm băm** (hash function) biến khóa thành một con số lớn.
-
-Phép `% số hộp` (chia lấy dư, [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md)) đưa con số đó vào đoạn `0 .. số hộp - 1`, chính là **chỉ số hộp**. Rồi ta cất khóa vào hộp ấy.
+Mục tiêu: nhận khóa (ví dụ một cái tên) và đi **thẳng** tới chỗ cất nó, không so từng cái một. Cách làm có ba bước. Bước 1: **hàm băm** (hash function) biến khóa thành một con số lớn. Bước 2: phép `% số hộp` (chia lấy dư, [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md)) đưa con số đó vào đoạn `0 .. số hộp - 1`, chính là **chỉ số hộp**. Bước 3: cất khóa vào hộp ấy.
 
 Hai khóa khác nhau có thể rơi cùng một hộp: gọi là **đụng độ** (collision), và không tránh hết được (13 người vào 12 hộp thì chắc chắn có hộp chứa hai người). **Chaining** (nối chuỗi) xử lý bằng cách cho mỗi hộp là **một danh sách** các khóa rơi vào nó. Tìm khóa nghĩa là tính hộp, rồi chỉ lục **trong hộp ấy**.
 
@@ -192,7 +194,11 @@ Hộp mà dài thì chậm, nên ta theo dõi **hệ số tải** (load factor) 
 
 Mình dùng `std::vector<std::list<std::string>>`: một vector các hộp, mỗi hộp là một `std::list` ([Bài 17](17-string-array-deque-list.md)) chứa chuỗi. Vì cả vector lẫn list tự dọn khi chết (RAII, [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)), bảng này không cần hàm hủy.
 
-Hai cú pháp mới trong listing: `static_cast<unsigned char>(c)` đổi một `char` thành số không âm để phép cộng không bị âm; còn `hop = std::move(moi)` ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)) chuyển cả vector `moi` vào `hop` mà không chép từng danh sách.
+Ba cú pháp mới trong listing:
+
+- `BangBam() : hop(4) {}` có **danh sách khởi tạo**: sau dấu `:` ta dựng thành viên `hop` bằng `hop(4)` (vector có 4 danh sách rỗng) ngay lúc đối tượng ra đời, trước khi vào thân `{}`.
+- `static_cast<unsigned char>(c)` đổi mỗi ký tự thành số từ 0 đến 255, để hàm băm không phụ thuộc `char` có dấu hay không trên máy.
+- `hop = std::move(moi)` ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)) chuyển cả vector `moi` vào `hop` mà không chép từng danh sách.
 
 ```cpp
 #include <iostream>
@@ -283,11 +289,11 @@ sau khoa thu 5:
 co Binh: 1, co Hoa: 0
 ```
 
-Mỗi cặp `[ ... ]` là một hộp, đếm từ hộp 0 bên trái. Số hộp và hàm băm ở đây là do mình chọn cho dễ đọc; `unordered_map` của thư viện dùng hàm băm khác và hệ số tải tối đa mặc định cũng là 1 (hàm `load_factor()` và `max_load_factor()` cho bạn xem). Chuẩn không quy định cụ thể số hộp hay cách chia, nên đừng dựa vào con số cụ thể.
+Mỗi cặp `[ ... ]` là một hộp, đếm từ hộp 0 bên trái. `co` trả `bool`, và `cout` in `true` là `1`, `false` là `0` (không phải chỉ số hộp). Số hộp và hàm băm ở đây là do mình chọn cho dễ đọc; `unordered_map` của thư viện dùng hàm băm khác và hệ số tải tối đa mặc định cũng là 1 (hàm `load_factor()` và `max_load_factor()` cho bạn xem). Chuẩn không quy định cụ thể số hộp hay cách chia, nên đừng dựa vào con số cụ thể.
 
 **Vì sao O(1) trung bình?** Một lần `them`/`co` làm hai việc: tính hộp (số bước cố định, không phụ thuộc số khóa) và lục trong hộp. Nhờ rehash giữ hệ số tải không quá khoảng 1, nếu hàm băm **tản đều** thì mỗi hộp chỉ có vài khóa, nên lục hộp là hằng số. Việc rehash thì tốn O(n) nhưng hiếm (mỗi lần số hộp gấp đôi), nên chia đều vẫn là O(1) amortized, đúng như `push_back` ở Bài 21.
 
-**Vì sao xấu nhất là O(n)?** Nếu mọi khóa rơi vào cùng một hộp, bảng thành một danh sách dài và `co` lục cả `n` khóa. Đó là khi hàm băm dở, hoặc khi kẻ xấu cố ý chọn các khóa cùng hộp.
+**Xấu nhất O(n)** khi mọi khóa rơi vào cùng một hộp (hàm băm dở, hoặc kẻ xấu cố ý chọn khóa cùng hộp): bảng thành một danh sách dài và `co` lục cả `n` khóa.
 
 **Thử thay đổi: cho hàm băm luôn trả `0`** (đổi `return h;` thành `return 0;`). Mình đã chạy: cả 4 khóa vào hộp 0 (`[ An Binh Cuong Dung ]`), sau rehash 5 khóa vẫn cùng hộp 0 và bảy hộp kia trống. Bảng vẫn **đúng** nhưng mỗi truy vấn phải lục cả danh sách: O(n).
 
@@ -296,7 +302,7 @@ Mỗi cặp `[ ... ]` là một hộp, đếm từ hộp 0 bên trái. Số hộ
 
 ### 4. Heap và `std::priority_queue`
 
-**Heap** (đống) ở đây là cây nhị phân **gần đầy**: mọi tầng đầy đủ trừ tầng cuối, và tầng cuối được lấp từ trái sang phải. Với **max-heap**, mỗi nút **lớn hơn hoặc bằng** hai con của nó (**min-heap** thì ngược lại, nhỏ hơn hoặc bằng). Hệ quả: phần tử lớn nhất luôn ở gốc. Chú ý chỉ cha so với con, còn anh em hay họ hàng chéo nhau thì không có luật.
+**Heap** (đống) ở đây là cây nhị phân **gần đầy**: mọi tầng đầy đủ trừ tầng cuối, và tầng cuối được lấp từ trái sang phải. Với **max-heap**, mỗi nút **lớn hơn hoặc bằng** hai con của nó (**min-heap** thì ngược lại, nhỏ hơn hoặc bằng). Hệ quả: phần tử lớn nhất luôn ở gốc. Luật chỉ so cha với con, anh em không có luật.
 
 Vì cây gần đầy, ta không cần nút và con trỏ: xếp các nút **theo từng tầng** vào một mảng (`vector`). Nút ở chỉ số `i` có con trái ở `2i + 1`, con phải ở `2i + 2`, và cha ở `(i - 1) / 2` (chia nguyên). Ví dụ mảng `[90, 70, 80, 30, 60, 20, 50]` là cây:
 
@@ -327,9 +333,7 @@ Còn **`top()`** chỉ đọc ô 0 nên O(1). Bảng dưới theo dõi mảng kh
 
 `push` và `pop` mỗi lần đi dọc một nhánh tối đa độ cao cây, mà cây gần đầy `n` nút cao cỡ log n nên cả hai là **O(log n)**. Hai điều cần nhớ: `pop`/`top` lúc rỗng là hành vi không xác định, và mảng heap **không** xếp theo thứ tự (`[70 50 20 30]` không phải dãy tăng hay giảm).
 
-**`std::priority_queue`** (`#include <queue>`) là heap có sẵn, thuộc nhóm container adaptor như `stack`/`queue` ([Bài 21](21-big-o-cau-truc-du-lieu.md)): bên trong là một `vector`. Mặc định nó là **max-heap**: `top()` là phần tử **lớn nhất**. Muốn **min-heap** thì khai báo ba tham số: kiểu phần tử, container bên trong, và cách so sánh `std::greater<int>` (`#include <functional>`). 
-
-Các thao tác: `push`, `top` O(1), `pop` (trả `void` như `stack`), `empty`, `size`.
+**`std::priority_queue`** (`#include <queue>`) là heap có sẵn, thuộc nhóm container adaptor như `stack`/`queue` ([Bài 21](21-big-o-cau-truc-du-lieu.md)): bên trong là một `vector`. Mặc định nó là **max-heap**: `top()` là phần tử **lớn nhất**. Muốn **min-heap** thì khai báo ba tham số: kiểu phần tử, container bên trong, và cách so sánh `std::greater<int>` (`#include <functional>`). `std::greater<int>` là một kiểu so sánh nhận hai số và trả `a > b`; `std::less<int>` trả `a < b` và là **mặc định**. `priority_queue` đưa lên `top` phần tử mà phép so sánh xếp ở cuối cùng: với `less` đó là số lớn nhất, với `greater` là số nhỏ nhất. Các thao tác: `push`, `top` O(1), `pop` (trả `void` như `stack`), `empty`, `size`.
 
 ```cpp
 #include <functional>
@@ -353,7 +357,7 @@ int main() {
 }
 ```
 
-Dòng (1) là max-heap mặc định. Dòng (2) có ba tham số: kiểu `int`, container nền `vector<int>`, và cách so sánh `greater<int>` làm `top()` thành số **nhỏ** nhất. Dòng (3) `pop` bỏ phần tử ở `top` (`8` của max-heap, `1` của min-heap), rồi `top` mới là số kế tiếp.
+Dòng (1) là max-heap mặc định. Dòng (2) có ba tham số: kiểu `int`, container nền `vector<int>`, và cách so sánh `greater<int>`: vì nó xếp số nhỏ ở cuối, `top()` là số **nhỏ** nhất. Dòng (3) `pop` bỏ phần tử ở `top` (`8` của max-heap, `1` của min-heap), rồi `top` mới là số kế tiếp.
 
 **Kết quả khi chạy:**
 
@@ -415,11 +419,7 @@ int main() {
 3 so lon nhat (nho -> lon): 8 9 11
 ```
 
-**Thử thay đổi: đổi `std::greater<int>` thành `std::less<int>`** (max-heap). Mình đã chạy: in `4 2 1`.
-
-Giờ `top` là số **lớn** nhất nên mỗi lần vượt `k` ta bỏ số lớn: heap giữ ba số **nhỏ** nhất và in từ lớn xuống nhỏ. Chọn nhầm chiều heap là một lỗi top-K hay gặp.
-
-Mình đã chạy mọi chương trình ở mục 1, 2, 3, 4 và mục này với `-fsanitize=address,undefined`: không có báo cáo nào.
+**Thử thay đổi: đổi `std::greater<int>` thành `std::less<int>`** (max-heap, `less` là mặc định). Mình đã chạy: in `4 2 1`. Giờ `top` là số **lớn** nhất nên mỗi lần vượt `k` ta bỏ số lớn: heap giữ ba số **nhỏ** nhất và in từ lớn xuống nhỏ. Chọn nhầm chiều heap là một lỗi top-K hay gặp. Mình đã chạy mọi chương trình ở mục 1–4 và mục này với `-fsanitize=address,undefined`: không có báo cáo nào.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -441,7 +441,7 @@ Mình đã chạy mọi chương trình ở mục 1, 2, 3, 4 và mục này vớ
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Tưởng BST lúc nào cũng O(log n)"
-    BST trần chèn dữ liệu đã sắp xếp thì thành một dây nút, `tìm` và `chen` thành O(n), và các hàm đệ quy (`chenNut`, `giai`) sâu bằng độ cao nên cây thành dây dài cả triệu nút có thể làm tràn stack; viết con trỏ con bằng `unique_ptr` cũng đệ quy y như vậy ([Bài 21](21-big-o-cau-truc-du-lieu.md)). Muốn bảo đảm O(log n) dùng `std::map`/`std::set` (cây cân bằng). Khi phỏng vấn, nhớ nói luôn "xấu nhất O(n) nếu cây lệch".
+    BST trần chèn dữ liệu đã sắp xếp thì thành một dây nút, và `tim`, `chen` thành O(n). Các hàm đệ quy (`chenNut`, `giai`) sâu bằng độ cao, nên dây đủ dài có thể làm tràn stack (ngưỡng cụ thể tùy giới hạn stack của máy, thường vài MB). Viết con trỏ con bằng `unique_ptr` cũng đệ quy y như vậy ([Bài 21](21-big-o-cau-truc-du-lieu.md)). Muốn bảo đảm O(log n) dùng `std::map`/`std::set` (cây cân bằng). Khi phỏng vấn, nhớ nói luôn "xấu nhất O(n) nếu cây lệch".
 
 !!! warning "Lỗi 2: Nhầm chiều của `priority_queue`, hoặc `pop()` rỗng"
     Mặc định `priority_queue<int>` cho số **lớn** nhất ở `top`; muốn nhỏ nhất phải khai báo `std::vector<int>, std::greater<int>`. `pop()` trả `void` (lấy `top()` trước), và `top()`/`pop()` lúc rỗng là hành vi không xác định, nên kiểm `empty()` trước.
@@ -488,19 +488,19 @@ std::cout << q.top();
 
 - `9`, vì `pop` bỏ số nhỏ nhất và còn lại số lớn nhất ở đỉnh
 - `4`, vì `pop` bỏ `2` nhỏ nhất, nên số nhỏ nhất kế là `4`
-- `2`, vì `pop` chỉ trả giá trị chứ không bỏ gì khỏi hàng
-- Lỗi biên dịch, vì `pop` trả `void` mà ta không dùng giá trị
+- `2`, vì `greater` làm `pop` bỏ số lớn nhất là `9`
+- `2`, vì `pop` bỏ số được cất vào trước nhất là `4`
 
-<p class="giai-thich" markdown>Với `greater`, đỉnh là số nhỏ nhất nên `pop` bỏ `2`, rồi đỉnh mới là `4`. Số `9` chỉ là đỉnh nếu đây là max-heap mặc định. `pop` thật sự bỏ phần tử và trả `void`, nên `2` không còn; gọi một hàm trả `void` thành câu lệnh riêng là hợp lệ, không phải lỗi biên dịch.</p>
+<p class="giai-thich" markdown>Với `greater`, đỉnh là số nhỏ nhất nên `pop` bỏ `2`, rồi đỉnh mới là `4`. Số `9` chỉ là đỉnh nếu đây là max-heap mặc định. `greater` đặt số nhỏ nhất ở đỉnh nên thứ bị bỏ là `2` chứ không phải `9`, và `priority_queue` bỏ theo độ ưu tiên chứ không theo thứ tự cất vào như `queue`, nên `4` không bị bỏ.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 4.** Vì sao một BST "trần" (không tự cân bằng) có thể tốn O(n) cho một lần tìm?
 
-- Vì mỗi lần rẽ nó phải so sánh với mọi nút khác trước khi chọn trái hay phải
-- Vì hàm tìm đệ quy luôn phải duyệt trung tự cả cây trước khi trả kết quả
-- Vì con trỏ trái và phải làm bộ nhớ không liền nên mỗi bước đi chậm cỡ O(n)
-- Chèn dữ liệu đã sắp xếp thì cây thành một dây nút cao bằng `n`, nên tìm đi qua cả `n` nút
+- Vì mỗi lần rẽ nó phải so sánh với mọi nút khác trước đó
+- Vì hàm tìm đệ quy luôn phải duyệt trung tự cả cây trước
+- Vì con trỏ trái và phải làm mỗi bước đi chậm cỡ O(n)
+- Vì dữ liệu đã sắp xếp làm cây thành một dây nút cao bằng `n`
 
 <p class="giai-thich" markdown>Chi phí tìm bằng độ cao của cây, và chèn theo thứ tự tăng hoặc giảm dần làm mỗi nút mới luôn rẽ cùng một phía, nên độ cao bằng số nút. Mỗi bước chỉ so với một nút trên đường đi chứ không với mọi nút, và `tim` rẽ theo luật chứ không duyệt trung tự cả cây. Bộ nhớ rời rạc làm mỗi bước chậm hơn một hằng số, nhưng không biến O(log n) thành O(n).</p>
 </div>
@@ -508,12 +508,12 @@ std::cout << q.top();
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 5.** Vì sao tìm trong bảng băm là O(1) **trung bình**?
 
-- Băm chọn thẳng một hộp, và hộp thường chỉ có vài khóa
-- Các khóa trong hộp được hàm băm xếp theo thứ tự để tra nhị phân trong mọi trường hợp
-- Mỗi hộp luôn chứa đúng một khóa vì hàm băm không bao giờ cho hai khóa cùng chỉ số hộp
-- Bảng băm lưu mọi khóa liền nhau trong mảng nên CPU đọc trực tiếp, bất kể số hộp
+- Hàm băm chọn thẳng một hộp, mà hộp thường chỉ vài khóa
+- Các khóa trong hộp thường được giữ theo thứ tự để tra nhị phân
+- Hàm băm giữ mỗi hộp đúng một khóa nên khỏi phải lục hộp
+- Các khóa thường nằm liền nhau trong một mảng nên CPU đọc nhanh hơn
 
-<p class="giai-thich" markdown>Tính hộp tốn số bước cố định, rồi chỉ lục trong hộp đó; nếu hàm băm tản đều và hệ số tải được giữ nhỏ thì mỗi hộp có vài khóa nên cả lần tìm là hằng số. Đụng độ là chuyện **có thật** (nhiều khóa vào một hộp), nên đáp án nói hộp luôn đúng một khóa là sai; khi mọi khóa cùng hộp thì xấu nhất là O(n). Hàm băm không xếp thứ tự trong hộp, và các hộp là danh sách rời rạc chứ không phải một mảng liền các khóa.</p>
+<p class="giai-thich" markdown>Tính hộp tốn số bước cố định, rồi chỉ lục trong hộp đó; nếu hàm băm tản đều và hệ số tải được giữ nhỏ thì mỗi hộp có vài khóa nên cả lần tìm là hằng số. Đụng độ là chuyện **có thật** (nhiều khóa vào một hộp), nên đáp án nói mỗi hộp đúng một khóa là sai; khi mọi khóa cùng hộp thì xấu nhất là O(n). Hàm băm không xếp thứ tự trong hộp, và các hộp là danh sách rời rạc chứ không phải một mảng liền các khóa.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -532,14 +532,14 @@ chỉ số hộp = bam(k) % số hộp
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 7.** Cần lấy `K` số lớn nhất trong dòng `n` số bằng `std::priority_queue`, mà chỉ dùng bộ nhớ O(K). Cách nào đúng?
+**Câu 7.** Cần lấy `K` số lớn nhất trong dòng `n` số bằng `std::priority_queue`, và muốn tiết kiệm bộ nhớ nhất. Cách nào đúng?
 
 - Max-heap chứa cả `n` số, rồi `pop` `K` lần
 - Max-heap giữ `K` số, quá `K` thì bỏ `top` đi
 - Min-heap chứa cả `n` số, rồi bỏ `K` số đầu tiên
 - Min-heap giữ `K` số, quá `K` thì bỏ `top` đi
 
-<p class="giai-thich" markdown>Muốn giữ các số lớn nhất, ta phải bỏ số nhỏ nhất mỗi khi vượt `K`, mà `top` của min-heap chính là số nhỏ nhất, nên min-heap giữ `K` số cho O(n log K). Max-heap giữ `K` số sẽ bỏ số lớn nhất, ra `K` số nhỏ nhất. Hai cách còn lại đều chứa cả `n` số nên tốn O(n) bộ nhớ; riêng cách min-heap bỏ `K` số nhỏ nhất thì chỉ còn `n - K` số, sai luôn kết quả.</p>
+<p class="giai-thich" markdown>Muốn giữ các số lớn nhất, ta phải bỏ số nhỏ nhất mỗi khi vượt `K`, mà `top` của min-heap chính là số nhỏ nhất, nên min-heap giữ `K` số cho O(n log K). Max-heap giữ `K` số sẽ bỏ số lớn nhất, ra `K` số nhỏ nhất. Hai cách chứa cả `n` số đều tốn O(n) bộ nhớ; riêng cách min-heap bỏ `K` số nhỏ nhất thì chỉ còn `n - K` số, sai luôn kết quả.</p>
 </div>
 
 </div>
