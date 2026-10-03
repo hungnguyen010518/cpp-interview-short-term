@@ -26,3 +26,4 @@
 | [Bài 20 — algorithm và lambda: sort, find, transform, remove-erase](nhom-2-stl-thuat-toan/20-algorithm-lambda.md) | <span class="diem" data-bai="20"></span> |
 | [Bài 21 — Big-O, danh sách liên kết, stack và queue](nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu.md) | <span class="diem" data-bai="21"></span> |
 | [Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap](nhom-2-stl-thuat-toan/22-bst-bang-bam-heap.md) | <span class="diem" data-bai="22"></span> |
+| [Bài 23 — Thuật toán hay hỏi ở phỏng vấn](nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi.md) | <span class="diem" data-bai="23"></span> |
