@@ -20,7 +20,9 @@ cái kho đồ, thư viện...) rồi mới tới tên gọi của các khái ni
 
 Hãy học **Nhóm 1 — Nền tảng và bộ nhớ** từ [Bài 1](nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) đến [Bài 15](nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md), đúng thứ tự. Nhóm này có 15 bài, đi từ "bộ nhớ là gì" đến smart pointer, move semantics, C++11, C++14/17 và công cụ bắt lỗi. Cả 15 bài đều được viết theo kiểu "dạy từ gốc": đi từng bước, có ví dụ chạy thật và trắc nghiệm.
 
-Các nhóm sau (STL, đa luồng, OOP, hệ thống) sẽ được thêm dần.
+Sau đó học **Nhóm 2 — STL và thuật toán** từ [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) đến [Bài 23](nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi.md): vector, string, map/set, iterator, thuật toán và lambda, Big-O, cấu trúc dữ liệu và các thuật toán hay hỏi.
+
+Các nhóm sau (đa luồng, OOP, hệ thống) sẽ được thêm dần.
 
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).
