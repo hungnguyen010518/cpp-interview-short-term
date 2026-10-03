@@ -5,7 +5,7 @@
     - Nói được **iterator invalidation** (iterator bị vô hiệu) là gì, container nào thêm/xóa thì hỏng cái gì (theo **chuẩn**), và g++ thực tế làm gì.
     - Xóa phần tử khi đang duyệt đúng cách (`it = c.erase(it)`) và biết vì sao `push_back` trong lúc duyệt vector là lỗi kinh điển.
 
-**Bạn cần biết trước:** [Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) (phép tính con trỏ, vị trí ngay sau phần tử cuối), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (`auto`, range-for), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (UB, ASan), [Bài 16](16-vector.md) (tái cấp phát), [Bài 17](17-string-array-deque-list.md) (`deque`, `list`) và [Bài 18](18-map-set-unordered.md) (`map`, `find`).
+**Bạn cần biết trước:** [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`), [Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md) (phép tính con trỏ, vị trí ngay sau phần tử cuối), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`const`, tham chiếu treo), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (`auto`, range-for), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (UB, ASan), [Bài 16](16-vector.md) (tái cấp phát), [Bài 17](17-string-array-deque-list.md) (`deque`, `list`) và [Bài 18](18-map-set-unordered.md) (`map`, `find`).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -165,8 +165,8 @@ int main() {
 |---|---|
 | (1) | Duyệt `map` bằng iterator; thứ tự là thứ tự khóa |
 | (2) | `it->first` là khóa, `it->second` là giá trị |
-| (3) | `std::next(it, n)` (`#include <iterator>`) trả iterator nhích `n` bước; dùng được cho mọi container |
-| (4) | `deque` (như `vector`) cho `+ 3`: nhảy thẳng tới phần tử thứ 3 |
+| (3) | `std::next(it, n)` (`#include <iterator>`) trả iterator nhích `n` bước (bỏ `n` thì nhích 1 bước); dùng được cho mọi container, với `list` tốn O(n) |
+| (4) | `deque` (như `vector`) cho `+ 3`: nhảy thẳng tới phần tử có chỉ số 3 (số `4`) |
 | (5) | `cbegin()`/`cend()`: chỉ đọc, `*c = 1` sẽ không biên dịch |
 
 **Kết quả khi chạy:**
@@ -178,9 +178,9 @@ An=9 Binh=7
 5 6 7 
 ```
 
-**Thử thay đổi (đã chạy, ba lỗi biên dịch):** `l.begin() + 1` với `list` báo `no match for 'operator+' (operand types are 'std::list<int>::iterator' and 'int')`; `*c = 1` với `c` từ `cbegin()` báo `assignment of read-only location`; hàm nhận `const std::vector<int>&` rồi `*v.begin() = 1` cũng báo `assignment of read-only location`, vì `begin()` của container `const` trả `const_iterator`.
+**Thử thay đổi (đã chạy, ba lỗi biên dịch):** `l.begin() + 1` với `list` báo `no match for 'operator+' (operand types are ... 'list<int>::iterator' and 'int')` (mình rút gọn tên kiểu); `*c = 1` với `c` từ `cbegin()` báo `assignment of read-only location`; hàm nhận `const std::vector<int>&` rồi `*v.begin() = 1` cũng báo `assignment of read-only location`, vì `begin()` của container `const` trả `const_iterator`.
 
-Từ đó rút ra: `vector`, `deque`, `std::array` (iterator **nhảy tự do**) có `it + n`, `it - n`, `it[n]`; `list`, `map`, `set` chỉ nhích từng bước `++`/`--`; `unordered_map`/`unordered_set` chỉ `++`. Cần nhảy `n` bước ở loại nào cũng được thì dùng `std::next`. Quy tắc dùng thường ngày: chỉ xem thì `cbegin`/`const auto&`, sửa tại chỗ thì `begin`/`auto&`.
+Từ đó rút ra: `vector`, `deque`, `std::array`, `std::string` (iterator **nhảy tự do**) có `it + n`, `it - n`, `it[n]`; `list`, `map`, `set` chỉ nhích từng bước `++`/`--`; `unordered_map`/`unordered_set` chỉ `++`. Cần nhảy `n` bước ở loại nào cũng được thì dùng `std::next`. Quy tắc dùng thường ngày: chỉ xem thì `cbegin`/`const auto&`, sửa tại chỗ thì `begin`/`auto&`.
 
 ### 4. Iterator invalidation: iterator bị vô hiệu
 
@@ -216,9 +216,12 @@ Dòng (1) lấy iterator vào mảng cũ; dòng (2) hết chỗ nên vector xin 
 
 - **Build thường:** thoát bình thường và in một số rác (lần chạy của mình: `-1892327856`; máy bạn sẽ khác).
 - **`-fsanitize=address`** (Bài 15): báo `heap-use-after-free`, `READ of size 4`, đúng dòng (3).
-- **`-D_GLIBCXX_DEBUG`** (chế độ kiểm tra của thư viện g++): in `Error: attempt to dereference a singular iterator.` rồi dừng chương trình. Chế độ này làm chương trình chậm và chỉ dùng để chạy thử.
+- **`-D_GLIBCXX_DEBUG`** (chế độ kiểm tra của thư viện g++): in `Error: attempt to dereference a singular iterator.` rồi dừng chương trình (`singular` = iterator đã bị vô hiệu, hoặc chưa gắn vào container nào). Chế độ này làm chương trình chậm và chỉ dùng để chạy thử.
 
-Đây là chỗ cần tách "chuẩn nói" với "g++ làm gì". **Chuẩn:** UB, mọi kết quả đều được phép. **g++ bản thường (libstdc++ 11):** không kiểm tra, iterator của vector bên trong chứa một con trỏ, nên nó cứ trỏ vào mảng cũ và đọc rác như trên; kết quả là do bộ cấp phát, không phải luật. Không báo lỗi **không có nghĩa** là đúng.
+Đây là chỗ cần tách "chuẩn nói" với "g++ làm gì":
+
+- **Chuẩn:** UB, mọi kết quả đều được phép.
+- **g++ bản thường (libstdc++ 11):** không kiểm tra; iterator của vector bên trong chứa một con trỏ, nên nó cứ trỏ vào mảng cũ và đọc rác như trên. Kết quả do bộ cấp phát, không phải luật, và có thể khác giữa các lần chạy. Không báo lỗi **không có nghĩa** là đúng.
 
 Dạng ẩn của lỗi này là thêm phần tử trong range-for (mục 2: `cuoi` lấy một lần, đã cũ):
 
@@ -240,10 +243,12 @@ int main() {
 
 Build thường của mình in `1 2 -1310071373` rồi `4`: phần tử thứ ba bị đọc từ mảng đã trả. ASan báo `heap-use-after-free` ở dòng `for`. Lần thứ ba, `-D_GLIBCXX_DEBUG` báo `attempt to increment a singular iterator`.
 
-**Thử thay đổi:** gọi `v.reserve(100)` ngay sau khi tạo `v`. Mình đã chạy: in `1 2 3` rồi `4` và ASan im lặng, vì không còn tái cấp phát. Nhưng chuẩn nói thêm `push_back` làm `end()` hỏng, nên về lý thuyết vẫn là UB: đừng dựa vào đó. Cách sửa thật: duyệt bằng chỉ số `for (std::size_t i = 0; i < v.size(); ++i)` (mình đã chạy: in `1 2 3 9`, `size` 4), hoặc gom việc cần thêm vào một vector khác rồi thêm sau vòng lặp.
+**Thử thay đổi:** gọi `v.reserve(100)` ngay sau khi tạo `v`. Mình đã chạy: in `1 2 3` rồi `4` và ASan im lặng, vì không còn tái cấp phát. Nhưng chuẩn nói `push_back` làm `end()` hỏng, nên về lý thuyết vẫn là UB: đừng dựa vào đó.
+
+Cách sửa thật: duyệt bằng chỉ số `for (std::size_t i = 0; i < v.size(); ++i)` (mình đã chạy: in `1 2 3 9`, `size` 4), hoặc gom việc cần thêm vào một vector khác rồi thêm sau vòng lặp.
 
 !!! info "Bạn biết Go?"
-    Go không có lớp lỗi này, nhưng có chuyện gần giống. `for _, x := range s { s = append(s, 9) }` thì **an toàn**: `range` tính `s` đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; `len(s)` thành 4) và slice cũ vẫn đọc được nhờ GC (Bài 16). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go không bao giờ cho đọc rác.
+    Go không có lớp lỗi này, nhưng có chuyện gần giống. `for _, x := range s { if x == 2 { s = append(s, 9) } }` thì **an toàn**: `range` tính `s` đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; `len(s)` thành 4) và slice cũ vẫn đọc được nhờ GC (Bài 16). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go thông thường không cho đọc rác kiểu này.
 
 ### 5. Xóa khi đang duyệt: `erase` trả iterator kế tiếp
 
@@ -265,7 +270,9 @@ int main() {
 }
 ```
 
-Build thường của mình in `1 2 3`: `erase` dồn các phần tử lên, `it` vẫn chỉ ô đó (giờ chứa số `2` thứ hai), rồi `++it` **bỏ qua** nó, nên một số 2 sống sót. Chương trình trông chạy bình thường nhưng sai kết quả, và theo chuẩn vẫn là UB. Với `-D_GLIBCXX_DEBUG`, nó báo `attempt to increment a singular iterator`. Với `map` (`m.erase(it)` rồi `++it`), build thường của mình in kết quả trông đúng và ASan **không báo gì**, còn chế độ debug thì dừng chương trình: một lý do nữa để không tin vào "chạy ra đúng".
+Với vector, build thường của mình in `1 2 3`: `erase` dồn các phần tử lên, `it` vẫn chỉ ô đó (giờ chứa số `2` thứ hai), rồi `++it` **bỏ qua** nó, nên một số 2 sống sót. Chương trình trông chạy bình thường nhưng sai kết quả, và theo chuẩn vẫn là UB. Với `-D_GLIBCXX_DEBUG`, nó báo `attempt to increment a singular iterator`.
+
+Với `map`, kết quả **tùy dữ liệu**. Mình thử cùng khuôn (`m.erase(it)` rồi `++it`, xóa khóa 2) trên bốn map: khóa `{1, 2, 3}` và `{1, 2, 3, 4}` in kích thước trông hợp lý, còn `{1, 2}` và `{2, 3, 4}` bị **sập (mã 139)**. ASan không báo gì ở cả bốn, còn chế độ debug thì dừng chương trình. Kết quả này là của g++ 11 trên máy mình và có thể khác nơi khác: đừng tin vào "chạy ra đúng".
 
 Cách đúng: **lấy iterator mà `erase` trả về, và chỉ `++` khi không xóa**. Cùng một khuôn dùng được cho `vector`, `list` và `map`:
 
@@ -322,13 +329,10 @@ int main() {
 1=10 3=30 
 ```
 
-Vài điều cần nhớ. Điều kiện phải gọi `v.end()` **mỗi vòng**, không lưu `end()` vào biến trước vòng lặp, vì `erase` làm `end()` cũ hỏng. Không bao giờ `erase(c.end())`: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom **remove-erase** ở Bài 20 (C++20 còn có `std::erase_if`).
+Vài điều cần nhớ. Với `vector` (và `deque`), `erase` làm `end()` cũ hỏng, nên phải gọi `v.end()` **mỗi vòng**, đừng lưu vào biến trước vòng lặp; với `list`/`map` lưu được, nhưng gọi lại mỗi vòng là thói quen an toàn cho mọi container. Không bao giờ `erase(c.end())`: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom (khuôn viết quen thuộc) **remove-erase** ở Bài 20 (C++20 còn có `std::erase_if`).
 
 !!! info "Bạn biết Go?"
-    Xóa khi `range` map trong Go là **hợp lệ**: `for k := range m { if k%2 == 0 { delete(m, k) } }` chạy đúng (mình đã chạy: còn `map[1:10 3:30]`), và đặc tả Go nói mục chưa duyệt tới mà bị xóa thì sẽ không được trả ra. C++ khác hẳn: chỉ an toàn nếu bạn dùng iterator mà `erase` trả về. Với slice Go, `t = append(t[:i], t[i+1:]...)` trong `range` không gây UB nhưng cũng **bỏ sót** phần tử y như ví dụ `1 2 3` ở trên (mình đã chạy: `[1 2 3]`).
-
-!!! warning "Hay nhầm"
-    "`list`/`map` không bao giờ bị hỏng iterator". Chuẩn nói: thêm thì không cái nào hỏng, xóa thì **chỉ iterator của phần tử bị xóa** hỏng, và đó chính là `it` bạn đang cầm.
+    Xóa khi `range` map trong Go là **hợp lệ**: `for k := range m { if k%2 == 0 { delete(m, k) } }` chạy đúng (mình đã chạy: còn `map[1:10 3:30]`), và đặc tả Go nói mục chưa duyệt tới mà bị xóa thì sẽ không được trả ra. C++ khác hẳn: an toàn khi bạn lấy iterator kế tiếp **trước** khi dùng lại `it` đã xóa, đơn giản nhất là `it = c.erase(it)`. Với slice Go, `t = append(t[:i], t[i+1:]...)` trong `range` không gây UB nhưng cũng **bỏ sót** phần tử y như ví dụ `1 2 3` ở trên (mình đã chạy: `[1 2 3]`).
 
 ## 💻 Ví dụ code
 
@@ -367,7 +371,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Còn dùng được không |
 |---|---|---|
-| (1) | Xin chỗ trước: capacity ít nhất 100 | `it` lấy ở dòng sau |
+| (1) | Xin chỗ trước: capacity ít nhất 100 chưa có iterator nào; `it` lấy ở dòng kế |
 | (2) | `push_back` không cần tái cấp phát | `it` (phía trước điểm thêm) còn sống theo chuẩn |
 | (3) | `list` thêm cuối | `a`, `b` đều còn sống |
 | (4) | Xóa `b` | chỉ `b` hỏng; `a` còn sống |
@@ -396,18 +400,15 @@ Dòng cuối cho thấy `r` vẫn đọc ra `10` và số hộp đã đổi (`1`
     Để dãy rỗng biểu diễn được (`begin() == end()`), vòng lặp chỉ cần `!=`, và `end() - begin()` là số phần tử. Range-for lấy `begin()` và `end()` **một lần**, rồi lặp `++` đến khi bằng `end()`; vì thế thêm/xóa phần tử của chính container đang duyệt có thể làm `end()` đã lấy bị hỏng.
 
 ??? question "Iterator khác con trỏ thế nào? `iterator` khác `const_iterator`?"
-    Iterator là khái niệm tổng quát hóa con trỏ: cùng `*`, `++`, `->`, `==`, nhưng là kiểu riêng của từng container, và không phải loại nào cũng cho `+ n` (chỉ `vector`, `deque`, `array`). `const_iterator` (từ `cbegin()` hoặc container `const`) cho đọc mà không cho sửa phần tử, tương tự `const T*`.
+    Iterator là khái niệm tổng quát hóa con trỏ: cùng `*`, `++`, `->`, `==`, nhưng là kiểu riêng của từng container, và không phải loại nào cũng cho `+ n` (chỉ `vector`, `deque`, `array`, `string`). `const_iterator` (từ `cbegin()` hoặc container `const`) cho đọc mà không cho sửa phần tử, tương tự `const T*`.
 
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: `erase(it)` rồi `++it`, hoặc lưu `end()` trước vòng lặp"
-    Cả hai dùng iterator đã hỏng (mục 5). Viết `it = c.erase(it)` và gọi lại `c.end()` mỗi vòng.
+    Việc đầu dùng iterator đã hỏng; việc sau dùng `end()` đã hỏng khi container là `vector`/`deque` (mục 5). Viết `it = c.erase(it)` và gọi lại `c.end()` mỗi vòng.
 
 !!! warning "Lỗi 2: Thêm hoặc xóa phần tử của chính container trong range-for"
     `for (auto x : v) { v.push_back(...); }` lấy `end()` một lần rồi dùng nó sau khi vector đã đổi (mục 4). Duyệt bằng chỉ số, hoặc gom thay đổi lại rồi áp dụng sau vòng lặp.
-
-!!! warning "Lỗi 3: Giữ iterator qua `push_back`/`insert` vào vector rồi dùng lại"
-    Kể cả khi hôm nay "chạy đúng", chuẩn không bảo đảm: chỉ cần vector đầy là iterator hỏng. Lấy lại `begin()`/`find()` sau khi thay đổi, hoặc dùng chỉ số.
 
 ## ✍️ Trắc nghiệm
 
@@ -419,7 +420,7 @@ Dòng cuối cho thấy `r` vẫn đọc ra `10` và số hộp đã đổi (`1`
 - Chính phần tử cuối cùng của vector đó
 - Ngay sau phần tử cuối, chỉ dùng để so sánh
 - Phần tử đầu tiên, giống hệt `v.begin()`
-- Một con trỏ rỗng dùng chung cho mọi vector khác
+- Ô nhớ cuối cùng mà vector đã xin, kể cả ô chưa dùng
 
 <p class="giai-thich" markdown>`end()` là vị trí ngay sau phần tử cuối: nó có thể so sánh nhưng không được `*`, giống `a + 3` của mảng ba phần tử ở Bài 05. Nếu nó chỉ vào phần tử cuối thì không biểu diễn được dãy rỗng. Chỉ vào phần tử đầu là việc của `begin()`; hai iterator này bằng nhau chỉ khi vector rỗng. Còn "con trỏ rỗng dùng chung" sai vì mỗi `end()` thuộc về đúng container của nó.</p>
 </div>
@@ -465,11 +466,11 @@ for (auto it = l.begin(); it != l.end(); ++it) {
 ```
 
 - Không có lỗi nào, vì iterator của `list` không bao giờ hỏng
-- `erase` không dùng được với `list`, chỉ dùng với vector
-- `list` không có thứ tự nên so sánh `*it == 2` không xác định
+- Vòng lặp không dừng, vì `end()` của `list` đổi sau `erase`
+- `erase` trên `list` làm hỏng mọi iterator khác của nó
 - `++it` dùng `it` đã bị xóa; phải viết `it = l.erase(it)`
 
-<p class="giai-thich" markdown>Sau `l.erase(it)`, iterator `it` của phần tử vừa xóa đã hỏng, mà `++it` ở đầu vòng sau vẫn dùng nó: đó là UB. Đúng là `list` chỉ làm hỏng iterator của phần tử **bị xóa**, nhưng đó chính là `it` này, nên lập luận "không bao giờ hỏng" sai. `list` có `erase`, và có thứ tự theo vị trí nên so sánh giá trị vẫn rõ nghĩa.</p>
+<p class="giai-thich" markdown>Sau `l.erase(it)`, iterator `it` của phần tử vừa xóa đã hỏng, mà `++it` ở đầu vòng sau vẫn dùng nó: đó là UB. Đúng là `list` chỉ làm hỏng iterator của phần tử **bị xóa**, nhưng đó chính là `it` này, nên lập luận "không bao giờ hỏng" sai. `erase` trên `list` không làm hỏng iterator nào khác, và `end()` của `list` vẫn dùng được nên vòng lặp vẫn dừng đúng.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -487,11 +488,11 @@ for (auto it = l.begin(); it != l.end(); ++it) {
 **Câu 6.** So sánh Go và C++ khi xóa phần tử của map lúc đang duyệt. Điều nào đúng?
 
 - Cả hai đều là UB, nên không bao giờ được làm khi đang duyệt map
-- Go là UB còn C++ thì luôn an toàn dù xóa kiểu nào
+- Go cấm xóa khi đang `range`, còn C++ cho mọi cách xóa
 - Cả hai an toàn kể cả với `m.erase(it); ++it` kiểu C++
-- Go cho phép; C++ chỉ khi dùng iterator mà `erase` trả về
+- Go cho phép; C++ an toàn với `it = m.erase(it)`
 
-<p class="giai-thich" markdown>Đặc tả Go cho phép `delete` trong lúc `range` map. C++ chỉ an toàn với khuôn `it = m.erase(it)`; còn `m.erase(it); ++it` dùng iterator đã hỏng và là UB. Nên không thể nói cả hai đều UB, và cũng không thể nói C++ luôn an toàn hay Go mới là bên UB.</p>
+<p class="giai-thich" markdown>Đặc tả Go cho phép `delete` trong lúc `range` map. C++ an toàn với khuôn `it = m.erase(it)`, không an toàn với `m.erase(it); ++it` vì nó dùng iterator đã hỏng (UB). Nên không thể nói Go cấm xóa, cũng không thể nói C++ cho mọi cách xóa hay `erase(it); ++it` an toàn.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
