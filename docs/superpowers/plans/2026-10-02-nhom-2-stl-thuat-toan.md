@@ -1,8 +1,8 @@
-# Nhóm 2 — STL và thuật toán (Bài 16–22) — Implementation Plan
+# Nhóm 2 — STL và thuật toán (Bài 16–23) — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Viết Nhóm 2 gồm 7 bài (Bài 16–22) về STL và thuật toán, cùng phong cách "dạy từ gốc" như Nhóm 1.
+**Goal:** Viết Nhóm 2 gồm 8 bài (Bài 16–23) về STL và thuật toán, cùng phong cách "dạy từ gốc" như Nhóm 1.
 
 **Architecture:** Thư mục mới `docs/nhom-2-stl-thuat-toan/`; dùng nguyên khung 8 khối, bộ kiểm tra (`nhom-*/*.md` đã được quét tự động) và luật dạy v2. Mỗi bài tự thêm mục nav, dòng `tien-do.md`, hàng glossary.
 
@@ -29,13 +29,14 @@
 | 18 | `18-map-set-unordered.md` | `map`/`set` (cây cân bằng, có thứ tự, O(log n)) vs `unordered_map`/`unordered_set` (băm, O(1) trung bình); `operator[]` tự chèn; `pair`, structured binding (C++17) |
 | 19 | `19-iterator-vo-hieu.md` | Iterator là gì, begin/end, range-for chạy thế nào, iterator invalidation của từng container, xóa khi duyệt, `erase` trả iterator |
 | 20 | `20-algorithm-lambda.md` | `<algorithm>`: sort, find, find_if, count_if, transform, accumulate, for_each, remove-erase idiom; lambda và capture `[=]`/`[&]`, comparator |
-| 21 | `21-big-o-cau-truc-du-lieu.md` | Big-O, so sánh cấu trúc dữ liệu tự cài (mảng, danh sách liên kết, stack, queue, hash table, cây nhị phân tìm kiếm, heap) và `priority_queue`/`stack`/`queue` |
-| 22 | `22-thuat-toan-hay-hoi.md` | Thuật toán hay hỏi: tìm kiếm nhị phân, hai con trỏ, sắp xếp (so sánh quick/merge/std::sort), đệ quy, quy hoạch động nhập môn; mẹo giải đề tại bảng trắng |
+| 21 | `21-big-o-cau-truc-du-lieu.md` | Big-O, bảng độ phức tạp container, danh sách liên kết đơn (đảo ngược), stack/queue (đã viết) |
+| 22 | `22-bst-bang-bam-heap.md` | Cây nhị phân tìm kiếm (chèn/tìm/duyệt trung tự), bảng băm tự cài (chaining), heap và `priority_queue` (tách từ Bài 21 vì quá dài) |
+| 23 | `23-thuat-toan-hay-hoi.md` | Thuật toán hay hỏi: tìm kiếm nhị phân, hai con trỏ, sắp xếp (so sánh quick/merge/std::sort), đệ quy, quy hoạch động nhập môn; mẹo giải đề tại bảng trắng |
 
 Mỗi task bên dưới = một bài. Task N nhận brief là dòng tương ứng trong bảng + các ràng buộc ở trên.
 
-### Task 1–7: viết Bài 16, 17, 18, 19, 20, 21, 22 (mỗi bài một task, tuần tự)
+### Task 1–7: viết Bài 16–23 (mỗi bài một task, tuần tự)
 
 - [ ] Mỗi task: viết file bài theo luật dạy v2, thêm nav/tien-do/glossary, chạy bộ kiểm tra, commit.
 - [ ] Mỗi bài qua một vòng review "người học" (lens: `.superpowers/sdd/2026-10-01-day-lai-nen-tang-bo-nho/lesson-review-lens-v2.md`), sửa tối đa 3 vòng.
-- [ ] Sau Bài 22: cập nhật `docs/index.md` (liệt kê Nhóm 2), rà soát toàn nhóm (độ dài đáp án, thuật ngữ, link chéo) rồi báo người dùng.
+- [ ] Sau Bài 23: cập nhật `docs/index.md` (liệt kê Nhóm 2), rà soát toàn nhóm (độ dài đáp án, thuật ngữ, link chéo) rồi báo người dùng.
