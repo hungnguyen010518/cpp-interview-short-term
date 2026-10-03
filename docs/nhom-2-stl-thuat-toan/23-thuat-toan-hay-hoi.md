@@ -4,17 +4,17 @@
     - Viết được **tìm kiếm nhị phân** không lệch biên (kể cả dãy rỗng), biết vì sao tính giữa bằng `lo + (hi - lo) / 2` chứ không phải `(lo + hi) / 2`, và nối nó với `std::binary_search`/`std::lower_bound` (Go: `sort.Search`, `slices.BinarySearch`).
     - Dùng **hai con trỏ** (tìm cặp có tổng `k` trên dãy đã sắp) và `unordered_map` (bài "two sum" trên dãy chưa sắp), nói được mỗi cách tốn thời gian và bộ nhớ thế nào.
     - Phân biệt **sắp xếp chèn** O(n²) với **sắp xếp trộn** O(n log n) bằng số lần so sánh đã đo, hiểu quick sort và `std::sort` ở mức khái niệm.
-    - Thấy vì sao Fibonacci đệ quy ngây thơ bùng nổ, rồi sửa bằng **ghi nhớ (memoization)** và **quy hoạch động** (bảng), giải được bài đổi tiền rút gọn.
+    - Thấy vì sao Fibonacci đệ quy ngây thơ bùng nổ, rồi sửa bằng **ghi nhớ (memoization)** và **quy hoạch động** (bảng), lập và tính tay được bảng cho bài đổi tiền rút gọn.
     - Có quy trình giải đề ở bảng trắng: làm rõ đề, ví dụ nhỏ, nói to cách nghĩ, nêu độ phức tạp, kiểm tra biên.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến toàn cục, khung hàm), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (tràn số có dấu là UB, ASan/UBSan), [Bài 16](16-vector.md) (`vector`, `size() - 1` khi rỗng), [Bài 18](18-map-set-unordered.md) (`unordered_map`, `find`), [Bài 19](19-iterator-vo-hieu.md) (iterator), [Bài 20](20-algorithm-lambda.md) (`sort`, `%`), [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O), [Bài 22](22-bst-bang-bam-heap.md) (đệ quy tại chỗ, `std::max`).
+**Bạn cần biết trước:** [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) (`&&`, `long long`, `static_cast`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến toàn cục, khung hàm), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `int&` để trả kết quả ra), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (tràn số có dấu là UB, ASan/UBSan), [Bài 16](16-vector.md) (`vector`, `size() - 1` khi rỗng), [Bài 18](18-map-set-unordered.md) (`unordered_map`, `find`), [Bài 19](19-iterator-vo-hieu.md) (iterator), [Bài 20](20-algorithm-lambda.md) (`sort`, `%`), [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O), [Bài 22](22-bst-bang-bam-heap.md) (đệ quy tại chỗ, `std::max`).
 
 !!! note "Phạm vi bài này"
     Mức nhập môn: mỗi thuật toán có một bản nhỏ chạy được, để bạn hiểu ý tưởng và nói trôi chảy. Quick sort chỉ ở mức khái niệm; đồ thị, quy hoạch động nhiều chiều và chứng minh đúng nằm ngoài bài.
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại thư viện của [Bài 21](21-big-o-cau-truc-du-lieu.md). **Tìm nhị phân** là mở giữa kệ đã xếp rồi bỏ một nửa. **Hai con trỏ** là hai người đứng hai đầu kệ rồi cùng đi vào giữa. **Sắp xếp** là xếp sách lên kệ: nhét từng cuốn vào đúng chỗ thì chậm, còn chia kệ làm đôi, xếp từng nửa rồi trộn lại thì nhanh. **Đệ quy** là giao việc nhỏ hơn cho một người y hệt mình. **Quy hoạch động** là cuốn sổ ghi chép: bài nào giải rồi thì ghi đáp án, lần sau chỉ việc đọc.
+Quay lại thư viện của [Bài 21](21-big-o-cau-truc-du-lieu.md). **Tìm nhị phân** là mở giữa kệ đã xếp rồi bỏ một nửa. **Hai con trỏ** là hai người đứng hai đầu kệ rồi cùng đi vào giữa. **Sắp xếp** là xếp sách lên kệ: nhét từng cuốn vào đúng chỗ thì chậm, còn chia kệ làm đôi, xếp từng nửa rồi trộn lại thì nhanh. Đệ quy và quy hoạch động có hình ảnh riêng ở mục 4 và 5.
 
 !!! info "Chỗ nào hình ảnh này không còn đúng?"
     Người mở giữa kệ phải đi tới tận chỗ đó, còn máy lấy `v[mid]` trong một bước vì `vector` nằm liền nhau. Đó là lý do tìm nhị phân cần lấy `v[i]` trong một bước (truy cập ngẫu nhiên); trên danh sách liên kết ([Bài 21](21-big-o-cau-truc-du-lieu.md)) muốn tới "giữa" vẫn phải đi từng nút.
@@ -28,9 +28,12 @@ Quay lại thư viện của [Bài 21](21-big-o-cau-truc-du-lieu.md). **Tìm nh�
 
 Điều kiện: dãy đã **sắp tăng dần** và truy cập `v[i]` nhanh. Ta giữ một đoạn `[lo, hi]` "còn có thể chứa `x`", so `x` với phần tử giữa, rồi bỏ nửa không thể chứa. Mỗi vòng đoạn nhỏ đi một nửa, nên sau cỡ log n vòng là hết: **O(log n)** thời gian, O(1) bộ nhớ.
 
-Hai cú pháp mới. `static_cast<int>(v.size()) - 1` đổi `size()` (kiểu không dấu) sang `int` **trước** khi trừ, để dãy rỗng cho `-1` thay vì số khổng lồ ([Bài 16](16-vector.md)).
+Một cú pháp cần nhắc lại: `static_cast<int>(v.size()) - 1` đổi `size()` (kiểu không dấu) sang `int` **trước** khi trừ, để dãy rỗng cho `-1` thay vì số khổng lồ ([Bài 16](16-vector.md)).
 
-Còn `std::binary_search(đầu, cuối, x)` trả `true`/`false`, và `std::lower_bound(đầu, cuối, x)` trả iterator tới phần tử **đầu tiên không nhỏ hơn** `x` (hoặc `end()` nếu không có); cả hai nằm trong `<algorithm>`, đòi dãy đã sắp, và `it - v.begin()` đổi iterator ra chỉ số.
+Rồi hai hàm thư viện mới trong `<algorithm>`, đều đòi dãy đã sắp:
+
+- `std::binary_search(đầu, cuối, x)` trả `true`/`false`.
+- `std::lower_bound(đầu, cuối, x)` trả iterator tới phần tử **đầu tiên không nhỏ hơn** `x` (hoặc `end()` nếu không có); `it - v.begin()` đổi iterator ra chỉ số.
 
 ```cpp
 #include <algorithm>
@@ -52,13 +55,14 @@ int timNhiPhan(const std::vector<int>& v, int x) {
 
 int main() {
     std::vector<int> v = {1, 3, 5, 7, 9, 11};
+    std::vector<int> rong;                       // vector rỗng
     std::cout << "tim 7: " << timNhiPhan(v, 7) << "\n";
     std::cout << "tim 4: " << timNhiPhan(v, 4) << "\n";
     std::cout << "tim 1: " << timNhiPhan(v, 1) << "\n";
-    std::cout << "day rong, tim 1: " << timNhiPhan({}, 1) << "\n";
+    std::cout << "day rong, tim 1: " << timNhiPhan(rong, 1) << "\n";
 
     std::cout << "binary_search 9: " << std::binary_search(v.begin(), v.end(), 9) << "\n";
-    auto it = std::lower_bound(v.begin(), v.end(), 6);       // (9)
+    auto it = std::lower_bound(v.begin(), v.end(), 6);       // (9) biết trước có 7 nên `*it` an toàn
     std::cout << "lower_bound 6 -> chi so " << (it - v.begin()) << ", gia tri " << *it << "\n";
     auto het = std::lower_bound(v.begin(), v.end(), 100);    // (10)
     std::cout << "lower_bound 100 la end()? " << (het == v.end()) << "\n";
@@ -91,37 +95,26 @@ lower_bound 6 -> chi so 3, gia tri 7
 lower_bound 100 la end()? 1
 ```
 
-Dãy rỗng cho `hi = -1` nên `lo <= hi` sai ngay và trả `-1`, không cần `if` riêng. Với `lower_bound` luôn kiểm `it != v.end()` trước khi `*it`.
+Dãy rỗng cho `hi = -1` nên `lo <= hi` sai ngay và trả `-1`, không cần `if` riêng. Dùng `<=` vì đoạn `[lo, hi]` gồm cả hai đầu: khi `lo == hi` vẫn còn một phần tử chưa xem. Với `lower_bound` luôn kiểm `it != v.end()` trước khi `*it`.
 
 **Bẫy tràn số.** Cách viết quen thuộc `(lo + hi) / 2` sai khi `lo + hi` vượt giá trị lớn nhất của `int` (khoảng 2,1 tỉ): số có dấu tràn là hành vi không xác định ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)). `hi - lo` thì luôn nằm trong khoảng an toàn (vì `0 <= lo <= hi`), nên `lo + (hi - lo) / 2` đúng với mọi dãy.
 
-```cpp
-// bo-qua-kiem-tra
-#include <iostream>
-
-int main() {
-    int lo = 2000000000;
-    int hi = 2100000000;
-    int sai = (lo + hi) / 2;               // lo + hi = 4,1 tỉ > INT_MAX
-    int dung = lo + (hi - lo) / 2;
-    std::cout << "sai = " << sai << ", dung = " << dung << "\n";
-    return 0;
-}
-```
-
-Mình đã chạy: bản thường in `sai = -97483648, dung = 2050000000` (số âm vô lý), còn với `-fsanitize=undefined` UBSan báo `signed integer overflow: 2000000000 + 2100000000 cannot be represented in type 'int'`. Số âm cụ thể là kết quả của một lần UB trên máy này; đừng dựa vào nó.
+Mình đã chạy một khối nhỏ với `lo = 2000000000`, `hi = 2100000000` (kiểu `int`): `(lo + hi) / 2` in `-97483648` (số âm vô lý), còn `lo + (hi - lo) / 2` in `2050000000`. Với `-fsanitize=undefined` UBSan báo `signed integer overflow: 2000000000 + 2100000000 cannot be represented in type 'int'`. Số âm cụ thể là kết quả của một lần UB trên máy này; đừng dựa vào nó.
 
 **Thử thay đổi: ở dòng (6) đổi `lo = mid + 1` thành `lo = mid`.** Mình đã chạy với `timeout 3`: chương trình không bao giờ dừng (bị dừng, mã 124). Với `{1, 3, 5, 7, 9, 11}` tìm `4`, đoạn rơi về `lo = 0`, `hi = 1`, `mid = 0`, `v[0] < 4` nên `lo = mid = 0` mãi: đoạn không còn nhỏ đi. Mỗi vòng **phải loại ít nhất phần tử `mid`**, vì vậy `+ 1` và `- 1` là bắt buộc.
-
-!!! question "Hỏi nhanh: vì sao `lo <= hi` chứ không phải `lo < hi`?"
-    Đoạn `[lo, hi]` gồm cả hai đầu, nên khi `lo == hi` vẫn còn đúng một phần tử chưa xem. Dùng `<` sẽ bỏ sót phần tử cuối cùng (ví dụ dãy một phần tử).
 
 !!! info "Bạn biết Go?"
     Go có `sort.Search(n, f)`: trả chỉ số **nhỏ nhất** `i` trong `[0, n)` mà `f(i)` đúng (trả `n` nếu không có), đúng tinh thần `lower_bound`, và `sort.SearchInts`. Từ Go 1.21, `slices.BinarySearch(s, x)` trả hai giá trị: vị trí và `found` (`true` nếu có). Mình đã chạy trên `{1,3,5,7,9,11}`: tìm `7` ra `3 true`, tìm `4` ra `2 false` (vị trí `4` sẽ được chèn vào), `sort.Search` với `>= 6` ra chỉ số `3`. Mã nguồn `sort.Search` của Go cố ý viết `int(uint(i+j) >> 1)` với comment "avoid overflow", cùng bẫy trên.
 
 ### 2. Hai con trỏ và bài "two sum"
 
-**Bài toán:** cho dãy số và số `k`, tìm hai phần tử (hai chỉ số khác nhau) có tổng bằng `k`. Có ba cách. Vét cạn (brute force, thử mọi cặp): O(n²). Nếu dãy **đã sắp**, dùng hai con trỏ: O(n) thời gian, O(1) bộ nhớ. Nếu dãy **chưa sắp**, dùng `unordered_map`: O(n) thời gian trung bình, đổi lại O(n) bộ nhớ (sắp xếp trước rồi hai con trỏ là O(n log n)).
+**Bài toán:** cho dãy số và số `k`, tìm hai phần tử (hai chỉ số khác nhau) có tổng bằng `k`. Có ba cách:
+
+| Cách | Điều kiện | Thời gian | Bộ nhớ |
+|---|---|---|---|
+| Vét cạn (brute force, thử mọi cặp) | không | O(n²) | O(1) |
+| Hai con trỏ | dãy đã sắp (chưa sắp thì sắp trước, tổng O(n log n)) | O(n) | O(1) |
+| `unordered_map` | không | O(n) trung bình | O(n) |
 
 Ý của hai con trỏ: `i` ở đầu (số nhỏ nhất), `j` ở cuối (số lớn nhất). Tổng nhỏ quá thì chỉ có cách tăng `i` (đổi sang số lớn hơn); tổng lớn quá thì chỉ có cách giảm `j`. Mỗi bước loại hẳn một phần tử khỏi vùng cần xét nên chỉ tối đa `n` bước. Cùng khuôn đó có đảo chuỗi tại chỗ: đổi chỗ `s[i]` với `s[j]` rồi `++i`, `--j` tới khi `i >= j`.
 
@@ -213,7 +206,7 @@ Ba thuật toán bạn cần nói được, từ chậm đến nhanh. **Sắp x�
 
 ### 4. Đệ quy nâng cao: giai thừa, Fibonacci và vì sao chậm
 
-[Bài 22](22-bst-bang-bam-heap.md) đã dạy đệ quy với điểm dừng và bước đệ quy. **Giai thừa**: `n! = n * (n-1)!`, điểm dừng `0! = 1`. Mỗi lần gọi chỉ sinh **một** lần gọi con nên số bước là n, ổn.
+[Bài 22](22-bst-bang-bam-heap.md) đã dạy đệ quy với điểm dừng và bước đệ quy (hình ảnh: giao việc nhỏ hơn cho một người y hệt mình). **Giai thừa**: `n! = n * (n-1)!`, điểm dừng `0! = 1`. Mỗi lần gọi chỉ sinh **một** lần gọi con nên số bước là n, ổn.
 
 **Fibonacci**: `F(0) = 0`, `F(1) = 1`, `F(n) = F(n-1) + F(n-2)`. Viết thẳng thành đệ quy thì mỗi lần gọi sinh **hai** lần gọi con, và các lần gọi con **tính lại** cùng một giá trị rất nhiều lần: `F(5)` gọi `F(4)` và `F(3)`, mà `F(4)` lại gọi `F(3)` lần nữa. Số lần gọi gần như nhân lên mỗi khi `n` tăng một bước, nên người ta nói gọn **O(2^n)** (chính xác hơn: cỡ 1,6^n; cả hai đều là "mũ").
 
@@ -292,20 +285,30 @@ bang      F(50) = 12586269025
 bang      F(90) = 2880067194370816120
 ```
 
-Mỗi lần `n` tăng 10, số lần gọi nhân lên hơn 100 lần (177, rồi 21891, rồi 2692537); còn bản ghi nhớ tính `F(50)` chỉ với 99 lần gọi (khoảng `2n`). `F(50)` đã vượt giới hạn `int` nên dùng `long long`; `F(93)` còn vượt cả `long long`, là một biên đáng nói khi phỏng vấn.
+Mỗi lần `n` tăng 10, số lần gọi nhân lên hơn 100 lần (177, rồi 21891, rồi 2692537); còn bản ghi nhớ tính `F(50)` chỉ với 99 lần gọi (khoảng `2n`). `F(50)` đã vượt giới hạn `int` nên dùng `long long`; `F(93)` còn vượt cả `long long`, và giai thừa tràn sớm hơn (`21!` đã vượt `long long`): đây là biên đáng nói khi phỏng vấn.
 
-**Thử thay đổi: gọi `fibNgayTho(40)`.** Mình đã chạy riêng: nó gọi 331160281 lần và mất khoảng 1,3 giây trên máy mình (số giây khác nhau theo máy), trong khi `fibBang(40)` gần như tức thì. Mỗi khi `n` tăng 1, số lần gọi chỉ tăng khoảng 60%, nhưng cộng dồn thành hàng trăm triệu sau vài chục bước.
+**Thử thay đổi: gọi `fibNgayTho(40)`.** Mình đã chạy riêng: nó gọi 331160281 lần và mất khoảng 1,3 giây trên máy mình khi biên dịch không bật tối ưu (`-O0`, như lệnh của khóa; số giây khác nhau theo máy và bật tối ưu thì ngắn hơn nhiều), trong khi `fibBang(40)` gần như tức thì. Mỗi khi `n` tăng 1, số lần gọi chỉ tăng khoảng 60%, nhưng cộng dồn thành hàng trăm triệu sau vài chục bước.
 
 !!! info "Bạn biết Go?"
-    Fibonacci đệ quy ngây thơ trong Go chậm y như vậy, vì thuật toán và số lần gọi giống hệt (`F(30)` cũng 2692537 lần). Cả Go lẫn C++ đều không tự biến đệ quy ngây thơ thành ghi nhớ. Cách sửa cũng giống: `map` hoặc slice làm bảng nhớ, hay vòng `for` từ dưới lên.
+    Fibonacci đệ quy ngây thơ trong Go chậm y như vậy, vì thuật toán và số lần gọi giống hệt (`F(30)` cũng 2692537 lần). Go và C++ không tự biến đệ quy ngây thơ thành ghi nhớ (chuẩn không bảo đảm điều đó; trình biên dịch tối ưu có thể làm nhanh hơn một chút, nhưng số lần gọi vẫn theo hàm mũ). Cách sửa cũng giống: `map` hoặc slice làm bảng nhớ, hay vòng `for` từ dưới lên.
 
 ### 5. Quy hoạch động nhập môn
 
-**Quy hoạch động (dynamic programming, DP)** áp dụng khi bài toán có hai tính chất: bài lớn được ghép từ **bài con nhỏ hơn**, và các bài con **lặp lại**. Cách làm: giải mỗi bài con **đúng một lần**, ghi đáp án vào bảng, rồi dùng bảng để giải bài lớn. Có hai cách viết: **từ trên xuống** (đệ quy kèm ghi nhớ, như `fibNho`) và **từ dưới lên** (điền bảng bằng vòng lặp từ bài nhỏ nhất, như `fibBang`).
+**Quy hoạch động (dynamic programming, DP)** giống cuốn sổ ghi chép: bài nào giải rồi thì ghi đáp án, lần sau chỉ việc đọc. Nó áp dụng khi bài toán có hai tính chất: bài lớn được ghép từ **bài con nhỏ hơn**, và các bài con **lặp lại**. Cách làm: giải mỗi bài con **đúng một lần**, ghi đáp án vào bảng, rồi dùng bảng để giải bài lớn. Có hai cách viết: **từ trên xuống** (đệ quy kèm ghi nhớ, như `fibNho`) và **từ dưới lên** (điền bảng bằng vòng lặp từ bài nhỏ nhất, như `fibBang`).
 
 Bốn bước nghĩ: định nghĩa "ô `dp[s]` nghĩa là gì", điểm bắt đầu (`dp[0]`), công thức nối ô này với các ô trước, và đọc đáp án ở ô nào. Với Fibonacci: `dp[i]` là `F(i)`, `dp[0] = 0`, `dp[1] = 1`, `dp[i] = dp[i-1] + dp[i-2]`, đáp án là `dp[n]`. **Leo cầu thang** (mỗi lần bước 1 hoặc 2 bậc, đếm số cách lên bậc `n`) có đúng công thức này với điểm bắt đầu khác một chút: `dp[1] = 1`, `dp[2] = 2`.
 
-Bài **đổi tiền** (ghép đúng số tiền `t` bằng **ít xu nhất**) cũng cùng khuôn: `dp[s]` là số xu ít nhất để ghép `s`, `dp[0] = 0`, và `dp[s] = min(dp[s - x] + 1)` qua mọi loại xu `x <= s`; đáp án ở `dp[t]`, thời gian O(t · m) với `m` loại xu. Cách "luôn lấy xu to nhất còn vừa" (**tham lam**, greedy) nhanh hơn nhưng có thể sai: với xu `{1, 3, 4}` và tiền `6`, tham lam lấy `4 + 1 + 1` (3 xu) trong khi `3 + 3` chỉ cần 2 xu. Tính bảng `dp` bằng tay: `dp[0..6] = 0 1 2 1 1 2 2`, ô cuối là 2.
+Bài **đổi tiền** (ghép đúng số tiền `t` bằng **ít xu nhất**) cũng cùng khuôn: `dp[s]` là số xu ít nhất để ghép `s`, `dp[0] = 0`, và `dp[s]` là **số nhỏ nhất** (`min`) trong các giá trị `dp[s - x] + 1` qua mọi loại xu `x` thỏa `x <= s` (dùng một xu `x`, phần còn lại `s - x` đã có đáp án). Đáp án ở `dp[t]`, thời gian O(t · m) với `m` loại xu.
+
+Tính tay với xu `{1, 3, 4}`, biết `dp[0..3] = 0 1 2 1`:
+
+| Ô | Thử từng xu | Lấy nhỏ nhất |
+|---|---|---|
+| `dp[4]` | xu 1: `dp[3] + 1 = 2`; xu 3: `dp[1] + 1 = 2`; xu 4: `dp[0] + 1 = 1` | 1 |
+| `dp[5]` | xu 1: `dp[4] + 1 = 2`; xu 3: `dp[2] + 1 = 3`; xu 4: `dp[1] + 1 = 2` | 2 |
+| `dp[6]` | xu 1: `dp[5] + 1 = 3`; xu 3: `dp[3] + 1 = 2`; xu 4: `dp[2] + 1 = 3` | 2 (tức `3 + 3`) |
+
+Cách "luôn lấy xu to nhất còn vừa" (**tham lam**, greedy) nhanh hơn nhưng có thể sai: với tiền `6` nó lấy `4 + 1 + 1` (3 xu), trong khi bảng cho 2 xu.
 
 ### 6. Mẹo giải đề ở bảng trắng
 
@@ -449,13 +452,10 @@ Nhìn từ `n = 1000` lên `2000`: số lần so sánh của sắp xếp chèn g
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Lệch biên trong tìm nhị phân"
-    Dùng `lo < hi` làm sót phần tử cuối, quên `+ 1` hay `- 1` làm vòng lặp không dừng, tính giữa bằng `(lo + hi) / 2` làm tràn số. Còn gán `hi = v.size() - 1` với `hi` kiểu `size_t` thì dãy rỗng cho số khổng lồ (mình đã chạy một khối nhỏ: `v.size() - 1` của vector rỗng in `18446744073709551615`). Sửa: `int` cùng `static_cast<int>`, `lo <= hi`, `mid ± 1`.
+    Dùng `lo < hi` làm sót phần tử cuối, quên `+ 1` hay `- 1` làm vòng lặp không dừng, tính giữa bằng `(lo + hi) / 2` làm tràn số. Còn gán `hi = v.size() - 1` với `hi` kiểu `size_t` thì dãy rỗng cho số khổng lồ (mình đã chạy một khối nhỏ: trên máy 64 bit, `v.size() - 1` của vector rỗng in `18446744073709551615`). Sửa: `int` cùng `static_cast<int>`, `lo <= hi`, `mid ± 1`.
 
 !!! warning "Lỗi 2: Dùng nhị phân hay hai con trỏ trên dãy chưa sắp"
     Cả hai dựa vào thứ tự để loại bỏ một phía: dãy chưa sắp thì kết quả sai mà không báo lỗi gì (`std::binary_search` đòi dãy đã sắp; vi phạm thì kết quả không đáng tin). Hãy sắp trước (O(n log n)) hoặc chọn cách không cần thứ tự (`unordered_map`).
-
-!!! warning "Lỗi 3: Đệ quy thiếu điểm dừng hoặc quên ghi nhớ"
-    Thiếu điểm dừng thì tràn stack ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)). Có điểm dừng mà bài con lặp lại (Fibonacci, đổi tiền) thì chạy đúng nhưng chậm theo hàm mũ: khi thấy hai nhánh gọi lại cùng một đối số, hãy nghĩ tới bảng ghi nhớ.
 
 ## ✍️ Trắc nghiệm
 
@@ -472,9 +472,9 @@ timNhiPhan(v, 12)
 - `5`, sau ba vòng: ghé `v[3]`, rồi `v[4]`, rồi `v[5]`
 - `5`, sau hai vòng: ghé `v[3] = 8`, rồi `v[5] = 12`
 - `-1`, vì `12` nằm ở nửa phải nên hàm bỏ qua nó
-- `4`, vì chỉ số đầu tiên tìm được là `(0 + 6) / 2 + 1`
+- `6`, vì `12` là phần tử thứ 6 khi đếm từ 1
 
-<p class="giai-thich" markdown>Vòng một: `lo = 0`, `hi = 6`, `mid = 3`, `v[3] = 8 < 12` nên `lo = 4`. Vòng hai: `mid = 4 + (6 - 4) / 2 = 5`, `v[5] = 12` trúng nên trả `5`, không còn vòng ba. Không có chuyện bỏ qua nửa phải: nửa phải mới là nơi chứa `12`. Chỉ số `4` chứa `10`, và công thức `(0 + 6) / 2 + 1` không phải cách hàm này chọn điểm giữa.</p>
+<p class="giai-thich" markdown>Vòng một: `lo = 0`, `hi = 6`, `mid = 3`, `v[3] = 8 < 12` nên `lo = 4`. Vòng hai: `mid = 4 + (6 - 4) / 2 = 5`, `v[5] = 12` trúng nên trả `5`, không còn vòng ba. Không có chuyện bỏ qua nửa phải: nửa phải mới là nơi chứa `12`. Hàm trả chỉ số (đếm từ 0) chứ không phải thứ tự đếm từ 1, nên `6` sai; chỉ số `6` còn chứa `14`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -496,12 +496,12 @@ v = {1, 2, 4, 7, 11}, k = 9
 timCap(v, 9, i, j)
 ```
 
-- `i = 1`, `j = 3`, vì `2 + 7 = 9`
-- `i = 2`, `j = 3`, vì `4 + 7 = 11` chưa đúng nên phải lặp thêm
+- `i = 1`, `j = 3`, vì `2 + 7 = 9` sau khi giảm `j` rồi tăng `i`
+- `i = 2`, `j = 3`, vì `4 + 7 = 11` là tổng gần `9` nhất
 - `i = 0`, `j = 4`, vì `1 + 11 = 12` là cặp đầu tiên được thử
 - Không có cặp nào, vì không có hai số liền kề cộng ra `9`
 
-<p class="giai-thich" markdown>Bắt đầu `i = 0`, `j = 4`: `1 + 11 = 12 > 9` nên giảm `j` còn 3; `1 + 7 = 8 < 9` nên tăng `i` còn 1; `2 + 7 = 9` thì dừng. Cặp `i = 0`, `j = 4` chỉ là cặp thử đầu tiên và cho tổng `12`, không phải đáp án. Cặp chỉ số 2 và 3 không bao giờ được thử vì `i` chưa kịp tới đó, và hai số không cần liền kề: hai con trỏ tìm mọi cặp có thể.</p>
+<p class="giai-thich" markdown>Bắt đầu `i = 0`, `j = 4`: `1 + 11 = 12 > 9` nên giảm `j` còn 3; `1 + 7 = 8 < 9` nên tăng `i` còn 1; `2 + 7 = 9` thì dừng. Cặp `i = 0`, `j = 4` chỉ là cặp thử đầu tiên và cho tổng `12`, không phải đáp án. Cặp chỉ số 2 và 3 không bao giờ được thử vì `i` chưa kịp tới đó (và tổng `11` cũng không phải `9`); còn hai số không cần liền kề: hai con trỏ tìm mọi cặp có thể.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -518,7 +518,7 @@ timCap(v, 9, i, j)
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 5.** Chuẩn C++ nói gì về độ phức tạp của `std::sort`?
 
-- Đòi O(n log n) kể cả xấu nhất (từ C++11); thuật toán do thư viện chọn
+- Đòi O(n log n) (từ C++11), thuật toán tùy thư viện
 - Bắt buộc dùng quick sort thuần nên xấu nhất có thể O(n²)
 - Bắt buộc dùng merge sort, vì vậy luôn cần thêm bộ nhớ phụ cỡ n
 - Chỉ đòi O(n²) vì sắp xếp tổng quát không làm tốt hơn được
@@ -545,12 +545,12 @@ dp[i] = dp[i-1] + dp[i-2]
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 7.** Được giao một bài thuật toán ở bảng trắng, việc nào nên làm trước khi viết code?
 
-- Viết ngay lời giải tối ưu nhất bạn nhớ, vì thời gian phỏng vấn có hạn
-- Im lặng nghĩ cho tới khi có lời giải hoàn chỉnh rồi mới trình bày một lần
-- Hỏi lại đề (dãy đã sắp chưa, có rỗng không), làm tay một ví dụ nhỏ, nói cách vét cạn và độ phức tạp của nó
-- Chờ người phỏng vấn gợi ý rồi mới bắt đầu, để tránh nói sai
+- Nói luôn cách tối ưu mà bạn nhớ, rồi mới hỏi lại đề
+- Vừa viết code vừa nghĩ, gặp lỗi mới hỏi lại đề
+- Hỏi lại đề, làm tay một ví dụ nhỏ, nói cách vét cạn
+- Nghĩ kỹ một mình tới khi có lời giải hoàn chỉnh rồi trình bày
 
-<p class="giai-thich" markdown>Làm rõ đề và thử ví dụ nhỏ giúp tránh giải nhầm bài, còn nói to cách vét cạn cho người nghe thấy bạn đang nghĩ gì và đưa ra điểm khởi đầu để cải tiến. Viết ngay mà chưa hiểu đề dễ giải sai bài. Im lặng làm người phỏng vấn không chấm được cách nghĩ của bạn. Chờ gợi ý cho thấy thiếu chủ động, trong khi họ muốn thấy bạn tự bắt đầu.</p>
+<p class="giai-thich" markdown>Làm rõ đề và thử ví dụ nhỏ giúp tránh giải nhầm bài, còn nói to cách vét cạn cho người nghe thấy bạn đang nghĩ gì và có điểm khởi đầu để cải tiến. Nói ngay cách tối ưu khi chưa hiểu đề dễ giải sai bài, và viết code trước rồi mới hỏi thì sửa lại tốn hơn. Nghĩ một mình tới cuối làm người phỏng vấn không chấm được cách nghĩ của bạn, cũng không gợi ý được khi bạn kẹt.</p>
 </div>
 
 </div>
