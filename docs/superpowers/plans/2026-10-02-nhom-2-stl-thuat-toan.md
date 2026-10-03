@@ -15,7 +15,7 @@
 - Quiz 6–8 câu/bài, ≥2 câu đọc code; công bằng độ dài đáp án (đúng KHÔNG hệ thống là dài nhất/ngắn nhất; ≤2 câu đúng-ngắn-nhất và ≤2 câu đúng-dài-nhất mỗi bài); giải thích không gọi đáp án theo vị trí; đáp án đúng KHÔNG đặt theo thứ tự cố định (JS xáo trộn).
 - Mọi khối ```` ```cpp ```` biên dịch sạch cảnh báo, chạy mã thoát 0 trong 5 giây; minh họa lỗi/UB đặt trong khối bắt đầu bằng `// bo-qua-kiem-tra` và chỉ nêu kết quả đã thực sự chạy. Số đo hiệu năng/địa chỉ: nói rõ là khác nhau theo máy.
 - Mỗi bài ≤ ~550 dòng; một ý chính; đoạn ≤4 câu. Bộ analogy: tiếp tục dùng bộ của Nhóm 1 khi hợp (kho đồ = heap, ...), thêm analogy mới nhất quán trong nhóm.
-- Repo công khai: không tên công ty/khách hàng/dự án/người, không đường dẫn cá nhân, không nhắc "nhà tuyển dụng/JD".
+- Repo công khai: không tên công ty/khách hàng/dự án/người, không đường dẫn cá nhân.
 - `data-bai` = số bài hai chữ số = tiền tố file; dòng trong `docs/tien-do.md`; mục `nav` (mới: "Nhóm 2 — STL và thuật toán"); hàng `docs/glossary.md` cho mọi thuật ngữ mới.
 - Git: danh tính đã cấu hình cục bộ; commit tiếng Việt kết thúc bằng `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`; chưa push; không đụng `docs/superpowers/` hay `.superpowers/`.
 - Chạy trước khi commit: `python3 -m unittest discover -s tests && python3 scripts/kiem_cau_truc.py && python3 scripts/kiem_code.py && mkdocs build --strict`.
