@@ -9,18 +9,18 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại **kệ sách** và **ngón tay** (iterator) của Bài 19. Bây giờ bạn thuê một **người quản thư**. Bạn chỉ đưa cho người ấy **hai ngón tay**: ngón đầu chỉ cuốn đầu của đoạn cần xử lý, ngón sau chỉ chỗ ngay sau cuốn cuối của đoạn. Người ấy không cần biết kệ làm bằng gỗ hay là các thẻ nối dây; cứ hai ngón tay là làm được: xếp thứ tự, tìm một cuốn, đếm, lật ngược.
+Quay lại **kệ sách** và **ngón tay** (iterator) của Bài 19. Bây giờ bạn thuê một **người quản thư**. Bạn chỉ đưa cho người ấy **hai ngón tay**: ngón đầu chỉ cuốn đầu của đoạn cần xử lý, ngón sau chỉ chỗ ngay sau cuốn cuối của đoạn. Người ấy không cần biết kệ làm bằng gỗ hay là các thẻ nối dây; cứ hai ngón tay là làm được nhiều việc: tìm một cuốn, đếm, lật ngược.
 
 Đó là cách **thuật toán** của STL làm việc: `std::sort(đầu, cuối)`, `std::find(đầu, cuối, giá_trị)`... Khi việc cần một tiêu chí ("xếp theo điểm giảm dần", "tìm cuốn nào dày hơn 300 trang") bạn đưa thêm một **mẩu giấy ghi luật**: đó là **lambda**.
 
 !!! info "Chỗ nào ví dụ người quản thư không còn đúng?"
-    Người quản thư chỉ có hai ngón tay, nên chỉ **xếp lại** sách trên kệ chứ không **vứt bỏ** hay **thêm** được cuốn nào: việc đó thuộc về chủ kệ (container). Chính điều này giải thích mục 4 (`remove` không làm vector ngắn đi).
+    Người quản thư chỉ có hai ngón tay, nên chỉ **xếp lại** sách trên kệ chứ không **vứt bỏ** hay **thêm** được cuốn nào: việc đó thuộc về chủ kệ (container). Chính điều này giải thích mục 5 (`remove` không làm vector ngắn đi). Ngoài ra, xếp nhanh cần ngón tay **nhảy cóc** được; kệ thẻ nối dây chỉ cho nhích từng bước nên `sort` không dùng được (mục 2).
 
 ## 📖 Giải thích
 
 ### 1. Cặp iterator `[begin, end)` là giao diện chung
 
-Ngoài `<algorithm>`, ta cần `#include <numeric>` cho `std::accumulate` (mục 3). Mọi thuật toán nhận một đoạn **nửa mở** `[begin, end)`: tính `begin`, **không** tính `end` (đúng như `end()` của Bài 19). Vì vậy `v.begin() + 1, v.begin() + 4` là phần tử số 1, 2, 3 (không phải số 4).
+Ngoài `<algorithm>`, ta cần `#include <numeric>` cho `std::accumulate` (mục 3). Mọi thuật toán nhận một đoạn **nửa mở** `[begin, end)`: tính `begin`, **không** tính `end` (đúng như `end()` của Bài 19). Vì vậy `v.begin() + 1, v.begin() + 4` là các phần tử ở chỉ số 1, 2, 3 (đếm từ 0; không gồm chỉ số 4).
 
 Các thuật toán tìm kiếm (`find`...) trả về **iterator**, không trả về giá trị: không tìm thấy thì trả về chính `end` mà bạn đưa vào. Bạn phải so với `end` **trước khi** dùng `*it`.
 
@@ -137,7 +137,7 @@ int main() {
 An:9 Cuong:9 Binh:7 Lan:7 
 ```
 
-**Luật cho comparator.** Hàm phải cho **thứ tự chặt**: `comp(a, a)` luôn `false` (một phần tử không đứng trước chính nó), và `comp(a, b)` với `comp(b, a)` không cùng `true`. Cứ dùng `<` hoặc `>`: `<=` hay `>=` vi phạm luật, và theo chuẩn thì sort khi đó là **hành vi không xác định** (mình không chạy thử và không nói nó in gì).
+**Luật cho comparator.** Hàm phải cho **thứ tự chặt**: `comp(a, a)` luôn `false` (một phần tử không đứng trước chính nó), `comp(a, b)` với `comp(b, a)` không cùng `true`, và bắc cầu (`a` trước `b`, `b` trước `c` thì `a` trước `c`). Cứ dùng `<` hoặc `>`: `<=` hay `>=` vi phạm luật, và theo chuẩn thì sort khi đó là **hành vi không xác định** (mình không chạy thử và không nói nó in gì).
 
 **Thử thay đổi: `std::sort(l.begin(), l.end())` với `l` là `std::list<int>`.** Mình đã chạy: lỗi biên dịch `no match for 'operator-' (operand types are 'std::_List_iterator<int>' and 'std::_List_iterator<int>')`. `sort` cần iterator **truy cập ngẫu nhiên** (nhảy được, trừ nhau được như `vector`, `deque`, `array`, mảng thường), còn `list` chỉ nhích từng bước ([Bài 19](19-iterator-vo-hieu.md)). Đó là lý do `list` có hàm riêng `l.sort()` mà Bài 17 đã dùng.
 
@@ -192,11 +192,11 @@ int main() {
 | (1) | Lambda `[nguong]` chép `nguong` (6) vào trong nó, cất vào `lonHon`; dùng lại được nhiều lần |
 | (2) | `find_if` trả iterator tới phần tử **đầu tiên** làm vị từ đúng: `9` (ở đây chắc chắn có, nên `*it` an toàn; thường vẫn phải kiểm `!= end`) |
 | (3) | `count_if` đếm số phần tử thỏa: `9` và `7` |
-| (4) | `any_of`: có phần tử nào thỏa không (có: 4); `all_of`: tất cả đều thỏa không (không). In ra `1` và `0` |
+| (4) | `x % 2` là số dư khi chia cho 2, bằng 0 là số chẵn. `any_of`: có phần tử nào thỏa không (có: 4); `all_of`: tất cả đều thỏa không (không). In ra `1` và `0` |
 | (5) | Tạo sẵn vector 5 số 0 làm chỗ chứa kết quả |
 | (6) | `transform` áp lambda lên từng phần tử của `[begin, end)` và ghi kết quả bắt đầu từ `binhPhuong.begin()`; chỗ chứa phải đủ lớn |
 | (7) | `[&tong]` giữ tham chiếu để cộng dồn vào biến ngoài |
-| (8) | `accumulate` (trong `<numeric>`) giữ một biến tích lũy ("bộ cộng") bắt đầu bằng giá trị đầu `0` và cộng từng phần tử vào: 28 |
+| (8) | `accumulate` (trong `<numeric>`) giữ một biến tích lũy ("bộ cộng") bắt đầu bằng giá trị đầu `0` và cộng từng phần tử vào: 28. Đối số thứ tư tùy chọn là lambda `(bộ cộng, phần tử)` đổi phép cộng sang phép khác; mục 💻 dùng nó |
 | (9) | Giá trị đầu `0` là `int` nên **bộ cộng cũng là `int`**; `0.0` là `double` |
 
 **Kết quả khi chạy:**
@@ -211,7 +211,7 @@ accumulate: 28
 init 0: 0, init 0.0: 1
 ```
 
-Dòng `init 0: 0` là cái bẫy kinh điển: cộng `0.5`, `0.25`, `0.25` vào bộ cộng kiểu `int` cho `0` (mỗi lần phần thập phân bị cắt), còn `0.0` cho đúng `1`. Kiểu của giá trị đầu quyết định kiểu kết quả. (Có thêm đối số thứ tư là lambda hai tham số `(đã cộng dồn, phần tử mới)` để đổi phép cộng thành phép khác; mục 💻 dùng nó.)
+Dòng `init 0: 0` là cái bẫy kinh điển: cộng `0.5`, `0.25`, `0.25` vào bộ cộng kiểu `int` cho `0` (mỗi lần phần thập phân bị cắt), còn `0.0` cho đúng `1`. Kiểu của giá trị đầu quyết định kiểu kết quả.
 
 **Thử thay đổi: ở dòng (7) viết `[=]` thay `[&tong]`.** Mình đã chạy: lỗi biên dịch `assignment of read-only variable 'tong'` (lambda `[=]` chỉ có bản chép hằng; Bài 13). Cách chọn capture: thân lambda chỉ **đọc** biến ngoài thì `[x]` hoặc `[=]`; cần **ghi lại** ra biến ngoài thì `[&x]`.
 
@@ -252,8 +252,8 @@ int main() {
 | (1) | Hàm thường `laChan`; tên hàm đưa thẳng cho `count_if` ở (2) |
 | (3) | Lambda không bắt, cất vào `auto` |
 | (4) | Lambda không bắt đổi được thành con trỏ hàm; `conTro(5)` gọi nó, ra `0` |
-| (5) | `std::function<bool(int)>` (trong `<functional>`) là cái hộp chứa **bất kỳ thứ gọi được** nhận `int` trả `bool`, kể cả lambda có bắt |
-| (6) | Cùng hộp đó gán lại thành hàm `laChan` |
+| (5) | `std::function<bool(int)>` (trong `<functional>`) là cái hộp chứa **bất kỳ thứ gọi được** nhận `int` trả `bool`, kể cả lambda có bắt. In `10`: `f(4)` đúng (1), `f(2)` sai (0) |
+| (6) | Cùng hộp đó gán lại thành hàm `laChan`: `laChan(4)` đúng (1), `laChan(5)` sai (0), cũng in `10` |
 
 **Kết quả khi chạy:**
 
@@ -320,11 +320,6 @@ int main() {
     std::vector<int> w = {5, 12, 7, 20, 3, 15};
     w.erase(std::remove_if(w.begin(), w.end(), [](int x) { return x >= 10; }), w.end());   // (4)
     in("bo >= 10", w);
-
-    std::vector<int> u = {3, 1, 3, 3, 2, 1};
-    std::sort(u.begin(), u.end());                                // (5)
-    u.erase(std::unique(u.begin(), u.end()), u.end());            // (6)
-    in("duy nhat", u);
     return 0;
 }
 ```
@@ -335,8 +330,6 @@ int main() {
 | (2) | Chỉ duyệt tới `moiCuoi`: đoạn sau đó không đọc (giá trị không rõ) |
 | (3) | `erase(moiCuoi, v.end())` cắt đoạn đuôi: size về 3 |
 | (4) | `remove_if` nhận vị từ thay giá trị: bỏ mọi số `>= 10`, rồi `erase` cùng dòng |
-| (5) | `unique` chỉ gộp các phần tử **liền kề** bằng nhau, nên sắp xếp trước |
-| (6) | `unique` cùng khuôn: trả chỗ ngay sau phần tử giữ cuối, rồi `erase` |
 
 **Kết quả khi chạy:**
 
@@ -345,10 +338,9 @@ phan giu lai dai 3, size van la 6
 giu lai: 1 3 4
 sau erase (size 3): 1 3 4
 bo >= 10 (size 3): 5 7 3
-duy nhat (size 3): 1 2 3
 ```
 
-Toàn bộ chỉ tốn O(n) (một lượt), thay cho nhiều lần `erase` O(n) của Bài 19. `list` thì có sẵn `l.remove(x)` và `l.remove_if(...)` **tự xóa luôn** (Bài 17); C++20 còn có `std::erase_if(v, vị_từ)` gói cả hai bước.
+Toàn bộ chỉ tốn O(n) (một lượt), thay cho nhiều lần `erase` O(n) của Bài 19. `list` thì có sẵn `l.remove(x)` và `l.remove_if(...)` **tự xóa luôn** (Bài 17); C++20 còn có `std::erase_if(v, vị_từ)` gói cả hai bước. `std::unique` cùng khuôn (`erase(unique(...), end)`) nhưng chỉ gộp các phần tử **liền kề** bằng nhau, nên phải sắp xếp trước.
 
 !!! info "Bạn biết Go?"
     Go xóa theo điều kiện bằng vòng lặp ghi đè `out := s[:0]; for _, x := range s { if giữ(x) { out = append(out, x) } }`: cùng ý "dồn phần giữ lại lên đầu rồi cắt". Từ Go 1.21 có `slices.DeleteFunc` làm trọn gói, ứng với remove_if cộng erase.
@@ -427,8 +419,11 @@ gioi 2, Lan hang 3
 !!! warning "Lỗi 2: Giá trị đầu của `accumulate` sai kiểu"
     `accumulate(d.begin(), d.end(), 0)` trên vector `double` cộng bằng `int` và ra `0` ở ví dụ mục 3. Viết `0.0`.
 
-!!! warning "Lỗi 3: Comparator dùng `<=`, hoặc `*` lên `end` khi không tìm thấy"
-    `<=` vi phạm thứ tự chặt (hành vi không xác định). Còn `*std::find(...)` mà không kiểm `!= end()` là `*` lên `end()`, cũng là hành vi không xác định.
+!!! warning "Lỗi 3: Comparator dùng `<=`"
+    `<=` vi phạm thứ tự chặt (hành vi không xác định). Dùng `<` hoặc `>`.
+
+!!! warning "Lỗi 4: `*std::find(...)` mà không kiểm `!= end()`"
+    Không tìm thấy thì `find` trả `end()`, và `*` lên `end()` là hành vi không xác định.
 
 ## ✍️ Trắc nghiệm
 
@@ -455,8 +450,8 @@ std::cout << v.size();
 ```
 
 - `6`, vì `remove` đã xóa nhưng `erase` không đổi gì
-- `5`, vì chỉ số `2` đầu tiên bị xóa
-- `3`, vì ba số `2` bị cắt khỏi vector
+- `5`, vì chỉ mỗi số `2` đầu tiên bị xóa
+- `3`, vì ba số `2` bị cắt
 - `4`, vì `remove` bỏ hai số `2` liền nhau
 
 <p class="giai-thich" markdown>`remove` dồn `1 3 4` lên đầu và trả chỗ ngay sau số `4`; `erase` cắt đoạn đuôi đó, nên còn đúng 3 phần tử. Nó xóa **mọi** số 2 chứ không chỉ số đầu tiên hay một cặp liền nhau. Con số `6` chỉ xuất hiện nếu bạn bỏ lời gọi `erase`, vì khi đó `size()` chưa bao giờ đổi.</p>
@@ -517,7 +512,7 @@ std::cout << std::accumulate(d.begin(), d.end(), 0);
 
 - `1`, vì ba số cộng lại đúng bằng 1 như phép toán thường
 - `1.0`, vì kết quả cộng từ `double` giữ kiểu `double`
-- `0`, vì giá trị đầu là `int` nên bộ cộng cũng là `int`
+- `0`, vì giá trị đầu là `int`
 - `0.5`, vì `accumulate` chỉ cộng phần tử đầu tiên
 
 <p class="giai-thich" markdown>Kiểu của giá trị đầu quyết định kiểu bộ cộng: `0` là `int` nên mỗi lần cộng phần thập phân bị cắt và ra `0`. Viết `0.0` mới được `1`. Việc "giữ kiểu `double`" là suy đoán sai: `accumulate` không lấy kiểu từ các phần tử. Phép cộng có chạy qua cả ba phần tử, nên `0.5` cũng sai.</p>
@@ -526,7 +521,7 @@ std::cout << std::accumulate(d.begin(), d.end(), 0);
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Vì sao `std::sort(l.begin(), l.end())` với `std::list<int> l` không biên dịch được?
 
-- `sort` cần nhảy cóc tới phần tử bất kỳ, `list` không nhảy được
+- `sort` cần iterator truy cập ngẫu nhiên, mà `list` chỉ nhích từng bước
 - `list` không lưu số nguyên liên tiếp nên không có thứ tự
 - `sort` chỉ nhận mảng thường và `vector`, không nhận container khác
 - Muốn sort `list` phải bật cờ biên dịch riêng cho `list`
