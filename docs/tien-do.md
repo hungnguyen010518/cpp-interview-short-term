@@ -23,3 +23,4 @@
 | [Bài 17 — string, string_view, array, deque, list](nhom-2-stl-thuat-toan/17-string-array-deque-list.md) | <span class="diem" data-bai="17"></span> |
 | [Bài 18 — map, set, unordered_map: tra cứu theo khóa](nhom-2-stl-thuat-toan/18-map-set-unordered.md) | <span class="diem" data-bai="18"></span> |
 | [Bài 19 — Iterator và iterator invalidation](nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md) | <span class="diem" data-bai="19"></span> |
+| [Bài 20 — algorithm và lambda: sort, find, transform, remove-erase](nhom-2-stl-thuat-toan/20-algorithm-lambda.md) | <span class="diem" data-bai="20"></span> |
