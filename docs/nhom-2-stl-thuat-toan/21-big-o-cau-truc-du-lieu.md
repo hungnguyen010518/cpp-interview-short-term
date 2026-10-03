@@ -12,7 +12,11 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Bạn cần tìm một cuốn sách trong thư viện có `n` cuốn, và bạn **đếm số lần phải cầm một cuốn lên xem**. Kệ chưa xếp thứ tự: tệ nhất bạn xem cả `n` cuốn. Kệ đã xếp theo tên: bạn mở giữa kệ, bỏ nửa không cần, rồi lặp lại, nên với một triệu cuốn chỉ cỡ hai chục lần cầm. Có sổ ghi sẵn "cuốn này ở ngăn nào": một lần.
+Bạn cần tìm một cuốn sách trong thư viện có `n` cuốn, và bạn **đếm số lần phải cầm một cuốn lên xem**. Có ba cách tìm:
+
+- Kệ chưa xếp thứ tự: tệ nhất bạn xem cả `n` cuốn.
+- Kệ đã xếp theo tên: bạn mở giữa kệ, bỏ nửa không cần, rồi lặp lại, nên với một triệu cuốn chỉ cỡ hai chục lần cầm.
+- Có sổ ghi sẵn "cuốn này ở ngăn nào": một lần.
 
 **Big-O** là cách nói gọn việc đó: số bước **tăng thế nào khi `n` lớn lên**. Nó không đo giây, vì giây còn tùy máy; nó cho biết thuật toán nào "chịu được" dữ liệu lớn.
 
@@ -23,14 +27,13 @@ Bạn cần tìm một cuốn sách trong thư viện có `n` cuốn, và bạn 
 
 ### 1. Đếm bước theo n, rồi bỏ hằng số
 
-Gọi `n` là số phần tử cần xử lý. Chương trình dưới có bốn hàm, mỗi hàm **trả về số bước nó làm** (mỗi lần đụng vào một phần tử là một bước), để bạn thấy bốn kiểu tăng khác nhau.
+Gọi `n` là số phần tử cần xử lý. Ba chữ cần nói trước: `long` là số nguyên cỡ lớn hơn `int` (thường 8 byte trên Linux 64-bit), `k /= 2` là `k = k / 2` (chia số nguyên, bỏ phần dư), và `n * x` là phép nhân. Chương trình dưới có bốn hàm, mỗi hàm **trả về số bước nó làm** (mỗi lần đụng vào một phần tử là một bước), để bạn thấy bốn kiểu tăng khác nhau.
 
 ```cpp
 #include <iostream>
 #include <vector>
 
-long layDau(int n) {
-    (void)n;
+long layDau() {
     return 1;                                  // (1) luôn một bước
 }
 
@@ -56,7 +59,7 @@ long chiaDoi(int n) {
 int main() {
     std::vector<int> cacN = {10, 100, 1000};
     for (int n : cacN) {
-        std::cout << "n=" << n << ": O(1)=" << layDau(n) << ", O(log n)=" << chiaDoi(n)
+        std::cout << "n=" << n << ": O(1)=" << layDau() << ", O(log n)=" << chiaDoi(n)
                   << ", O(n)=" << tong(n) << ", O(n log n)=" << n * chiaDoi(n)       // (5)
                   << ", O(n^2)=" << demCap(n) << "\n";
     }
@@ -82,7 +85,7 @@ n=100: O(1)=1, O(log n)=6, O(n)=100, O(n log n)=600, O(n^2)=4950
 n=1000: O(1)=1, O(log n)=9, O(n)=1000, O(n log n)=9000, O(n^2)=499500
 ```
 
-Cột O(n²) cho thấy chữ **bỏ hằng số**: `demCap` làm `n(n-1)/2` bước, tức gần nửa `n²`, nhưng ta vẫn viết O(n²) vì khi `n` gấp đôi thì số bước vẫn **gấp bốn**. Tương tự, một hàm làm `3n + 5` bước là O(n): khi `n` lớn, `5` không đáng kể và `3` chỉ là hệ số. Ta giữ lại số hạng lớn nhất và bỏ phần còn lại.
+Cột O(n²) cho thấy chữ **bỏ hằng số**: `demCap` làm `n(n-1)/2` bước, tức gần nửa `n²`, nhưng ta vẫn viết O(n²) vì khi `n` lớn và gấp đôi thì số bước **gần gấp bốn**. Tương tự, một hàm làm `3n + 5` bước là O(n): khi `n` lớn, `5` không đáng kể và `3` chỉ là hệ số. Ta giữ lại số hạng lớn nhất và bỏ phần còn lại.
 
 | Ký hiệu | Đọc là | Ví dụ quen thuộc |
 |---|---|---|
@@ -129,8 +132,6 @@ int main() {
 }
 ```
 
-Dòng (3) là mấu chốt: `capacity` đổi nghĩa là vừa xin mảng mới và chuyển `sizeTruoc` phần tử cũ sang, nên cộng `sizeTruoc` vào `chep`.
-
 **Kết quả khi chạy:**
 
 ```text
@@ -141,7 +142,7 @@ Mười một lần chuyển nhà cho 1000 lần thêm, tổng 1023 phần tử 
 
 ### 3. Bảng độ phức tạp của các container đã học
 
-Dấu `–` là container đó không có thao tác ấy. Bảng là mức mà **chuẩn** C++ đòi (với `map`, thêm cách cài thông thường là cây), không phải số đo máy bạn.
+Dấu `–` là container đó không có thao tác ấy. Bảng là mức mà **chuẩn** C++ đòi (`map`/`set` thường cài bằng cây cân bằng, chuẩn chỉ đòi O(log n)), không phải số đo máy bạn.
 
 | Thao tác | `vector` | `deque` | `list` | `map`/`set` | `unordered_*` |
 |---|---|---|---|---|---|
@@ -158,9 +159,15 @@ Mặc định vẫn chọn `vector`: các phần tử nằm liền nhau nên CPU
 
 ### 4. Danh sách liên kết đơn tự cài
 
-**Danh sách liên kết đơn** là chuỗi các **nút** (node) nằm rời nhau ở heap: mỗi nút giữ một giá trị và **địa chỉ của nút kế tiếp**, y như tờ giấy ghi số ngăn ([Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md)). Nút cuối giữ `nullptr` để báo "hết". Danh sách chỉ cần nhớ **nút đầu**; từ đó lần theo mũi tên là đi hết. `std::list` của Bài 17 là bản **đôi** (mỗi nút có thêm mũi tên lùi); ở đây ta làm bản đơn (một chiều) vì đó là bản hay hỏi.
+**Danh sách liên kết đơn** là chuỗi các **nút** (node) nằm rời nhau ở heap: mỗi nút giữ một giá trị và **địa chỉ của nút kế tiếp**, y như tờ giấy ghi số ngăn ([Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md)). Nút cuối giữ `nullptr` để báo "hết". Danh sách chỉ cần nhớ **nút đầu**; từ đó lần theo mũi tên là đi hết.
 
-Có ba điểm cú pháp cần nói trước khi đọc code. Nút chứa con trỏ tới **chính kiểu của nó** (`Nut* tiep`): được phép, vì con trỏ luôn cùng một cỡ nên trình biên dịch biết `Nut` to bao nhiêu. Còn viết `Nut tiep;` (nhét nguyên một nút trong nút) là lỗi, vì kích thước thành vô hạn; g++ báo `field 'tiep' has incomplete type 'Nut'`. Ngoài ra `new Nut{x, dau}` xin một nút ở heap và điền hai trường theo thứ tự như `{"An", 9}` ở Bài 14, còn `Nut* dau = nullptr;` đặt giá trị ban đầu ngay tại khai báo trường.
+`std::list` của Bài 17 là bản **đôi** (mỗi nút có thêm mũi tên lùi); ở đây ta làm bản đơn (một chiều) vì đó là bản hay hỏi.
+
+Có ba điểm cú pháp cần nói trước khi đọc code:
+
+- Nút chứa con trỏ tới **chính kiểu của nó** (`Nut* tiep`): được phép, vì con trỏ luôn cùng một cỡ nên trình biên dịch biết `Nut` to bao nhiêu.
+- Viết `Nut tiep;` (nhét nguyên một nút trong nút) là lỗi vì kích thước thành vô hạn; g++ báo `field 'tiep' has incomplete type 'Nut'`.
+- `new Nut{x, dau}` xin một nút ở heap và điền hai trường theo thứ tự như `{"An", 9}` ở Bài 14; còn `Nut* dau = nullptr;` đặt giá trị ban đầu ngay tại khai báo trường.
 
 Dòng `DanhSach() = default;` giữ lại hàm tạo mặc định: hễ đã khai báo hàm sao chép (kể cả `= delete`), trình biên dịch thôi không tự sinh nó nữa. Mình đã thử bỏ dòng này: `DanhSach ds;` báo `no matching function for call to 'DanhSach::DanhSach()'`.
 
@@ -239,6 +246,7 @@ int main() {
 | (5) lần 1 | `new Nut{1, dau}`: nút mới trỏ tới `dau` cũ (`nullptr`), rồi `dau` trỏ vào nó | `dau` → `0x1000`: [1 \| null] |
 | (5) lần 2, 3 | Mỗi lần nút mới **chen lên đầu**, nó trỏ tới nút đầu cũ | `dau` → `0x1020`: [3 \| →`0x1010`] → [2 \| →`0x1000`] → [1 \| null] |
 | (7) | `tim` đi từng nút, đúng giá trị thì trả địa chỉ nút, hết mà không thấy thì `nullptr`: O(n) | |
+| (8)–(12) | `daoNguoc`, xem bảng theo vết bên dưới; `in()` chỉ đi dọc danh sách và in | |
 | (6) | `dau` nhảy sang nút kế, rồi mới `delete` nút cũ (làm ngược lại là mất đường đi) | `dau` → nút `2` |
 | (4) | Hết `main`: hàm hủy gọi `xoaDau` đến khi `dau` rỗng, trả mọi nút còn lại | |
 
@@ -262,30 +270,27 @@ tim 2: co, tim 9: khong
 
 Hết vòng, `hien` là `nullptr` và `truoc` là nút cuối cũ, tức đầu mới: dòng (12) gán `dau = truoc`. Chỉ có ba con trỏ phụ nên bộ nhớ thêm là O(1), mỗi nút đụng một lần nên thời gian O(n).
 
-**Thử thay đổi: bỏ vòng `while` trong hàm hủy (dòng (4)).** Mình đã biên dịch với `-fsanitize=address` và chạy: chương trình in đúng như cũ rồi LeakSanitizer báo `32 byte(s) leaked in 2 allocation(s)`. Đúng là hai nút còn lại (ba nút xin, `xoaDau` trả một), mỗi nút 16 byte (một `int`, đệm, một con trỏ). Hàm hủy là chỗ RAII ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)) trả hết nút khi danh sách chết.
-
-Tóm lại, với danh sách chỉ nhớ nút đầu: thêm/xóa đầu O(1); tìm theo giá trị và đến nút thứ `k` O(n); thêm cuối O(n) (phải đi tới nút cuối), chỉ O(1) nếu có thêm con trỏ đuôi (mục 💻); đảo ngược O(n) thời gian, O(1) bộ nhớ thêm.
+**Thử thay đổi: bỏ vòng `while` trong hàm hủy (dòng (4)).** Mình đã biên dịch với `-fsanitize=address` và chạy: chương trình in đúng như cũ rồi LeakSanitizer báo `32 byte(s) leaked in 2 allocation(s)`. Đúng là hai nút còn lại (ba nút xin, `xoaDau` trả một), mỗi nút thường 16 byte trên máy 64-bit (một `int`, đệm, một con trỏ). Hàm hủy là chỗ RAII ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)) trả hết nút khi danh sách chết.
 
 !!! warning "Hay nhầm: viết nút bằng `unique_ptr` cho gọn"
-    Có thể viết `std::unique_ptr<Nut> tiep;` để khỏi gọi `delete` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)), và với danh sách ngắn nó chạy đúng. Nhưng hàm hủy của nút này hủy nút kế, nút kế hủy nút sau nó...: **đệ quy** (hàm gọi lại chính nó, Bài 02), mỗi nút một tầng stack. Mình thử 1 triệu nút bằng `unique_ptr`: chương trình sập (mã thoát 139) lúc hủy, cả khi bật `-O2`. Vòng lặp `delete` ở trên không bị.
+    Có thể viết `std::unique_ptr<Nut> tiep;` để khỏi gọi `delete` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)), và với danh sách ngắn nó chạy đúng. Nhưng hàm hủy của nút này hủy nút kế, nút kế hủy nút sau nó...: một kiểu **đệ quy** (hàm gọi lại chính nó, Bài 02), mỗi nút một tầng stack.
+
+    Trên máy mình (Linux, stack 8 MB) danh sách 10 nghìn nút còn chạy; 100 nghìn nút sập lúc hủy khi biên dịch `-O0` (mã thoát 139 của shell) nhưng vẫn chạy ở `-O2`; 1 triệu nút sập cả ở `-O2`. Đặt `ulimit -s unlimited` thì 1 triệu nút lại chạy được. Ngưỡng cụ thể tùy giới hạn stack của máy bạn và chuẩn không bảo đảm gì; vòng lặp `delete` ở trên không phụ thuộc vào đó.
 
 !!! info "Bạn biết Go?"
     Bài này viết bằng Go gần như y nguyên: `type Nut struct { Val int; Next *Nut }`, và đảo ngược cũng bằng ba con trỏ (`prev`, `cur`, `next := cur.Next`). Khác biệt là Go **không có** `delete` hay hàm hủy: bộ gom rác dọn các nút không còn ai trỏ tới. Trong C++, quên trả nút là rò rỉ (ASan báo), và `container/list` của Go ứng với `std::list`.
 
 ### 5. Stack và queue
 
-**Stack** (ngăn xếp) là chồng đĩa: đĩa đặt sau cùng lấy ra trước, gọi là **LIFO** (last in, first out). **Queue** (hàng đợi) là hàng xếp mua vé: người đến trước được phục vụ trước, gọi là **FIFO** (first in, first out). Vùng stack của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) cũng theo luật LIFO (khung hàm gọi sau thì trả trước), và đó là lý do chúng cùng tên. Nhưng `std::stack` là một kiểu thư viện chứa dữ liệu trong một container (mặc định là `deque`), không phải vùng stack ấy.
+**Stack** (ngăn xếp) là chồng đĩa: đĩa đặt sau cùng lấy ra trước, gọi là **LIFO** (last in, first out). **Queue** (hàng đợi) là hàng xếp mua vé: người đến trước được phục vụ trước, gọi là **FIFO** (first in, first out).
 
-`std::stack` (`#include <stack>`) và `std::queue` (`#include <queue>`) là **container adaptor** (bộ bọc): chúng giấu container bên trong và chỉ lộ vài thao tác. Vì vậy chúng không có iterator và không duyệt được. Bạn đổi container bên trong bằng tham số thứ hai, ví dụ `std::stack<int, std::vector<int>>`.
+Vùng stack của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) cũng theo luật LIFO (khung hàm gọi sau thì trả trước), nên chúng cùng tên. Nhưng `std::stack` là một kiểu thư viện chứa dữ liệu trong một container (mặc định là `deque`), không phải vùng stack ấy.
 
-| | `std::stack` | `std::queue` |
-|---|---|---|
-| cất thêm | `push(x)` đặt lên đỉnh | `push(x)` đặt cuối hàng |
-| xem | `top()` là đỉnh | `front()` là đầu hàng, `back()` là cuối hàng |
-| bỏ đi | `pop()` bỏ đỉnh | `pop()` bỏ đầu hàng |
-| hỏi | `empty()`, `size()` | `empty()`, `size()` |
+`std::stack` (`#include <stack>`) và `std::queue` (`#include <queue>`) là **container adaptor** (bộ bọc): chúng giấu container bên trong và chỉ lộ vài thao tác. Vì vậy chúng không có iterator và không duyệt được. Bạn đổi container bên trong bằng tham số thứ hai: `std::stack<int, std::vector<int>>` được, còn `queue` cần container có `pop_front` nên dùng `deque` hoặc `list`.
 
-Mọi thao tác ở bảng trên đều O(1). Chương trình dưới dùng stack kiểm tra dấu ngoặc khớp nhau (bài kinh điển: ngoặc mở **gần nhất** phải đóng trước) và queue phục vụ khách theo thứ tự đến.
+`std::stack` có `push(x)` (đặt lên đỉnh), `top()` (xem đỉnh), `pop()` (bỏ đỉnh). `std::queue` có `push(x)` (đặt cuối hàng), `front()` (xem đầu hàng), `back()` (xem cuối hàng), `pop()` (bỏ đầu hàng). Cả hai có `empty()` và `size()`.
+
+Mọi thao tác đó đều O(1). Trong code dưới, `||` là "hoặc" và `&&` là "và" (như Go). Chương trình dùng stack kiểm tra dấu ngoặc khớp nhau (bài kinh điển: ngoặc mở **gần nhất** phải đóng trước) và queue phục vụ khách theo thứ tự đến.
 
 ```cpp
 #include <iostream>
@@ -323,7 +328,6 @@ int main() {
         std::cout << "phuc vu " << hang.front() << "\n";
         hang.pop();                                        // (9)
     }
-    std::cout << "con " << hang.size() << " nguoi\n";
     return 0;
 }
 ```
@@ -348,19 +352,18 @@ dau hang: An, cuoi hang: Cuong
 phuc vu An
 phuc vu Binh
 phuc vu Cuong
-con 0 nguoi
 ```
 
 !!! warning "Hay nhầm: `pop()` không trả giá trị"
     `pop()` của cả `stack` lẫn `queue` trả `void`: muốn lấy giá trị thì phải gọi `top()` (hoặc `front()`) **trước**, rồi mới `pop()`, như dòng (4)–(5). Và gọi `top()`, `front()`, `pop()` khi rỗng là hành vi không xác định, nên kiểm `empty()` trước (dòng (3)).
 
-Tự cài cũng dễ vì cả hai chỉ là vài thao tác trên container có sẵn. Stack tự cài bằng danh sách liên kết: `themDau`/`xoaDau` của mục 4 chính là `push`/`pop`, đều O(1). Queue cần thêm ở một đầu và lấy ở đầu kia, nên danh sách đơn phải có thêm **con trỏ đuôi**, như ở mục 💻.
+Tự cài cũng dễ: stack tự cài bằng danh sách liên kết: `themDau`/`xoaDau` của mục 4 chính là `push`/`pop`, đều O(1). Queue cần thêm ở một đầu và lấy ở đầu kia, nên danh sách đơn phải có thêm **con trỏ đuôi**, như ở mục 💻.
 
 !!! info "Bạn biết Go?"
     Go **không có** stack/queue chuẩn: người ta dùng slice. Stack: `s = append(s, x)` để push, `x := s[len(s)-1]; s = s[:len(s)-1]` để pop. Queue: `q = append(q, x)` và `q = q[1:]` để lấy đầu, đơn giản nhưng phần đã bỏ vẫn nằm trong mảng nền cho đến lần `append` cấp mảng mới. Channel có đệm cũng là hàng đợi FIFO, nhưng để chuyển dữ liệu giữa các goroutine.
 
 !!! info "Một mảnh của bài kế tiếp: `priority_queue`"
-    `std::priority_queue` (`<queue>`) lấy phần tử **lớn nhất trước** thay vì vào trước ra trước, cài bằng heap (bài kế tiếp). Bên Go là `container/heap`: bạn tự viết năm hàm của `heap.Interface` (`Len`, `Less`, `Swap`, `Push`, `Pop`) và nó lấy phần tử **nhỏ nhất** trước.
+    `std::priority_queue` (`<queue>`) lấy phần tử **lớn nhất trước** thay vì vào trước ra trước, cài bằng heap (bài kế tiếp). Bên Go là `container/heap`: bạn tự viết năm hàm của `heap.Interface` (`Len`, `Less`, `Swap`, `Push`, `Pop`) và nó lấy phần tử mà `Less` xếp đầu (với `Less` là `<` thì là nhỏ nhất).
 
 ## 💻 Ví dụ code
 
@@ -458,9 +461,6 @@ Mình đã chạy ba chương trình ở mục 4, mục 5 và mục này với `
 !!! warning "Lỗi 1: Quên lưu nút kế khi đảo ngược hoặc xóa"
     `hien->tiep = truoc; hien = hien->tiep;` làm `hien` thành `truoc`, không phải nút kế, và cả phần còn lại của danh sách bị bỏ rơi (rò rỉ). Tương tự khi xóa: lấy `dau->tiep` **trước** khi `delete` nút. Quy tắc: cắt dây nào thì nhớ đầu bên kia trước.
 
-!!! warning "Lỗi 2: Lấy từ stack hoặc queue rỗng, và trông chờ `pop()` trả giá trị"
-    `top()`, `front()`, `pop()` trên container rỗng là hành vi không xác định, và `pop()` trả `void`. Viết `if (!s.empty()) { auto x = s.top(); s.pop(); ... }`.
-
 ## ✍️ Trắc nghiệm
 
 <div class="quiz" data-bai="21" markdown>
@@ -475,11 +475,11 @@ for (int i = 0; i < n; ++i)
 ```
 
 - O(n²), vì có hai vòng `for` lồng nhau
-- O(5n), vì vòng trong chạy năm lần cho mỗi `i`
+- O(5), vì vòng trong chỉ chạy năm lần mà thôi
 - O(log n), vì `j` chỉ đi một đoạn rất ngắn
 - O(n), vì vòng trong luôn chạy đúng 5 lần
 
-<p class="giai-thich" markdown>Vòng ngoài chạy `n` lần và mỗi lần vòng trong chỉ chạy 5 lần, tổng `5n` bước, và hằng số 5 bị bỏ nên là O(n). Hai vòng lồng chỉ cho O(n²) khi cả hai cùng chạy tới `n`. Viết O(5n) là chưa bỏ hằng số, còn log n là kiểu chia đôi dữ liệu và không có gì như thế ở đây.</p>
+<p class="giai-thich" markdown>Vòng ngoài chạy `n` lần và mỗi lần vòng trong chỉ chạy 5 lần, tổng `5n` bước, và hằng số 5 bị bỏ nên là O(n). Hai vòng lồng chỉ cho O(n²) khi cả hai cùng chạy tới `n`. O(5) bỏ quên vòng ngoài chạy `n` lần, còn log n là kiểu chia đôi dữ liệu và không có gì như thế ở đây.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -490,12 +490,12 @@ hien->tiep = truoc;
 hien = hien->tiep;
 ```
 
-- `hien` thành `nullptr`, vòng dừng, nút 2 và 3 bị bỏ rơi
-- `hien` sang nút 2 như dự định, nên việc đảo vẫn đúng
-- Sập ngay vì nút 1 đang trỏ vào chính nó
+- `hien` thành `nullptr`, nút 2 và 3 bị bỏ rơi
+- `hien` sang nút 2 như dự định, nên cả danh sách được đảo đúng
+- `hien` thành nút 1, nên vòng lặp chạy mãi không dừng
 - `hien` nhảy tới nút 3 vì đi theo hai mũi tên
 
-<p class="giai-thich" markdown>Dòng đầu quay mũi tên của nút 1 thành `nullptr`, rồi dòng hai đọc `hien->tiep` **sau khi nó đã bị ghi đè**, nên `hien` thành `nullptr` và vòng dừng. Nút 2 và nút 3 mất đường duy nhất tới chúng, tức rò rỉ. Mũi tên của nút 1 chỉ vào `nullptr` chứ không vào chính nó, nên không có vòng lặp vô hạn. Cách sửa là lưu nút kế vào biến `ke` **trước** khi quay mũi tên.</p>
+<p class="giai-thich" markdown>Dòng đầu quay mũi tên của nút 1 thành `nullptr`, rồi dòng hai đọc `hien->tiep` **sau khi nó đã bị ghi đè**, nên `hien` thành `nullptr` và vòng dừng. Nút 2 và nút 3 mất đường duy nhất tới chúng, tức rò rỉ. `hien` đã là `nullptr`, không quay lại nút 1 nên không có vòng lặp vô hạn. Cách sửa là lưu nút kế vào biến `ke` **trước** khi quay mũi tên.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -522,9 +522,9 @@ std::cout << s.top();
 - `1`, vì `pop` bỏ phần tử được cất vào đầu tiên
 - `2`, vì `pop` bỏ phần tử được cất vào sau cùng
 - `3`, vì `pop` chỉ trả giá trị chứ không bỏ gì
-- Lỗi biên dịch, vì `pop` trả `void` mà ta không dùng
+- `0`, vì `pop` làm rỗng rồi `top` trả giá trị mặc định
 
-<p class="giai-thich" markdown>Stack là LIFO: phần tử vào sau cùng (3) nằm ở đỉnh và bị `pop` bỏ đi, nên đỉnh mới là 2. Phần tử đầu tiên cất vào (1) nằm dưới đáy, không bị đụng tới. `pop` thật sự **bỏ** phần tử và không trả gì (`void`), nên `3` sai; và gọi một hàm trả `void` như một câu lệnh riêng là hợp lệ, không gây lỗi.</p>
+<p class="giai-thich" markdown>Stack là LIFO: phần tử vào sau cùng (3) nằm ở đỉnh và bị `pop` bỏ đi, nên đỉnh mới là 2. Phần tử đầu tiên cất vào (1) nằm dưới đáy, không bị đụng tới. `pop` thật sự **bỏ** phần tử và không trả gì (`void`), nên `3` sai; còn `top` không có "giá trị mặc định" nào, stack vẫn giữ 1 và 2.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -548,7 +548,7 @@ q.pop();
 std::cout << q.front() << q.back();
 ```
 
-- `bc`, vì `pop` bỏ `a` ở đầu, `c` vẫn ở cuối
+- `bc`, vì `pop` bỏ `a`
 - `ac`, vì `pop` bỏ `b` nằm ở giữa hàng
 - `ca`, vì queue lấy ngược từ cuối về đầu
 - `cb`, vì `pop` bỏ `a` rồi hàng bị đảo ngược
