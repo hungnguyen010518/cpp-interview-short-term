@@ -23,7 +23,7 @@ Cách tốt: chính **để thẻ thớt lại** (để phụ còn có thẻ mà
 
 ### 1. Vì sao cần chờ điều kiện: hai cách chờ tồi
 
-Chương trình dưới có luồng phụ "chuẩn bị dữ liệu" mất 1 giây rồi đặt cờ `xong`; luồng chính chờ cờ đó bằng một **vòng chờ bận** (busy waiting: lặp lại việc kiểm tra liên tục, không ngủ). Cờ và dữ liệu luôn được đọc/ghi dưới khóa ([Bài 25](25-data-race-mutex.md)). `std::chrono::seconds(1)` là khoảng 1 giây, cùng họ với `milliseconds` ở [Bài 24](24-thread-co-ban.md).
+Chương trình dưới có luồng phụ "chuẩn bị dữ liệu" mất 1 giây rồi đặt cờ `xong`; luồng chính chờ cờ đó bằng một **vòng chờ bận** (busy waiting: lặp lại việc kiểm tra liên tục, không ngủ). Cờ và dữ liệu luôn được đọc/ghi dưới khóa ([Bài 25](25-data-race-mutex.md)). `std::chrono::seconds(1)` là khoảng 1 giây, cùng họ với `milliseconds` ở [Bài 24](24-thread-co-ban.md). `while (true)` là vòng lặp không có điều kiện dừng (như `for { }` của Go), chỉ thoát bằng `break`.
 
 ```cpp
 #include <chrono>
@@ -43,7 +43,7 @@ int main() {
         xong = true;
     });
 
-    for (;;) {                                                  // (2) vòng chờ bận
+    while (true) {                                              // (2) vòng chờ bận
         std::lock_guard<std::mutex> g(khoa);
         if (xong) break;
     }
@@ -75,7 +75,7 @@ user	0m1,002s
 - `user` chỉ cỡ 0,001 giây, vì luồng chính ngủ gần hết thời gian.
 - Luồng chính biết tin trễ **khoảng 90 ms** sau khi dữ liệu sẵn sàng (ba lần chạy: 91, 90, 90).
 
-Vòng ngủ-rồi-hỏi tốn gần như không CPU, nhưng trễ tới một chu kỳ ngủ; ngủ ngắn lại thì trễ ít đi mà CPU tốn trở lại.
+Mình chọn 1010 ms để cờ đến ngay sau một lần hỏi, nên trễ gần mức tối đa (một chu kỳ ngủ); trung bình khoảng nửa chu kỳ. Vòng ngủ-rồi-hỏi tốn gần như không CPU nhưng trễ; ngủ ngắn lại thì trễ ít đi mà CPU tốn trở lại.
 
 Ta muốn: **không tốn CPU lúc chờ, và biết tin ngay khi có**. Hệ điều hành làm được chuyện đó nếu luồng chờ xin "đánh thức tôi khi có tin".
 
@@ -130,7 +130,7 @@ int main() {
 | (1)-(3) | Luồng phụ xin được khóa (vì chính đã nhả), đặt dữ liệu, trả khóa |
 | (4) | `notify_one` đánh thức luồng chính |
 | (6) | Luồng chính dậy, **xin lại khóa**, kiểm lại predicate: `true`, nên `wait` trả về |
-| (7) | In ra, khi luồng chính đang giữ khóa |
+| (7) | In ra khi luồng chính đang giữ khóa; rồi `unlock()` để không giữ khóa lúc `join` chờ luồng phụ |
 
 **Kết quả khi chạy:** `nhan duoc 42`; `time` ra `real 1,005 s` nhưng `user` chỉ `0,001 s`, trong khi bản chờ bận ở mục 1 ra `user 1,002 s`. Mình cũng đo độ trễ từ lúc đặt cờ đến lúc luồng chính dậy: ba lần, 22 đến 58 **micro**giây (khác nhau theo máy), so với ~90 **mili**giây của vòng ngủ. TSan (`setarch $(uname -m) -R`, [Bài 25](25-data-race-mutex.md)) không báo gì.
 
@@ -147,7 +147,7 @@ while (!pred()) {
 }
 ```
 
-Vòng `while` này không phải để cho đẹp. Có **ba lý do** phải kiểm lại điều kiện sau mỗi lần dậy:
+Vòng `while` này không phải để cho đẹp. Có **ba lý do** phải kiểm điều kiện: hai lý do cho lúc **sau khi dậy** (hai mục đầu), một lý do cho lúc **trước khi ngủ** (mục cuối):
 
 - **Spurious wakeup** (đánh thức giả): chuẩn C++ **cho phép** `wait` trả về mà không ai gọi `notify`. Mình không tái hiện được trên máy này và không đưa ví dụ nào ra; bạn chỉ cần biết chuẩn cho phép, nên không được giả định "dậy nghĩa là có tin".
 - **Món bị lấy mất:** khi có nhiều luồng chờ, `notify_one` đánh thức luồng A, nhưng luồng B tới nhanh hơn và lấy mất món trước khi A xin lại được khóa. A dậy thấy món không còn, phải ngủ lại. Lý do này không cần chuẩn cho phép gì thêm.
@@ -179,12 +179,20 @@ int main() {
 }
 ```
 
+**Chạy từng dòng**
+
+| Dòng | Chuyện gì xảy ra |
+|---|---|
+| (1) | Luồng phụ gọi `notify_one` khi chưa luồng nào chờ: tiếng chuông mất |
+| (2) | Luồng chính ngủ 300 ms, tới sau khi tiếng chuông đã mất |
+| (3) | `wait` không có predicate nên ngủ ngay; không ai báo nữa, nên ngủ mãi |
+
 **Kết quả khi chạy:** mình biên dịch sạch cảnh báo; chạy `timeout 3 ./chuongtrinh` thì **không in gì**, `timeout` thoát mã **124**. Tiếng chuông ở (1) đã mất, nên (3) ngủ không ai gọi. Khối đặt `// bo-qua-kiem-tra` vì nó treo. Chuẩn không hứa là nó treo (spurious wakeup có thể làm nó dậy), mình chỉ nói điều mình thấy trên máy này.
 
 **Thử thay đổi: lấy chương trình ở mục 2, bỏ dòng ngủ 1 giây của luồng phụ, và cho luồng chính ngủ 300 ms trước khi xin khóa.** Vậy `notify_one` gần như chắc chắn đến **trước** `wait`, nhưng `wait` vẫn có predicate. Mình đã chạy: in `xong`, không treo (TSan sạch). Predicate được kiểm **trước khi ngủ** (như vòng `while` ở trên): `xong` đã `true` nên `wait` không ngủ. Trạng thái nằm trong biến, không nằm trong tiếng chuông.
 
 !!! warning "Hay nhầm"
-    Biến điều kiện phải được đổi **dưới cùng mutex** mà luồng chờ dùng, kể cả khi nó chỉ là một `bool`. Đổi ngoài khóa thì có thể rơi đúng vào khe giữa lúc luồng chờ kiểm `xong` (thấy `false`) và lúc nó ngủ: tin đến mà không ai nhận, lost wakeup trá hình. Hàng đợi ở mục 5 cũng thế: mọi `push`/`pop` đều dưới khóa.
+    Biến điều kiện phải được đổi **dưới cùng mutex** mà luồng chờ dùng, kể cả khi nó chỉ là một `bool`. Đổi ngoài khóa thì có thể rơi đúng vào khe giữa lúc luồng chờ kiểm `xong` (thấy `false`) và lúc nó ngủ: tin đến mà không ai nhận, lost wakeup trá hình, và còn là data race ([Bài 25](25-data-race-mutex.md)) vì hai luồng đụng cùng một biến không đồng bộ. Hàng đợi ở mục 💻 cũng thế: mọi `push`/`pop` đều dưới khóa.
 
 ### 4. `notify_one` hay `notify_all`, và notify lúc nào
 
@@ -193,7 +201,7 @@ int main() {
 
 Quy tắc dễ nhớ: **một món mới, chỉ một người dùng được** thì `notify_one`; **một thay đổi mà mọi người đều phải biết** (như "hết việc, dừng") thì `notify_all`. Lỡ dùng `notify_one` để báo dừng khi có hai consumer cùng đang chờ, thì một luồng thoát, luồng kia ngủ mãi (mục 💻 có thử thật).
 
-**Notify trong khi giữ khóa hay sau khi nhả?** Cả hai đều đúng theo chuẩn: `notify` không đòi bạn giữ khóa. Nhả trước rồi mới notify (như dòng (3)-(4) ở mục 2) thường **hiệu quả hơn**: luồng vừa được đánh thức khỏi phải ngay lập tức bị chặn lại vì khóa vẫn nằm trong tay người báo tin. Một số cài đặt tự tối ưu chuyện này nên chênh lệch tùy thư viện và máy; mình không đo, nên đừng coi đó là luật.
+**Notify trong khi giữ khóa hay sau khi nhả?** Cả hai đều đúng theo chuẩn: `notify` không đòi bạn giữ khóa. Nhả trước rồi mới notify (như dòng (3)-(4) ở mục 2) thường **được khuyên dùng**: luồng vừa được đánh thức khỏi phải ngay lập tức bị chặn lại vì khóa vẫn nằm trong tay người báo tin. Một số cài đặt tự tối ưu chuyện này nên chênh lệch tùy thư viện và máy; mình không đo, nên đừng coi đó là luật. Giữ khóa lúc notify đôi khi lại cần, ví dụ khi luồng chờ sẽ hủy chính `cv` ngay lúc dậy.
 
 ## 💻 Ví dụ code
 
@@ -223,7 +231,7 @@ int main() {
     std::vector<std::thread> consumer;
     for (int k = 0; k < 2; ++k) {
         consumer.emplace_back([&tong, &soViec, k] {
-            for (;;) {
+            while (true) {
                 std::unique_lock<std::mutex> lk(khoa);
                 cv.wait(lk, [] { return !hang.empty() || xong; });   // (1)
                 if (hang.empty()) break;                             // (2) xong và hết việc
@@ -271,16 +279,18 @@ int main() {
 
 **Kết quả khi chạy:** `tong = 500500, so viec = 1000`. Mình biên dịch sạch cảnh báo (cả `-O2`), chạy 100 lần cùng đúng một dòng, và TSan không báo gì. Tổng 1 + 2 + ... + 1000 = 500500 luôn đúng, nhưng consumer nào xử lý bao nhiêu việc thì đổi theo lần chạy (mình không in).
 
+Về cú pháp: `[&tong, &soViec, k]` trộn được hai kiểu bắt: `tong` và `soViec` bắt bằng tham chiếu, còn `k` bắt bằng **bản sao** (mỗi luồng giữ `k` của riêng nó; bắt tham chiếu thì vòng `for` đổi `k` ngay sau đó). Biến toàn cục như `xong`, `hang` không cần bắt, nên lambda `[]` rỗng vẫn đọc được chúng.
+
 Ba điểm đáng nhớ:
 
 - **Predicate có hai vế** (`!hang.empty() || xong`): consumer chỉ được thoát khi hàng đã **cạn**. Sau khi `xong = true`, vẫn còn việc trong hàng thì consumer vẫn lấy tiếp cho hết rồi mới thoát; không bị bỏ sót việc.
 - **Dừng sạch** là ba bước: đặt cờ `xong` dưới khóa, `notify_all`, rồi `join`. Quên `notify_all`, consumer đang ngủ không biết cờ đổi (xem Lỗi 1).
 - **Xử lý ngoài khóa** (dòng (3)): giữ khóa suốt lúc tính thì các consumer thành tuần tự, như phạm vi khóa nhỏ nhất ở [Bài 25](25-data-race-mutex.md).
 
-**Thử thay đổi: ở dòng (7) đổi `notify_all()` thành `notify_one()`.** Mình đã chạy 100 lần: 99 lần ra đúng `tong = 500500`, **1 lần treo** (`timeout 3` mã 124).
+**Thử thay đổi: ở dòng (7) đổi `notify_all()` thành `notify_one()`.** Mình đã chạy 100 lần: 99 lần ra đúng `tong = 500500`, **1 lần treo** (`timeout 3` mã 124). Con số đổi theo máy và theo lần chạy (có lần chạy lại mình thấy 0 lần treo). Chuẩn chỉ hứa `notify_one` đánh thức nhiều nhất một luồng, không hứa gì hơn.
 
 - Treo xảy ra khi cả hai consumer đã ngủ lúc producer báo dừng: `notify_one` chỉ đánh thức một, luồng kia ngủ mãi và `join` chờ nó.
-- 99 lần "ổn" là cái bẫy: lỗi hiếm và hên xui như deadlock ở [Bài 26](26-deadlock.md).
+- Những lần "ổn" là cái bẫy: lỗi hiếm và hên xui như deadlock ở [Bài 26](26-deadlock.md).
 - Để tái hiện chắc chắn, mình cho producer ngủ 200 ms và không đưa việc nào (cả hai consumer chắc chắn đang ngủ): treo, mã 124.
 
 ### `wait_for`: chờ có hạn
@@ -303,7 +313,81 @@ int main() {
 }
 ```
 
+**Chạy từng dòng**
+
+| Dòng | Chuyện gì xảy ra |
+|---|---|
+| `unique_lock` | Luồng chính giữ khóa |
+| `wait_for` | Kiểm predicate: `false`; nhả khóa, chờ 50 ms; hết giờ thì xin lại khóa, kiểm lần cuối, trả `false` |
+
+Bản `wait_for` **không** predicate trả `std::cv_status` (`timeout` hay `no_timeout`) và có thể trả `no_timeout` do spurious wakeup, nên bài chỉ dùng dạng có predicate.
+
 **Kết quả khi chạy:** `het gio` (sau khoảng 50 ms; `time` ra `real 0,053 s`). Predicate luôn sai và không ai notify, nên chỉ có hết giờ mới đưa nó ra khỏi `wait_for`.
+
+### Hàng đợi có giới hạn: hai điều kiện, hai `condition_variable`
+
+Ở chương trình trên, producer nhanh hơn consumer thì hàng phình mãi. Hàng đợi **có giới hạn** (bounded queue) chặn chuyện đó: hàng chứa tối đa 4 phần tử, đầy thì **producer** phải chờ. Giờ có **hai** điều kiện khác nhau (consumer chờ "có việc", producer chờ "còn chỗ"), nên dùng hai `condition_variable`, mỗi cái đánh thức đúng phía cần nó. `size_t` là kiểu số nguyên không âm mà `size()` trả về. `[&]` bắt mọi biến cục bộ bằng tham chiếu ([Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md)).
+
+```cpp
+#include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <thread>
+
+std::mutex khoa;
+std::condition_variable conViec;     // "hàng có việc hoặc đã xong": consumer chờ
+std::condition_variable conCho;      // "hàng còn chỗ": producer chờ
+std::queue<int> hang;
+bool xong = false;
+const size_t TOI_DA = 4;             // hàng chứa tối đa 4 phần tử
+
+int main() {
+    size_t dinh = 0;                 // số phần tử nhiều nhất từng thấy trong hàng (đọc/ghi dưới khóa)
+    long long tong = 0;
+
+    std::thread consumer([&] {
+        while (true) {
+            std::unique_lock<std::mutex> lk(khoa);
+            conViec.wait(lk, [] { return !hang.empty() || xong; });
+            if (hang.empty()) break;
+            int v = hang.front();
+            hang.pop();
+            lk.unlock();
+            conCho.notify_one();                                   // (1) vừa có chỗ trống
+            tong += v;
+        }
+    });
+
+    std::thread producer([&] {
+        for (int i = 1; i <= 1000; ++i) {
+            std::unique_lock<std::mutex> lk(khoa);
+            conCho.wait(lk, [] { return hang.size() < TOI_DA; });  // (2) hàng đầy thì chờ
+            hang.push(i);
+            if (hang.size() > dinh) dinh = hang.size();
+            lk.unlock();
+            conViec.notify_one();
+        }
+        {
+            std::lock_guard<std::mutex> g(khoa);
+            xong = true;
+        }
+        conViec.notify_all();
+    });
+
+    producer.join();
+    consumer.join();
+    std::cout << "tong = " << tong << ", dinh <= " << TOI_DA << ": " << (dinh <= TOI_DA ? "dung" : "sai") << "\n";
+    return 0;
+}
+```
+
+| Dòng | Chuyện gì xảy ra |
+|---|---|
+| (1) | Consumer lấy một việc ra thì hàng có chỗ trống: báo `conCho` cho producer |
+| (2) | Producer chờ tới khi `hang.size() < TOI_DA`; sau mỗi `push`, nó báo `conViec` cho consumer |
+
+**Kết quả khi chạy:** `tong = 500500, dinh <= 4: dung`. Mình chạy 100 lần, cả 100 lần giống nhau, và TSan không báo gì. `dinh` là số phần tử nhiều nhất từng thấy trong hàng (ghi dưới khóa); nó không bao giờ vượt 4. Dùng một `cv` chung cho cả hai điều kiện cũng được nếu luôn `notify_all`, nhưng hai `cv` đánh thức đúng người hơn. Đây là nền cho thread pool ở Bài 30.
 
 ## Go: channel làm sẵn hàng đợi và chờ
 
@@ -311,7 +395,8 @@ int main() {
     Mình đã chạy Go 1.27.1. Go có `sync.Cond` là bản **gần nhất** của `condition_variable`, nhưng ít khi là lựa chọn đầu tiên:
 
     - Channel làm sẵn việc ta vừa viết thủ công: `ch <- v` bỏ vào hàng đợi, `<-ch` lấy ra và **tự chờ** khi hàng rỗng; `close(ch)` thay cho cờ `xong` + `notify_all`, và `for v := range ch` thoát khi channel đóng và cạn (như dòng (2) ở trên). Chương trình Go dưới đây chạy ra `tong = 500500`, `-race` sạch.
-    - `sync.Cond` gần nhất với `std::condition_variable`: `cond := sync.NewCond(&mu)`; luồng chờ khóa `mu` rồi viết `for !xong { cond.Wait() }` (**vòng `for` do bạn tự viết**, không có tham số predicate như `wait(lk, pred)` của C++); `Signal` ứng với `notify_one`, `Broadcast` với `notify_all`. `Wait` nhả `c.L` khi ngủ và khóa lại trước khi trả về, y như `wait`. Tài liệu Go dặn vẫn phải `Wait` trong vòng lặp vì khi `Wait` trả về điều kiện có thể đã đổi.
+    - `sync.Cond` gần nhất với `std::condition_variable`: `cond := sync.NewCond(&mu)`; luồng chờ khóa `mu` rồi viết `for !xong { cond.Wait() }` (**vòng `for` do bạn tự viết**, không có tham số predicate như `wait(lk, pred)` của C++); `Signal` ứng với `notify_one`, `Broadcast` với `notify_all`. `Wait` nhả `c.L` khi ngủ và khóa lại trước khi trả về, y như `wait`.
+    - Tài liệu Go (`go doc sync.Cond.Wait`) dặn vẫn phải `Wait` trong vòng lặp vì khi `Wait` trả về điều kiện có thể đã đổi (goroutine khác lấy mất món). Khác C++ một điểm: tài liệu nói `Wait` **không trả về** trừ khi có `Signal`/`Broadcast`, tức Go không có spurious wakeup.
     - Thói quen Go là **truyền dữ liệu qua channel** thay vì nhiều goroutine cùng khóa biến chung rồi gọi chuông; `sync.Cond` hiếm gặp hơn nhiều trong code Go. C++ chuẩn **không có channel** ([Bài 24](24-thread-co-ban.md)), nên bạn tự ghép mutex + queue + `condition_variable`, hoặc dùng thư viện ngoài chuẩn.
     - Chờ có hạn: Go dùng `select` với `time.After(...)`; C++ dùng `wait_for`.
 
@@ -342,7 +427,7 @@ int main() {
     `cv.wait(lk);` trần chỉ đúng khi bạn chắc chắn `notify` luôn đến **sau** khi bạn đã ngủ, mà bạn không thể chắc (mục 3: treo, mã 124). Luôn viết `cv.wait(lk, [] { return điềuKiện; });`.
 
 !!! warning "Lỗi 3: Giữ khóa lúc xử lý việc, hoặc báo dừng bằng `notify_one`"
-    Giữ khóa suốt lúc xử lý làm các consumer chờ nhau, mất lợi ích của nhiều luồng; lấy việc ra, nhả khóa, rồi mới làm. Báo "dừng" bằng `notify_one` khi có nhiều consumer chờ thì chỉ đánh thức một (mục 💻: mình thấy 1 lần treo trong 100 lần chạy).
+    Giữ khóa suốt lúc xử lý làm các consumer chờ nhau, mất lợi ích của nhiều luồng; lấy việc ra, nhả khóa, rồi mới làm. Báo "dừng" bằng `notify_one` khi có nhiều consumer chờ thì chỉ đánh thức một (mục 💻: hiếm và hên xui, mình có lần thấy treo trong 100 lần chạy).
 
 ## ✍️ Trắc nghiệm
 
@@ -380,7 +465,7 @@ std::mutex m;  std::condition_variable cv;  bool san = false;
 **Câu 3.** Vì sao `condition_variable::wait` nhận `std::unique_lock` mà không nhận `std::lock_guard`?
 
 - Vì `unique_lock` tự gọi `notify_one` khi nó bị hủy ở cuối khối
-- Vì `wait` phải nhả khóa lúc ngủ rồi xin lại, mà `lock_guard` không có cách nhả
+- Vì `wait` phải nhả khóa lúc ngủ rồi xin lại, mà `lock_guard` không nhả được
 - Vì `unique_lock` nhanh hơn `lock_guard` nên chuẩn bắt buộc dùng nó
 - Vì `lock_guard` không xin được khóa của mutex đã dùng với `condition_variable`
 
@@ -399,7 +484,7 @@ int v = hang.front();  hang.pop();
 - Thoát vòng lặp êm, vì `notify_all` đánh thức nó và cờ `xong` đã là `true`
 - Gọi `front()` trên hàng rỗng, vì `notify_all` buộc nó chạy tiếp ngay
 - Ném ngoại lệ, vì `wait` nhận ra sẽ không còn producer nào nữa
-- Dậy, thấy hàng vẫn rỗng, ngủ lại; cả nhóm treo vì predicate chỉ nhìn hàng
+- Dậy, thấy hàng vẫn rỗng và ngủ lại, vì predicate chỉ nhìn hàng đợi
 
 <p class="giai-thich" markdown>Dậy thì predicate được kiểm lại, và nó chỉ hỏi hàng có rỗng không, không hề đọc `xong`; hàng vẫn rỗng nên `wait` ngủ lại và `join` chờ mãi. Cờ `xong` có đổi cũng vô nghĩa nếu predicate không nhìn nó. Predicate chính là thứ chặn consumer gọi `front()` trên hàng rỗng, nên cách nói đó sai. Và `wait` không có cơ chế phát hiện producer đã kết thúc.</p>
 </div>
@@ -437,10 +522,10 @@ bool xong = false;
 
 - Luồng chính dậy khi `xong` đổi, vì `wait` luôn theo dõi biến trong predicate
 - Luồng chính dậy khi luồng phụ nhả khóa, vì `wait` đang chờ chính khóa đó
-- Không có gì đánh thức luồng chính, nên nó thường ngủ mãi
+- Không có gì đánh thức luồng chính, nên nó ngủ mãi trên máy mình
 - Luồng chính dậy sau lần kiểm kế tiếp, vì `wait` tự kiểm predicate mỗi giây
 
-<p class="giai-thich" markdown>Không ai gọi `notify`, nên không có gì đánh thức luồng chính; đây là lỗi quên `notify`, và mình đã chạy ra treo mã 124. Chữ "thường" vì chuẩn cho phép đánh thức giả, nhưng bạn không được dựa vào nó. `wait` không theo dõi biến nào: predicate chỉ được gọi khi luồng chính dậy vì lý do khác. Nó cũng không chờ khóa (lúc đó luồng chính đã nhả khóa và ngủ trên `cv`), và không có đồng hồ kiểm mỗi giây nào.</p>
+<p class="giai-thich" markdown>Không ai gọi `notify`, nên không có gì đánh thức luồng chính; đây là lỗi quên `notify`, và mình đã chạy ra treo mã 124. Chuẩn cho phép đánh thức giả nên không thể hứa chắc là mãi mãi, và bạn không được dựa vào nó; trên máy mình thì treo. `wait` không theo dõi biến nào: predicate chỉ được gọi khi luồng chính dậy vì lý do khác. Nó cũng không chờ khóa (lúc đó luồng chính đã nhả khóa và ngủ trên `cv`), và không có đồng hồ kiểm mỗi giây nào.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -458,8 +543,8 @@ bool xong = false;
 
 ## 🔑 Tóm tắt
 
-1. Luồng phải đợi điều kiện do luồng khác tạo ra thì đừng chờ bận (mình chạy: `user` ≈ `real`, đốt trọn một lõi) và đừng ngủ-rồi-hỏi (mình đo trễ ~90 ms ở chu kỳ 100 ms); `std::condition_variable` cho ngủ không tốn CPU mà dậy sau cỡ chục micro-giây (số đo trên máy mình).
+1. Luồng phải đợi điều kiện do luồng khác tạo ra thì đừng chờ bận (mình chạy: `user` ≈ `real`, đốt trọn một lõi) và đừng ngủ-rồi-hỏi (mình đo trễ ~90 ms ở chu kỳ 100 ms); `std::condition_variable` cho ngủ không tốn CPU mà dậy sau vài chục micro-giây (số đo trên máy mình).
 2. Ba mảnh đi cùng nhau: `std::mutex`, biến điều kiện (đổi **dưới khóa**) và `std::condition_variable`; `wait` cần `std::unique_lock` vì nó phải nhả khóa lúc ngủ và xin lại khi dậy, việc `lock_guard` không làm được.
 3. Luôn dùng `wait(lk, predicate)` (≡ `while (!pred()) wait(lk);`): chuẩn cho phép spurious wakeup, luồng khác có thể lấy mất món, và `notify` gọi trước `wait` thì mất (mình chạy `wait` trần: treo, mã 124); trạng thái nằm trong biến, không nằm trong tiếng chuông.
-4. `notify_one` cho một món một người dùng; `notify_all` cho thay đổi mọi người phải biết (như dừng); notify trong hay sau khi nhả khóa đều đúng, nhả trước thường hiệu quả hơn (tùy cài đặt); `wait_for` chờ có hạn.
+4. `notify_one` cho một món một người dùng; `notify_all` cho thay đổi mọi người phải biết (như dừng); notify trong hay sau khi nhả khóa đều đúng, nhả trước thường được khuyên (tùy cài đặt, mình không đo); `wait_for` chờ có hạn.
 5. Producer-consumer: `std::queue` dưới khóa, consumer `wait` tới khi có việc hoặc `xong`, xử lý ngoài khóa; dừng sạch = đặt `xong` dưới khóa + `notify_all` + `join`. Go: channel và `close` làm sẵn cả hàng đợi lẫn chờ; `sync.Cond` là bản gần nhất (vòng `for` tự viết, `Signal`/`Broadcast`), nhưng hiếm dùng hơn channel.
