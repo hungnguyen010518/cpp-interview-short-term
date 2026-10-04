@@ -10,12 +10,12 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Xưởng đồ chơi cần các **hộp đựng**: hộp đựng xe, hộp đựng gấu, hộp đựng robot. Cách làm vụng: vẽ ba bản vẽ gần giống hệt, chỉ khác chữ "xe", "gấu", "robot". Cách gọn: vẽ **một bản vẽ có chỗ trống** "hộp đựng ___", rồi mỗi lần cần loại nào thì điền vào chỗ trống và có ngay một bản vẽ thật.
+Xưởng đồ chơi cần các **hộp đựng**: hộp đựng xe, hộp đựng gấu, hộp đựng robot. Cách làm vụng: vẽ ba bản vẽ gần giống hệt, chỉ khác chữ "xe", "gấu", "robot". Cách gọn: làm **một khuôn có chỗ trống** "hộp đựng ___", rồi mỗi lần cần loại nào thì điền vào chỗ trống và có ngay một bản vẽ thật.
 
-Đó là **template (khuôn mẫu)**: một bản vẽ có chỗ trống để điền **kiểu**. Bạn đã dùng nó từ lâu: `std::vector<int>` là bản vẽ "dãy đựng ___" với chỗ trống điền `int` ([Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)). Template hàm cũng vậy: một hàm có chỗ trống ở kiểu, điền xong thành một hàm thật.
+Đó là **template (khuôn mẫu)**: một khuôn có chỗ trống để điền **kiểu**. Bạn đã dùng nó từ lâu: `std::vector<int>` là khuôn "dãy đựng ___" với chỗ trống điền `int` ([Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)). Template hàm cũng vậy: một hàm có chỗ trống ở kiểu, điền xong thành một hàm thật.
 
 !!! info "Chỗ nào ví von xưởng đồ chơi không còn đúng?"
-    Ở xưởng, bản vẽ dùng được ngay còn "món" làm ra sau. Template thì **chưa phải bản vẽ**, nó là bản vẽ của bản vẽ: điền kiểu xong mới ra một bản vẽ thật (một lớp), rồi từ đó mới làm ra món. Việc điền chỗ trống do **trình biên dịch tự làm lúc biên dịch**, khi nó thấy bạn dùng, và lúc đó chưa có món nào cả.
+    Ở xưởng, bản vẽ dùng được ngay còn "món" làm ra sau. Template thì **chưa phải bản vẽ**, nó là khuôn để làm ra bản vẽ: điền kiểu xong mới ra một bản vẽ thật (một lớp), rồi từ đó mới làm ra món (với template hàm, điền xong ra thẳng một hàm). Việc điền chỗ trống do **trình biên dịch tự làm lúc biên dịch**, khi nó thấy bạn dùng, và lúc đó chưa có món nào cả. Các ví dụ phía dưới (ngăn xếp, nhãn, hình) rời xưởng đồ chơi: chỉ cần nhớ "khuôn có chỗ trống".
 
 ## 📖 Giải thích
 
@@ -23,7 +23,7 @@ Xưởng đồ chơi cần các **hộp đựng**: hộp đựng xe, hộp đự
 
 Viết `template <typename T>` ngay trước một hàm: `T` là **tên chỗ trống** cho một kiểu, dùng được trong cả hàm như kiểu thường. Mỗi lần bạn gọi hàm với một kiểu mới, trình biên dịch **sinh ra một hàm thật** cho kiểu đó (gọi là **instantiation**, "sinh bản"). Ví dụ 1 chạy thật và đếm các bản sinh ra.
 
-`template <class T>` và `template <typename T>` **giống hệt nhau** ở chỗ này (mình đã đổi và chạy: kết quả y hệt). Ngày nay nhiều người viết `typename` vì `T` có thể là kiểu không phải lớp, như `int`.
+`template <class T>` và `template <typename T>` **giống hệt nhau** ở chỗ này (mình đã đổi và chạy: kết quả y hệt). Nhiều người viết `typename` vì chữ `class` dễ làm tưởng `T` phải là lớp, trong khi `int` cũng được.
 
 ### 2. Suy luận đối số: khi nào phải ghi `<kiểu>`
 
@@ -39,7 +39,7 @@ Chỗ trống không chỉ là kiểu. **Tham số không phải kiểu** (non-t
 
 Đôi khi một kiểu cần cách làm riêng. **Chuyên biệt hóa** là viết thêm một bản **dành riêng** cho kiểu đó, bằng `template <>` rồi tên lớp có kiểu cụ thể (`Nhan<bool>`); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng thay vì bản chung. Ví dụ 3 làm với `bool`. Chuẩn còn có **chuyên biệt hóa từng phần** (cho một nhóm kiểu, như mọi con trỏ), mình chỉ nêu tên.
 
-Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản chuyên biệt hóa lưu mỗi phần tử bằng một bit. Vì vậy `&v[0]` không cho `bool*` (mình đã thử: g++ báo `cannot convert ‘std::vector<bool>::reference*’ to ‘bool*’`); đây là lý do nhiều người tránh `vector<bool>`.
+Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản chuyên biệt hóa mà g++ cài bằng cách lưu mỗi phần tử một bit (chuẩn chỉ cho phép dạng gọn). Vì vậy `&v[0]` không cho `bool*` (mình đã thử: g++ báo `cannot convert ‘std::vector<bool>::reference*’ to ‘bool*’`); đây là lý do nhiều người tránh `vector<bool>`.
 
 ### 5. Template hay hàm ảo? Hai kiểu đa hình
 
@@ -51,7 +51,7 @@ Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản 
 | Cần lớp cha chung | Có | Không, chỉ cần kiểu có đúng hàm cần gọi |
 | Trộn nhiều kiểu trong một dãy | Được (`vector<unique_ptr<Hinh>>`) | Không: `vector<H>` chỉ một kiểu `H` |
 | Chi phí gọi | Qua bảng hàm ảo, khó inline (Bài 33) | Gọi thẳng, thường inline được |
-| Mã nhị phân | Một bản mã cho mọi lớp con | Một bản cho **mỗi kiểu** dùng |
+| Mã nhị phân | Một bản hàm duyệt (như `tongAo`) cho mọi lớp con; mỗi lớp con vẫn có hàm ghi đè riêng | Một bản hàm duyệt cho **mỗi kiểu** dùng, sinh lúc biên dịch |
 | Lỗi báo | Thường ngắn, đúng chỗ gọi | Có thể dài (mục 6) |
 
 Không bên nào "tốt hơn" tuyệt đối: cần chứa lẫn nhiều loại và quyết định lúc chạy thì chọn hàm ảo; cùng một thuật toán cho nhiều kiểu, kiểu biết từ lúc viết thì chọn template. Mình không đo thời gian ở bài này.
@@ -69,11 +69,23 @@ l1.cpp:6:14:   required from here
 predefined_ops.h:45:23: error: no match for ‘operator<’ (operand types are ‘Mon’ and ‘Mon’)
 ```
 
-Cách đọc: tìm dòng có chữ `error:` (nói thiếu `operator<` cho `Mon`), rồi dòng `required from here` có tên **file của bạn** (`l1.cpp:6:14`, chỗ bạn gọi `sort`). Phần giữa là đường đi bên trong thư viện, thường không cần đọc.
+Cách đọc: tìm dòng có chữ `error:` (nói thiếu `operator<` cho `Mon`), rồi dòng `required from here` có tên **file của bạn** (`l1.cpp:6:14`, chỗ bạn gọi `sort`). Phần giữa là đường đi bên trong thư viện, thường không cần đọc; lỗi này lặp vài lần, đọc lần đầu là đủ.
 
-**Code bloat** là chương trình phình to vì nhiều bản sinh ra. Mình thử một hàm template (sắp xếp một `vector` rồi cộng) với 1, 2, 4, 8 kiểu số, đo phần mã (`.text`) của file đối tượng (`.o`: kết quả dịch một file `.cpp`, chưa ghép) bằng lệnh `size`.
+**Code bloat** là chương trình phình to vì nhiều bản sinh ra. Mình thử một hàm template (sắp xếp một `vector` rồi cộng) với 1, 2, 4, 8 kiểu số, đo phần mã (`.text`) của file đối tượng (`.o`: kết quả dịch một file `.cpp`, chưa ghép) bằng lệnh `size`, lệnh in cỡ phần mã và phần dữ liệu của một file `.o`. Chương trình đo (bản 2 kiểu; bản 4 và 8 kiểu thêm các dòng `tong<float>`, `tong<short>`...):
 
-Với `-O0`: 11818, 22929, 45505, 89528 byte, tức mỗi kiểu thêm gần cả chục nghìn byte. Với `-O2`: 1716, 3766, 7353, 14300 byte (bản đơn lẻ có thể được chèn thẳng vào `main`). Số đổi theo hàm, kiểu, cờ và trình biên dịch; chỉ nhớ **mẫu**: càng nhiều kiểu thì càng nhiều bản.
+```text
+#include <algorithm>
+#include <iostream>
+#include <vector>
+template <typename T> T tong(std::vector<T> v) { std::sort(v.begin(), v.end()); T t{}; for (const T& x : v) t += x; return t; }
+int main() {
+  std::cout << tong<int>({3, 1, 2}) << "\n";
+  std::cout << tong<long>({3, 1, 2}) << "\n";
+}
+// g++ -std=c++17 -O0 -c b.cpp -o b.o && size b.o      (cột text)
+```
+
+Với `-O0`: 11818, 22929, 45505, 89528 byte, tức mỗi kiểu thêm gần cả chục nghìn byte. Với `-O2`: 1716, 3766, 7353, 14300 byte. Số đổi theo hàm, kiểu, cờ và trình biên dịch; chỉ nhớ **mẫu**: càng nhiều kiểu thì càng nhiều bản.
 
 ### 7. Vì sao thân template nằm trong header
 
@@ -164,7 +176,7 @@ Ba bản `lonHon` và hai bản của hàm gọi trong lambda, đúng số kiể
 
 ### Ví dụ 2: `Ngan<T, N>`, template lớp với tham số kiểu và không phải kiểu
 
-Một ngăn xếp nhỏ giữ tối đa `N` phần tử kiểu `T`, nằm trên một `std::array<T, N>` ([Bài 17](../nhom-2-stl-thuat-toan/17-string-array-deque-list.md)). `N` có mặc định 4.
+Một ngăn xếp nhỏ (stack dữ liệu, khác stack bộ nhớ của Bài 02: thêm và lấy cùng một đầu, cái vào sau ra trước) giữ tối đa `N` phần tử kiểu `T`, nằm trên một `std::array<T, N>` ([Bài 17](../nhom-2-stl-thuat-toan/17-string-array-deque-list.md)). `N` có mặc định 4.
 
 ```cpp
 #include <array>
@@ -234,11 +246,11 @@ b day? 1
 20 36
 ```
 
-Mình chạy với ASan + UBSan: sạch. `20` và `36` là của máy mình (`int` 4 byte: 4 × 4 + `dem_` 4 = 20; 8 × 4 + 4 = 36), máy khác có thể ra số khác. Xem bản sinh ra bằng `nm -C` (rút gọn `string`): chỉ có `Ngan<int, 4>::them`, `lay`, `size`, và `Ngan<string, 2>::them`; **không có** `Ngan<string, 2>::lay` hay `size` vì chương trình không gọi. Các **Thử thay đổi** (đã chạy, đều lỗi biên dịch):
+Mình chạy với ASan + UBSan: sạch. `20` và `36` là của máy mình (`int` 4 byte: 4 × 4 + `dem_` 4 = 20; 8 × 4 + 4 = 36), máy khác có thể ra số khác. Xem bản sinh ra bằng `nm -C` (rút gọn `string`): trong các hàm bạn gọi có `Ngan<int, 4>::them`, `lay`, `size` và `Ngan<string, 2>::them` (cộng hàm tạo/hủy tự sinh); **không có** `Ngan<string, 2>::lay` hay `size` vì chương trình không gọi. Các **Thử thay đổi** (đã chạy, đều lỗi biên dịch):
 
 - **Thêm `Ngan<int, 0> z;`**: `error: static assertion failed: N phai duong`.
-- **Thêm `Ngan<int, 2> p; Ngan<int, 4> q; p = q;`**: `no match for ‘operator=’ (operand types are ‘Ngan<int, 2>’ and ‘Ngan<int>’)`: hai cỡ là hai kiểu khác nhau.
-- **Thêm `Ngan<int> a2; a2.them("x");`**: `invalid conversion from ‘const char*’ to ‘int’`. **Thêm `a2.foo();`**: `‘class Ngan<int>’ has no member named ‘foo’`.
+- **Thêm `Ngan<int, 2> p; Ngan<int, 4> q; p = q;`**: `no match for ‘operator=’ (operand types are ‘Ngan<int, 2>’ and ‘Ngan<int, 4>’)`: hai cỡ là hai kiểu khác nhau.
+- **Thêm `Ngan<int> a2; a2.them("x");`**: `invalid conversion from ‘const char*’ to ‘int’`. **Thêm `a2.foo();`**: `‘class Ngan<int, 4>’ has no member named ‘foo’`.
 
 ### Ví dụ 3: chuyên biệt hóa `Nhan<bool>`
 
@@ -285,7 +297,7 @@ Mình chạy với ASan + UBSan: sạch. **Thử thay đổi: xóa khối `templ
 
 ### Ví dụ 4: cùng việc "cộng diện tích", làm bằng hàm ảo và bằng template
 
-`Tron`, `Vuong` kế thừa `Hinh` như Bài 33; `Luoi` **không** kế thừa gì, chỉ có hàm `dienTich` cùng tên. `tongAo` dùng hàm ảo, `tongMau` dùng template.
+`Tron`, `Vuong` kế thừa `Hinh` giống ý của Bài 33 (tên lớp ngắn lại); `Luoi` **không** kế thừa gì, chỉ có hàm `dienTich` cùng tên. `tongAo` dùng hàm ảo, `tongMau` dùng template.
 
 ```cpp
 #include <iostream>
@@ -363,14 +375,22 @@ Mình chạy với ASan + UBSan: sạch. `nm -C` thấy đúng hai bản `tongMa
 
 ### Ví dụ 5: tách template ra `.cpp`, gặp `undefined reference`
 
-Ba file trong một thư mục tạm (ở đây không dùng ` ```cpp ` vì cần ghép nhiều file):
+Ba file trong một thư mục tạm (ở đây không dùng ` ```cpp ` vì cần ghép nhiều file). `-c` bảo g++ chỉ dịch ra file `.o`, chưa liên kết; lệnh cuối `g++ main.o lon.o -o app` mới ghép các `.o` thành chương trình.
 
 ```text
-lon.h:                              lon.cpp:
-template <typename T>               #include "lon.h"
-T lonHon(T a, T b);                 template <typename T>
-                                    T lonHon(T a, T b) { if (a < b) return b; return a; }
+lon.h:
+template <typename T>
+T lonHon(T a, T b);
+```
 
+```text
+lon.cpp:
+#include "lon.h"
+template <typename T>
+T lonHon(T a, T b) { if (a < b) return b; return a; }
+```
+
+```text
 main.cpp:
 #include <iostream>
 #include "lon.h"
@@ -402,7 +422,7 @@ Hai lần biên dịch đều sạch lỗi, chỉ bước liên kết hỏng. **
     - **Ràng buộc**: Go kiểm bằng một **constraint** (một interface). `Max(P{1}, P{2})` với `P` là struct báo `P does not satisfy cmp.Ordered`.
     - **Lúc nào kiểm**: thân hàm cũng được kiểm theo constraint ngay lúc định nghĩa: `func Dung[T any](a, b T) bool { return a < b }` lỗi `type parameter T cannot use operator <` dù chưa ai gọi. C++ (không dùng concepts) kiểm lúc **sinh bản**, như duck typing lúc biên dịch: mình đã biên dịch một template chưa ai gọi mà thân gọi `x.size()` thì g++ im lặng, đến khi gọi với `int` mới báo lỗi.
     - **Không có chuyên biệt hóa**: Go không có cách viết bản riêng cho `bool` như `Nhan<bool>`; muốn khác thì rẽ nhánh trong thân hoặc dùng interface.
-    - **Cài đặt, chỉ để lấy ý**: với trình biên dịch gc mình dùng, `Max` cho `int`, `float64`, `string` ra ba ký hiệu `main.Max[go.shape.int]`, `[go.shape.float64]`, `[go.shape.string]`; còn `Max(A(1), A(2))`, `Max(B(3), B(4))` với `type A int`, `type B int` **dùng chung** bản `go.shape.int` (`go tool nm` thấy một ký hiệu). Cách này gọi là "GC shape stenciling"; đó là chi tiết cài đặt của gc, spec Go không quy định và có thể đổi. C++ thì mỗi kiểu một bản (Ví dụ 1).
+    - **Cài đặt, chỉ để lấy ý**: với trình biên dịch gc mình dùng, `Max` cho `int`, `float64`, `string` ra ba ký hiệu `main.Max[go.shape.int]`, `[go.shape.float64]`, `[go.shape.string]`; còn `Max(A(1), A(2))`, `Max(B(3), B(4))` với `type A int`, `type B int` **dùng chung** bản `go.shape.int` (`go tool nm` thấy một ký hiệu; biên dịch với `-gcflags=-l` để `Max` không bị inline, không thì khó thấy). Cách này gọi là "GC shape stenciling"; đó là chi tiết cài đặt của gc, spec Go không quy định và có thể đổi. C++ thì mỗi kiểu một bản (Ví dụ 1).
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -410,16 +430,16 @@ Hai lần biên dịch đều sạch lỗi, chỉ bước liên kết hỏng. **
     Template là mã viết một lần với tham số kiểu (hoặc số); trình biên dịch sinh một bản riêng cho mỗi tổ hợp tham số được dùng (instantiation) và kiểm kiểu như code thường. Macro (`#define`) là bộ tiền xử lý thay chữ trước khi biên dịch, không biết kiểu và không biết phạm vi. Mình chạy `#define BINH(x) x * x` rồi `BINH(1 + 2)`: ra `5` chứ không phải `9`, vì chữ bị thay thành `1 + 2 * 1 + 2`.
 
 ??? question "Template và đa hình lúc chạy khác nhau thế nào? Chọn cái nào?"
-    Đa hình lúc biên dịch (template) chọn theo kiểu lúc biên dịch, không cần lớp cha chung, không có vtable, thường inline được, nhưng mỗi kiểu một bản mã và một dãy chỉ chứa một kiểu. Đa hình lúc chạy (hàm ảo) chọn theo món thật lúc chạy, trộn nhiều loại trong một dãy, một bản mã chung, đổi lại gọi gián tiếp. Cần trộn loại hoặc quyết định lúc chạy thì hàm ảo; cùng thuật toán cho nhiều kiểu biết trước thì template.
+    Đa hình lúc biên dịch (template) chọn theo kiểu lúc biên dịch, không cần lớp cha chung, không có vtable, thường inline được, nhưng mỗi kiểu một bản mã sinh lúc biên dịch và một dãy chỉ chứa một kiểu. Đa hình lúc chạy (hàm ảo) chọn theo món thật lúc chạy, trộn nhiều loại trong một dãy, hàm duyệt chỉ một bản (mỗi lớp con vẫn có hàm ghi đè riêng, chọn lúc chạy qua vtable), đổi lại gọi gián tiếp. Cần trộn loại hoặc quyết định lúc chạy thì hàm ảo; cùng thuật toán cho nhiều kiểu biết trước thì template.
 
 ??? question "Tại sao định nghĩa template thường nằm trong header?"
     Mỗi file `.cpp` được biên dịch riêng. Để sinh bản cho `lonHon<int>`, trình biên dịch phải thấy thân template ngay tại file đang dịch; nếu thân nằm ở `.cpp` khác thì file dùng chỉ để lại lời gọi, còn file có thân không được yêu cầu sinh bản `int`, nên bước liên kết báo `undefined reference` (mình đã chạy). Chữa bằng cách để thân trong header, hoặc sinh bản tường minh cho vài kiểu cố định.
 
 ??? question "Chuyên biệt hóa (specialization) là gì?"
-    Là viết một bản template riêng cho một kiểu (toàn phần, `template <> struct Nhan<bool>`) hoặc một nhóm kiểu (từng phần, như mọi con trỏ); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng. Ví dụ trong thư viện chuẩn là `std::vector<bool>` lưu mỗi phần tử một bit, nên `&v[0]` không cho `bool*`. Go không có chuyên biệt hóa.
+    Là viết một bản template riêng cho một kiểu (toàn phần, `template <> struct Nhan<bool>`) hoặc một nhóm kiểu (từng phần, như mọi con trỏ); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng. Ví dụ trong thư viện chuẩn là `std::vector<bool>` (g++) lưu mỗi phần tử một bit, nên `&v[0]` không cho `bool*`. Go không có chuyên biệt hóa.
 
 ??? question "Code bloat là gì?"
-    Mỗi kiểu dùng sinh một bản mã riêng, nên dùng một template với nhiều kiểu thì chương trình lớn hơn. Mình đo một hàm template với 1 rồi 8 kiểu số: phần mã của file đối tượng tăng từ 11818 lên 89528 byte ở `-O0`, và từ 1716 lên 14300 byte ở `-O2`; số đo đổi theo hàm, kiểu, cờ, trình biên dịch. Giảm bằng cách bớt kiểu thừa, để phần không phụ thuộc `T` ở hàm thường, hoặc dùng hàm ảo khi một bản mã chung là đủ.
+    Mỗi kiểu dùng sinh một bản mã riêng, nên dùng một template với nhiều kiểu thì chương trình lớn hơn. Mình đo một hàm template với 1 rồi 8 kiểu số: phần mã của file đối tượng tăng từ 11818 lên 89528 byte ở `-O0`, và từ 1716 lên 14300 byte ở `-O2`; số đo đổi theo hàm, kiểu, cờ, trình biên dịch. Giảm bằng cách bớt kiểu thừa, để phần không phụ thuộc `T` ở hàm thường, hoặc dùng hàm ảo khi một hàm duyệt chung là đủ.
 
 ## ⚠️ Lỗi thường gặp
 
@@ -472,7 +492,7 @@ T lon(T a, T b) { if (a < b) return b; return a; }
 - Vì chuẩn C++ cấm viết thân template trong file `.cpp`, nên chỉ còn chỗ ở header
 - Vì mã trong header được nạp nhanh hơn nên chương trình chạy nhanh hơn
 - Vì template được sinh bản ngay lúc chạy nên thân phải sẵn trong bộ nhớ
-- Vì nơi dùng phải thấy thân để sinh bản, không thì liên kết báo `undefined reference`
+- Vì nơi dùng phải thấy thân để sinh bản, không thì có `undefined reference`
 
 <p class="giai-thich" markdown>Mỗi file `.cpp` được biên dịch riêng; file `main.cpp` cần thân template để sinh bản `int`, còn file `lon.cpp` có thân thì không ai nhờ nó sinh bản đó. Không có bản nào thì bước liên kết báo `undefined reference` (mình đã chạy). Chuẩn không cấm đặt thân ở `.cpp`, vì sinh bản tường minh cho vài kiểu cố định vẫn dùng được. Sinh bản xảy ra lúc biên dịch chứ không phải lúc chạy, và vị trí header không làm chương trình chạy nhanh hơn.</p>
 </div>
@@ -499,7 +519,7 @@ int main() { }
 
 - Lỗi biên dịch, vì `T` chưa biết là kiểu nào nên không thể kiểm `x.size()` được
 - Biên dịch được, vì chưa ai gọi `f` nên chưa có bản nào để kiểm `x.size()`
-- Biên dịch được nhưng chạy thì báo lỗi, vì `main` rỗng không có đối tượng nào có `size`
+- Biên dịch được, nhưng bước liên kết báo lỗi vì không tìm thấy hàm `size`
 - Lỗi biên dịch, vì template phải được gọi ít nhất một lần trong chương trình này
 
 <p class="giai-thich" markdown>Mình đã biên dịch đoạn này: g++ không báo lỗi hay cảnh báo. Thân hàm phụ thuộc vào `T`, nên chuyện `x.size()` có hợp lệ hay không chỉ được kiểm khi sinh bản cho một kiểu cụ thể, mà không ai gọi `f`. Gọi `f(3)` thì mới báo `request for member ‘size’ in ‘x’, which is of non-class type ‘int’` (đã chạy). Và `main` rỗng không chạy gì nên cũng chẳng có lỗi lúc chạy; template cũng không bắt buộc phải được gọi.</p>
@@ -508,23 +528,23 @@ int main() { }
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 6.** `Ngan<int, 3>` và `Ngan<int, 5>` là hai bản của template `template <typename T, int N> class Ngan`. Quan hệ giữa hai kiểu này là gì?
 
-- Cùng một kiểu `Ngan<int>`; số 3 và 5 chỉ là cỡ ban đầu, đổi được lúc chạy
+- Cùng một kiểu, vì `T` giống nhau; số 3 và 5 chỉ là cỡ ban đầu, đổi được lúc chạy
 - Hai kiểu khác nhau nhưng gán được cho nhau, vì cùng `T` là `int`
 - Hai kiểu khác nhau, như `array<int, 3>` và `array<int, 5>`; gán nhau là lỗi
-- Cùng một kiểu, chỉ khác giá trị mặc định của `N` khi không ghi số
+- Cùng một kiểu, vì `N` chỉ là số thường, không nằm trong tên kiểu
 
-<p class="giai-thich" markdown>`N` là tham số không phải kiểu: giá trị của nó nằm **trong** kiểu, nên `Ngan<int, 3>` và `Ngan<int, 5>` là hai lớp riêng, và gán cho nhau báo `no match for ‘operator=’` (mình đã chạy ở Ví dụ 2). Số trong `< >` phải biết lúc biên dịch nên không đổi được lúc chạy. Cùng `T` không làm hai lớp gán được cho nhau. Giá trị mặc định chỉ có tác dụng khi bạn bỏ trống `N`, không gộp các bản đã ghi số rõ.</p>
+<p class="giai-thich" markdown>`N` là tham số không phải kiểu: giá trị của nó nằm **trong** kiểu, nên `Ngan<int, 3>` và `Ngan<int, 5>` là hai lớp riêng, và gán cho nhau báo `no match for ‘operator=’` (mình đã chạy ở Ví dụ 2). Số trong `< >` phải biết lúc biên dịch nên không đổi được lúc chạy. Cùng `T` không làm hai lớp gán được cho nhau. Và `N` không phải số thường: nó nằm trong tên kiểu, nên hai giá trị khác nhau cho hai kiểu khác nhau.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Điều nào đúng khi so generics của Go (`func Max[T cmp.Ordered](a, b T) T`) với template C++?
 
-- Go kiểm thân hàm theo constraint ngay lúc định nghĩa; C++ thường lộ lỗi khi sinh bản
-- Go sinh một bản riêng cho từng kiểu như C++ và cho viết riêng một bản cho `bool` nữa
-- Go kiểm kiểu lúc chạy nên `Max` của hai struct vẫn biên dịch được rồi mới panic ở đó
-- C++ kiểm ràng buộc bằng interface, còn Go kiểm bằng duck typing lúc sinh bản của nó
+- Go kiểm thân hàm theo constraint ngay khi định nghĩa; C++ không concepts kiểm khi sinh bản
+- Go sinh một bản riêng cho từng kiểu như C++, và cũng cho chuyên biệt hóa từng kiểu
+- Go kiểm ràng buộc lúc chạy, nên sai kiểu chỉ lộ ở lần chạy đầu tiên
+- C++ kiểm ràng buộc bằng interface lúc biên dịch, còn Go chỉ kiểm khi gọi hàm
 
-<p class="giai-thich" markdown>Mình đã chạy Go 1.27.1: `a < b` trong hàm với `T any` bị chặn ngay ở thân hàm, và `Max` của hai struct bị chặn lúc biên dịch với `does not satisfy cmp.Ordered`; C++ không concepts thì chỉ kiểm khi sinh bản (Ví dụ 4, Câu 5). Go không có chuyên biệt hóa, và trình biên dịch gc còn cho nhiều kiểu cùng hình dạng (như `int` và `type A int`) dùng chung một bản. Go kiểm lúc biên dịch, không đợi lúc chạy. Còn câu nói C++ kiểm bằng interface thì đảo ngược: constraint (interface) là của Go, còn kiểu "duck typing lúc sinh bản" là của C++.</p>
+<p class="giai-thich" markdown>Mình đã chạy Go 1.27.1: `a < b` trong hàm với `T any` bị chặn ngay ở thân hàm, và `Max` của hai struct bị chặn lúc biên dịch với `does not satisfy cmp.Ordered`; C++ không concepts thì chỉ kiểm khi sinh bản (Ví dụ 4, Câu 5). Go không có chuyên biệt hóa, và trình biên dịch gc còn cho nhiều kiểu cùng hình dạng (như `int` và `type A int`) dùng chung một bản. Go kiểm lúc biên dịch, không đợi lúc chạy. Còn câu nói C++ kiểm bằng interface thì đảo ngược: constraint (interface) là của Go, và hàm `Dung` chưa ai gọi vẫn bị Go chặn, nên không phải "chỉ khi gọi".</p>
 </div>
 
 </div>
@@ -533,6 +553,6 @@ int main() { }
 
 1. **Template** là bản vẽ có chỗ trống cho kiểu (hoặc số): `template <typename T>` (`class` cũng được, giống hệt); mỗi kiểu được dùng sinh **một bản riêng** lúc biên dịch (mình chạy: 3 kiểu, 3 bản `lonHon`, thấy bằng `nm` và `__PRETTY_FUNCTION__`). `max(3, 4.5)` lỗi vì suy ra hai `T`; ghi `max<double>(3, 4.5)`.
 2. **Template lớp** (`vector<int>`, `Ngan<T, N>`): mỗi bộ tham số là một lớp riêng; tham số không phải kiểu như `N` nằm trong kiểu (`array<int, 3>` khác `array<int, 5>`), có giá trị mặc định; chỉ hàm thành viên được gọi mới sinh; **chuyên biệt hóa** là bản riêng cho một kiểu (`Nhan<bool>`).
-3. **Template vs hàm ảo**: lúc biên dịch (không cần lớp cha chung, gọi thẳng, một bản mỗi kiểu, một dãy một kiểu) so với lúc chạy (trộn loại, một bản mã, gọi gián tiếp). Không bên nào luôn tốt hơn; mình không đo thời gian.
+3. **Template vs hàm ảo**: lúc biên dịch (không cần lớp cha chung, gọi thẳng, một bản mỗi kiểu, một dãy một kiểu) so với lúc chạy (trộn loại, một hàm duyệt chung, mỗi lớp con vẫn có hàm ghi đè riêng, gọi gián tiếp). Không bên nào luôn tốt hơn; mình không đo thời gian.
 4. **Giá cả**: lỗi dài (114 dòng cho một `sort` thiếu `operator<`, đọc từ dòng `error:` và `required from here`), code bloat (mình đo: `.text` tăng 11818 lên 89528 byte khi 1 lên 8 kiểu ở `-O0`, đổi theo máy và cờ), và thân template phải ở header (tách `.cpp` thì `undefined reference`).
 5. Chỉ nhắc: `static_assert`/`type_traits`, concepts C++20 (g++ 11.4 `-std=c++20` chạy được), SFINAE, lambda `auto` là template. Go: generics kiểm constraint ngay ở thân hàm, không có chuyên biệt hóa, gc cho các kiểu cùng "hình dạng" dùng chung một bản (chi tiết cài đặt).
