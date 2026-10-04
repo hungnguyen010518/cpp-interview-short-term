@@ -237,6 +237,6 @@ Thuật ngữ được thêm vào đây ở cuối mỗi bài.
 | join / detach / joinable | `join` chờ luồng xong; `detach` thả luồng chạy nền, không chờ được nữa; `joinable()` cho biết `thread` còn cầm luồng. Hủy `std::thread` còn joinable thì `std::terminate` | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
 | std::ref | Bọc một biến thành "tham chiếu có thể sao chép" (`#include <functional>`) để `std::thread` truyền chính biến đó thay vì bản sao; đối số mặc định bị sao chép | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
 | hardware_concurrency | `std::thread::hardware_concurrency()` trả gợi ý số luồng phần cứng chạy cùng lúc; chuẩn cho phép trả `0` nếu không biết | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
-| std::this_thread (sleep_for, get_id) | Tiện ích cho luồng đang chạy dòng đó: `sleep_for(khoảng)` ngủ ít nhất khoảng đó, `get_id()` trả mã nhận diện luồng | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
+| std::this_thread::sleep_for | Làm luồng đang chạy dòng đó ngủ ít nhất một khoảng thời gian cho trước; các luồng khác vẫn chạy | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
 | std::chrono | Thư viện thời gian của C++11: `std::chrono::milliseconds(50)` là khoảng 50 ms, `steady_clock::now()` là thời điểm của đồng hồ chạy đều, `duration_cast` đổi đơn vị | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |
 | lớp bọc luồng tự join (RAII) | Lớp giữ một `std::thread` và `join` trong hàm hủy, để luồng vẫn được join khi hàm thoát sớm bằng ngoại lệ; C++20 có sẵn `std::jthread` | [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) |

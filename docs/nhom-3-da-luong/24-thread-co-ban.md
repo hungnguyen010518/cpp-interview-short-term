@@ -6,7 +6,7 @@
     - Nói được vì sao tham số truyền cho luồng **mặc định bị sao chép**, và dùng `std::ref` hoặc `std::move` khi cần truyền tham chiếu hay `unique_ptr`.
     - Tránh ba lỗi hay gặp (hủy `std::thread` còn joinable, luồng `detach` cầm tham chiếu tới biến đã chết, ngoại lệ thoát khỏi hàm của luồng) và tự viết một lớp bọc nhỏ để luồng luôn được `join`.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack, heap, biến toàn cục), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy, `throw`/`catch`, `std::terminate`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) và [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`unique_ptr`, `std::move`, `= delete`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `[&x]`, `[=]`), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`vector`, `emplace_back`).
+**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack, heap, biến toàn cục), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy, `throw`/`catch`, `std::terminate`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) và [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`unique_ptr`, `= delete`, `std::move`), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, ASan), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `[&x]`, `[=]`), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`vector`, `emplace_back`).
 
 !!! note "Phạm vi bài này"
     Bài này chỉ dạy cách **bắt đầu và kết thúc** một luồng. Mọi chương trình ở đây được thiết kế để các luồng không cùng sửa một biến; chuyện nhiều luồng cùng sửa một biến (data race, `std::mutex`) là Bài 25.
@@ -29,12 +29,11 @@ Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có **bàn học ri
 | | Tiến trình | Luồng (cùng tiến trình) |
 |---|---|---|
 | Bộ nhớ | Riêng: tiến trình này không đọc được bộ nhớ của tiến trình kia | Chung heap và biến toàn cục; stack riêng |
-| Nói chuyện với nhau | Phải nhờ hệ điều hành (ống, socket, bộ nhớ chia sẻ) | Đọc ghi thẳng vào biến chung (nên phải cẩn thận, Bài 25) |
-| Chi phí tạo | Thường nặng hơn | Thường nhẹ hơn |
+| Nói chuyện với nhau | Phải nhờ hệ điều hành (ống là kênh một chiều giữa hai tiến trình, socket, bộ nhớ chia sẻ) | Đọc ghi thẳng vào biến chung (nên phải cẩn thận, Bài 25) |
 | Một luồng gặp lỗi nặng (truy cập bộ nhớ sai) | Thường chỉ tiến trình đó sập | Thường cả tiến trình sập, mọi luồng chết theo |
 
 !!! info "Bạn biết Go?"
-    Goroutine **không phải** luồng của hệ điều hành. Runtime của Go lập lịch rất nhiều goroutine lên một số ít luồng hệ điều hành; stack của goroutine bắt đầu nhỏ và tự lớn lên, nên tạo hàng chục nghìn goroutine vẫn bình thường. `std::thread` thì mỗi đối tượng là **một luồng thật** do hệ điều hành lập lịch, mỗi luồng có stack riêng (mình đọc giá trị mặc định của thư viện luồng trên máy này: 8388608 byte, tức 8 MiB; số này khác nhau theo hệ thống). Vì vậy bạn không tạo luồng C++ bừa bãi như `go f()`.
+    Goroutine **không phải** luồng của hệ điều hành. Runtime của Go lập lịch (quyết định cái nào chạy khi nào) rất nhiều goroutine lên một số ít luồng hệ điều hành; stack của goroutine bắt đầu nhỏ và tự lớn lên, nên tạo hàng chục nghìn goroutine vẫn bình thường. `std::thread` thì mỗi đối tượng là **một luồng thật** do hệ điều hành lập lịch, mỗi luồng có stack riêng (mình đọc giá trị mặc định của thư viện luồng trên máy này: 8388608 byte, tức 8 MiB; đó là vùng địa chỉ dành sẵn, chưa chắc dùng hết, và khác nhau theo hệ thống). Tạo hàng nghìn luồng vẫn là chi phí thật, nên bạn không tạo luồng C++ bừa bãi như `go f()`.
 
 ### 2. Luồng đầu tiên: tạo bằng hàm, chờ bằng `join`
 
@@ -81,9 +80,7 @@ tong = 5050
 Mình cũng chạy chương trình này với `-fsanitize=thread` (công cụ bắt lỗi luồng, Bài 25 sẽ dạy): không có cảnh báo nào.
 
 !!! info "Bạn biết Go?"
-    `go f(x)` ↔ `std::thread t(f, x)`, nhưng C++ bắt bạn nói rõ chuyện chờ: `wg.Wait()` của `sync.WaitGroup` ứng với `t.join()` (mỗi `thread` tự `join`, không có bộ đếm chung).
-
-    Go còn khác ở chỗ quên chờ không sao cả: khi `main` kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên `join`/`detach` thì chương trình bị `std::terminate` (mục 5). Thư viện chuẩn C++ cũng **không có channel**; Bài 27 dùng hàng đợi và `condition_variable` thay thế.
+    `go f(x)` ↔ `std::thread t(f, x)`, nhưng C++ bắt bạn nói rõ chuyện chờ: `wg.Wait()` của `sync.WaitGroup` ứng với `t.join()` (mỗi `thread` tự `join`, không có bộ đếm chung). Go còn khác ở chỗ quên chờ không sao cả: khi `main` kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên `join`/`detach` thì chương trình bị `std::terminate` (mục 5). Thư viện chuẩn C++ cũng **không có channel**; Bài 27 dùng hàng đợi và `condition_variable` thay thế.
 
 ### 3. Truyền tham số: mặc định là sao chép
 
@@ -163,7 +160,6 @@ Mỗi đối tượng `std::thread` đang cầm một luồng thì gọi là **j
 |---|---|---|
 | Ý nghĩa | Chờ luồng xong | Thả luồng chạy nền, không chờ nữa |
 | Sau lệnh | `t.joinable()` là `false` | `t.joinable()` là `false`, và không còn cách chờ luồng đó |
-| Kết quả luồng | Đọc an toàn sau `join` | Không biết khi nào xong |
 | Dùng khi | Hầu hết mọi trường hợp | Việc nền độc lập, chỉ dùng bản sao của dữ liệu |
 
 Ta thử `detach` bằng một luồng chỉ dùng bản sao tham số. Để thứ tự in ổn định, luồng nền ngủ 0,1 giây trước khi in, còn luồng chính ngủ 0,4 giây. Hai thứ mới ở đây: `std::this_thread::sleep_for(...)` làm **luồng đang gọi** ngủ một khoảng (các luồng khác vẫn chạy), và `std::chrono::milliseconds(100)` là một giá trị "khoảng thời gian 100 mili giây" (`std::chrono` là thư viện thời gian của C++11; mục 7 nói thêm).
@@ -222,9 +218,9 @@ int main() {
 }
 ```
 
-Mình đã chạy: chương trình in `terminate called without an active exception` và thoát với mã 134 (bị hủy bằng `abort`). Khi chạy qua ống (pipe), mình không thấy dòng nào do chương trình tự in; đừng dựa vào việc có thấy hay không, vì chương trình bị hủy đột ngột.
+Mình đã chạy: chương trình in `terminate called without an active exception` và thoát với mã 134 (bị hủy bằng `abort`, tức 128 + 6, 6 là số tín hiệu abort). Khi chạy qua ống (pipe), mình không thấy dòng nào do chương trình tự in, vì đầu ra bị đệm và `abort` không xả bộ đệm; đừng dựa vào việc có thấy hay không.
 
-**Lỗi 2: luồng `detach` cầm tham chiếu tới biến cục bộ đã chết.** Lambda `[&so]` chỉ cầm tham chiếu ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)). Nếu hàm tạo luồng kết thúc trước khi luồng dùng `so`, thì `so` đã chết và đây là hành vi không xác định ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)):
+**Lỗi 2: luồng `detach` cầm tham chiếu tới biến cục bộ đã chết.** Lambda `[&so]` chỉ cầm tham chiếu ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)). Nếu hàm `khoiDong` (hàm đã tạo luồng) kết thúc trước khi luồng dùng `so`, thì `so` đã chết và đây là hành vi không xác định ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)):
 
 ```cpp
 // bo-qua-kiem-tra
@@ -249,18 +245,17 @@ int main() {
 }
 ```
 
-Mình đã chạy: lần thường in một số rác khác nhau mỗi lần (ba lần ra `941067184`, `2115781296`, `-827094560`). Với `-fsanitize=address`, ASan báo `stack-buffer-overflow` ("READ of size 8", trong luồng phụ, dòng (3)); vùng stack của `khoiDong` đã được một lệnh gọi khác dùng lại. Với `-fsanitize=thread`, chương trình sập ngay vì đọc địa chỉ rác. Sửa: bản sao (`[so]`), hoặc `join` trước khi hàm kết thúc.
+Mình đã chạy: lần thường in một số rác khác nhau mỗi lần (ba lần ra `941067184`, `2115781296`, `-827094560`). Với `-fsanitize=address`, ASan báo `stack-buffer-overflow` ("READ of size 8", trong luồng phụ, dòng (3)); vùng stack của `khoiDong` đã được một lệnh gọi khác dùng lại. Với `-fsanitize=thread`, chương trình sập ngay vì đọc địa chỉ rác.
 
-**Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.** Ngoại lệ không được `catch` bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi `std::terminate` và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có `throw 1;`: g++ in `terminate called after throwing an instance of 'int'` và thoát với mã 134, y như ngoại lệ không bắt ở `main` ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)). Muốn xử lý, `try`/`catch` ngay trong hàm của luồng; Bài 29 có cách chuyển ngoại lệ sang luồng khác.
+Cách sửa: bản sao (`[so]`), hoặc `join` trước khi hàm kết thúc.
 
-!!! info "Bạn biết Go?"
-    Goroutine bị `panic` mà không `recover` cũng làm cả chương trình chết (mình đã chạy: mã thoát 2), nên hai bên giống nhau ở chỗ lỗi không rơi êm vào goroutine/luồng đó rồi thôi.
+**Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.** Ngoại lệ không được `catch` bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi `std::terminate` và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có `throw 1;`: g++ in `terminate called after throwing an instance of 'int'` và thoát với mã 134, y như ngoại lệ không bắt ở `main` ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)). Muốn xử lý, `try`/`catch` ngay trong hàm của luồng; Bài 29 có cách chuyển ngoại lệ sang luồng khác. (Go: goroutine `panic` mà không `recover` cũng làm cả chương trình chết, mình đã chạy: mã thoát 2.)
 
 ### 6. RAII bọc `thread`: luôn được `join`
 
 [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) dạy: hàm hủy chạy cả khi hàm thoát vì ngoại lệ. Ta dùng đúng ý đó: một lớp nhỏ giữ `std::thread` và `join` nó trong hàm hủy. Hai chi tiết cú pháp trong code dưới (ta dùng `struct` như các bài trước):
 
-- `std::thread` **không sao chép được** (một luồng chỉ có một "tay cầm"), chỉ chuyển bằng `std::move` ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)); nên hàm tạo của ta nhận `std::thread` và chuyển vào thành viên, còn việc sao chép ta cấm bằng `= delete` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)).
+- `std::thread` **không sao chép được** (một luồng chỉ có một "tay cầm"), chỉ chuyển bằng `std::move` ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)); nên hàm tạo của ta nhận `std::thread` và chuyển vào thành viên, còn việc sao chép ta cấm bằng `= delete` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)).
 - `: luong(std::move(t))` sau hàm tạo là **danh sách khởi tạo**: dựng thành viên `luong` ngay từ `t`, trước khi thân hàm `{}` chạy.
 
 ```cpp
@@ -319,41 +314,27 @@ tong = 5050
 
 **Thử thay đổi: bỏ `LuongTuJoin g(std::move(t));` và để `t` trần, gọi `t.join()` sau `throw`.** Mình đã chạy: `throw` thoát hàm trước khi tới `t.join()`, nên `t` bị hủy khi còn joinable; chương trình in `terminate called without an active exception` (mã 134) và không bao giờ tới `catch` để in `bat duoc ma`. Lớp bọc cứu đúng chỗ này.
 
-C++20 có sẵn `std::jthread` tự `join` trong hàm hủy: mình đã thử, `-std=c++17` báo `'jthread' is not a member of 'std'`, `-std=c++20` thì dùng được. Khóa học dùng C++17 nên ta tự viết lớp bọc.
-
-### 7. Vài tiện ích: số lõi, `get_id`, `sleep_for`
+### 7. Vài tiện ích: số lõi và `sleep_for`
 
 - `std::thread::hardware_concurrency()` trả một `unsigned` là **gợi ý** về số luồng phần cứng chạy cùng lúc (chuẩn cho phép trả `0` nếu không biết).
-- `std::this_thread::get_id()` trả "mã nhận diện" của luồng đang chạy dòng này; so `==`/`!=` được.
 - `std::this_thread::sleep_for(d)` làm luồng này ngủ **ít nhất** khoảng `d`.
+- `std::chrono::steady_clock::now()` là thời điểm hiện tại của đồng hồ chạy đều (không nhảy khi ai đó chỉnh giờ).
 
-Về thời gian, `std::chrono` là thư viện thời gian của C++11 (các bài trước chưa dùng); ta chỉ dùng ở mức này. `std::chrono::milliseconds(50)` là khoảng 50 mili giây. `steady_clock::now()` là thời điểm hiện tại của đồng hồ chạy đều (không nhảy khi ai đó chỉnh giờ). Hai thời điểm trừ nhau cho ra khoảng thời gian, và `duration_cast<std::chrono::milliseconds>(khoang).count()` đổi khoảng đó thành số nguyên mili giây.
+Hai thời điểm trừ nhau cho ra một khoảng thời gian, và `std::chrono::duration_cast<std::chrono::milliseconds>(khoang).count()` đổi khoảng đó thành số nguyên mili giây.
 
 ```cpp
 #include <chrono>
 #include <iostream>
 #include <thread>
 
-bool khacMain = false;
-std::thread::id idMain;
-
-void kiemTraId() {
-    khacMain = (std::this_thread::get_id() != idMain);       // (1) id của luồng đang chạy dòng này
-}
-
 int main() {
-    idMain = std::this_thread::get_id();
-    std::thread t(kiemTraId);
-    t.join();
-    std::cout << "id luong con khac id main: " << khacMain << "\n";
-
-    unsigned lop = std::thread::hardware_concurrency();      // (2) gợi ý số luồng chạy song song được
+    unsigned lop = std::thread::hardware_concurrency();      // (1) gợi ý số luồng chạy song song được
     std::cout << "hardware_concurrency = " << lop << "\n";
 
-    auto bat = std::chrono::steady_clock::now();             // (3) đồng hồ chạy đều, không nhảy
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));   // (4) luồng này ngủ ít nhất 50 ms
-    auto troi = std::chrono::steady_clock::now() - bat;      // (5) khoảng thời gian đã trôi
-    long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(troi).count();   // (6)
+    auto bat = std::chrono::steady_clock::now();             // (2) đồng hồ chạy đều, không nhảy
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));   // (3) luồng này ngủ ít nhất 50 ms
+    auto troi = std::chrono::steady_clock::now() - bat;      // (4) khoảng thời gian đã trôi
+    long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(troi).count();   // (5)
     std::cout << "ngu it nhat 50 ms? " << (ms >= 50) << "\n";
     return 0;
 }
@@ -362,12 +343,11 @@ int main() {
 **Kết quả khi chạy:**
 
 ```text
-id luong con khac id main: 1
 hardware_concurrency = 8
 ngu it nhat 50 ms? 1
 ```
 
-Dòng thứ hai là của máy mình (8 luồng phần cứng); máy bạn in số khác. Mình cố ý không in `get_id()` ra màn hình vì giá trị đó khác nhau mỗi lần và vô nghĩa với người đọc.
+Dòng đầu là của máy mình (8 luồng phần cứng); máy bạn in số khác.
 
 ## 💻 Ví dụ code
 
@@ -375,7 +355,11 @@ Dòng thứ hai là của máy mình (8 luồng phần cứng); máy bạn in s�
 
 Bài toán: cộng 1000 số `1..1000` nằm trong một `vector` (ở heap). Ta chia làm bốn đoạn 250 phần tử, mỗi luồng cộng một đoạn và ghi tổng phần vào **ô riêng** của nó trong `tongPhan`, rồi luồng chính cộng bốn tổng phần. Hai luồng không bao giờ ghi cùng một ô, và `so` chỉ được đọc, nên không có tranh chấp.
 
-Vài thứ mới: `std::vector<std::thread>` giữ nhiều luồng (đối tượng `thread` chuyển được nên `emplace_back` đặt nó vào vector); lambda `[&so, &tongPhan, k]` bắt `so` và `tongPhan` theo tham chiếu, còn `k` theo bản sao (mỗi luồng cần `k` của riêng mình); vòng `for (std::thread& t : cacLuong)` dùng `&` để **không sao chép** `thread` (không sao chép được).
+Ba thứ mới trong code:
+
+- `std::vector<std::thread>` giữ nhiều luồng; `emplace_back(lambda)` dựng một `std::thread` từ lambda ngay trong ô cuối ([Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)). Viết `push_back(t)` sẽ cần sao chép `thread`, mà nó không sao chép được.
+- Lambda `[&so, &tongPhan, k]` bắt `so` và `tongPhan` theo tham chiếu, còn `k` theo bản sao (mỗi luồng cần `k` của riêng mình).
+- Vòng `for (std::thread& t : cacLuong)` dùng `&` để **không sao chép** `thread`.
 
 ```cpp
 #include <iostream>
@@ -394,9 +378,9 @@ int main() {
         cacLuong.emplace_back([&so, &tongPhan, k] {         // (1) lambda là hàm của luồng
             int dau = k * 250;                              // (2) biến cục bộ: stack riêng của luồng
             int cuoi = dau + 250;
-            long long t = 0;
-            for (int i = dau; i < cuoi; ++i) t += so[i];    // (3) chỉ ĐỌC vector chung
-            tongPhan[k] = t;                                // (4) chỉ GHI ô số k
+            long long tongDoan = 0;
+            for (int i = dau; i < cuoi; ++i) tongDoan += so[i];    // (3) chỉ ĐỌC vector chung
+            tongPhan[k] = tongDoan;                         // (4) chỉ GHI ô số k
         });
     }
     for (std::thread& t : cacLuong) t.join();               // (5) chờ cả bốn luồng
@@ -416,7 +400,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1) | Mỗi vòng `k` dựng một luồng chạy lambda với bản sao riêng của `k` | 4 luồng phụ, mỗi luồng có `k` riêng |
-| (2) | Luồng `k` tính đoạn `[k*250, k*250+250)` trong biến cục bộ của nó | `dau`, `cuoi`, `t` nằm ở stack của từng luồng |
+| (2) | Luồng `k` tính đoạn `[k*250, k*250+250)` trong biến cục bộ của nó | `dau`, `cuoi`, `tongDoan` nằm ở stack của từng luồng |
 | (3) | Đọc `so[i]` của vector chung | `so` ở heap, chỉ đọc |
 | (4) | Ghi tổng vào `tongPhan[k]` | mỗi luồng một ô khác nhau |
 | (5) | Luồng chính `join` từng luồng; sau đó `tongPhan` đầy đủ | |
@@ -431,7 +415,7 @@ phan 3: 218875
 tong = 500500
 ```
 
-Cả bốn dòng `phan` và `tong` in từ luồng chính **sau** `join`, nên thứ tự và giá trị ổn định. Nếu để từng luồng tự in, thứ tự dòng sẽ khác nhau mỗi lần chạy (mục "Lỗi thường gặp"). Mình cũng chạy với `-fsanitize=thread`: không có cảnh báo.
+Cả bốn dòng `phan` và `tong` in từ luồng chính **sau** `join`, nên thứ tự và giá trị ổn định. Nếu để từng luồng tự in, thứ tự dòng do hệ điều hành quyết định và đổi theo lần chạy (có thể cả chen vào giữa một dòng). Mình cũng chạy với `-fsanitize=thread`: không có cảnh báo.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -448,9 +432,6 @@ Cả bốn dòng `phan` và `tong` in từ luồng chính **sau** `join`, nên t
 
 !!! warning "Lỗi 1: Quên `join`/`detach`, hay để ngoại lệ bỏ qua `join`"
     Hủy `std::thread` còn joinable gọi `std::terminate` (mình đã chạy: mã 134). Hai nguồn hay gặp là quên hẳn, và gọi `join` ở cuối hàm trong khi giữa chừng có `return` sớm hay `throw`. Sửa: bọc luồng bằng lớp RAII như mục 6.
-
-!!! warning "Lỗi 2: Tưởng thứ tự in giữa các luồng là cố định"
-    Khi luồng chính và luồng phụ cùng in, thứ tự dòng do hệ điều hành quyết định, đổi theo lần chạy và theo công cụ. Mình đã gặp thật khi viết bài này: ở bản nháp của chương trình `detach`, luồng nền in ngay lúc `main` cũng in; chạy thường ra thứ tự này, chạy với `-fsanitize=thread` thì hai dòng chen vào giữa nhau, kể cả chen ngay giữa một dòng. Muốn kết quả ổn định thì `join` rồi in từ luồng chính, như các ví dụ trong bài.
 
 ## ✍️ Trắc nghiệm
 
@@ -544,7 +525,7 @@ std::cout << (p == nullptr);
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
-**Câu 7.** Đọc đoạn sau, với `LuongTuJoin` là lớp bọc ở mục 6 (`join` trong hàm hủy). Khi `f` thoát vì ngoại lệ, luồng ra sao?
+**Câu 7.** Đọc đoạn sau, với `LuongTuJoin` là lớp bọc ở mục 6 (`join` trong hàm hủy). Ngoại lệ của `f` được `catch` ở hàm gọi `f`. Khi `f` thoát vì ngoại lệ, luồng ra sao?
 
 ```text
 void f() {
@@ -559,7 +540,7 @@ void f() {
 - Luồng bị bỏ lại chạy nền, vì hàm thoát sớm nên không ai `join` nó
 - Luồng bị dừng ngay mà không chờ, vì ngoại lệ hủy mọi luồng của hàm
 
-<p class="giai-thich" markdown>Biến cục bộ `g` vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở Bài 08. Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự `detach` nó. `terminate` chỉ gọi nếu `std::thread` bị hủy lúc còn joinable, mà ở đây `g` đã `join` trước đó.</p>
+<p class="giai-thich" markdown>Biến cục bộ `g` vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở Bài 08. Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự `detach` nó. `terminate` chỉ gọi nếu `std::thread` bị hủy lúc còn joinable, mà ở đây `g` đã `join` trước đó. Ngoại lệ được `catch` ở nơi gọi nên không rơi vào trường hợp không ai bắt.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
