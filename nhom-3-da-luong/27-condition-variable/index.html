@@ -1474,7 +1474,7 @@
 <p><strong>Bạn cần biết trước:</strong> <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::thread</code>, <code>join</code>, <code>sleep_for</code>, <code>vector&lt;thread&gt;</code>), <a href="../25-data-race-mutex/">Bài 25</a> (<code>std::mutex</code>, <code>lock_guard</code>, <code>unique_lock</code>, vùng găng, TSan), <a href="../../nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu/">Bài 21</a> (<code>std::queue</code>: <code>push</code>, <code>front</code>, <code>pop</code>, <code>empty</code>), <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda, vị từ), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (lambda <code>[&amp;x]</code>), <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a> (<code>vector&lt;long long&gt; v(2, 0)</code>: hai phần tử, đều bằng 0), <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a> (<code>điều kiện ? A : B</code>).</p>
 <h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
 <p>Quay lại <strong>nhà bếp</strong> của <a href="../25-data-race-mutex/">Bài 25</a>, với một thớt chung và một thẻ vào thớt. Giờ có hai người phụ thuộc nhau: đầu bếp chính cần hành đã sơ chế, mà hành do đầu bếp phụ chuẩn bị, mất một lúc. Chính chưa thể thái cho tới khi phụ xong.</p>
-<p>Có hai cách chờ tồi. Cách một: chính đứng ngay cạnh tủ và mở ra nhìn <strong>không ngừng</strong>, mệt và chẳng làm được việc gì khác. Cách hai: cứ vài phút chính ghé nhìn một lần rồi đi ngủ; đỡ mệt, nhưng hành xong từ lâu mà chính vẫn chưa hay.</p>
+<p>Có hai cách chờ tồi. Cách một: chính đứng ngay cạnh thớt và nhìn <strong>không ngừng</strong>, mệt và chẳng làm được việc gì khác. Cách hai: cứ vài phút chính ghé nhìn một lần rồi đi ngủ; đỡ mệt, nhưng hành xong từ lâu mà chính vẫn chưa hay.</p>
 <p>Cách tốt: chính <strong>để thẻ thớt lại</strong> (để phụ còn có thẻ mà đặt hành lên thớt), ngồi xuống ghế và ngủ. Phụ chuẩn bị xong thì <strong>bấm chuông</strong>. Chuông reo, chính dậy, xin lại thẻ thớt rồi làm. Cái chuông chính là <code>std::condition_variable</code>.</p>
 <div class="admonition info">
 <p class="admonition-title">Chỗ nào ví von cái chuông không còn đúng?</p>
@@ -1678,7 +1678,7 @@
 </tbody>
 </table>
 <p><strong>Kết quả khi chạy:</strong> mình biên dịch sạch cảnh báo; chạy <code>timeout 3 ./chuongtrinh</code> thì <strong>không in gì</strong>, <code>timeout</code> thoát mã <strong>124</strong>. Tiếng chuông ở (1) đã mất, nên (3) ngủ không ai gọi. Khối đặt <code>// bo-qua-kiem-tra</code> vì nó treo. Chuẩn không hứa là nó treo (spurious wakeup có thể làm nó dậy), mình chỉ nói điều mình thấy trên máy này.</p>
-<p><strong>Thử thay đổi: lấy chương trình ở mục 2, bỏ dòng ngủ 1 giây của luồng phụ, và cho luồng chính ngủ 300 ms trước khi xin khóa.</strong> Vậy <code>notify_one</code> gần như chắc chắn đến <strong>trước</strong> <code>wait</code>, nhưng <code>wait</code> vẫn có predicate. Mình đã chạy: in <code>xong</code>, không treo (TSan sạch). Predicate được kiểm <strong>trước khi ngủ</strong> (như vòng <code>while</code> ở trên): <code>xong</code> đã <code>true</code> nên <code>wait</code> không ngủ. Trạng thái nằm trong biến, không nằm trong tiếng chuông.</p>
+<p><strong>Thử thay đổi: lấy chương trình ở mục 3, thêm <code>bool xong</code> đặt thành <code>true</code> dưới khóa trước <code>notify_one</code>, và đổi <code>wait</code> thành <code>wait(lk, [] { return xong; })</code>.</strong> Vậy <code>notify_one</code> vẫn đến <strong>trước</strong> <code>wait</code> (luồng chính còn ngủ 300 ms), nhưng <code>wait</code> giờ có predicate. Mình đã chạy: in <code>xong</code>, không treo (TSan sạch). Predicate được kiểm <strong>trước khi ngủ</strong> (như vòng <code>while</code> ở trên): <code>xong</code> đã <code>true</code> nên <code>wait</code> không ngủ. Trạng thái nằm trong biến, không nằm trong tiếng chuông.</p>
 <div class="admonition warning">
 <p class="admonition-title">Hay nhầm</p>
 <p>Biến điều kiện phải được đổi <strong>dưới cùng mutex</strong> mà luồng chờ dùng, kể cả khi nó chỉ là một <code>bool</code>. Đổi ngoài khóa thì có thể rơi đúng vào khe giữa lúc luồng chờ kiểm <code>xong</code> (thấy <code>false</code>) và lúc nó ngủ: tin đến mà không ai nhận, lost wakeup trá hình, và còn là data race (<a href="../25-data-race-mutex/">Bài 25</a>) vì hai luồng đụng cùng một biến không đồng bộ. Hàng đợi ở mục 💻 cũng thế: mọi <code>push</code>/<code>pop</code> đều dưới khóa.</p>
@@ -1688,7 +1688,7 @@
 <li><code>notify_one()</code> đánh thức <strong>nhiều nhất một</strong> luồng đang chờ trên <code>cv</code> đó (chuẩn không nói là luồng nào).</li>
 <li><code>notify_all()</code> đánh thức <strong>tất cả</strong> luồng đang chờ; chúng dậy lần lượt vì phải xin lại cùng một khóa.</li>
 </ul>
-<p>Quy tắc dễ nhớ: <strong>một món mới, chỉ một người dùng được</strong> thì <code>notify_one</code>; <strong>một thay đổi mà mọi người đều phải biết</strong> (như "hết việc, dừng") thì <code>notify_all</code>. Lỡ dùng <code>notify_one</code> để báo dừng khi có hai consumer cùng đang chờ, thì một luồng thoát, luồng kia ngủ mãi (mục 💻 có thử thật).</p>
+<p>Quy tắc dễ nhớ: <strong>một món mới, chỉ một người dùng được</strong> thì <code>notify_one</code>; <strong>một thay đổi mà mọi người đều phải biết</strong> (như "hết việc, dừng") thì <code>notify_all</code>. Lỡ dùng <code>notify_one</code> để báo dừng khi có hai consumer cùng đang chờ, thì một luồng thoát, luồng kia ngủ tiếp không ai gọi (trên máy mình là mãi; chuẩn cho phép đánh thức giả; mục 💻 có thử thật).</p>
 <p><strong>Notify trong khi giữ khóa hay sau khi nhả?</strong> Cả hai đều đúng theo chuẩn: <code>notify</code> không đòi bạn giữ khóa. Nhả trước rồi mới notify (như dòng (3)-(4) ở mục 2) thường <strong>được khuyên dùng</strong>: luồng vừa được đánh thức khỏi phải ngay lập tức bị chặn lại vì khóa vẫn nằm trong tay người báo tin. Một số cài đặt tự tối ưu chuyện này nên chênh lệch tùy thư viện và máy; mình không đo, nên đừng coi đó là luật. Giữ khóa lúc notify đôi khi lại cần, ví dụ khi luồng chờ sẽ hủy chính <code>cv</code> ngay lúc dậy.</p>
 <h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
 <h3 id="producer-consumer-hang-oi-chung-va-dung-sach">Producer-consumer: hàng đợi chung và dừng sạch<a class="headerlink" href="#producer-consumer-hang-oi-chung-va-dung-sach" title="Permanent link">&para;</a></h3>
@@ -1902,7 +1902,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Kết quả khi chạy:</strong> <code>tong = 500500, dinh &lt;= 4: dung</code>. Mình chạy 100 lần, cả 100 lần giống nhau, và TSan không báo gì. <code>dinh</code> là số phần tử nhiều nhất từng thấy trong hàng (ghi dưới khóa); nó không bao giờ vượt 4. Dùng một <code>cv</code> chung cho cả hai điều kiện cũng được nếu luôn <code>notify_all</code>, nhưng hai <code>cv</code> đánh thức đúng người hơn. Đây là nền cho thread pool ở Bài 30.</p>
+<p><strong>Kết quả khi chạy:</strong> <code>tong = 500500, dinh &lt;= 4: dung</code>. Mình chạy 100 lần, cả 100 lần giống nhau, và TSan không báo gì. <code>dinh</code> là số phần tử nhiều nhất từng thấy trong hàng (ghi dưới khóa); nó không bao giờ vượt 4. Dùng một <code>cv</code> chung cho cả hai điều kiện cũng được nếu luôn <code>notify_all</code>, nhưng hai <code>cv</code> đánh thức đúng người hơn. Đây là nền cho thread pool ở <a href="../30-thread-pool-hieu-nang/">Bài 30</a>.</p>
 <h2 id="go-channel-lam-san-hang-oi-va-cho">Go: channel làm sẵn hàng đợi và chờ<a class="headerlink" href="#go-channel-lam-san-hang-oi-va-cho" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
@@ -2023,9 +2023,9 @@
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>// luồng chính: std::unique_lock&lt;std::mutex&gt; lk(m);  cv.wait(lk, [] { return xong; });
 </code></pre></div>
 <ul>
-<li>Luồng chính dậy khi <code>xong</code> đổi, vì <code>wait</code> luôn theo dõi biến trong predicate</li>
-<li>Luồng chính dậy khi luồng phụ nhả khóa, vì <code>wait</code> đang chờ chính khóa đó</li>
-<li>Không có gì đánh thức luồng chính, nên nó ngủ mãi trên máy mình</li>
+<li>Luồng chính dậy khi <code>xong</code> đổi, vì <code>wait</code> theo dõi biến trong predicate</li>
+<li>Luồng chính thường dậy khi luồng phụ nhả khóa, vì <code>wait</code> chờ chính khóa đó</li>
+<li>Không có gì đánh thức luồng chính, nên nó ngủ tiếp chứ không dậy</li>
 <li>Luồng chính dậy sau lần kiểm kế tiếp, vì <code>wait</code> tự kiểm predicate mỗi giây</li>
 </ul>
 <p class="giai-thich">Không ai gọi <code>notify</code>, nên không có gì đánh thức luồng chính; đây là lỗi quên <code>notify</code>, và mình đã chạy ra treo mã 124. Chuẩn cho phép đánh thức giả nên không thể hứa chắc là mãi mãi, và bạn không được dựa vào nó; trên máy mình thì treo. <code>wait</code> không theo dõi biến nào: predicate chỉ được gọi khi luồng chính dậy vì lý do khác. Nó cũng không chờ khóa (lúc đó luồng chính đã nhả khóa và ngủ trên <code>cv</code>), và không có đồng hồ kiểm mỗi giây nào.</p>

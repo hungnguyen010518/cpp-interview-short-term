@@ -1035,9 +1035,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#7-vai-tien-ich-so-loi-va-sleep_for" class="md-nav__link">
+  <a href="#7-vai-tien-ich-so-luong-phan-cung-va-sleep_for" class="md-nav__link">
     <span class="md-ellipsis">
-      7. Vài tiện ích: số lõi và sleep_for
+      7. Vài tiện ích: số luồng phần cứng và sleep_for
     </span>
   </a>
   
@@ -1370,9 +1370,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#7-vai-tien-ich-so-loi-va-sleep_for" class="md-nav__link">
+  <a href="#7-vai-tien-ich-so-luong-phan-cung-va-sleep_for" class="md-nav__link">
     <span class="md-ellipsis">
-      7. Vài tiện ích: số lõi và sleep_for
+      7. Vài tiện ích: số luồng phần cứng và sleep_for
     </span>
   </a>
   
@@ -1474,14 +1474,14 @@
 <p><strong>Bạn cần biết trước:</strong> <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a> (stack, heap, biến toàn cục), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, hàm hủy, <code>throw</code>/<code>catch</code>, <code>std::terminate</code>), <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a> (tham chiếu), <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/">Bài 09</a>, <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/">Bài 11</a> và <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a> (<code>unique_ptr</code>, <code>= delete</code>, <code>std::move</code>), <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (hành vi không xác định, ASan), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> và <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda, <code>[&amp;x]</code>, <code>[=]</code>), <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a> (<code>vector</code>, <code>emplace_back</code>).</p>
 <div class="admonition note">
 <p class="admonition-title">Phạm vi bài này</p>
-<p>Bài này chỉ dạy cách <strong>bắt đầu và kết thúc</strong> một luồng. Mọi chương trình ở đây được thiết kế để các luồng không cùng sửa một biến; chuyện nhiều luồng cùng sửa một biến (data race, <code>std::mutex</code>) là Bài 25.</p>
+<p>Bài này chỉ dạy cách <strong>bắt đầu và kết thúc</strong> một luồng. Mọi chương trình ở đây được thiết kế để các luồng không cùng sửa một biến; chuyện nhiều luồng cùng sửa một biến (data race, <code>std::mutex</code>) là <a href="../25-data-race-mutex/">Bài 25</a>.</p>
 </div>
 <h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
-<p>Hãy tưởng tượng một <strong>nhà bếp</strong>. Mỗi chương trình đang chạy là một nhà bếp riêng, có <strong>kho</strong> ở sân sau (heap của <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a>) và <strong>bảng treo tường</strong> (biến toàn cục). Mỗi <strong>đầu bếp</strong> là một luồng. Từ Bài 01 tới giờ, nhà bếp của bạn chỉ có đúng một đầu bếp: luồng chính, chạy hàm <code>main</code>.</p>
-<p>Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có <strong>bàn học riêng</strong> để đặt đồ đang cầm trên tay (stack riêng). Cả bếp <strong>dùng chung kho và bảng treo tường</strong>, nên người này thấy ngay món người kia để vào kho. Và đầu bếp chính có thể <strong>đứng chờ</strong> một đầu bếp phụ làm xong món (<code>join</code>), hoặc <strong>để họ tự làm</strong> mà không hỏi nữa (<code>detach</code>).</p>
+<p>Hãy tưởng tượng một <strong>nhà bếp</strong>. Mỗi chương trình đang chạy là một nhà bếp riêng, có <strong>kho</strong> ở sân sau (heap của <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a>) và <strong>bảng treo tường</strong> (biến toàn cục). Mỗi <strong>đầu bếp</strong> là một luồng. Từ <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/">Bài 01</a> tới giờ, nhà bếp của bạn chỉ có đúng một đầu bếp: luồng chính, chạy hàm <code>main</code>.</p>
+<p>Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có một <strong>góc bàn riêng</strong> để đặt đồ đang cầm trên tay (như bàn học ở Nhóm 1: stack riêng). Cả bếp <strong>dùng chung kho và bảng treo tường</strong>, nên người này thấy ngay món người kia để vào kho. Và đầu bếp chính có thể <strong>đứng chờ</strong> một đầu bếp phụ làm xong món (<code>join</code>), hoặc <strong>để họ tự làm</strong> mà không hỏi nữa (<code>detach</code>).</p>
 <div class="admonition info">
 <p class="admonition-title">Chỗ nào ví von nhà bếp không còn đúng?</p>
-<p>Đầu bếp thật đứng song song. Luồng chỉ chạy song song thật khi máy có đủ lõi CPU; nếu có nhiều luồng hơn lõi, hệ điều hành cho các luồng thay phiên nhau rất nhanh. Ngoài ra "kho chung" là cả một chuyện lớn (hai người cùng sửa một món); bài này tránh nó, Bài 25 mới tới.</p>
+<p>Đầu bếp thật đứng song song. Luồng chỉ chạy song song thật khi máy có đủ lõi CPU; nếu có nhiều luồng hơn lõi, hệ điều hành cho các luồng thay phiên nhau rất nhanh. Ngoài ra "kho chung" là cả một chuyện lớn (hai người cùng sửa một món); bài này tránh nó, <a href="../25-data-race-mutex/">Bài 25</a> mới tới.</p>
 </div>
 <h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
 <h3 id="1-tien-trinh-va-luong">1. Tiến trình và luồng<a class="headerlink" href="#1-tien-trinh-va-luong" title="Permanent link">&para;</a></h3>
@@ -1503,7 +1503,7 @@
 <tr>
 <td>Nói chuyện với nhau</td>
 <td>Phải nhờ hệ điều hành (ống là kênh một chiều giữa hai tiến trình, socket, bộ nhớ chia sẻ)</td>
-<td>Đọc ghi thẳng vào biến chung (nên phải cẩn thận, Bài 25)</td>
+<td>Đọc ghi thẳng vào biến chung (nên phải cẩn thận, <a href="../25-data-race-mutex/">Bài 25</a>)</td>
 </tr>
 <tr>
 <td>Một luồng gặp lỗi nặng (truy cập bộ nhớ sai)</td>
@@ -1568,10 +1568,10 @@
 <p><strong>Kết quả khi chạy:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>tong = 5050
 </code></pre></div>
-<p>Mình cũng chạy chương trình này với <code>-fsanitize=thread</code> (công cụ bắt lỗi luồng, Bài 25 sẽ dạy): không có cảnh báo nào.</p>
+<p>Mình cũng chạy chương trình này với <code>-fsanitize=thread</code> (công cụ bắt lỗi luồng, <a href="../25-data-race-mutex/">Bài 25</a> sẽ dạy): không có cảnh báo nào.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
-<p><code>go f(x)</code> ↔ <code>std::thread t(f, x)</code>, nhưng C++ bắt bạn nói rõ chuyện chờ: <code>wg.Wait()</code> của <code>sync.WaitGroup</code> ứng với <code>t.join()</code> (mỗi <code>thread</code> tự <code>join</code>, không có bộ đếm chung). Go còn khác ở chỗ quên chờ không sao cả: khi <code>main</code> kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên <code>join</code>/<code>detach</code> thì chương trình bị <code>std::terminate</code> (mục 5). Thư viện chuẩn C++ cũng <strong>không có channel</strong>; Bài 27 dùng hàng đợi và <code>condition_variable</code> thay thế.</p>
+<p><code>go f(x)</code> ↔ <code>std::thread t(f, x)</code>, nhưng C++ bắt bạn nói rõ chuyện chờ: <code>wg.Wait()</code> của <code>sync.WaitGroup</code> ứng với <code>t.join()</code> (mỗi <code>thread</code> tự <code>join</code>, không có bộ đếm chung). Go còn khác ở chỗ quên chờ không sao cả: khi <code>main</code> kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên <code>join</code>/<code>detach</code> thì chương trình bị <code>std::terminate</code> (mục 5). Thư viện chuẩn C++ cũng <strong>không có channel</strong>; <a href="../27-condition-variable/">Bài 27</a> dùng hàng đợi và <code>condition_variable</code> thay thế.</p>
 </div>
 <h3 id="3-truyen-tham-so-mac-inh-la-sao-chep">3. Truyền tham số: mặc định là sao chép<a class="headerlink" href="#3-truyen-tham-so-mac-inh-la-sao-chep" title="Permanent link">&para;</a></h3>
 <p>Các đối số đưa vào <code>std::thread t(f, a, b)</code> được <strong>chép vào bộ nhớ riêng của luồng mới</strong>, rồi hàm <code>f</code> nhận bản chép đó. Lý do nằm ở thời điểm: luồng mới có thể chạy rất muộn, lúc hàm đã gọi <code>std::thread</code> kết thúc và biến <code>a</code> trên stack của nó đã chết. Nếu luồng giữ tham chiếu tới <code>a</code> thì nó trỏ vào chỗ đã dọn (<a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a>). Vì vậy chuẩn chọn mặc định an toàn: luồng giữ <strong>bản sao riêng</strong>.</p>
@@ -1716,7 +1716,7 @@
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>luong nen: nhan so 42
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>main ket thuc
 </code></pre></div>
-<p>Thứ tự dòng thứ ba và thứ tư chỉ <strong>dựa vào giấc ngủ</strong>, không phải bảo đảm của chuẩn: nếu máy bận, luồng nền có thể chậm hơn 0,3 giây. Đó là lý do <code>detach</code> khó dùng: bạn không có cách chắc chắn biết việc nền xong (Bài 27 và Bài 29 có cách).</p>
+<p>Thứ tự dòng thứ ba và thứ tư chỉ <strong>dựa vào giấc ngủ</strong>, không phải bảo đảm của chuẩn: nếu máy bận, luồng nền có thể chậm hơn 0,3 giây. Đó là lý do <code>detach</code> khó dùng: bạn không có cách chắc chắn biết việc nền xong (<a href="../27-condition-variable/">Bài 27</a> và <a href="../29-async-future/">Bài 29</a> có cách).</p>
 <p><strong>Thử thay đổi: ở dòng (5) đổi 400 thành 10.</strong> Mình đã chạy ba lần: dòng <code>luong nen: ...</code> không bao giờ hiện, chỉ có <code>main ket thuc</code>. <code>main</code> kết thúc thì cả chương trình dừng, kể cả luồng nền đang dở; không ai chờ nó.</p>
 <h3 id="5-ba-loi-hay-gap">5. Ba lỗi hay gặp<a class="headerlink" href="#5-ba-loi-hay-gap" title="Permanent link">&para;</a></h3>
 <p><strong>Lỗi 1: hủy <code>std::thread</code> còn joinable.</strong> Bỏ <code>join</code> và <code>detach</code> rồi để <code>t</code> chết (ra khỏi phạm vi, hay <code>main</code> kết thúc): hàm hủy của <code>std::thread</code> gọi <code>std::terminate</code> (<a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a>). Lý do thường được nêu: tự <code>join</code> ngầm sẽ chờ lâu bất ngờ, tự <code>detach</code> ngầm sẽ để lại luồng dùng biến đã chết; chuẩn chọn cách làm lỗi nổ to thay vì lặng lẽ.</p>
@@ -1757,7 +1757,7 @@
 </code></pre></div>
 <p>Mình đã chạy: lần thường in một số rác khác nhau mỗi lần (ba lần ra <code>941067184</code>, <code>2115781296</code>, <code>-827094560</code>). Với <code>-fsanitize=address</code>, ASan báo <code>stack-buffer-overflow</code> ("READ of size 8", trong luồng phụ, dòng (3)); vùng stack của <code>khoiDong</code> đã được một lệnh gọi khác dùng lại. Với <code>-fsanitize=thread</code>, chương trình sập ngay vì đọc địa chỉ rác.</p>
 <p>Cách sửa: bản sao (<code>[so]</code>), hoặc <code>join</code> trước khi hàm kết thúc.</p>
-<p><strong>Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.</strong> Ngoại lệ không được <code>catch</code> bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi <code>std::terminate</code> và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có <code>throw 1;</code>: g++ in <code>terminate called after throwing an instance of 'int'</code> và thoát với mã 134, y như ngoại lệ không bắt ở <code>main</code> (<a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a>). Muốn xử lý, <code>try</code>/<code>catch</code> ngay trong hàm của luồng; Bài 29 có cách chuyển ngoại lệ sang luồng khác. (Go: goroutine <code>panic</code> mà không <code>recover</code> cũng làm cả chương trình chết, mình đã chạy: mã thoát 2.)</p>
+<p><strong>Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.</strong> Ngoại lệ không được <code>catch</code> bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi <code>std::terminate</code> và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có <code>throw 1;</code>: g++ in <code>terminate called after throwing an instance of 'int'</code> và thoát với mã 134, y như ngoại lệ không bắt ở <code>main</code> (<a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a>). Muốn xử lý, <code>try</code>/<code>catch</code> ngay trong hàm của luồng; <a href="../29-async-future/">Bài 29</a> có cách chuyển ngoại lệ sang luồng khác. (Go: goroutine <code>panic</code> mà không <code>recover</code> cũng làm cả chương trình chết, mình đã chạy: mã thoát 2.)</p>
 <h3 id="6-raii-boc-thread-luon-uoc-join">6. RAII bọc <code>thread</code>: luôn được <code>join</code><a class="headerlink" href="#6-raii-boc-thread-luon-uoc-join" title="Permanent link">&para;</a></h3>
 <p><a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> dạy: hàm hủy chạy cả khi hàm thoát vì ngoại lệ. Ta dùng đúng ý đó: một lớp nhỏ giữ <code>std::thread</code> và <code>join</code> nó trong hàm hủy. Hai chi tiết cú pháp trong code dưới (ta dùng <code>struct</code> như các bài trước):</p>
 <ul>
@@ -1837,9 +1837,9 @@
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>tong = 5050
 </code></pre></div>
 <p><strong>Thử thay đổi: bỏ <code>LuongTuJoin g(std::move(t));</code> và để <code>t</code> trần, gọi <code>t.join()</code> sau <code>throw</code>.</strong> Mình đã chạy: <code>throw</code> thoát hàm trước khi tới <code>t.join()</code>, nên <code>t</code> bị hủy khi còn joinable; chương trình in <code>terminate called without an active exception</code> (mã 134) và không bao giờ tới <code>catch</code> để in <code>bat duoc ma</code>. Lớp bọc cứu đúng chỗ này.</p>
-<h3 id="7-vai-tien-ich-so-loi-va-sleep_for">7. Vài tiện ích: số lõi và <code>sleep_for</code><a class="headerlink" href="#7-vai-tien-ich-so-loi-va-sleep_for" title="Permanent link">&para;</a></h3>
+<h3 id="7-vai-tien-ich-so-luong-phan-cung-va-sleep_for">7. Vài tiện ích: số luồng phần cứng và <code>sleep_for</code><a class="headerlink" href="#7-vai-tien-ich-so-luong-phan-cung-va-sleep_for" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>std::thread::hardware_concurrency()</code> trả một <code>unsigned</code> là <strong>gợi ý</strong> về số luồng phần cứng chạy cùng lúc (chuẩn cho phép trả <code>0</code> nếu không biết).</li>
+<li><code>std::thread::hardware_concurrency()</code> trả một <code>unsigned</code> là <strong>gợi ý</strong> về số luồng phần cứng chạy cùng lúc (chuẩn cho phép trả <code>0</code> nếu không biết). Đó là số <strong>luồng</strong> phần cứng, không phải số lõi: CPU có siêu phân luồng cho mỗi lõi chạy hai luồng thì con số gấp đôi số lõi.</li>
 <li><code>std::this_thread::sleep_for(d)</code> làm luồng này ngủ <strong>ít nhất</strong> khoảng <code>d</code>.</li>
 <li><code>std::chrono::steady_clock::now()</code> là thời điểm hiện tại của đồng hồ chạy đều (không nhảy khi ai đó chỉnh giờ).</li>
 </ul>
@@ -1864,7 +1864,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>hardware_concurrency = 8
 <a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>ngu it nhat 50 ms? 1
 </code></pre></div>
-<p>Dòng đầu là của máy mình (8 luồng phần cứng); máy bạn in số khác.</p>
+<p>Dòng đầu là của máy mình (4 lõi, mỗi lõi hai luồng, nên 8 luồng phần cứng); máy bạn in số khác.</p>
 <h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
 <h3 id="chia-viec-cho-bon-luong-bang-lambda">Chia việc cho bốn luồng bằng lambda<a class="headerlink" href="#chia-viec-cho-bon-luong-bang-lambda" title="Permanent link">&para;</a></h3>
 <p>Bài toán: cộng 1000 số <code>1..1000</code> nằm trong một <code>vector</code> (ở heap). Ta chia làm bốn đoạn 250 phần tử, mỗi luồng cộng một đoạn và ghi tổng phần vào <strong>ô riêng</strong> của nó trong <code>tongPhan</code>, rồi luồng chính cộng bốn tổng phần. Hai luồng không bao giờ ghi cùng một ô, và <code>so</code> chỉ được đọc, nên không có tranh chấp.</p>
@@ -2060,7 +2060,7 @@
 <li>Luồng bị bỏ lại chạy nền, vì hàm thoát sớm nên không ai <code>join</code> nó</li>
 <li>Luồng bị dừng ngay mà không chờ, vì ngoại lệ hủy mọi luồng của hàm</li>
 </ul>
-<p class="giai-thich">Biến cục bộ <code>g</code> vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở Bài 08. Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự <code>detach</code> nó. <code>terminate</code> chỉ gọi nếu <code>std::thread</code> bị hủy lúc còn joinable, mà ở đây <code>g</code> đã <code>join</code> trước đó. Ngoại lệ được <code>catch</code> ở nơi gọi nên không rơi vào trường hợp không ai bắt.</p>
+<p class="giai-thich">Biến cục bộ <code>g</code> vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a>. Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự <code>detach</code> nó. <code>terminate</code> chỉ gọi nếu <code>std::thread</code> bị hủy lúc còn joinable, mà ở đây <code>g</code> đã <code>join</code> trước đó. Ngoại lệ được <code>catch</code> ở nơi gọi nên không rơi vào trường hợp không ai bắt.</p>
 </div>
 <div class="cau-hoi" data-dap-an="3">
 <p><strong>Câu 8.</strong> Một hàm chạy trong luồng phụ ném ngoại lệ và không có <code>catch</code> nào bên trong hàm đó. Chuyện gì xảy ra?</p>
@@ -2070,7 +2070,7 @@
 <li>Chương trình gọi <code>std::terminate</code> và dừng cả chương trình</li>
 <li>Ngoại lệ được cất lại và <code>join</code> sẽ ném lại ở luồng chính</li>
 </ul>
-<p class="giai-thich">Ngoại lệ không được bắt ngay trong hàm của luồng thì thoát khỏi hàm đó và <code>std::terminate</code> được gọi, dừng mọi luồng. Ngăn xếp của mỗi luồng riêng, nên <code>catch</code> ở luồng chính không thể bắt thứ ném ở luồng khác. Cũng không có nơi nào âm thầm nuốt hay cất ngoại lệ; việc chuyển ngoại lệ sang luồng khác cần cơ chế riêng mà Bài 29 mới dạy.</p>
+<p class="giai-thich">Ngoại lệ không được bắt ngay trong hàm của luồng thì thoát khỏi hàm đó và <code>std::terminate</code> được gọi, dừng mọi luồng. Ngăn xếp của mỗi luồng riêng, nên <code>catch</code> ở luồng chính không thể bắt thứ ném ở luồng khác. Cũng không có nơi nào âm thầm nuốt hay cất ngoại lệ; việc chuyển ngoại lệ sang luồng khác cần cơ chế riêng mà <a href="../29-async-future/">Bài 29</a> mới dạy.</p>
 </div>
 </div>
 <h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>

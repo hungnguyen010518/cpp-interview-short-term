@@ -1623,7 +1623,7 @@
 </tr>
 <tr>
 <td>cache (bộ nhớ đệm)</td>
-<td>Chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, khỏi làm lại</td>
+<td>Chỗ cất tạm kết quả vừa dùng để lần sau lấy cho nhanh, khỏi làm lại (bộ nhớ đệm phần mềm; khác bộ nhớ đệm phần cứng của CPU ở <a href="../nhom-3-da-luong/30-thread-pool-hieu-nang/">Bài 30</a>)</td>
 <td><a href="../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a></td>
 </tr>
 <tr>
@@ -1638,8 +1638,8 @@
 </tr>
 <tr>
 <td>data race</td>
-<td>Hai luồng cùng truy cập một biến, ít nhất một luồng ghi, mà không có đồng bộ; là UB</td>
-<td><a href="../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> (nhắc, gọi là tranh chấp dữ liệu), <a href="../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a></td>
+<td>Hai luồng cùng truy cập một ô nhớ, ít nhất một luồng ghi, mà không có đồng bộ; là UB</td>
+<td><a href="../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> (gọi là tranh chấp dữ liệu), <a href="../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>, <a href="../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a> (định nghĩa chuẩn, UB, bắt bằng TSan)</td>
 </tr>
 <tr>
 <td>luồng (thread)</td>
@@ -1648,8 +1648,8 @@
 </tr>
 <tr>
 <td>nguyên tử (atomic)</td>
-<td>Thao tác mà luồng khác không thể chen vào giữa chừng; bộ đếm của <code>shared_ptr</code> được cập nhật như vậy</td>
-<td><a href="../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a></td>
+<td>Thao tác mà luồng khác không thể chen vào giữa chừng; bộ đếm của <code>shared_ptr</code> được cập nhật như vậy; <code>std::atomic</code> dạy ở Bài 28</td>
+<td><a href="../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a>, <a href="../nhom-3-da-luong/28-atomic/">Bài 28</a></td>
 </tr>
 <tr>
 <td>sao chép nông (shallow copy)</td>
@@ -1883,8 +1883,8 @@
 </tr>
 <tr>
 <td>ThreadSanitizer / TSan</td>
-<td>Sanitizer bắt data race, bật bằng <code>-fsanitize=thread</code>, không ghép được với ASan; ứng với <code>go run -race</code> của Go; chỉ nêu tên</td>
-<td><a href="../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a></td>
+<td>Sanitizer bắt data race, bật bằng <code>-fsanitize=thread</code>, không ghép được với ASan; ứng với <code>go run -race</code> của Go. Dạy ở Bài 25 (đọc báo cáo <code>data race</code>), Bài 26 thêm <code>lock-order-inversion</code>; thoát mã 66 khi báo lỗi; trên máy mình cần chạy qua <code>setarch $(uname -m) -R</code></td>
+<td><a href="../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>, <a href="../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a>, <a href="../nhom-3-da-luong/26-deadlock/">Bài 26</a></td>
 </tr>
 <tr>
 <td>red zone (vùng đệm đỏ) / shadow memory</td>
@@ -2298,7 +2298,7 @@
 </tr>
 <tr>
 <td>hardware_concurrency</td>
-<td><code>std::thread::hardware_concurrency()</code> trả gợi ý số luồng phần cứng chạy cùng lúc; chuẩn cho phép trả <code>0</code> nếu không biết</td>
+<td><code>std::thread::hardware_concurrency()</code> trả gợi ý số luồng phần cứng chạy cùng lúc; đếm luồng phần cứng, không đếm lõi (siêu phân luồng thì gấp đôi số lõi; máy mình 4 lõi, trả 8); chuẩn cho phép trả <code>0</code> nếu không biết</td>
 <td><a href="../nhom-3-da-luong/24-thread-co-ban/">Bài 24</a></td>
 </tr>
 <tr>
@@ -2320,6 +2320,16 @@
 <td>race condition</td>
 <td>Lỗi logic: kết quả đúng hay sai phụ thuộc thứ tự các luồng chạy; có thể còn ngay cả khi không có data race (ví dụ kiểm-rồi-làm giữa hai lần khóa riêng lẻ)</td>
 <td><a href="../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a></td>
+</tr>
+<tr>
+<td>đồng bộ (synchronization) / xung đột (conflict)</td>
+<td>Chuẩn gọi hai thao tác là <strong>xung đột</strong> nếu cùng truy cập một ô nhớ và ít nhất một bên ghi; <strong>đồng bộ</strong> là ép chúng có thứ tự rõ ràng (bằng <code>mutex</code>, <code>join</code>, <code>std::atomic</code>...). Xung đột từ hai luồng mà không có đồng bộ là data race</td>
+<td><a href="../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a></td>
+</tr>
+<tr>
+<td>thanh ghi (register) / mã hợp ngữ (assembly)</td>
+<td>Thanh ghi là chỗ chứa số tạm ngay trong CPU (<code>++dem</code> đọc vào đó, cộng, ghi lại). Mã hợp ngữ là các lệnh máy viết dạng chữ (<code>g++ -O2 -S</code> sinh ra), dùng để xem trình biên dịch thật sự làm gì</td>
+<td><a href="../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a>, <a href="../nhom-3-da-luong/28-atomic/">Bài 28</a></td>
 </tr>
 <tr>
 <td>std::mutex (lock / unlock)</td>
@@ -2363,7 +2373,7 @@
 </tr>
 <tr>
 <td>deadlock (khóa chết)</td>
-<td>Các luồng chờ nhau theo vòng tròn, mỗi luồng giữ thứ luồng khác cần, nên không luồng nào chạy tiếp; C++ không tự phát hiện (chương trình treo im lặng)</td>
+<td>Các luồng chờ nhau theo vòng tròn, mỗi luồng giữ thứ luồng khác cần, nên không luồng nào chạy tiếp; g++ không tự phát hiện và chuẩn không đòi (chương trình treo im lặng)</td>
 <td><a href="../nhom-3-da-luong/26-deadlock/">Bài 26</a></td>
 </tr>
 <tr>
@@ -2447,13 +2457,18 @@
 <td><a href="../nhom-3-da-luong/27-condition-variable/">Bài 27</a></td>
 </tr>
 <tr>
+<td>hàng đợi có giới hạn (bounded queue)</td>
+<td>Hàng chứa tối đa N phần tử: đầy thì producer phải chờ, rỗng thì consumer chờ; dùng hai <code>condition_variable</code> ("còn chỗ" và "có việc")</td>
+<td><a href="../nhom-3-da-luong/27-condition-variable/">Bài 27</a></td>
+</tr>
+<tr>
 <td>dừng sạch (cờ xong + notify_all)</td>
 <td>Đặt cờ <code>xong = true</code> dưới khóa, <code>notify_all</code> để mọi luồng đang ngủ dậy thấy cờ, consumer thoát khi hàng rỗng <strong>và</strong> <code>xong</code>, rồi <code>join</code>; báo dừng bằng <code>notify_one</code> có thể bỏ sót luồng</td>
 <td><a href="../nhom-3-da-luong/27-condition-variable/">Bài 27</a></td>
 </tr>
 <tr>
 <td>notify_one vs notify_all</td>
-<td><code>notify_one</code> đánh thức nhiều nhất một luồng đang chờ (chuẩn không nói luồng nào): cho một món một người dùng. <code>notify_all</code> đánh thức tất cả: cho thay đổi mọi người phải biết. Notify trong hay sau khi nhả khóa đều đúng; nhả trước thường hiệu quả hơn</td>
+<td><code>notify_one</code> đánh thức nhiều nhất một luồng đang chờ (chuẩn không nói luồng nào): cho một món một người dùng. <code>notify_all</code> đánh thức tất cả: cho thay đổi mọi người phải biết. Notify trong hay sau khi nhả khóa đều đúng; nhả trước thường được khuyên (mình không đo, đừng coi là luật)</td>
 <td><a href="../nhom-3-da-luong/27-condition-variable/">Bài 27</a></td>
 </tr>
 <tr>
@@ -2507,6 +2522,11 @@
 <td><a href="../nhom-3-da-luong/28-atomic/">Bài 28</a></td>
 </tr>
 <tr>
+<td>wait-free</td>
+<td>Mạnh hơn lock-free: <strong>mọi</strong> luồng đều xong thao tác trong số bước hữu hạn, dù luồng khác làm gì; chỉ nêu tên</td>
+<td><a href="../nhom-3-da-luong/28-atomic/">Bài 28</a></td>
+</tr>
+<tr>
 <td>std::atomic_flag (test_and_set / clear)</td>
 <td>Atomic nhỏ nhất, một cờ hai trạng thái: <code>test_and_set()</code> đặt cờ lên và trả giá trị cũ, <code>clear()</code> hạ cờ; chuẩn bảo đảm lock-free.</td>
 <td><a href="../nhom-3-da-luong/28-atomic/">Bài 28</a></td>
@@ -2539,6 +2559,21 @@
 <tr>
 <td>std::packaged_task / std::shared_future</td>
 <td><code>packaged_task&lt;int(int, int)&gt;</code> bọc một hàm, chạy khi được gọi (hay trao cho luồng), kết quả vào future; không sao chép được, phải <code>std::move</code>. <code>shared_future</code> là future sao chép được, nhiều luồng cùng <code>get()</code> (chỉ nhắc tên)</td>
+<td><a href="../nhom-3-da-luong/29-async-future/">Bài 29</a></td>
+</tr>
+<tr>
+<td>[[nodiscard]] / cảnh báo <code>nodiscard</code></td>
+<td>Thuộc tính đánh dấu "đừng bỏ giá trị trả về"; hàm như <code>std::async</code> có nó, nên gọi mà không giữ future thì g++ cảnh báo <code>ignoring return value</code>. Cảnh báo ấy chính là dấu hiệu của bẫy future tạm</td>
+<td><a href="../nhom-3-da-luong/29-async-future/">Bài 29</a></td>
+</tr>
+<tr>
+<td>catch (...)</td>
+<td><code>catch (...)</code> (ba dấu chấm thật) bắt ngoại lệ <strong>bất kỳ kiểu nào</strong>; thường đi với <code>std::current_exception()</code> để chuyển ngoại lệ sang <code>promise</code></td>
+<td><a href="../nhom-3-da-luong/29-async-future/">Bài 29</a></td>
+</tr>
+<tr>
+<td>hậu tố <code>LL</code> / time_point</td>
+<td><code>0LL</code> là số <code>long long</code> (cần khi tổng vượt <code>int</code>). <code>std::chrono::steady_clock::time_point</code> là kiểu của một thời điểm, thứ <code>now()</code> trả về; trừ hai thời điểm ra khoảng thời gian</td>
 <td><a href="../nhom-3-da-luong/29-async-future/">Bài 29</a></td>
 </tr>
 <tr>

@@ -1521,7 +1521,7 @@
 </table>
 <p>Mình chạy một luồng với <code>n{10}</code>: <code>store(20)</code>, rồi <code>fetch_add(5)</code> trả <code>20</code> (và <code>n</code> thành 25), rồi <code>exchange(100)</code> trả <code>25</code>, rồi <code>++n</code> cho <code>n = 101</code>. Hai điều hay nhầm: <code>fetch_add</code> trả giá trị <strong>cũ</strong>, và <code>std::atomic</code> <strong>không sao chép được</strong> (mình thử <code>std::atomic&lt;int&gt; b = a;</code>: <code>error: use of deleted function ‘std::atomic&lt;int&gt;::atomic(const std::atomic&lt;int&gt;&amp;)’</code>).</p>
 <h3 id="2-noi-lai-vi-du-em-chung-cua-bai-25">2. Nối lại ví dụ đếm chung của Bài 25<a class="headerlink" href="#2-noi-lai-vi-du-em-chung-cua-bai-25" title="Permanent link">&para;</a></h3>
-<p>Đây là chương trình của <a href="../25-data-race-mutex/">Bài 25</a>: bốn luồng, mỗi luồng tăng biến chung 100000 lần. Bài 25 cho kết quả sai (và TSan báo data race) vì biến là <code>int</code> thường. Lần này <strong>chỉ đổi kiểu</strong> của <code>dem</code>.</p>
+<p>Đây là chương trình của <a href="../25-data-race-mutex/">Bài 25</a>: bốn luồng, mỗi luồng tăng biến chung 100000 lần. <a href="../25-data-race-mutex/">Bài 25</a> cho kết quả sai (và TSan báo data race) vì biến là <code>int</code> thường. Lần này <strong>chỉ đổi kiểu</strong> của <code>dem</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;thread&gt;</span>
@@ -1560,7 +1560,7 @@
 </tr>
 <tr>
 <td><code>join</code></td>
-<td>Luồng chính chờ cả bốn xong (đồng bộ như Bài 25)</td>
+<td>Luồng chính chờ cả bốn xong (đồng bộ như <a href="../25-data-race-mutex/">Bài 25</a>)</td>
 <td>400000</td>
 </tr>
 <tr>
@@ -1573,7 +1573,7 @@
 <p><strong>Kết quả khi chạy</strong> (năm lần liền đều như nhau; không tối ưu và <code>-O2</code> đều vậy):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mong doi 400000, thuc te 400000
 </code></pre></div>
-<p>Mình chạy với <code>-fsanitize=thread</code> (cả không tối ưu và <code>-O2</code>, qua <code>setarch $(uname -m) -R</code> như Bài 25): không cảnh báo, mã thoát 0. Khác với <code>int</code> thường ở <code>-O2</code> (có lúc ra đúng nhờ may mà TSan vẫn báo), ở đây đúng theo chuẩn.</p>
+<p>Mình chạy với <code>-fsanitize=thread</code> (cả không tối ưu và <code>-O2</code>, qua <code>setarch $(uname -m) -R</code> như <a href="../25-data-race-mutex/">Bài 25</a>): không cảnh báo, mã thoát 0. Khác với <code>int</code> thường ở <code>-O2</code> (mình chạy 20 lần đều ra đúng nhờ may, mà TSan vẫn báo), ở đây đúng theo chuẩn.</p>
 <p><strong>Thử thay đổi: đổi <code>++dem;</code> thành <code>dem = dem + 1;</code>.</strong> Mình đã chạy:</p>
 <ul>
 <li>Kết quả: vẫn biên dịch, nhưng sai và đổi mỗi lần (<code>114247</code>, <code>113895</code>, <code>105750</code>, <code>104864</code>, <code>107086</code>); TSan <strong>không</strong> báo gì (mã thoát 0).</li>
@@ -1583,14 +1583,13 @@
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
 <p><code>sync/atomic</code> của Go làm đúng việc này: <code>atomic.AddInt64(&amp;n, 1)</code> (hàm nhận con trỏ, cách cũ) hoặc kiểu <code>atomic.Int64</code> với <code>n.Add(1)</code>, <code>n.Load()</code>, <code>n.Store(v)</code>, <code>n.Swap(v)</code> (kiểu này có từ Go 1.19). Mình chạy bốn goroutine, mỗi cái tăng 100000 lần: cả hai cách ra <code>400000</code>, <code>go run -race</code> không báo gì; một biến <code>int64</code> thường cùng <code>thuong++</code> thì <code>-race</code> báo <code>WARNING: DATA RACE</code>.</p>
-<p>Khác chỗ:</p>
 <ul>
-<li><code>Add</code> của Go trả giá trị <strong>mới</strong> (mình chạy: <code>Store(10)</code> rồi <code>Add(5)</code> ra <code>15</code>), còn <code>fetch_add</code> của C++ trả giá trị <strong>cũ</strong>.</li>
+<li>Khác chỗ: <code>Add</code> của Go trả giá trị <strong>mới</strong> (mình chạy: <code>Store(10)</code> rồi <code>Add(5)</code> ra <code>15</code>), còn <code>fetch_add</code> của C++ trả giá trị <strong>cũ</strong>.</li>
 <li>Go không có tham số <code>memory_order</code> để chọn. Tài liệu của Go (<code>go doc sync/atomic</code>) nói mọi thao tác atomic hành xử như thể chạy theo một thứ tự tuần tự chung, cùng ngữ nghĩa với atomic <code>seq_cst</code> của C++ và với <code>volatile</code> của Java.</li>
 </ul>
 </div>
 <h3 id="3-atomic-va-mutex-o-chi-phi">3. Atomic và mutex: đo chi phí<a class="headerlink" href="#3-atomic-va-mutex-o-chi-phi" title="Permanent link">&para;</a></h3>
-<p>Cùng một việc đếm, hai cách: <code>lock_guard</code> quanh <code>++</code> (<a href="../25-data-race-mutex/">Bài 25</a>) hay atomic. Mỗi luồng tăng một triệu lần, bốn luồng; <code>chay</code> nhận một con trỏ hàm và đo bằng <code>std::chrono</code>, như Bài 25.</p>
+<p>Cùng một việc đếm, hai cách: <code>lock_guard</code> quanh <code>++</code> (<a href="../25-data-race-mutex/">Bài 25</a>) hay atomic. Mỗi luồng tăng một triệu lần, bốn luồng; <code>chay</code> nhận một con trỏ hàm và đo bằng <code>std::chrono</code>, như <a href="../25-data-race-mutex/">Bài 25</a>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;chrono&gt;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
@@ -1628,37 +1627,14 @@
 <a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="p">}</span>
 </code></pre></div>
-<p><strong>Chạy từng dòng</strong></p>
-<table>
-<thead>
-<tr>
-<th>Dòng</th>
-<th>Chuyện gì xảy ra</th>
-<th>Việc đang làm</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>chay(bangMutex)</code></td>
-<td>Bốn luồng xếp hàng xin thẻ cho từng lần <code>++</code></td>
-<td>4 triệu lần xin và trả khóa</td>
-</tr>
-<tr>
-<td><code>chay(bangAtomic)</code></td>
-<td>Bốn luồng cùng <code>++</code> một biến atomic, không thẻ</td>
-<td>4 triệu thao tác nguyên tử</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Kết quả khi chạy</strong> (g++ 11, máy 8 lõi, CPU x86-64, không tối ưu; dòng đầu luôn như nhau):</p>
+<p><strong>Kết quả khi chạy</strong> (g++ 11, máy 4 lõi 8 luồng phần cứng, CPU x86-64, không tối ưu; dòng đầu luôn như nhau):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>tong: 4000000 4000000
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>mutex 254 ms, atomic 69 ms
 </code></pre></div>
 <p>Mẫu đáng nhớ: trên máy mình atomic nhanh hơn mutex khoảng 4 lần ở việc đếm này (các lần chạy của mình ra từ 3,7 đến 5,4 lần, cả không tối ưu lẫn <code>-O2</code>). Mọi con số đổi theo máy, số lõi, mức <code>-O</code> và độ bận lúc chạy. Atomic cũng không miễn phí: các lõi vẫn phải tranh nhau một ô nhớ; nó chỉ rẻ hơn việc xin khóa, nhả khóa và ngủ chờ. Đừng đo hiệu năng khi bật TSan: một lần chạy của mình mất gần 5 s tổng.</p>
 <h3 id="4-compare_exchange-so-sanh-roi-oi-trong-mot-nhip">4. <code>compare_exchange</code>: so sánh rồi đổi trong một nhịp<a class="headerlink" href="#4-compare_exchange-so-sanh-roi-oi-trong-mot-nhip" title="Permanent link">&para;</a></h3>
 <p>Bài toán: tăng <code>dem</code> thêm 1 <strong>chỉ khi</strong> nó còn nhỏ hơn một giới hạn (250000), từ bốn luồng, mỗi luồng cố tăng 100000 lần. Cách "kiểm rồi tăng" bằng hai lệnh atomic rời nhau (<code>if (dem.load() &lt; GIOI_HAN) dem.fetch_add(1);</code>) là sai: giữa kiểm và tăng, luồng khác chen vào được.</p>
-<p>Mình chạy đúng cách làm đó 20 lần ở mỗi mức tối ưu (không tối ưu và <code>-O2</code>): lần này <code>dem</code> lần nào cũng vượt giới hạn (<code>250002</code> hoặc <code>250003</code>). Kết quả đổi theo mức tối ưu, theo lần chạy và độ bận của máy; có lúc ra đúng <code>250000</code> do may, nên "ra đúng" không chứng minh cách này đúng, và chuẩn không hứa kết quả cụ thể nào. TSan (chạy một lần) không báo gì, mã thoát 0.</p>
-<p>Đây là <strong>race condition</strong> (<a href="../25-data-race-mutex/">Bài 25</a>), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.</p>
+<p>Mình chạy đúng cách làm đó 20 lần ở mỗi mức tối ưu (không tối ưu và <code>-O2</code>): lần này <code>dem</code> lần nào cũng vượt giới hạn (<code>250002</code> hoặc <code>250003</code>). Kết quả đổi theo mức tối ưu, theo lần chạy và độ bận của máy; có lúc ra đúng <code>250000</code> do may, nên "ra đúng" không chứng minh cách này đúng, và chuẩn không hứa kết quả cụ thể nào. TSan (chạy một lần) không báo gì, mã thoát 0. Đây là <strong>race condition</strong> (<a href="../25-data-race-mutex/">Bài 25</a>), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.</p>
 <p>Cách đúng là <strong><code>compare_exchange</code></strong>: "nếu <code>dem</code> <strong>vẫn đang bằng</strong> giá trị <code>cu</code> tôi đã thấy thì đổi thành <code>cu + 1</code> và báo <code>true</code>; nếu không thì <strong>không đổi</strong> và báo <code>false</code>". Cả việc so sánh lẫn việc đổi là <strong>một nhịp</strong> nguyên tử, không ai chen vào giữa. Khi thất bại, hàm còn <strong>ghi giá trị hiện tại vào <code>cu</code></strong> (nên <code>cu</code> được truyền như tham chiếu) để bạn thử lại ngay.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
@@ -1737,8 +1713,7 @@
 </code></pre></div>
 <p>Tổng 400000 lần thử, đúng 250000 lần thành công, <code>dem</code> dừng đúng ở giới hạn. Khi mình đếm thêm số lần <code>compare_exchange_weak</code> thất bại (qua một biến đếm phụ), được từ 401896 đến 572745 lần trong năm lượt chạy: bốn luồng tranh nhau phải thử lại nhiều lần, và con số đổi theo lần chạy. Đó là giá của cách làm này khi tranh chấp nặng.</p>
 <p><strong><code>weak</code> hay <code>strong</code>?</strong> Chuẩn C++ nói <code>compare_exchange_weak</code> <strong>được phép thất bại giả</strong> (spurious failure): trả <code>false</code> dù giá trị đang đúng bằng <code>cu</code>; <code>compare_exchange_strong</code> thì chỉ thất bại khi giá trị thật sự khác. Vì thế <code>weak</code> hợp với <strong>vòng lặp thử lại</strong> như trên.</p>
-<p>Mình chạy một luồng, 100 triệu lần <code>weak</code> với giá trị đúng: <strong>0</strong> lần thất bại giả trên máy này, và đổi <code>weak</code> thành <code>strong</code> ở chương trình trên ra cùng kết quả. Đừng suy ra "<code>weak</code> không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa.</p>
-<p><strong>Quy tắc dễ nhớ:</strong> trong vòng lặp dùng <code>weak</code>; một lần duy nhất không lặp thì dùng <code>strong</code>.</p>
+<p>Mình chạy một luồng, 100 triệu lần <code>weak</code> với giá trị đúng: <strong>0</strong> lần thất bại giả trên máy này, và đổi <code>weak</code> thành <code>strong</code> ở chương trình trên ra cùng kết quả. Đừng suy ra "<code>weak</code> không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa. <strong>Quy tắc dễ nhớ:</strong> trong vòng lặp dùng <code>weak</code>; một lần duy nhất không lặp thì dùng <code>strong</code>.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
 <p><code>CompareAndSwap(old, new)</code> của Go (cả <code>atomic.CompareAndSwapInt64(&amp;n, old, new)</code> lẫn <code>n.CompareAndSwap(old, new)</code>) chỉ trả <code>bool</code>; nó <strong>không</strong> cập nhật <code>old</code> như C++, nên vòng lặp của Go phải tự <code>Load()</code> lại ở đầu mỗi vòng. Mình chạy bản Go của bài toán trên: <code>250000 250000</code>, <code>go run -race</code> sạch. Go chỉ có một loại CAS, không có <code>weak</code>/<code>strong</code> để chọn.</p>
@@ -1853,11 +1828,9 @@
 </div>
 <h3 id="6-memory_order-chi-nhac-nguoi-moi-dung-mac-inh">6. <code>memory_order</code>: chỉ nhắc, người mới dùng mặc định<a class="headerlink" href="#6-memory_order-chi-nhac-nguoi-moi-dung-mac-inh" title="Permanent link">&para;</a></h3>
 <p>Các hàm thành viên như <code>load</code>, <code>store</code>, <code>fetch_add</code>, <code>exchange</code> nhận thêm một tham số tùy chọn <strong><code>std::memory_order</code></strong> (thứ tự bộ nhớ): nó nói thao tác đó ràng buộc thứ tự với các lần đọc ghi <strong>khác</strong> quanh nó mạnh đến đâu. Các toán tử như <code>++n</code> hay <code>n = v</code> không có chỗ truyền tham số này và luôn dùng mức mặc định. Mặc định là <strong><code>std::memory_order_seq_cst</code></strong>, mạnh nhất và dễ suy luận nhất: mọi luồng thấy mọi thao tác atomic theo cùng một thứ tự chung.</p>
-<p>Bài này <strong>không</strong> dạy các mức giữa (<code>acquire</code>/<code>release</code>); đó là chủ đề riêng và dễ sai. <strong>Người mới dùng mặc định <code>seq_cst</code></strong>: đừng ghi tham số thứ tự, như ở mọi ví dụ trong bài.</p>
-<p>Mức duy nhất bài nhắc là <strong><code>std::memory_order_relaxed</code></strong>, ví dụ <code>n.fetch_add(1, std::memory_order_relaxed)</code>: nó chỉ bảo đảm thao tác <strong>nguyên tử</strong>, không ràng buộc thứ tự với việc khác. Nó hợp với <strong>bộ đếm thống kê</strong> (mọi luồng chỉ cộng, bạn chỉ đọc kết quả sau <code>join</code>). Đừng dùng <code>relaxed</code> cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Mình thử đổi bộ đếm ở mục 3 sang <code>relaxed</code>: g++ <code>-O2</code> sinh cùng lệnh <code>lock addq $1, ...</code> cho cả hai, và thời gian không khác rõ rệt (atomic 40 đến 50 ms, relaxed 44 đến 47 ms trong ba lần chạy). Đó là chuyện của máy x86-64 mình; trên CPU khác <code>relaxed</code> có thể rẻ hơn.</p>
+<p>Bài này <strong>không</strong> dạy các mức giữa (<code>acquire</code>/<code>release</code>); đó là chủ đề riêng và dễ sai. <strong>Người mới dùng mặc định <code>seq_cst</code></strong>: đừng ghi tham số thứ tự, như ở mọi ví dụ trong bài. Mức duy nhất bài nhắc là <strong><code>std::memory_order_relaxed</code></strong>, ví dụ <code>n.fetch_add(1, std::memory_order_relaxed)</code>: nó chỉ bảo đảm thao tác <strong>nguyên tử</strong>, không ràng buộc thứ tự với việc khác. Nó hợp với <strong>bộ đếm thống kê</strong> (mọi luồng chỉ cộng, bạn chỉ đọc kết quả sau <code>join</code>). Đừng dùng <code>relaxed</code> cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Mình thử đổi bộ đếm ở mục 3 sang <code>relaxed</code>: g++ <code>-O2</code> sinh cùng lệnh <code>lock addq $1, ...</code> cho cả hai, và thời gian không khác rõ rệt (atomic 40 đến 50 ms, relaxed 44 đến 47 ms trong ba lần chạy). Đó là chuyện của máy x86-64 mình; trên CPU khác <code>relaxed</code> có thể rẻ hơn.</p>
 <p><strong><code>volatile</code> không phải atomic.</strong> Từ khóa <code>volatile</code> của C++ dặn trình biên dịch đừng bỏ các lần đọc ghi biến (dùng cho thanh ghi phần cứng); nó <strong>không</strong> làm <code>++</code> nguyên tử và <strong>không</strong> tạo đồng bộ giữa luồng, nên data race trên biến <code>volatile</code> vẫn là hành vi không xác định.</p>
-<p>Mình thử <code>volatile int dem</code> trong chương trình đếm của <a href="../25-data-race-mutex/">Bài 25</a>, <code>-O2</code>: ba lần ra <code>163455</code>, <code>131218</code>, <code>163086</code> (mong 400000), và TSan báo <code>data race</code>. Ở C++, thứ dùng chung giữa luồng là <code>std::atomic</code> (hoặc mutex).</p>
-<p>Trái với Java, nơi <code>volatile</code> là công cụ đồng bộ luồng (dù <code>++</code> vẫn không nguyên tử); Go thì gọi thẳng <code>sync/atomic</code>.</p>
+<p>Mình thử <code>volatile int dem</code> trong chương trình đếm của <a href="../25-data-race-mutex/">Bài 25</a>, <code>-O2</code>: ba lần ra <code>163455</code>, <code>131218</code>, <code>163086</code> (mong 400000), và TSan báo <code>data race</code>. Ở C++, thứ dùng chung giữa luồng là <code>std::atomic</code> (hoặc mutex). Trái với Java, nơi <code>volatile</code> là công cụ đồng bộ luồng (dù <code>++</code> vẫn không nguyên tử); Go thì gọi thẳng <code>sync/atomic</code>.</p>
 <h3 id="7-lock-free-atomic_flag-va-aba">7. Lock-free, <code>atomic_flag</code> và ABA<a class="headerlink" href="#7-lock-free-atomic_flag-va-aba" title="Permanent link">&para;</a></h3>
 <p><strong>Lock-free</strong> có hai nghĩa đời thường, đừng lẫn. Với kiểu atomic: <code>is_lock_free()</code> trả <code>true</code> nếu thao tác chạy bằng lệnh CPU, <strong>không</strong> dùng khóa ngầm trong thư viện. Với thuật toán: lock-free nghĩa là luôn có ít nhất một luồng tiến lên được, dù luồng khác bị hoãn (mục phỏng vấn nói kỹ hơn).</p>
 <p>Mình gọi <code>is_lock_free()</code> thật trên g++ 11, x86-64: <code>std::atomic&lt;int&gt;</code> và <code>std::atomic&lt;long long&gt;</code> đều ra <code>1</code> (<code>true</code>), còn <code>std::atomic</code> của một <code>struct</code> 64 byte ra <code>0</code>. Đó là kết quả của máy mình, chuẩn không hứa.</p>
@@ -2061,12 +2034,12 @@
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>// luồng chính: ngủ 50 ms; dung = true; join
 </code></pre></div>
 <ul>
-<li>Luôn dừng sau cỡ 50 ms, vì luồng chính đã ghi <code>true</code> vào <code>dung</code></li>
+<li>Thường dừng sau cỡ 50 ms, vì luồng chính đã ghi <code>true</code> vào <code>dung</code></li>
 <li>Có data race nên chuẩn không hứa gì: có thể dừng, có thể treo mãi</li>
 <li>Luôn treo mãi, vì luồng nền không bao giờ thấy giá trị mới của <code>dung</code></li>
-<li>Luôn dừng đúng, chỉ riêng giá trị <code>vong</code> có thể sai vì thiếu đồng bộ</li>
+<li>Dừng đúng sau 50 ms, chỉ riêng giá trị <code>vong</code> có thể sai vì thiếu đồng bộ</li>
 </ul>
-<p class="giai-thich">Một luồng đọc, luồng kia ghi cùng ô <code>dung</code> mà không có đồng bộ: đó là data race, hành vi không xác định, nên chuẩn không bảo đảm cách nào cả. Mình chạy cả hai kết quả: không tối ưu thì dừng, còn <code>-O2</code> thì treo. Vì thế "luôn dừng" và "luôn treo" đều quá chắc. Còn nói chỉ riêng <code>vong</code> sai thì sai ở chỗ coi phần còn lại của chương trình vẫn được bảo đảm, trong khi hành vi không xác định chạm cả chương trình.</p>
+<p class="giai-thich">Một luồng đọc, luồng kia ghi cùng ô <code>dung</code> mà không có đồng bộ: đó là data race, hành vi không xác định, nên chuẩn không bảo đảm cách nào cả. Mình chạy cả hai kết quả: không tối ưu thì dừng, còn <code>-O2</code> thì treo. Vì thế "thường dừng" (đúng ở bản không tối ưu) và "luôn treo" đều quá chắc. Còn nói chỉ riêng <code>vong</code> sai thì sai ở chỗ coi phần còn lại của chương trình vẫn được bảo đảm, trong khi hành vi không xác định chạm cả chương trình.</p>
 </div>
 <div class="cau-hoi" data-dap-an="4">
 <p><strong>Câu 5.</strong> Đọc đoạn sau. Luồng 1 chạy <code>--a; ++b;</code> nhiều lần, luồng 2 chạy <code>x = a.load(); y = b.load();</code> rồi kiểm <code>x + y</code>. <code>a</code>, <code>b</code> đều là <code>std::atomic&lt;int&gt;</code> với thứ tự mặc định, <code>a + b</code> ban đầu là 1000. Điều nào đúng?</p>
@@ -2096,12 +2069,12 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>dem = dem + 1;
 </code></pre></div>
 <ul>
-<li>Luôn đúng 400000, vì phép gán <code>=</code> của atomic là một thao tác nguyên tử</li>
+<li>Đúng 400000, vì phép gán <code>=</code> của atomic là một thao tác nguyên tử</li>
 <li>Là hành vi không xác định, vì bốn luồng cùng ghi một biến mà không khóa</li>
-<li>Không có data race, nhưng có thể thiếu, vì đọc và ghi là hai thao tác rời</li>
-<li>Luôn nhỏ hơn 400000, vì mỗi luồng ghi đè hết kết quả của luồng khác</li>
+<li>Không có data race, nhưng có thể thiếu, vì đọc và ghi là hai bước rời</li>
+<li>Nhỏ hơn 400000 mỗi lần chạy, vì mỗi luồng ghi đè hết kết quả của luồng khác</li>
 </ul>
-<p class="giai-thich"><code>dem + 1</code> là một lần <code>load()</code>, rồi <code>=</code> là một lần <code>store()</code>; mỗi lần đều nguyên tử nên không có data race, nhưng giữa hai lần luồng khác chen vào được, nên có thể mất lần tăng. Mình chạy thật: kết quả thiếu và đổi mỗi lần, TSan vẫn sạch. Nói "luôn đúng" nhầm giữa từng thao tác và cả câu lệnh. Nói hành vi không xác định nhầm vì mọi truy cập đều qua atomic. Còn "luôn nhỏ hơn" quá chắc: chuẩn không hứa kết quả cụ thể nào, chỉ là có thể thiếu.</p>
+<p class="giai-thich"><code>dem + 1</code> là một lần <code>load()</code>, rồi <code>=</code> là một lần <code>store()</code>; mỗi lần đều nguyên tử nên không có data race, nhưng giữa hai lần luồng khác chen vào được, nên có thể mất lần tăng. Mình chạy thật: kết quả thiếu và đổi mỗi lần, TSan vẫn sạch. Nói "đúng 400000" nhầm giữa từng thao tác và cả câu lệnh. Nói hành vi không xác định nhầm vì mọi truy cập đều qua atomic. Còn "nhỏ hơn mỗi lần chạy" quá chắc: chuẩn không hứa kết quả cụ thể nào, chỉ là có thể thiếu.</p>
 </div>
 </div>
 <h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>

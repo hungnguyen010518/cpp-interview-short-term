@@ -1489,7 +1489,7 @@
 <li>Tìm deadlock trong chương trình đang treo bằng <code>gdb</code> (<code>info threads</code>, <code>thread apply all bt</code>) và bằng ThreadSanitizer; so với Go, nơi runtime chỉ báo deadlock khi <strong>mọi</strong> goroutine đều ngủ.</li>
 </ul>
 </div>
-<p><strong>Bạn cần biết trước:</strong> <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::thread</code>, <code>join</code>, <code>std::ref</code>, lambda làm hàm luồng, <code>sleep_for</code>), <a href="../25-data-race-mutex/">Bài 25</a> (<code>std::mutex</code>, <code>lock_guard</code>, vùng găng, TSan, khóa hai lần trong một luồng là hành vi không xác định), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, hàm hủy), <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a> (tham chiếu <code>&amp;</code>), <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a> (<code>{...}</code> điền các trường của struct, <code>điều kiện ? A : B</code>), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> và <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda <code>[&amp;]</code>, con trỏ hàm), <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (hành vi không xác định, sanitizer).</p>
+<p><strong>Bạn cần biết trước:</strong> <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::thread</code>, <code>join</code>, <code>std::ref</code>, lambda làm hàm luồng, <code>sleep_for</code>), <a href="../25-data-race-mutex/">Bài 25</a> (<code>std::mutex</code>, <code>lock_guard</code>, vùng găng, TSan), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, hàm hủy), <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a> (tham chiếu <code>&amp;</code>), <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a> (<code>{...}</code> điền các trường của struct, <code>điều kiện ? A : B</code>), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> và <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda <code>[&amp;]</code>, con trỏ hàm), <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (hành vi không xác định, sanitizer).</p>
 <h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
 <p>Quay lại <strong>nhà bếp</strong> của <a href="../25-data-race-mutex/">Bài 25</a>, nhưng giờ bếp có <strong>hai thớt</strong>, mỗi thớt một <strong>thẻ vào thớt</strong>. Món "chuyển hành từ thớt 1 sang thớt 2" cần cầm cả hai thẻ. Đầu bếp An lấy thẻ thớt 1 trước rồi mới đi xin thẻ thớt 2. Đầu bếp Bình lại lấy thẻ thớt 2 trước rồi mới đi xin thẻ thớt 1.</p>
 <p>Nếu cả hai cùng lấy được thẻ đầu tiên của mình, An đứng chờ Bình trả thẻ thớt 2, còn Bình đứng chờ An trả thẻ thớt 1. Không ai chịu trả thẻ đang cầm khi chưa xong việc, nên cả bếp đứng im.</p>
@@ -1575,7 +1575,7 @@
 <p>Nhưng chương trình <strong>vẫn có lỗi thiết kế</strong>, và ThreadSanitizer vẫn báo nó (mục 3).</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
-<p>Go có đúng loại lỗi này: hai goroutine khóa hai <code>sync.Mutex</code> ngược thứ tự thì kẹt nhau. Điểm khác là <strong>ai báo</strong>, ở mục 4.</p>
+<p>Go có đúng loại lỗi này: hai goroutine khóa hai <code>sync.Mutex</code> ngược thứ tự thì kẹt nhau. Điểm khác là <strong>ai báo</strong>, ở phần Go cuối bài.</p>
 </div>
 <h3 id="2-bon-ieu-kien-cua-deadlock">2. Bốn điều kiện của deadlock<a class="headerlink" href="#2-bon-ieu-kien-cua-deadlock" title="Permanent link">&para;</a></h3>
 <p>Deadlock chỉ xảy ra khi <strong>cả bốn</strong> điều kiện dưới đây cùng đúng. Bạn chỉ cần nhớ ý và nhớ hệ quả: <strong>phá một điều kiện là hết deadlock</strong>.</p>
@@ -1729,7 +1729,7 @@
 </tbody>
 </table>
 <p>Mình biên dịch sạch và chạy <code>timeout 3</code>: không in gì, mã <strong>124</strong>.</p>
-<p><a href="../25-data-race-mutex/">Bài 25</a> đã nói xin lại <code>std::mutex</code> đang giữ là hành vi không xác định: chuẩn không hứa gì, còn <strong>trên máy mình</strong> nó treo. Ta gọi đó là <strong>tự deadlock</strong> (self-deadlock): một luồng là đủ.</p>
+<p>Chuẩn nói: một luồng xin lại <code>std::mutex</code> mà chính nó đang giữ là hành vi không xác định (<a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>); chuẩn không hứa gì, còn <strong>trên máy mình</strong> nó treo. Ta gọi đó là <strong>tự deadlock</strong> (self-deadlock): một luồng là đủ.</p>
 <p>Một biến thể hay gặp khác: giữ khóa rồi <code>join</code> một luồng cần đúng khóa đó (luồng chờ khóa, <code>join</code> chờ luồng), như ví dụ treo ở <a href="../25-data-race-mutex/">Bài 25</a>.</p>
 <p>Quy tắc: không gọi hàm mà bạn không kiểm soát (callback, hàm của thư viện khác) khi đang giữ khóa; lấy dữ liệu ra, nhả khóa, rồi mới gọi.</p>
 <p><strong><code>std::recursive_mutex</code></strong> (<code>#include &lt;mutex&gt;</code>) cho <strong>cùng một luồng</strong> xin lại nhiều lần (mỗi lần xin phải có một lần trả). Mình đổi <code>std::mutex</code> thành <code>std::recursive_mutex</code> ở khai báo <code>khoa</code> và ở hai <code>lock_guard</code> của chương trình trên: chạy được, in <code>dem = 1</code>. Nó chỉ che lỗi thiết kế, và vẫn không cứu hai luồng khóa ngược thứ tự; chỉ dùng khi thật cần.</p>
@@ -1864,7 +1864,7 @@
 <p>Từ C++17 cứ dùng <code>scoped_lock</code> cho gọn.</p>
 <div class="admonition warning">
 <p class="admonition-title">Hay nhầm</p>
-<p><code>scoped_lock</code> không cứu được trường hợp hai mutex <strong>là một</strong>. Mình thử <code>chuyen(a, a, 3)</code> (gửi cho chính mình) với <code>scoped_lock giu(tu.khoa, den.khoa)</code>: treo (<code>timeout 3</code> mã 124). Chuẩn không hứa gì ở đây: xin lại <code>std::mutex</code> đang giữ là hành vi không xác định (<a href="../25-data-race-mutex/">Bài 25</a>), mình chỉ biết trên máy mình (g++ 11) nó treo. Cách 1 theo <code>id</code> cũng hỏng nếu hai <code>id</code> trùng, vì <code>dau</code> và <code>sau</code> khi đó là cùng một tài khoản. Cách tránh: <code>if (&amp;tu == &amp;den) return;</code> ở đầu hàm.</p>
+<p><code>scoped_lock</code> không cứu được trường hợp hai mutex <strong>là một</strong>. Mình thử <code>chuyen(a, a, 3)</code> (gửi cho chính mình) với <code>scoped_lock giu(tu.khoa, den.khoa)</code>: treo (<code>timeout 3</code> mã 124). Chuẩn không hứa gì ở đây: xin lại <code>std::mutex</code> đang giữ là hành vi không xác định (mục 5 ở trên), mình chỉ biết trên máy mình (g++ 11) nó treo. Cách 1 theo <code>id</code> cũng hỏng nếu hai <code>id</code> trùng, vì <code>dau</code> và <code>sau</code> khi đó là cùng một tài khoản. Cách tránh: <code>if (&amp;tu == &amp;den) return;</code> ở đầu hàm.</p>
 </div>
 <h3 id="try_lock_for-co-han-cho-thay-vi-cho-mai"><code>try_lock_for</code>: có hạn chờ thay vì chờ mãi<a class="headerlink" href="#try_lock_for-co-han-cho-thay-vi-cho-mai" title="Permanent link">&para;</a></h3>
 <p><code>std::timed_mutex</code> (<code>#include &lt;mutex&gt;</code>) là mutex có thêm <code>try_lock_for(khoảng thời gian)</code>: chờ tối đa khoảng đó, trả <code>true</code> nếu lấy được khóa, <code>false</code> nếu hết giờ. Luồng chính giữ khóa suốt, nên luồng phụ chắc chắn hết giờ:</p>
@@ -2025,12 +2025,12 @@
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>void ghi() { std::lock_guard&lt;std::mutex&gt; g(m); /* sửa dữ liệu chung */ }
 </code></pre></div>
 <ul>
-<li>Chạy xong bình thường, vì cùng một luồng thì <code>std::mutex</code> cho xin lại</li>
+<li>Thường chạy xong bình thường, vì cùng một luồng <code>std::mutex</code> cho xin lại</li>
 <li>Chuẩn bắt buộc <code>lock()</code> ném ngoại lệ để báo lỗi khi xin lại</li>
-<li>Không thể treo, vì deadlock luôn cần ít nhất hai luồng và hai khóa</li>
+<li>Thường không treo, vì deadlock cần ít nhất hai luồng và hai khóa</li>
 <li>Hành vi không xác định, vì luồng xin lại <code>std::mutex</code> mình đang giữ</li>
 </ul>
-<p class="giai-thich">Chuẩn nói luồng xin lại một <code>std::mutex</code> mà nó đang giữ là hành vi không xác định; trên máy mình kết quả là treo. <code>std::mutex</code> không cho cùng luồng xin lại, đó là việc của <code>std::recursive_mutex</code>. Chuẩn cũng không bắt buộc ném ngoại lệ trong trường hợp này. Còn một luồng tự chờ chính mình vẫn là kẹt, nên "deadlock cần hai luồng" chỉ đúng với cách hiểu hẹp của ví dụ chuyển tiền.</p>
+<p class="giai-thich">Chuẩn nói luồng xin lại một <code>std::mutex</code> mà nó đang giữ là hành vi không xác định; trên máy mình kết quả là treo. <code>std::mutex</code> không cho cùng luồng xin lại, đó là việc của <code>std::recursive_mutex</code>. Chuẩn cũng không bắt buộc ném ngoại lệ trong trường hợp này. Cũng không có gì bảo đảm chạy xong hay không treo: chuẩn không hứa gì ở đây, nên "thường" chỉ là chuyện của một máy. Còn một luồng tự chờ chính mình vẫn là kẹt, nên "deadlock cần hai luồng" chỉ đúng với cách hiểu hẹp của ví dụ chuyển tiền.</p>
 </div>
 <div class="cau-hoi" data-dap-an="2">
 <p><strong>Câu 7.</strong> Chương trình đang treo. Bạn chạy <code>thread apply all bt</code> trong gdb. Kết quả nào ủng hộ mạnh nhất nghi ngờ deadlock giữa hai luồng?</p>

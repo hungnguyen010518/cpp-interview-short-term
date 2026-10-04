@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bai-29-stdasync-va-stdfuture-lay-ket-qua-va-ngoai-le-tu-luong-khac" class="md-skip">
+        <a href="#bai-29-stdasync-va-stdfuture-lay-ket-qua-tu-luong-khac" class="md-skip">
           Bỏ qua
         </a>
       
@@ -1461,7 +1461,7 @@
   
 
 
-<h1 id="bai-29-stdasync-va-stdfuture-lay-ket-qua-va-ngoai-le-tu-luong-khac">Bài 29 — std::async và std::future: lấy kết quả (và ngoại lệ) từ luồng khác<a class="headerlink" href="#bai-29-stdasync-va-stdfuture-lay-ket-qua-va-ngoai-le-tu-luong-khac" title="Permanent link">&para;</a></h1>
+<h1 id="bai-29-stdasync-va-stdfuture-lay-ket-qua-tu-luong-khac">Bài 29 — std::async và std::future: lấy kết quả từ luồng khác<a class="headerlink" href="#bai-29-stdasync-va-stdfuture-lay-ket-qua-tu-luong-khac" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
 <ul>
@@ -1477,7 +1477,7 @@
 <p>Món đã giao đi thì không giao lần nữa: sau khi lấy món, phiếu hết hiệu lực. Nếu phụ làm cháy món, phụ để lại <strong>biên bản cháy</strong> thay cho món, và chính đọc biên bản đó khi đưa phiếu. Còn <code>std::promise</code> là cái khay ở quầy dành cho phụ đặt món (hoặc biên bản) lên, cho người đang cầm phiếu.</p>
 <div class="admonition info">
 <p class="admonition-title">Chỗ nào ví von phiếu hẹn không còn đúng?</p>
-<p>Phiếu hẹn giấy thì photo được; <code>std::future</code> thì <strong>không sao chép được</strong> (chỉ chuyển, như <code>std::thread</code> ở Bài 24). Phiếu giấy vứt đi không sao; còn future do <code>std::async</code> trả về mà bị hủy khi món chưa xong thì chương trình <strong>đứng chờ</strong> món xong (mục 5). Việc "chia một sổ số lớn cho bốn phụ cộng mỗi người một đoạn" thì không cần thẻ thớt, vì ai cũng chỉ <strong>đọc</strong> sổ.</p>
+<p>Phiếu hẹn giấy thì photo được; <code>std::future</code> thì <strong>không sao chép được</strong> (chỉ chuyển, như <code>std::thread</code> ở <a href="../24-thread-co-ban/">Bài 24</a>). Phiếu giấy vứt đi không sao; còn future do <code>std::async</code> trả về mà bị hủy khi món chưa xong thì chương trình <strong>đứng chờ</strong> món xong (mục 5). Việc "chia một sổ số lớn cho bốn phụ cộng mỗi người một đoạn" thì không cần thẻ thớt, vì ai cũng chỉ <strong>đọc</strong> sổ.</p>
 </div>
 <h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
 <h3 id="1-van-e-cua-stdthread-thuan">1. Vấn đề của <code>std::thread</code> thuần<a class="headerlink" href="#1-van-e-cua-stdthread-thuan" title="Permanent link">&para;</a></h3>
@@ -1509,7 +1509,7 @@
 </tr>
 <tr>
 <td>(2)</td>
-<td>Luồng nhận tham chiếu tới <code>ketQua</code> (Bài 24: <code>[&amp;x]</code>) và ghi 42</td>
+<td>Luồng nhận tham chiếu tới <code>ketQua</code> (<a href="../24-thread-co-ban/">Bài 24</a>: <code>[&amp;x]</code>) và ghi 42</td>
 <td>42</td>
 </tr>
 <tr>
@@ -1559,7 +1559,7 @@
 </table>
 <p>Mình chạy: in <code>terminate called after throwing an instance of 'std::runtime_error'</code> và <code>what():  loi trong luong</code>, mã thoát 134. Dòng <code>catch</code> của <code>main</code> không chạy. <code>std::future</code> giải quyết cả hai chuyện.</p>
 <h3 id="2-stdasync-tra-ve-stdfuture">2. <code>std::async</code> trả về <code>std::future</code><a class="headerlink" href="#2-stdasync-tra-ve-stdfuture" title="Permanent link">&para;</a></h3>
-<p><code>std::async(std::launch::async, hàm, đối số...)</code> (cần <code>#include &lt;future&gt;</code>) bảo C++ chạy <code>hàm(đối số...)</code> trên một luồng riêng, và <strong>ngay lập tức</strong> trả về một <code>std::future&lt;T&gt;</code>, với <code>T</code> là kiểu trả về của hàm. Cặp <code>&lt;T&gt;</code> đọc như <code>vector&lt;int&gt;</code> ở <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a>: <code>future&lt;int&gt;</code> là phiếu hẹn cho một <code>int</code>. Đối số được <strong>sao chép</strong> vào luồng như ở Bài 24 (muốn tham chiếu thì <code>std::ref</code>).</p>
+<p><code>std::async(std::launch::async, hàm, đối số...)</code> (cần <code>#include &lt;future&gt;</code>) bảo C++ chạy <code>hàm(đối số...)</code> trên một luồng riêng, và <strong>ngay lập tức</strong> trả về một <code>std::future&lt;T&gt;</code>, với <code>T</code> là kiểu trả về của hàm. Cặp <code>&lt;T&gt;</code> đọc như <code>vector&lt;int&gt;</code> ở <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a>: <code>future&lt;int&gt;</code> là phiếu hẹn cho một <code>int</code>. Đối số được <strong>sao chép</strong> vào luồng như ở <a href="../24-thread-co-ban/">Bài 24</a> (muốn tham chiếu thì <code>std::ref</code>).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;future&gt;</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
@@ -1604,7 +1604,7 @@
 <ul>
 <li><code>valid()</code>: <code>true</code> nếu future còn gắn với một kết quả chưa lấy.</li>
 <li><code>wait()</code>: chờ cho tới khi có kết quả nhưng <strong>không</strong> lấy ra (sau đó vẫn <code>get()</code> được).</li>
-<li><code>wait_for(thời gian)</code>: chờ tối đa chừng đó rồi trả <code>std::future_status::ready</code> (đã xong), <code>timeout</code> (chưa), hoặc <code>deferred</code> (mục 4). Thời gian viết bằng <code>std::chrono</code> như Bài 24 (<code>std::chrono::seconds(0)</code> là 0 giây, tức chỉ hỏi chứ không chờ). Mình chạy một tác vụ ngủ 200 ms: <code>wait_for</code> 50 ms ra <code>timeout</code>, sau <code>wait()</code> ra <code>ready</code>.</li>
+<li><code>wait_for(thời gian)</code>: chờ tối đa chừng đó rồi trả <code>std::future_status::ready</code> (đã xong), <code>timeout</code> (chưa), hoặc <code>deferred</code> (mục 4). Thời gian viết bằng <code>std::chrono</code> như <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::chrono::seconds(0)</code> là 0 giây, tức chỉ hỏi chứ không chờ). Mình chạy một tác vụ ngủ 200 ms: <code>wait_for</code> 50 ms ra <code>timeout</code>, sau <code>wait()</code> ra <code>ready</code>.</li>
 </ul>
 <p><strong><code>get()</code> chỉ lấy được một lần.</strong> Lấy kết quả xong là món đã giao đi (nên <code>valid()</code> thành <code>0</code>).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// bo-qua-kiem-tra</span>
@@ -1643,7 +1643,7 @@
 </tr>
 </tbody>
 </table>
-<p>Mình chạy trên g++ 11: in <code>42</code>, rồi <code>loi: std::future_error: No associated state</code> (<code>std::future_error</code> là kiểu ngoại lệ riêng của <code>&lt;future&gt;</code>, ném khi dùng future sai). Chuẩn đòi <code>valid() == true</code> trước mỗi <code>get()</code>; vi phạm thì chuẩn không hứa gì (Bài 15: hành vi không xác định). Việc g++ ném <code>std::future_error</code> chỉ là cách cài đặt này xử lý; đừng viết code dựa vào nó.</p>
+<p>Mình chạy trên g++ 11: in <code>42</code>, rồi <code>loi: std::future_error: No associated state</code> (<code>std::future_error</code> là kiểu ngoại lệ riêng của <code>&lt;future&gt;</code>, ném khi dùng future sai). Chuẩn đòi <code>valid() == true</code> trước mỗi <code>get()</code>; vi phạm thì chuẩn không hứa gì (<a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>: hành vi không xác định). Việc g++ ném <code>std::future_error</code> chỉ là cách cài đặt này xử lý; đừng viết code dựa vào nó.</p>
 <h3 id="3-ngoai-le-i-qua-future">3. Ngoại lệ đi qua future<a class="headerlink" href="#3-ngoai-le-i-qua-future" title="Permanent link">&para;</a></h3>
 <p>Tác vụ ném ngoại lệ thì <code>async</code> <strong>giữ</strong> ngoại lệ lại trong future, và <code>get()</code> ném lại nó ở luồng gọi <code>get()</code>. Ở <code>main</code> bạn <code>catch</code> như bình thường.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;future&gt;</span>
@@ -1786,7 +1786,7 @@
 <a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a><span class="p">}</span>
 </code></pre></div>
-<p><code>future&lt;void&gt;</code> là phiếu hẹn cho tác vụ không trả gì. Mình chạy bốn lần: lần nào cũng <code>giu future</code> ra 300 đến 303 ms và <code>bo future</code> ra 600 đến 603 ms.</p>
+<p><code>future&lt;void&gt;</code> là phiếu hẹn cho tác vụ không trả gì. <code>std::chrono::steady_clock::time_point</code> là kiểu của một thời điểm, thứ <code>steady_clock::now()</code> trả về; hàm <code>mili</code> trừ hai thời điểm để ra khoảng thời gian. Mình chạy bốn lần: lần nào cũng <code>giu future</code> ra 300 đến 303 ms và <code>bo future</code> ra 600 đến 603 ms.</p>
 <table>
 <thead>
 <tr>
@@ -1920,7 +1920,7 @@
 <p>Nghĩa là luồng ghi mà quên <code>set_value</code> (do <code>return</code> sớm, ngoại lệ...) và promise bị hủy thì luồng đọc nhận lỗi rõ ràng. Nếu promise còn sống mà không ai đặt, <code>get()</code> vẫn chờ.</p>
 <h3 id="7-packaged_task-va-shared_future-chi-nhac">7. <code>packaged_task</code> và <code>shared_future</code> (chỉ nhắc)<a class="headerlink" href="#7-packaged_task-va-shared_future-chi-nhac" title="Permanent link">&para;</a></h3>
 <p><code>std::packaged_task&lt;int(int, int)&gt;</code> bọc một hàm; hàm đó <strong>không</strong> chạy lúc tạo, mà chạy khi bạn gọi nó (ví dụ trao cho một luồng). Kết quả hoặc ngoại lệ tự vào future. Kiểu <code>int(int, int)</code> đọc như <code>std::function&lt;bool(int)&gt;</code> ở <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a>: "nhận hai <code>int</code>, trả <code>int</code>".</p>
-<p>Dùng: <code>goi</code> được tạo từ lambda <code>a + b</code>; <code>auto kq = goi.get_future();</code> lấy phiếu; <code>std::thread t(std::move(goi), 3, 4);</code> trao gói cho luồng (không sao chép được nên phải <code>std::move</code>, Bài 12). Mình chạy đủ chương trình: <code>kq.get()</code> ra <code>3 + 4 = 7</code>, TSan sạch. Nó hay dùng khi cài hàng đợi công việc (Bài 30).</p>
+<p>Dùng: <code>goi</code> được tạo từ lambda <code>a + b</code>; <code>auto kq = goi.get_future();</code> lấy phiếu; <code>std::thread t(std::move(goi), 3, 4);</code> trao gói cho luồng (không sao chép được nên phải <code>std::move</code>, <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a>). Mình chạy đủ chương trình: <code>kq.get()</code> ra <code>3 + 4 = 7</code>, TSan sạch. Nó hay dùng khi cài hàng đợi công việc (<a href="../30-thread-pool-hieu-nang/">Bài 30</a>).</p>
 <p><code>std::shared_future&lt;T&gt;</code> là future sao chép được, nhiều luồng cùng <code>get()</code>; chỉ cần biết tên. Còn <code>std::future</code> thì không sao chép được.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
@@ -1929,7 +1929,7 @@
 <ul>
 <li>Nhận lần hai từ channel còn đang mở <strong>chờ mãi</strong>; chương trình mẫu chỉ có <code>main</code> nên Go báo <code>fatal error: all goroutines are asleep - deadlock!</code> (binary thoát mã 2). <code>future.get()</code> lần hai là lỗi của người gọi (mục 2).</li>
 <li>Channel đã <code>close</code> thì nhận ra giá trị 0 và <code>ok == false</code>; future không có khái niệm tương tự.</li>
-<li>Lỗi trong goroutine không tự đi theo channel (ném <code>panic</code> làm cả chương trình chết, như Bài 24); bạn phải gửi <code>error</code> qua channel, hoặc dùng <code>errgroup</code> của module <code>golang.org/x/sync</code> (không thuộc thư viện chuẩn, mình không chạy ở bài này). <code>future</code> mang ngoại lệ sẵn.</li>
+<li>Lỗi trong goroutine không tự đi theo channel (ném <code>panic</code> làm cả chương trình chết, như <a href="../24-thread-co-ban/">Bài 24</a>); bạn phải gửi <code>error</code> qua channel, hoặc dùng <code>errgroup</code> của module <code>golang.org/x/sync</code> (không thuộc thư viện chuẩn, mình không chạy ở bài này). <code>future</code> mang ngoại lệ sẵn.</li>
 <li><code>sync.WaitGroup</code> chỉ chờ xong, không mang kết quả: giống <code>join</code> hơn <code>get</code>.</li>
 </ul>
 </div>
@@ -1994,8 +1994,8 @@
 <p><strong>Kết quả khi chạy</strong> (ổn định; TSan sạch ở <code>-O1</code> và <code>-O2</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>tong = 500000500000
 </code></pre></div>
-<p><strong>Thử thay đổi: bỏ <code>std::ref(so)</code>, viết <code>so</code>.</strong> Mình đã chạy: vẫn đúng 500000500000, nhưng mỗi <code>async</code> sao chép cả vector (cỡ 4 MB trên máy mình) (đối số bị sao chép mặc định, Bài 24) mà không cần.</p>
-<p><strong>Có nhanh hơn không?</strong> Với dãy cỡ này, việc cộng quá nhỏ so với chi phí tạo bốn luồng, nên bốn <code>async</code> chỉ nhanh hơn một luồng chút ít hoặc ngang nhau, và kết quả đổi theo lần chạy và mức <code>-O</code>. Mình đo riêng nhiều lần (chương trình đo không đưa vào bài) và không tin được con số nào, nên bài không ghi số. Bài 30 đo kỹ.</p>
+<p><strong>Thử thay đổi: bỏ <code>std::ref(so)</code>, viết <code>so</code>.</strong> Mình đã chạy: vẫn đúng 500000500000, nhưng mỗi <code>async</code> sao chép cả vector (cỡ 4 MB trên máy mình) (đối số bị sao chép mặc định, <a href="../24-thread-co-ban/">Bài 24</a>) mà không cần.</p>
+<p><strong>Có nhanh hơn không?</strong> Với dãy cỡ này, việc cộng quá nhỏ so với chi phí tạo bốn luồng, nên bốn <code>async</code> chỉ nhanh hơn một luồng chút ít hoặc ngang nhau, và kết quả đổi theo lần chạy và mức <code>-O</code>. Mình đo riêng nhiều lần (chương trình đo không đưa vào bài) và không tin được con số nào, nên bài không ghi số. <a href="../30-thread-pool-hieu-nang/">Bài 30</a> đo kỹ.</p>
 <h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary><code>std::async</code> khác tự tạo <code>std::thread</code> thế nào?</summary>
@@ -2061,7 +2061,7 @@
 <li>Không đâu cả: chương trình gọi <code>std::terminate</code> như với <code>std::thread</code></li>
 <li>Ở lời gọi <code>get()</code>, được ném lại cho luồng đang gọi nó</li>
 </ul>
-<p class="giai-thich"><code>async</code> bắt ngoại lệ trong tác vụ và cất vào future; <code>get()</code> ném lại nó ở luồng gọi <code>get()</code>, nên ở đó bạn <code>catch</code> được. Dòng gọi <code>async</code> trả về ngay nên chưa thấy gì. Hàm hủy của future không ném ngoại lệ ra và cũng không gọi <code>terminate</code>. <code>terminate</code> là chuyện của <code>std::thread</code> thuần (Bài 24), nơi ngoại lệ thoát khỏi hàm của luồng không có chỗ để cất.</p>
+<p class="giai-thich"><code>async</code> bắt ngoại lệ trong tác vụ và cất vào future; <code>get()</code> ném lại nó ở luồng gọi <code>get()</code>, nên ở đó bạn <code>catch</code> được. Dòng gọi <code>async</code> trả về ngay nên chưa thấy gì. Hàm hủy của future không ném ngoại lệ ra và cũng không gọi <code>terminate</code>. <code>terminate</code> là chuyện của <code>std::thread</code> thuần (<a href="../24-thread-co-ban/">Bài 24</a>), nơi ngoại lệ thoát khỏi hàm của luồng không có chỗ để cất.</p>
 </div>
 <div class="cau-hoi" data-dap-an="2">
 <p><strong>Câu 4.</strong> Đọc đoạn sau. Điều gì xảy ra ở dòng cuối?</p>
@@ -2092,11 +2092,11 @@
 <p><strong>Câu 6.</strong> Gọi <code>std::async(f)</code> mà không nêu policy. Chuẩn C++ nói gì?</p>
 <ul>
 <li>Cài đặt tự chọn: chạy luồng riêng hoặc hoãn tới <code>get()</code>/<code>wait()</code></li>
-<li>Luôn chạy trên một luồng mới, giống khi nêu <code>std::launch::async</code></li>
+<li>Thường chạy trên luồng mới; chuẩn chỉ cho hoãn khi hết luồng</li>
 <li>Luôn hoãn tới <code>get()</code> hay <code>wait()</code>, giống khi nêu <code>std::launch::deferred</code></li>
 <li>Chuẩn bảo đảm chọn <code>async</code> nếu máy còn lõi rảnh, không thì hoãn</li>
 </ul>
-<p class="giai-thich">Không nêu policy tương đương <code>async | deferred</code>: chuẩn cho phép cả hai và để cài đặt chọn, nên cùng đoạn code có thể chạy khác nhau giữa các trình biên dịch. Nói "luôn luồng mới" hay "luôn hoãn" đều khẳng định hơn chuẩn (g++ 11 trên máy mình thì không hoãn, nhưng đó chỉ là cách cài đặt này). Chuẩn cũng không hứa kiểu "chọn <code>async</code> nếu còn lõi rảnh": cách chọn là việc của cài đặt.</p>
+<p class="giai-thich">Không nêu policy tương đương <code>async | deferred</code>: chuẩn cho phép cả hai và để cài đặt chọn, nên cùng đoạn code có thể chạy khác nhau giữa các trình biên dịch. Nói "thường chạy luồng mới, chỉ hoãn khi hết luồng" hay "luôn hoãn" đều khẳng định hơn chuẩn: chuẩn không nêu điều kiện nào cho việc hoãn (g++ 11 trên máy mình thì không hoãn, nhưng đó chỉ là cách cài đặt này). Chuẩn cũng không hứa kiểu "chọn <code>async</code> nếu còn lõi rảnh": cách chọn là việc của cài đặt.</p>
 </div>
 <div class="cau-hoi" data-dap-an="4">
 <p><strong>Câu 7.</strong> Đọc đoạn sau. Chương trình in ra gì?</p>

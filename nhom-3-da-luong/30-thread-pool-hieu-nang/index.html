@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bai-30-thread-pool-va-hieu-nang-tai-dung-luong-false-sharing-amdahl" class="md-skip">
+        <a href="#bai-30-thread-pool-va-hieu-nang-false-sharing-amdahl" class="md-skip">
           Bỏ qua
         </a>
       
@@ -1509,17 +1509,17 @@
   
 
 
-<h1 id="bai-30-thread-pool-va-hieu-nang-tai-dung-luong-false-sharing-amdahl">Bài 30 — Thread pool và hiệu năng: tái dùng luồng, false sharing, Amdahl<a class="headerlink" href="#bai-30-thread-pool-va-hieu-nang-tai-dung-luong-false-sharing-amdahl" title="Permanent link">&para;</a></h1>
+<h1 id="bai-30-thread-pool-va-hieu-nang-false-sharing-amdahl">Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl<a class="headerlink" href="#bai-30-thread-pool-va-hieu-nang-false-sharing-amdahl" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
 <ul>
 <li>Giải thích vì sao "mỗi việc một luồng" tệ khi việc nhỏ, và tự cài một <strong>thread pool</strong> (nhóm luồng dùng lại) từ <code>std::queue</code>, <code>std::mutex</code>, <code>std::condition_variable</code>: worker lấy việc, chạy <strong>ngoài khóa</strong>, và hàm hủy dừng sạch (đặt cờ dưới khóa, <code>notify_all</code>, <code>join</code>).</li>
-<li>Biết <code>submit</code> trả <code>std::future</code> bằng <code>std::packaged_task</code>, chọn số worker theo <code>hardware_concurrency()</code> cho việc nặng CPU, và vì sao việc chờ I/O thì khác.</li>
+<li>Biết dùng <code>std::packaged_task</code> để lấy <code>future</code> từ việc nộp vào pool, chọn số worker theo <code>hardware_concurrency()</code> (số luồng phần cứng) cho việc nặng CPU, và vì sao việc chờ I/O thì khác.</li>
 <li>Đo thật ba cách (tuần tự, mỗi việc một luồng, pool): việc nhỏ thì pool cũng không thắng được tuần tự; việc đủ lớn mới có lợi.</li>
-<li>Hiểu <strong>false sharing</strong> (đo thật với <code>alignas(64)</code>) và <strong>định luật Amdahl</strong>; có bảng chọn công cụ đa luồng và danh sách câu hỏi phỏng vấn nối về Bài 24 đến 29; so với worker pool của Go.</li>
+<li>Hiểu <strong>false sharing</strong> (đo thật với <code>alignas(64)</code>) và <strong>định luật Amdahl</strong>; có bảng chọn công cụ đa luồng và danh sách câu hỏi phỏng vấn nối về <a href="../24-thread-co-ban/">Bài 24</a> đến 29; so với worker pool của Go.</li>
 </ul>
 </div>
-<p><strong>Bạn cần biết trước:</strong> <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::thread</code>, <code>join</code>, <code>hardware_concurrency</code>, <code>steady_clock</code>, ngoại lệ trong luồng gọi <code>std::terminate</code>), <a href="../25-data-race-mutex/">Bài 25</a> (<code>mutex</code>, <code>lock_guard</code>, class có <code>private:</code>), <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/">Bài 03</a> (con trỏ), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (lambda <code>[&amp;]</code>), <a href="../27-condition-variable/">Bài 27</a> (<code>condition_variable</code>, <code>wait</code> với predicate, dừng sạch, hàng đợi), <a href="../28-atomic/">Bài 28</a> (<code>std::atomic</code>, <code>fetch_add</code>), <a href="../29-async-future/">Bài 29</a> (<code>future</code>, <code>get</code>), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, hàm hủy), <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a> (<code>std::move</code>), <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> (<code>make_shared</code>), <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda, <code>std::function&lt;bool(int)&gt;</code>).</p>
+<p><strong>Bạn cần biết trước:</strong> <a href="../24-thread-co-ban/">Bài 24</a> (<code>std::thread</code>, <code>join</code>, <code>hardware_concurrency</code>, <code>steady_clock</code>, ngoại lệ trong luồng gọi <code>std::terminate</code>), <a href="../25-data-race-mutex/">Bài 25</a> (<code>mutex</code>, <code>lock_guard</code>, class có <code>private:</code>), <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/">Bài 03</a> (con trỏ), <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/">Bài 11</a> (<code>this</code>), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (lambda <code>[&amp;]</code>), <a href="../27-condition-variable/">Bài 27</a> (<code>condition_variable</code>, <code>wait</code> với predicate, dừng sạch, hàng đợi), <a href="../28-atomic/">Bài 28</a> (<code>std::atomic</code>, <code>fetch_add</code>), <a href="../29-async-future/">Bài 29</a> (<code>future</code>, <code>get</code>), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, hàm hủy), <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a> (<code>std::move</code>), <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> (<code>make_shared</code>), <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (lambda, <code>std::function&lt;bool(int)&gt;</code>).</p>
 <h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
 <p>Quay lại <strong>nhà bếp</strong> của <a href="../25-data-race-mutex/">Bài 25</a>. Có hai cách xử lý một đống món nhỏ. Cách một: mỗi món <strong>thuê một đầu bếp mới</strong>, làm xong là cho nghỉ việc. Tuyển người, chỉ chỗ đứng, trả lương, rồi sa thải: món chỉ mất một phút nấu thì phần thủ tục còn lâu hơn.</p>
 <p>Cách hai: giữ <strong>một đội đầu bếp cố định</strong>, treo một <strong>bảng phiếu việc</strong> ở cửa. Ai rảnh thì lấy phiếu tiếp theo, làm xong lại quay ra bảng; bảng trống thì ngồi nghỉ và chờ chuông. Đội đó là <strong>thread pool</strong>, bảng phiếu là hàng đợi công việc, chuông là <code>condition_variable</code> của <a href="../27-condition-variable/">Bài 27</a>.</p>
@@ -1552,7 +1552,7 @@
 </ul>
 <p>Mình làm đúng như vậy ở ví dụ phần 💻, không sửa lớp pool. Viết thành hàm mẫu (template) <code>submit</code> trả <code>future&lt;T&gt;</code> cho mọi kiểu là việc gọn hơn nhưng cần cú pháp chưa dạy, nên bài chỉ nêu hướng.</p>
 <h3 id="4-bao-nhieu-worker">4. Bao nhiêu worker?<a class="headerlink" href="#4-bao-nhieu-worker" title="Permanent link">&para;</a></h3>
-<p>Với việc <strong>nặng CPU</strong> (tính toán thuần), mỗi worker giữ một lõi bận suốt, nên số worker hợp lý xấp xỉ số lõi: <code>std::thread::hardware_concurrency()</code> (<a href="../24-thread-co-ban/">Bài 24</a>; chuẩn chỉ gọi nó là gợi ý và cho phép trả <code>0</code>, nên cần kiểm). Nhiều hơn số lõi thì các worker tranh nhau lõi, chỉ buộc hệ điều hành luân phiên nhiều luồng trên cùng một lõi.</p>
+<p>Với việc <strong>nặng CPU</strong> (tính toán thuần), mỗi worker giữ một lõi bận suốt, nên số worker hợp lý xấp xỉ số lõi, mà mốc dễ lấy là <code>std::thread::hardware_concurrency()</code> (<a href="../24-thread-co-ban/">Bài 24</a>; chuẩn chỉ gọi nó là gợi ý và cho phép trả <code>0</code>, nên cần kiểm). Hàm này đếm <strong>luồng phần cứng</strong>, không đếm lõi: CPU có siêu phân luồng (mỗi lõi chạy hai luồng) thì con số gấp đôi số lõi thật (máy mình: 4 lõi, trả 8), và nó đổi theo máy; vẫn dùng làm mốc được. Nhiều hơn số lõi thì các worker tranh nhau lõi, chỉ buộc hệ điều hành luân phiên nhiều luồng trên cùng một lõi.</p>
 <p>Với việc <strong>chờ I/O</strong> (đọc mạng, đọc đĩa, ngủ), worker đang chờ <strong>không dùng CPU</strong>, nên có thể nhiều worker hơn số lõi: lúc một worker chờ, lõi đó chạy worker khác. Mình thử đúng điều đó ở "Thử thay đổi" của ví dụ 1.</p>
 <h3 id="5-hai-buc-tuong-false-sharing-va-amdahl">5. Hai bức tường: false sharing và Amdahl<a class="headerlink" href="#5-hai-buc-tuong-false-sharing-va-amdahl" title="Permanent link">&para;</a></h3>
 <p><strong>Dòng cache.</strong> CPU không đọc từng byte từ RAM mà từng <strong>dòng cache</strong> (cache line) cỡ 64 byte, cất trong <strong>bộ nhớ đệm</strong> (cache) của CPU: vùng nhỏ nằm sát mỗi lõi, nhanh hơn RAM rất nhiều. Tên giống cache ở <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> vì cùng ý "cất tạm cho nhanh", nhưng đây là phần cứng. 64 là cỡ <strong>phổ biến</strong> (máy mình báo đúng 64), không phải chuẩn C++ bắt buộc.</p>
@@ -1593,7 +1593,7 @@
 <h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
 <h3 id="vi-du-1-thread-pool-tu-cai">Ví dụ 1: thread pool tự cài<a class="headerlink" href="#vi-du-1-thread-pool-tu-cai" title="Permanent link">&para;</a></h3>
 <p>Chương trình tạo pool 4 worker, nộp 1000 việc "cộng <code>i</code> vào <code>tong</code>" (một <code>std::atomic&lt;long long&gt;</code>), rồi nộp thêm một việc có kết quả bằng <code>packaged_task</code>. Việc nào chạy trên worker nào đổi theo lần chạy, nên <strong>không in thứ tự</strong>; chương trình chỉ in sau khi pool đã hủy (dừng sạch).</p>
-<p>Về cú pháp mới: <code>[this]</code> cho lambda trong hàm thành viên dùng được các thành viên của đối tượng (<code>this</code> là con trỏ tới chính đối tượng, như con trỏ ở <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/">Bài 03</a>); đuôi <code>_</code> trong <code>khoa_</code>, <code>hang_</code> chỉ là thói quen đặt tên cho thành viên.</p>
+<p>Về cú pháp mới: <code>[this]</code> cho lambda trong hàm thành viên dùng được các thành viên của đối tượng (<code>this</code> là con trỏ tới chính đối tượng, như đã học ở <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/">Bài 11</a>); đuôi <code>_</code> trong <code>khoa_</code>, <code>hang_</code> chỉ là thói quen đặt tên cho thành viên.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;condition_variable&gt;</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
@@ -1718,10 +1718,10 @@
 <li>Chương trình trên, chạy 20 lần một đợt, ba đợt mỗi mức <code>-O</code>. Không tối ưu: 5, 4, 3 lần ra bình thường, còn lại treo (<code>timeout 3</code> mã <strong>124</strong>). <code>-O2</code>: 19, 16, 18 lần ra bình thường, chỉ 1 đến 4 lần treo. Treo hay không tùy lúc hủy worker còn bận hay đã ngủ, nên tỉ lệ đổi mạnh theo máy, mức <code>-O</code> và lần chạy.</li>
 <li>Chỉ tạo pool 4 worker, ngủ 200 ms rồi hủy (cả bốn chắc chắn đang ngủ trong <code>wait</code>): 3 lần đều treo.</li>
 </ul>
-<p>Lý do: không ai đánh thức worker đang ngủ, nên <code>join</code> chờ mãi. "Ra bình thường" là may; chuẩn chỉ nói <code>notify_one</code> đánh thức nhiều nhất một luồng và <code>wait</code> cần được đánh thức.</p>
+<p>Lý do: không ai đánh thức worker đang ngủ, nên <code>join</code> chờ mãi (trên máy mình; chuẩn cho phép đánh thức giả nên không hứa). "Ra bình thường" là may; chuẩn chỉ nói <code>notify_one</code> đánh thức nhiều nhất một luồng và <code>wait</code> cần được đánh thức.</p>
 <p><strong>Thử thay đổi 2: cho một việc ném ngoại lệ</strong>, ví dụ việc <code>i == 500</code> thực hiện <code>throw std::runtime_error("loi")</code>. Với bản pool <strong>bỏ</strong> <code>try</code>/<code>catch</code> ở dòng (10) (chỉ còn <code>viec();</code>), mình chạy: chương trình dừng với <code>terminate called after throwing an instance of 'std::runtime_error'</code> và mã <strong>134</strong>. Việc chạy trên luồng của worker, ngoại lệ không ai bắt thoát khỏi hàm luồng, đúng như <a href="../24-thread-co-ban/">Bài 24</a>. Với bản có <code>try</code>/<code>catch</code> như listing, mình chạy: in <code>tong = 500000</code> (thiếu đúng việc 500) và <code>kq = 42</code>, mã 0, TSan sạch. Ngoại lệ bị <strong>nuốt im lặng</strong>; muốn biết lỗi thì ghi lại nó, hoặc dùng <code>packaged_task</code> để ngoại lệ đi vào <code>future</code> (<a href="../29-async-future/">Bài 29</a>).</p>
 <p>Bài này không xử lý chuyện <code>submit</code> sau khi pool đã bị hủy hay đặt cờ dừng (việc nộp muộn có thể không bao giờ chạy), nên đây là bản học, chưa đủ cho sản phẩm.</p>
-<p><strong>Thử thay đổi 3: việc chờ I/O.</strong> Mình đổi mỗi việc thành <code>std::this_thread::sleep_for(std::chrono::milliseconds(10))</code> (giả vờ chờ mạng), nộp 100 việc, rồi đo thời gian từ lúc tạo pool tới lúc hủy xong. Máy mình (8 lõi): pool 4 worker mất khoảng 252 ms (ba lần chạy: 252, 252, 253), pool 32 worker khoảng 43 ms (ba lần: 43, 43, 43). Việc chờ không tốn CPU nên nhiều worker hơn số lõi vẫn nhanh hơn; con số đổi theo máy.</p>
+<p><strong>Thử thay đổi 3: việc chờ I/O.</strong> Mình đổi mỗi việc thành <code>std::this_thread::sleep_for(std::chrono::milliseconds(10))</code> (giả vờ chờ mạng), nộp 100 việc, rồi đo thời gian từ lúc tạo pool tới lúc hủy xong. Máy mình (4 lõi, 8 luồng phần cứng): pool 4 worker mất khoảng 252 ms (ba lần chạy: 252, 252, 253), pool 32 worker khoảng 43 ms (ba lần: 43, 43, 43). Việc chờ không tốn CPU nên nhiều worker hơn số lõi vẫn nhanh hơn; con số đổi theo máy.</p>
 <h3 id="vi-du-2-o-pool-moi-viec-mot-luong-va-tuan-tu">Ví dụ 2: đo pool, mỗi việc một luồng, và tuần tự<a class="headerlink" href="#vi-du-2-o-pool-moi-viec-mot-luong-va-tuan-tu" title="Permanent link">&para;</a></h3>
 <p>Mỗi việc ghi kết quả vào ô riêng <code>kq[i]</code> (không đụng ô của việc khác, nên không cần khóa). Ba cách cùng làm một lô việc: chạy lần lượt; mỗi việc một <code>std::thread</code> (theo đợt 8 luồng rồi <code>join</code>); và pool 4 worker (thời gian gồm cả dựng pool và hủy). Mình chạy hai lô: 20000 việc nhỏ và 400 việc to hơn.</p>
 <p>Đoạn dưới là phần thay cho <code>main</code> ở ví dụ 1. Mình ghép nó ngay sau lớp <code>NhomLuong</code> (thêm <code>#include &lt;chrono&gt;</code>) rồi biên dịch và chạy; khối này không đứng một mình (cần lớp ở ví dụ 1) và in số đo đổi theo lần chạy, nên không được tự biên dịch riêng.</p>
@@ -1790,7 +1790,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Kết quả khi chạy</strong> (g++ 11.4, 8 lõi; ba lần ở mỗi mức <code>-O</code>, đổi theo máy, lần chạy, và mức <code>-O</code>):</p>
+<p><strong>Kết quả khi chạy</strong> (g++ 11.4, máy 4 lõi 8 luồng phần cứng; ba lần ở mỗi mức <code>-O</code>, đổi theo máy, lần chạy, và mức <code>-O</code>):</p>
 <table>
 <thead>
 <tr>
@@ -1834,8 +1834,8 @@
 </table>
 <p>Mẫu đáng nhớ có ba ý:</p>
 <ul>
-<li>Việc nhỏ thì <strong>tuần tự thắng cả pool</strong> (1 ms so với 6 đến 33 ms): một việc chỉ vài chục phép cộng, nhẹ hơn việc khóa mutex, đẩy hàng và đánh thức một worker. Pool vẫn rẻ hơn tạo luồng cho từng việc rất nhiều.</li>
-<li>Việc vừa thì pool thường nhanh nhất, nhưng <strong>không nhanh gấp 4 lần</strong> tuần tự dù có 4 worker: còn chi phí đồng bộ và phần tuần tự (mục 5).</li>
+<li>Việc nhỏ thì <strong>tuần tự thắng cả pool</strong> (ở <code>-O2</code>: 0 ms so với 6 đến 8 ms): một việc chỉ vài chục phép cộng, nhẹ hơn việc khóa mutex, đẩy hàng và đánh thức một worker. Pool vẫn rẻ hơn tạo luồng cho từng việc rất nhiều.</li>
+<li>Việc vừa thì pool thường nhanh nhất, nhưng <strong>không nhanh gấp 4 lần</strong> tuần tự dù có 4 worker: còn chi phí đồng bộ, phần tuần tự (mục 5), và máy này chỉ có 4 lõi thật.</li>
 <li>Luồng dùng một lần, mỗi việc một luồng, tốn nhất khi việc nhỏ (khoảng 650 ms chia cho 20000 luồng ra cỡ 30 micro-giây mỗi luồng, trên máy này).</li>
 </ul>
 <h3 id="vi-du-3-false-sharing-o-that">Ví dụ 3: false sharing, đo thật<a class="headerlink" href="#vi-du-3-false-sharing-o-that" title="Permanent link">&para;</a></h3>
@@ -1933,7 +1933,7 @@
 </details>
 <details class="question">
 <summary>Số luồng trong pool nên là bao nhiêu?</summary>
-<p>Việc nặng CPU: xấp xỉ <code>std::thread::hardware_concurrency()</code> (chỉ là gợi ý, có thể trả 0), vì nhiều hơn chỉ tranh lõi. Việc chờ I/O: có thể nhiều hơn số lõi, vì luồng đang chờ không dùng CPU. Cần đo, không đoán; số tối ưu còn tùy tranh chấp khóa.</p>
+<p>Việc nặng CPU: xấp xỉ số lõi, lấy mốc từ <code>std::thread::hardware_concurrency()</code> (chỉ là gợi ý, có thể trả 0, và đếm luồng phần cứng nên có thể gấp đôi số lõi), vì nhiều hơn chỉ tranh lõi. Việc chờ I/O: có thể nhiều hơn số lõi, vì luồng đang chờ không dùng CPU. Cần đo, không đoán; số tối ưu còn tùy tranh chấp khóa.</p>
 </details>
 <details class="question">
 <summary>False sharing là gì và Amdahl nói gì?</summary>
@@ -2002,7 +2002,7 @@
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Lỗi 3: Dùng pool (hoặc nhiều luồng) cho việc quá nhỏ, và đo khi bật TSan</p>
-<p>Mình đo: 20000 việc cỡ vài chục phép cộng, tuần tự chỉ vài mili giây còn pool mất hàng chục. Hãy đo trước khi song song hóa; và đừng đo tốc độ với <code>-fsanitize=thread</code> vì nó chậm hơn nhiều lần.</p>
+<p>Mình đo: 20000 việc cỡ vài chục phép cộng, tuần tự 0 đến 1 ms còn pool 6 đến 33 ms. Hãy đo trước khi song song hóa; và đừng đo tốc độ với <code>-fsanitize=thread</code> vì nó chậm hơn nhiều lần.</p>
 </div>
 <h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
 <div class="quiz" data-bai="30">
@@ -2030,17 +2030,17 @@
 <li>Hủy êm, vì <code>join</code> tự đánh thức worker đang ngủ rồi chờ chúng thoát</li>
 <li>Treo ở <code>join</code>, vì worker đang ngủ mà không ai gọi dậy để thấy <code>dung_</code></li>
 </ul>
-<p class="giai-thich">Worker chỉ kiểm lại predicate khi được đánh thức; đổi <code>dung_</code> không đánh thức ai, nên cả bốn ngủ tiếp và <code>join</code> chờ mãi (mình chạy: mã 124). Chúng không tự nhận ra thay đổi vì <code>wait</code> không theo dõi biến. <code>join</code> chỉ chờ luồng kết thúc, không gọi ai dậy. Còn <code>std::terminate</code> xảy ra khi hủy <code>std::thread</code> chưa <code>join</code>, mà ở đây <code>join</code> được gọi.</p>
+<p class="giai-thich">Worker chỉ kiểm lại predicate khi được đánh thức; đổi <code>dung_</code> không đánh thức ai, nên cả bốn ngủ tiếp và <code>join</code> chờ mãi (mình chạy: mã 124; chuẩn cho phép đánh thức giả nên không hứa chắc). Chúng không tự nhận ra thay đổi vì <code>wait</code> không theo dõi biến. <code>join</code> chỉ chờ luồng kết thúc, không gọi ai dậy. Còn <code>std::terminate</code> xảy ra khi hủy <code>std::thread</code> chưa <code>join</code>, mà ở đây <code>join</code> được gọi.</p>
 </div>
 <div class="cau-hoi" data-dap-an="1">
 <p><strong>Câu 3.</strong> Máy có <code>hardware_concurrency() == 8</code>. Cần chạy 100 việc, mỗi việc chủ yếu <strong>chờ mạng</strong> 10 ms rồi tính một chút. Số worker nào hợp lý nhất?</p>
 <ul>
 <li>Nhiều hơn 8, vì worker đang chờ mạng thì không chiếm CPU</li>
 <li>Ít hơn 8, vì nhiều worker thì tranh khóa hàng đợi rất nặng</li>
-<li>Đúng 100, vì mỗi việc cần một worker riêng cho chắc ăn</li>
+<li>Đúng 1, vì chờ mạng thì một worker làm lần lượt là đủ</li>
 <li>Đúng 8, vì <code>hardware_concurrency</code> là số worker được khuyên dùng</li>
 </ul>
-<p class="giai-thich">Việc chờ mạng không dùng CPU, nên khi một worker chờ thì lõi đó chạy worker khác; vì vậy nhiều worker hơn số lõi vẫn làm xong nhiều việc hơn (mình thử với việc ngủ 10 ms: 4 worker mất khoảng 252 ms, 32 worker khoảng 43 ms). Quy tắc "bằng số lõi" chỉ hợp việc nặng CPU, và <code>hardware_concurrency</code> chỉ là gợi ý về phần cứng. Tranh khóa hàng đợi có thật nhưng nhỏ so với 10 ms chờ mỗi việc, nên ít worker hơn chỉ làm chậm thêm. Mở 100 worker cho 100 việc phí stack và tạo luồng, không cần để các việc chờ chạy gối nhau.</p>
+<p class="giai-thich">Việc chờ mạng không dùng CPU, nên khi một worker chờ thì lõi đó chạy worker khác; vì vậy nhiều worker hơn số lõi vẫn làm xong nhiều việc hơn (mình thử với việc ngủ 10 ms: 4 worker mất khoảng 252 ms, 32 worker khoảng 43 ms). Quy tắc "bằng số lõi" chỉ hợp việc nặng CPU, và <code>hardware_concurrency</code> chỉ là gợi ý về phần cứng. Tranh khóa hàng đợi có thật nhưng nhỏ so với 10 ms chờ mỗi việc, nên ít worker hơn chỉ làm chậm thêm. Chỉ một worker thì 100 việc nối đuôi nhau mất cỡ 100 lần 10 ms, trong khi chờ mạng không cần chiếm lõi nào.</p>
 </div>
 <div class="cau-hoi" data-dap-an="3">
 <p><strong>Câu 4.</strong> Đọc đoạn sau. Luồng 1 chỉ <code>fetch_add</code> trên <code>a</code>, luồng 2 chỉ <code>fetch_add</code> trên <code>b</code>, mỗi luồng 5 triệu lần. Với <code>Gan</code> chạy chậm hơn nhiều so với <code>Xa</code> (mình đo khoảng 3 đến 4 lần). Vì sao?</p>
@@ -2098,7 +2098,7 @@
 <h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Mỗi việc một luồng tốn chi phí tạo và hủy luồng, lớn hơn chính việc nhỏ (mình đo: 20000 việc nhỏ mất hơn 600 ms nếu mỗi việc một luồng); thread pool tạo N luồng một lần rồi tái sử dụng.</li>
-<li>Pool tự cài là ba mảnh của Bài 27: <code>std::queue&lt;std::function&lt;void()&gt;&gt;</code> dưới mutex, <code>condition_variable</code>, N worker; worker lấy việc, nhả khóa, <strong>chạy ngoài khóa</strong>; hàm hủy (RAII) đặt cờ dưới khóa + <code>notify_all</code> + <code>join</code>, làm hết việc còn lại rồi thoát (quên <code>notify_all</code> thì treo hay không tùy mức <code>-O</code> và lần chạy, mình chạy). <code>packaged_task</code> trong <code>shared_ptr</code> cho <code>submit</code> trả <code>future</code>; ngoại lệ không bắt trong việc là <code>terminate</code> (listing bọc <code>try</code>/<code>catch (...)</code> thì nuốt nó).</li>
+<li>Pool tự cài là ba mảnh của <a href="../27-condition-variable/">Bài 27</a>: <code>std::queue&lt;std::function&lt;void()&gt;&gt;</code> dưới mutex, <code>condition_variable</code>, N worker; worker lấy việc, nhả khóa, <strong>chạy ngoài khóa</strong>; hàm hủy (RAII) đặt cờ dưới khóa + <code>notify_all</code> + <code>join</code>, làm hết việc còn lại rồi thoát (quên <code>notify_all</code> thì treo hay không tùy mức <code>-O</code> và lần chạy, mình chạy). <code>packaged_task</code> trong <code>shared_ptr</code> cho <code>submit</code> trả <code>future</code>; ngoại lệ không bắt trong việc là <code>terminate</code> (listing bọc <code>try</code>/<code>catch (...)</code> thì nuốt nó).</li>
 <li>Số worker ≈ <code>hardware_concurrency()</code> cho việc nặng CPU; việc chờ I/O thì nhiều hơn số lõi vẫn có lợi. Việc quá nhỏ thì tuần tự thắng cả pool (số đo đổi theo máy và <code>-O</code>, mẫu thì ổn định).</li>
 <li>False sharing: hai biến khác nhau chung dòng cache (thường 64 byte) làm chậm dù không có data race (mình đo: khoảng 3 đến 4 lần); gỡ bằng <code>alignas(64)</code> hoặc đệm. Amdahl: tăng tốc tối đa <code>1 / ((1 - p) + p / n)</code>, không vượt <code>1 / (1 - p)</code>; vùng găng và đồng bộ tính vào phần tuần tự.</li>
 <li>Chọn công cụ: <code>thread</code> cho việc dài, <code>async</code>/<code>future</code> khi cần kết quả, <code>mutex</code> cho dữ liệu chung, <code>atomic</code> cho một bộ đếm hay cờ, <code>condition_variable</code> để chờ điều kiện, pool cho nhiều việc nhỏ. Go không cần tự cài pool vì goroutine rẻ; khi cần giới hạn thì <code>for job := range jobs</code> + <code>WaitGroup</code>.</li>
