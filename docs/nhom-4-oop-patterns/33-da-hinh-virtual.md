@@ -23,7 +23,7 @@
 
 Không có `virtual`, hàm chạy do **kiểu khai báo** của tham chiếu/con trỏ quyết định (đã thấy ở [Bài 32](32-ke-thua.md)). Thêm `virtual` trước hàm của cha: khi gọi hàm đó qua `Cha&` hay `Cha*`, chương trình nhìn **món thật** lúc chạy và gọi bản của lớp con nếu lớp con có viết lại. Viết lại như vậy gọi là **ghi đè (override)**, khác với **che hàm** của Bài 32 (che chỉ xảy ra theo tên, lúc biên dịch).
 
-Ở lớp con, hàm ghi đè phải **cùng tên, cùng tham số, cùng `const`** với hàm ảo của cha. Hãy luôn viết `override` sau hàm: nếu chữ ký lệch dù chỉ thiếu một chữ `const`, g++ báo lỗi ngay. Không có `override`, hàm lệch kia lặng lẽ thành một hàm mới (Ví dụ 1, Thử thay đổi).
+Ở lớp con, hàm ghi đè phải **cùng tên, cùng tham số, cùng `const`, cùng kiểu trả về** với hàm ảo của cha (kiểu trả về có ngoại lệ hiếm, bỏ qua). Hàm ghi đè tự thành ảo dù không viết lại `virtual`; `override` chỉ để g++ kiểm. Hãy luôn viết `override` sau hàm: nếu chữ ký lệch dù chỉ thiếu một chữ `const`, g++ báo lỗi ngay. Không có `override`, hàm lệch kia lặng lẽ thành một hàm mới (Ví dụ 1, Thử thay đổi).
 
 ### 2. Cài đặt thông dụng: vtable và vptr (chi tiết cài đặt, không phải luật)
 
@@ -37,7 +37,7 @@ p->choi():  đọc nhãn trong món p trỏ tới -> tra ô "choi" -> nhảy t�
 
 Có hai chứng cứ gián tiếp: thêm hàm ảo đầu tiên làm `sizeof` đối tượng **tăng đúng một con trỏ** (8 byte trên máy 64-bit này), và thêm hàm ảo thứ hai thì không tăng thêm, vì nhãn chỉ có một cái. Ví dụ 2 đo thật. Vì là chi tiết cài đặt, số byte đổi theo máy/trình biên dịch; đừng viết code dựa vào nó.
 
-**Chi phí.** Gọi hàm ảo phải đọc nhãn, tra bảng rồi nhảy gián tiếp, nên trình biên dịch thường khó **inline** (chèn thân hàm vào chỗ gọi) lời gọi đó vì lúc biên dịch chưa chắc biết hàm đích. Mỗi món cũng tốn thêm chỗ cho nhãn. Mình không đo thời gian trong bài này: với đa số chương trình, phần này nhỏ so với việc hàm làm; chỉ khi một vòng lặp cực nóng gọi hàm ảo rất nhiều thì mới đáng đo bằng công cụ đo hiệu năng.
+**Chi phí.** Gọi hàm ảo phải đọc nhãn, tra bảng rồi nhảy gián tiếp, nên trình biên dịch thường khó **inline** (chèn thân hàm vào chỗ gọi) lời gọi đó vì lúc biên dịch chưa chắc biết hàm đích. Mỗi món cũng tốn thêm chỗ cho nhãn. Mình không đo thời gian trong bài này: thường phần này không đáng kể so với việc hàm làm; chỉ khi một vòng lặp cực nóng gọi hàm ảo rất nhiều thì mới đáng đo bằng công cụ đo hiệu năng.
 
 ### 3. Hàm hủy phải `virtual` khi dùng qua con trỏ cha
 
@@ -47,15 +47,17 @@ Cách chữa: đặt `virtual ~DoChoi() {...}` hoặc `virtual ~DoChoi() = defau
 
 ### 4. Hàm thuần ảo `= 0`, lớp trừu tượng và interface
 
-Viết `virtual double dienTich() const = 0;` là khai báo **hàm thuần ảo** (pure virtual): "lớp này không có bản dùng sẵn, mọi lớp con phải tự viết". Lớp có ít nhất một hàm thuần ảo là **lớp trừu tượng (abstract class)**: không tạo được đối tượng của nó (như `Hinh h;`, Ví dụ 4 chạy thật ra lỗi), nhưng `Hinh*` và `Hinh&` vẫn dùng để trỏ tới các lớp con. Lớp con chưa viết hết hàm thuần ảo thì cũng vẫn trừu tượng.
+Từ đây ví dụ đổi sang hình học cho gọn: `Hinh` là bản vẽ gốc chung, `HinhTron`, `HinhChuNhat` là bản vẽ con, và mỗi loại tính diện tích theo cách riêng nên hàm `dienTich()` tự nhiên là hàm ảo (ví von bản vẽ/món vẫn đúng). Viết `virtual double dienTich() const = 0;` là khai báo **hàm thuần ảo** (pure virtual): "lớp này không có bản dùng sẵn, mọi lớp con phải tự viết". Lớp có ít nhất một hàm thuần ảo là **lớp trừu tượng (abstract class)**: không tạo được đối tượng của nó (như `Hinh h;`, Ví dụ 4 chạy thật ra lỗi), nhưng `Hinh*` và `Hinh&` vẫn dùng để trỏ tới các lớp con. Lớp con chưa viết hết hàm thuần ảo thì cũng vẫn trừu tượng.
 
 Lớp trừu tượng có thể có dữ liệu và hàm thường. Khi nó **chỉ** gồm hàm thuần ảo (cộng hàm hủy ảo) và không có dữ liệu thì thường gọi là **interface**: C++ không có từ khóa `interface`, đó chỉ là cách thiết kế. Tập hợp nhiều loại hình vào một dãy cần con trỏ (hoặc tham chiếu), vì hình khác loại có kích thước khác nhau: `std::vector<std::unique_ptr<Hinh>>` ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)) là cách chuẩn.
 
 ### 5. Hàm tạo và hàm hủy: không có đa hình ở đó
 
-Khi hàm tạo của `DoChoi` đang chạy, phần `XeChay` **chưa được dựng** ([Bài 32](32-ke-thua.md): cha dựng trước). Nếu cho phép gọi bản của `XeChay` thì nó sẽ đụng vào thành viên chưa tồn tại. Nên chuẩn quy định: trong hàm tạo (và hàm hủy) của lớp `L`, lời gọi hàm ảo chạy bản của **chính `L`** (hoặc của lớp cha nếu `L` không viết lại), không chạy bản của lớp con (Ví dụ 5). Hàm hủy thì ngược lại: lúc `~DoChoi` chạy, phần `XeChay` đã bị hủy rồi.
+Khi hàm tạo của `DoChoi` đang chạy, phần `XeChay` **chưa được dựng** ([Bài 32](32-ke-thua.md): cha dựng trước). Nếu cho phép gọi bản của `XeChay` thì nó sẽ đụng vào thành viên chưa tồn tại. Nên chuẩn quy định: trong hàm tạo (và hàm hủy) của lớp `L`, lời gọi hàm ảo chạy bản của **chính `L`** (hoặc của lớp cha nếu `L` không viết lại), không chạy bản của lớp con (Ví dụ 5). 
 
-Gọi hàm thuần ảo trực tiếp hay gián tiếp từ hàm tạo là hành vi không xác định theo chuẩn; trên g++ 11 mình đã chạy một ca gián tiếp và chương trình dừng với `pure virtual method called`. Hãy tránh gọi hàm ảo trong hàm tạo/hàm hủy, hoặc nếu gọi thì chắc chắn muốn bản của chính lớp đó.
+Hàm hủy cũng vậy: lúc `~DoChoi` chạy, phần `XeChay` đã bị hủy, nên hàm ảo cũng chỉ thấy bản của `DoChoi`.
+
+Gọi hàm thuần ảo trực tiếp hay gián tiếp từ hàm tạo là hành vi không xác định theo chuẩn; trên g++ 11 mình đã chạy cả hai: gọi thẳng thì g++ cảnh báo rồi báo lỗi liên kết `undefined reference`, gọi gián tiếp thì chương trình dừng lúc chạy với `pure virtual method called` (Ví dụ 5, Thử thay đổi). Hãy tránh gọi hàm ảo trong hàm tạo/hàm hủy, hoặc nếu gọi thì chắc chắn muốn bản của chính lớp đó.
 
 ### 6. Object slicing đầy đủ
 
@@ -65,7 +67,9 @@ Slicing xảy ra ở hàm nhận tham số theo giá trị (`void f(DoChoi d)`),
 
 ### 7. Chỉ nhắc: `dynamic_cast`, `typeid`, `final`
 
-**`dynamic_cast<Con*>(conTroCha)`** hỏi lúc chạy "món thật có phải `Con` không?": đúng thì cho con trỏ `Con*`, sai thì cho `nullptr` (Ví dụ 4). Nó chỉ dùng được với lớp có ít nhất một hàm ảo. `typeid(*p)` (trong `<typeinfo>`) trả thông tin kiểu thật, và tên in ra do trình biên dịch tự chọn. Cả hai thuộc nhóm "biết kiểu thật lúc chạy"; cần đến chúng nhiều thì thường là dấu hiệu nên thêm một hàm ảo thay vì hỏi kiểu.
+**`dynamic_cast<Con*>(conTroCha)`** hỏi lúc chạy "món thật có phải `Con` không?": đúng thì cho con trỏ `Con*`, sai thì cho `nullptr` (Ví dụ 4). Nó chỉ dùng được với lớp có ít nhất một hàm ảo. 
+
+`typeid(*p)` (trong `<typeinfo>`) với lớp có hàm ảo cho thông tin kiểu thật, và tên in ra do trình biên dịch tự chọn. Cả hai thuộc nhóm "biết kiểu thật lúc chạy"; cần đến chúng nhiều thì thường là dấu hiệu nên thêm một hàm ảo thay vì hỏi kiểu.
 
 **`final`** đặt sau hàm ảo (`void choi() const final`) cấm lớp con ghi đè tiếp (cùng từ khóa bạn đã gặp cho lớp ở [Bài 32](32-ke-thua.md)); Ví dụ 1 chạy lỗi thật.
 
@@ -223,7 +227,7 @@ Chuẩn gọi cả tình huống này là hành vi không xác định, nên ba 
 
 ### Ví dụ 4: lớp trừu tượng và `vector<unique_ptr<Hinh>>`
 
-`Hinh` là interface (chỉ hàm thuần ảo và hàm hủy ảo). Hai lớp hình khác loại nằm chung một dãy. Hàm `dienTich` được gọi qua con trỏ cha nên đa hình.
+Ví dụ này tạm rời xưởng đồ chơi sang hình học (mục 4). `Hinh` là interface (chỉ hàm thuần ảo và hàm hủy ảo). Hai lớp hình khác loại nằm chung một dãy. Hàm `dienTich` được gọi qua con trỏ cha nên đa hình.
 
 ```cpp
 #include <iostream>
@@ -275,7 +279,7 @@ int main() {
 |---|---|---|
 | (2) | Dãy giữ `unique_ptr<Hinh>`: mỗi phần tử là một con trỏ, cùng cỡ dù hình nào | `[ptr][ptr]` trỏ tới hai món ở kho |
 | (3) | `unique_ptr<HinhChuNhat>` là giá trị tạm, đổi được sang `unique_ptr<Hinh>` (như upcast con trỏ) | món 0: hình chữ nhật 3 x 4 |
-| (4) | `h->dienTich()` qua `Hinh*`: ảo, nên chạy bản của hình thật | in 12, rồi 12.56 |
+| (4) | `const auto&` vì `unique_ptr` không chép được ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)); `h->dienTich()` qua `Hinh*`: ảo, nên chạy bản của hình thật | in 12, rồi 12.56 |
 | (5) | Khai báo `t` ngay trong điều kiện `if`; `dynamic_cast` cho `nullptr` với chữ nhật nên `if` bỏ qua, với hình tròn cho con trỏ thật | chỉ hình tròn in thêm dòng |
 | hết `main` | `cacHinh` chết: mỗi `unique_ptr` xóa qua `Hinh*`, hàm hủy ảo (1) chạy hàm hủy đúng lớp | kho sạch |
 
@@ -339,11 +343,16 @@ goi tu ngoai:
   la DoChoi
 ```
 
-Mình chạy với ASan + UBSan: sạch. Dòng đầu và dòng cuối đều là `la DoChoi` dù món là xe: đúng quy tắc mục 5. **Thử thay đổi (đã chạy):** cho `gioiThieu` thành thuần ảo (`= 0`) và hàm tạo gọi nó **gián tiếp** qua một hàm thường `chuanBi()`: biên dịch được, chạy thì in `pure virtual method called` rồi `terminate called without an active exception`, chương trình dừng bất thường. Chuẩn gọi đó là hành vi không xác định.
+Mình chạy với ASan + UBSan: sạch. Dòng đầu và dòng cuối đều là `la DoChoi` dù món là xe: đúng quy tắc mục 5.
+
+**Thử thay đổi (đã chạy):** đổi `gioiThieu` của `DoChoi` thành thuần ảo (`= 0`).
+
+- **Giữ nguyên (1) và (2)** (gọi thẳng trong hàm tạo/hàm hủy): g++ cảnh báo `pure virtual ‘virtual void DoChoi::gioiThieu() const’ called from constructor` (và `from destructor`), rồi **lỗi liên kết** `undefined reference to ‘DoChoi::gioiThieu() const’`.
+- **Bỏ lời gọi ở (2), và ở (1) gọi qua hàm thường `chuanBi() { gioiThieu(); }`** (gọi gián tiếp): biên dịch được, chạy in `pure virtual method called` rồi `terminate called without an active exception`.
 
 ### Ví dụ 6: slicing và cách tránh
 
-`DoChoi` và `XeChay` như trước, `choi` là ảo, `XeChay` có thêm `toc_`. Năm chỗ gọi: tạo `DoChoi cat = x;`, hai hàm nhận theo giá trị/theo tham chiếu, và `vector<DoChoi>`.
+`DoChoi` và `XeChay` như trước, `choi` là ảo, `XeChay` có thêm `toc_`. Bốn lần gọi `choi()`: tạo `DoChoi cat = x;`, hai hàm nhận theo giá trị/theo tham chiếu, và `vector<DoChoi>`.
 
 ```cpp
 #include <iostream>
@@ -418,7 +427,7 @@ Mình chạy với ASan + UBSan: sạch. Chỉ chỗ (5), dùng tham chiếu, gi
     Đa hình là một lời gọi chạy hàm khác nhau tùy kiểu. Compile-time: trình biên dịch chọn hàm trước khi chạy, qua overload và template. Runtime: chọn theo kiểu thật của đối tượng lúc chạy, qua hàm `virtual` gọi bằng con trỏ/tham chiếu lớp cha. Runtime linh hoạt hơn (chứa nhiều loại trong một dãy), compile-time thì không tốn gián tiếp lúc chạy; Bài 34 nói tiếp.
 
 ??? question "vtable hoạt động thế nào?"
-    Cách cài đặt thông dụng (chuẩn không bắt buộc): mỗi lớp có hàm ảo có một bảng chứa con trỏ tới các hàm ảo của nó (vtable), mỗi đối tượng có thêm một con trỏ ẩn (vptr) trỏ tới bảng của lớp thật. Gọi hàm ảo là đọc vptr, tra ô tương ứng, nhảy gián tiếp. Bằng chứng: `sizeof` tăng một con trỏ khi thêm hàm ảo đầu tiên. Vì gián tiếp nên khó inline.
+    Cách cài đặt thông dụng (chuẩn không bắt buộc): mỗi lớp có hàm ảo có một bảng chứa con trỏ tới các hàm ảo của nó (vtable), mỗi đối tượng có thêm một con trỏ ẩn (vptr) trỏ tới bảng của lớp thật. Gọi hàm ảo là đọc vptr, tra ô tương ứng, nhảy gián tiếp. Chứng cứ gián tiếp: `sizeof` tăng một con trỏ khi thêm hàm ảo đầu tiên. Vì gián tiếp nên khó inline.
 
 ??? question "Tại sao hàm hủy của lớp cha phải virtual?"
     Xóa đối tượng lớp con qua con trỏ lớp cha mà hàm hủy cha không ảo là hành vi không xác định theo chuẩn; thực tế hàm hủy lớp con thường không chạy, nên tài nguyên của phần con bị rò. Hàm hủy ảo làm `delete` nhìn kiểu thật và chạy con trước, cha sau. Quy tắc: lớp định làm cha đa hình thì có hàm hủy ảo (`unique_ptr<Cha>` cũng cần).
@@ -427,7 +436,7 @@ Mình chạy với ASan + UBSan: sạch. Chỉ chỗ (5), dùng tham chiếu, gi
     Abstract class là lớp có ít nhất một hàm thuần ảo (`= 0`), không tạo được đối tượng, có thể có dữ liệu và hàm thường. Interface (C++ không có từ khóa riêng) là abstract class chỉ có hàm thuần ảo, thường kèm hàm hủy ảo và không có dữ liệu. Lớp con phải viết hết hàm thuần ảo mới tạo được đối tượng.
 
 ??? question "Object slicing là gì, tránh thế nào?"
-    Gán/truyền đối tượng lớp con vào biến/tham số lớp cha theo giá trị thì chỉ phần cha được chép, mất dữ liệu của con và hàm ảo chạy bản của cha. Hay gặp ở tham số theo giá trị và `vector<Cha>`. Tránh bằng tham chiếu, con trỏ, hoặc `vector<unique_ptr<Cha>>`; lớp trừu tượng chặn được luôn.
+    Gán/truyền đối tượng lớp con vào biến/tham số lớp cha theo giá trị thì chỉ phần cha được chép, mất dữ liệu của con và hàm ảo chạy bản của cha. Hay gặp ở tham số theo giá trị và `vector<Cha>`. Tránh bằng tham chiếu, con trỏ, hoặc `vector<unique_ptr<Cha>>`; lớp trừu tượng chặn được kiểu theo giá trị (không tạo được `Cha` để nhận), nhưng gán qua `Cha&` vẫn biên dịch và chỉ chép phần cha.
 
 ??? question "Gọi hàm virtual trong constructor thì sao?"
     Không đa hình: trong hàm tạo của `L` (và hàm hủy), lời gọi hàm ảo chạy bản của chính `L` (hoặc lớp cha), vì phần lớp con chưa dựng (hoặc đã hủy). Gọi hàm thuần ảo từ hàm tạo là hành vi không xác định. Tránh gọi hàm ảo ở đó, hoặc dùng hàm khởi tạo riêng sau khi dựng xong.
@@ -478,16 +487,16 @@ int main() { Vuong v; }                                                      // 
 - Dòng B, vì `Vuong` vẫn là lớp trừu tượng: hàm thiếu `const` không ghi đè hàm của cha
 - Dòng A, vì hàm ghi đè hàm thuần ảo bắt buộc phải ghi `override`
 - Không dòng nào, vì `Vuong` có hàm tên `dienTich` nên đã viết hết hàm thuần ảo của cha
-- Dòng A, vì hàm hủy ảo không đi chung được với hàm thuần ảo trong cùng lớp
+- Dòng A, vì `double c = 2;` không được khởi tạo ngay trong lớp
 
-<p class="giai-thich" markdown>`dienTich()` của `Vuong` thiếu `const` nên khác chữ ký với hàm của cha, không phải ghi đè; hàm thuần ảo của cha vẫn chưa có bản nên `Vuong` còn trừu tượng và `Vuong v;` bị g++ chặn (`cannot declare variable ‘v’ to be of abstract type ‘Vuong’`, mình đã chạy). `override` là lời nhắc để g++ bắt lỗi giúp, không phải điều kiện bắt buộc của cú pháp. Trùng tên không đủ: phải cùng tham số và cùng `const`. Còn hàm hủy ảo và hàm thuần ảo thường đi cùng nhau trong cùng một lớp.</p>
+<p class="giai-thich" markdown>`dienTich()` của `Vuong` thiếu `const` nên khác chữ ký với hàm của cha, không phải ghi đè; hàm thuần ảo của cha vẫn chưa có bản nên `Vuong` còn trừu tượng và `Vuong v;` bị g++ chặn (`cannot declare variable ‘v’ to be of abstract type ‘Vuong’`, mình đã chạy). `override` là lời nhắc để g++ bắt lỗi giúp, không phải điều kiện bắt buộc của cú pháp. Trùng tên không đủ: phải cùng tham số và cùng `const`. Còn gán giá trị ngay chỗ khai báo thành viên là cú pháp hợp lệ ([Bài 31](31-lop-dong-goi.md)).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 3.** `Con` kế thừa `Cha`, hàm hủy của `Cha` không `virtual`, và code là `Cha* p = new Con(); delete p;`. Điều nào đúng theo chuẩn C++?
 
 - Hàm hủy `Con` chạy rồi đến hàm hủy `Cha`, giống khi hàm hủy là `virtual`
-- Chỉ hàm hủy `Cha` chạy, và đó là kết quả chuẩn bảo đảm
+- Chỉ hàm hủy `Cha` chạy, vì `p` có kiểu `Cha*`
 - Lỗi biên dịch, vì trình biên dịch phát hiện xóa qua con trỏ cha
 - Hành vi không xác định, hàm hủy của `Con` có thể không chạy
 
@@ -531,17 +540,6 @@ int main() { Con c; c.chao(); }
 - Mỗi đối tượng giữ một bản sao riêng của vtable, nên tốn bộ nhớ theo số hàm ảo của lớp
 
 <p class="giai-thich" markdown>Chuẩn chỉ nói hàm ảo chọn theo kiểu thật; vtable/vptr là cách làm của các trình biên dịch phổ biến, và ví dụ `sizeof` trong bài cho thấy hàm ảo đầu tiên thêm 8 byte còn hàm thứ hai không thêm. Nó không phải điều chuẩn quy định. Nhãn trong đối tượng chỉ có một cái, thêm hàm ảo chỉ thêm ô vào bảng. Và bảng thuộc về lớp, dùng chung cho mọi đối tượng, không sao chép theo từng đối tượng.</p>
-</div>
-
-<div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 7.** Cho `class Hinh { public: virtual double dienTich() const = 0; virtual ~Hinh() = default; };`. Điều nào đúng?
-
-- Không dùng được `Hinh*`, vì không có đối tượng `Hinh` nào để nó trỏ tới
-- Lớp con không cần viết `dienTich`, vì `= 0` đã cho sẵn giá trị trả về là 0
-- Có thể tạo `Hinh h;` rồi gọi `h.dienTich()` để nhận 0
-- Không tạo được đối tượng `Hinh`, nhưng `Hinh*` vẫn trỏ tới lớp con để gọi hàm đa hình
-
-<p class="giai-thich" markdown>Lớp trừu tượng bị cấm tạo đối tượng trực tiếp, nhưng con trỏ và tham chiếu tới nó vẫn dùng bình thường để trỏ vào lớp con đã viết đủ hàm. `= 0` không phải giá trị trả về mà là dấu "chưa có bản, con phải tự viết". Nên cũng không tạo được `Hinh h;` để gọi hàm. Việc có con trỏ `Hinh*` không đòi hỏi đối tượng `Hinh`, chỉ cần một đối tượng thuộc lớp con của nó.</p>
 </div>
 
 </div>
