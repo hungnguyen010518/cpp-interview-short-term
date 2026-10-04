@@ -29,3 +29,4 @@
 | [Bài 23 — Thuật toán hay hỏi ở phỏng vấn](nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi.md) | <span class="diem" data-bai="23"></span> |
 | [Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số](nhom-3-da-luong/24-thread-co-ban.md) | <span class="diem" data-bai="24"></span> |
 | [Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến](nhom-3-da-luong/25-data-race-mutex.md) | <span class="diem" data-bai="25"></span> |
+| [Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi](nhom-3-da-luong/26-deadlock.md) | <span class="diem" data-bai="26"></span> |
