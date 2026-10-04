@@ -6,10 +6,7 @@
     - Giữ vùng khóa nhỏ nhất có thể, không giữ khóa lúc làm việc chậm, và đóng gói dữ liệu cùng mutex của nó trong một lớp an toàn luồng.
     - Tránh bẫy trả về tham chiếu tới dữ liệu đang được bảo vệ; phân biệt data race với race condition; nhận ra `thread_local` và `std::shared_mutex` khi gặp tên.
 
-**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, lambda làm hàm luồng, `vector<thread>`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy, `throw`/`catch`), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu, hàm thành viên), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda `[&b]`, con trỏ hàm), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`std::vector<int>`: ngoặc `<...>` cho biết kiểu).
-
-!!! note "Phạm vi bài này"
-    Bài này chỉ dạy cách bảo vệ **một** dữ liệu chung bằng **một** mutex. Chuyện hai mutex chờ nhau (deadlock) là Bài 26, chờ một điều kiện (`condition_variable`) là Bài 27, và `std::atomic` là Bài 28.
+**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, lambda làm hàm luồng, `vector<thread>`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy, `throw`/`catch`), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu, hàm thành viên), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda `[&b]`, con trỏ hàm), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến toàn cục, `class` ≈ `struct`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (`auto`), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`std::vector<int>`: ngoặc `<...>` cho biết kiểu).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -76,9 +73,13 @@ mong doi 400000, thuc te 124915
 
 Mỗi lần một số khác nhau và đều nhỏ hơn 400000; máy bạn sẽ ra số khác, nên chỉ cái **mẫu** (nhỏ hơn mong đợi, đổi theo lần) mới đáng nhớ. Khối mã này đặt `// bo-qua-kiem-tra` vì nó có data race.
 
-**Thử thay đổi: biên dịch thêm `-O2`.** Mình chạy 20 lần: **cả 20 lần đều ra đúng 400000**. Lý do: mình xem mã hợp ngữ (assembly, các lệnh máy viết dưới dạng chữ) do `g++ -O2 -S` sinh ra thì thấy hàm `tang` chỉ còn đúng một lệnh `addl $100000, dem(%rip)` (cộng thẳng 100000 vào ô nhớ `dem`), cửa sổ để luồng khác chen vào hẹp tới mức chưa thấy lỗi. Nhưng đó vẫn là data race: ThreadSanitizer (ngay dưới) vẫn báo khi biên dịch với `-O2`. Chạy ra đúng **không** chứng minh chương trình đúng.
+**Thử thay đổi: biên dịch thêm `-O2`.**
 
-**ThreadSanitizer (TSan)** là công cụ của [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) chuyên bắt data race. Biên dịch kèm `-g -fsanitize=thread` rồi chạy. Trên máy mình phải chạy kèm `setarch $(uname -m) -R ./chuongtrinh` (tắt việc hệ điều hành xáo trộn địa chỉ bộ nhớ); chạy trần thì TSan dừng với `FATAL: ThreadSanitizer: unexpected memory mapping`. Báo cáo thật, mình rút gọn (bỏ các dòng ngăn xếp gọi của thư viện, đường dẫn tệp, số địa chỉ):
+- Kết quả: mình chạy 20 lần, **cả 20 lần đều ra đúng 400000**.
+- Vì sao: mình xem mã hợp ngữ (assembly, các lệnh máy viết dạng chữ) do `g++ -O2 -S` sinh ra, hàm `tang` chỉ còn một lệnh `addl $100000, dem(%rip)` (cộng thẳng 100000 vào ô nhớ `dem`), nên cửa sổ cho luồng khác chen vào hẹp tới mức chưa thấy lỗi.
+- Nhưng vẫn là data race: ThreadSanitizer (ngay dưới) vẫn báo khi biên dịch với `-O2`. Chạy ra đúng **không** chứng minh chương trình đúng.
+
+**ThreadSanitizer (TSan)** là công cụ của [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) chuyên bắt data race. Biên dịch kèm `-g -fsanitize=thread` rồi chạy. Báo cáo thật, mình rút gọn (bỏ các dòng ngăn xếp gọi của thư viện, đường dẫn tệp, số địa chỉ):
 
 ```text
 WARNING: ThreadSanitizer: data race
@@ -90,20 +91,20 @@ WARNING: ThreadSanitizer: data race
 SUMMARY: ThreadSanitizer: data race dem_chung.cpp:9 in tang()
 ```
 
-Dòng 9 của tệp chính là `++dem;`. TSan chỉ ra: một luồng **đọc** `dem`, luồng kia **ghi** cùng ô nhớ trước đó, không có đồng bộ giữa hai việc. Chương trình vẫn chạy tiếp, in kết quả (khác nhau mỗi lần) và thoát với mã 66, mã mà TSan dùng khi đã báo lỗi.
+Dòng được chỉ ra là dòng chứa `++dem;` (dòng 9 nếu bạn bỏ dòng chú thích đầu tệp). TSan chỉ ra: một luồng **đọc** `dem`, luồng kia **ghi** cùng ô nhớ trước đó, không có đồng bộ giữa hai việc. Chương trình vẫn chạy tiếp, in kết quả (khác nhau mỗi lần) và thoát với mã 66, mã mà TSan dùng khi đã báo lỗi.
+
+Trên máy mình, TSan phải chạy qua `setarch $(uname -m) -R ./chuongtrinh` (tắt việc hệ điều hành xáo trộn địa chỉ); chạy trần thì nó dừng với `FATAL: ThreadSanitizer: unexpected memory mapping`.
 
 !!! info "Bạn biết Go?"
-    Chương trình Go tương đương (4 goroutine, mỗi cái `dem++` 100000 lần, chờ bằng `sync.WaitGroup`) cũng ra số khác nhau mỗi lần, mình đã chạy ba lần: `130174`, `145546`, `219512`. `go run -race` (hoặc `go test -race`) ứng với TSan: cùng in `WARNING: DATA RACE`, chỉ ra hai dòng xung đột và thoát với mã 66; công cụ của Go được xây trên cùng công nghệ ThreadSanitizer.
+    Chương trình Go tương đương (4 goroutine, mỗi cái `dem++` 100000 lần, chờ bằng `sync.WaitGroup`) cũng ra số khác nhau mỗi lần, mình đã chạy ba lần: `130174`, `145546`, `219512`. `go run -race` (hoặc `go test -race`) ứng với TSan: in `WARNING: DATA RACE` và chỉ ra hai dòng xung đột. Binary dựng bằng `go build -race` thoát mã 66 như TSan; `go run` tự thoát mã 1 và in thêm `exit status 66`. Công cụ của Go được xây trên cùng công nghệ ThreadSanitizer.
 
-    Data race trong Go cũng là lỗi nghiêm trọng. Mình chạy ghi đồng thời vào một `map` từ 4 goroutine (Go 1.27.1): cả 6 lần đều chết ngay với `fatal error: concurrent map writes` và mã thoát 2.
+    Data race trong Go cũng nghiêm trọng: ghi đồng thời vào một `map` từ 4 goroutine (Go 1.27.1) chết cả 6 lần với `fatal error: concurrent map writes` (binary thoát mã 2).
 
 ### 2. `std::mutex`: cái thẻ vào thớt
 
 Muốn dùng mutex cần `#include <mutex>`. **`std::mutex`** (mutual exclusion, "loại trừ lẫn nhau") là một đối tượng có hai thao tác chính: `lock()` xin khóa, `unlock()` trả khóa. Nếu mutex đang bị luồng khác giữ thì `lock()` **chặn** luồng gọi (bắt đứng chờ) tới khi khóa được trả.
 
 Chuẩn bảo đảm: đoạn code giữa `lock()` và `unlock()` của một luồng **không chạy xen** với đoạn tương ứng của luồng khác trên cùng mutex; và mọi thứ luồng trước ghi trước `unlock()` đều được luồng sau thấy sau `lock()`. Đó chính là "thứ tự được bảo đảm" cần để hết data race. `std::mutex` không sao chép được (chỉ có một chiếc thẻ).
-
-Một bẫy: nếu **chính luồng đang giữ** mutex lại gọi `lock()` lần nữa trên nó, chuẩn nói đó là hành vi không xác định; chuyện chờ nhau kiểu này là chủ đề của Bài 26.
 
 ### 3. Vì sao không gọi `lock()`/`unlock()` bằng tay
 
@@ -134,13 +135,13 @@ int main() {
 }
 ```
 
-Mình biên dịch (sạch cảnh báo) và chạy với `timeout 3` (lệnh giết chương trình sau 3 giây): chương trình **không bao giờ in gì**, và `timeout` thoát với mã **124**, mã nó dùng khi hết giờ. Luồng chính giữ khóa từ (4) mà không trả, luồng `t` đứng chờ ở (5) mãi mãi, và `join` ở (6) chờ `t`. Mình cũng thử thay `return` bằng `throw x;` (bắt ở `main` bằng `try`/`catch`): vẫn treo, mã 124. Đây không phải deadlock cổ điển (Bài 26), nhưng cùng một hậu quả: treo.
+Mình biên dịch (sạch cảnh báo) và chạy với `timeout 3` (lệnh giết chương trình sau 3 giây): chương trình **không bao giờ in gì**, và `timeout` thoát với mã **124**, mã nó dùng khi hết giờ. Luồng chính giữ khóa từ (4) mà không trả, luồng `t` đứng chờ ở (5) mãi mãi, và `join` ở (6) chờ `t`.
+
+Mình cũng thử thay `return` bằng `throw x;` (bắt ở `main` bằng `try`/`catch`): vẫn treo, mã 124. Đây không phải deadlock cổ điển (Bài 26), nhưng cùng một hậu quả: treo.
 
 ### 4. `std::lock_guard`: RAII cho mutex
 
-[Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) đã nêu `std::lock_guard` làm ví dụ RAII: nó **xin khóa trong hàm tạo, trả khóa trong hàm hủy**. Biến cục bộ luôn bị hủy khi ra khỏi khối, kể cả khi thoát bằng `return` hay ngoại lệ, nên khóa luôn được trả. Cú pháp: `std::lock_guard<std::mutex> giu(khoa);`. Cặp `<std::mutex>` cho biết kiểu mutex bị giữ, giống `<int>` trong `std::vector<int>` ([Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)).
-
-Ta sửa ví dụ đếm: thêm một mutex và một dòng `lock_guard` bao quanh `++dem`.
+[Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) đã nêu `std::lock_guard` làm ví dụ RAII: nó **xin khóa trong hàm tạo, trả khóa trong hàm hủy**. Biến cục bộ bị hủy khi ra khỏi khối, kể cả khi thoát bằng `return`, hoặc bằng ngoại lệ được `catch` ở đâu đó (ngoại lệ không ai bắt thì chương trình gọi `std::terminate`, [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)); nên khóa được trả. Cú pháp: `std::lock_guard<std::mutex> giu(khoa);`. Cặp `<std::mutex>` cho biết kiểu mutex bị giữ, giống `<int>` trong `std::vector<int>` ([Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)).
 
 ```cpp
 #include <iostream>
@@ -183,10 +184,12 @@ mong doi 400000, thuc te 400000
 
 Mình chạy với `-fsanitize=thread`: không có cảnh báo, mã thoát 0. Kết quả giờ ổn định vì `++dem` của các luồng xếp hàng qua mutex, và `join` bảo đảm luồng chính thấy kết quả cuối.
 
-**Thử thay đổi: xóa dòng (2).** Mình đã chạy: lỗi biên dịch không có; kết quả lại nhỏ hơn 400000 và đổi mỗi lần (`106880`, `144583`, `118777`). Mutex `khoa` vẫn còn đó nhưng không ai xin, nên không bảo vệ gì.
+**Thử thay đổi: xóa dòng (2).** Mình đã chạy: vẫn biên dịch được, nhưng kết quả lại nhỏ hơn 400000 và đổi mỗi lần (`106880`, `144583`, `118777`). Mutex `khoa` vẫn còn đó nhưng không ai xin, nên không bảo vệ gì.
 
 !!! info "Bạn biết Go?"
-    `sync.Mutex` ↔ `std::mutex`, `mu.Lock()` ↔ `lock()`. Go không có RAII (hàm hủy), nên thói quen là `mu.Lock()` rồi `defer mu.Unlock()`: `defer` chạy khi **hàm** kết thúc, kể cả `return` sớm hay `panic`, tương đương vai trò của `lock_guard`. Khác chỗ: `lock_guard` nhả khóa khi ra khỏi **khối** `{ }` chứa nó (như vòng `for` ở trên), còn `defer` nhả khi cả hàm kết thúc. Mình chạy bản Go có `sync.Mutex`: ra đúng 400000, và bản biên dịch với `-race` không báo gì.
+    `sync.Mutex` ↔ `std::mutex`, `mu.Lock()` ↔ `lock()`. Go không có RAII (hàm hủy), nên thói quen là `mu.Lock()` rồi `defer mu.Unlock()`: `defer` chạy khi **hàm** kết thúc, kể cả `return` sớm hay `panic`, tương đương vai trò của `lock_guard`.
+
+    Khác chỗ: `lock_guard` nhả khóa khi ra khỏi **khối** `{ }` chứa nó (như vòng `for` ở trên), còn `defer` nhả khi cả hàm kết thúc. Mình chạy bản Go có `sync.Mutex`: ra đúng 400000, và bản biên dịch với `-race` không báo gì.
 
 ### 5. `std::unique_lock`: khi cần nhả và xin lại
 
@@ -210,10 +213,8 @@ void tho() {
         if (viec.empty()) return;                     // (2) hết việc: hàm hủy của lk nhả khóa
         int x = viec.back();
         viec.pop_back();
-        lk.unlock();                                  // (3) nhả khóa sớm, đang giữ tay
-
+        lk.unlock();                                  // (3) nhả khóa sớm: phần tính sau không đụng dữ liệu chung
         int binhPhuong = x * x;                       // (4) việc "nặng" làm NGOÀI khóa
-
         lk.lock();                                    // (5) xin lại khóa để ghi kết quả
         tong += binhPhuong;
     }                                                 // (6) cuối vòng: lk bị hủy, nhả khóa
@@ -238,9 +239,7 @@ Ai lấy số nào là việc của hệ điều hành và đổi theo lần ch�
 
 ### 6. Vùng găng nhỏ nhất, và đừng giữ khóa lúc làm việc chậm
 
-Mutex làm các luồng xếp hàng. Mỗi giây giữ khóa là một giây các luồng khác đứng chờ, nên vùng găng chỉ nên bọc **đúng phần đụng dữ liệu chung**. Việc chậm (đọc tệp, mạng, `sleep`, tính toán nặng) làm **ngoài** khóa.
-
-Ta đo: mỗi luồng cần "làm việc chậm" 50 ms rồi tăng `dem`. Bản đầu giữ khóa suốt cả lúc chậm; bản sau chỉ khóa khi tăng `dem`. Hàm `chay` nhận một con trỏ hàm ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) và đo thời gian chạy bằng `std::chrono` ([Bài 24](24-thread-co-ban.md)). Chương trình chỉ in `0`/`1` trả lời các câu hỏi so sánh, vì mili giây thật đổi theo máy.
+Mutex làm các luồng xếp hàng. Mỗi giây giữ khóa là một giây các luồng khác đứng chờ, nên vùng găng chỉ nên bọc **đúng phần đụng dữ liệu chung**. Việc chậm (đọc tệp, mạng, `sleep`, tính toán nặng) làm **ngoài** khóa. Ta đo: mỗi luồng cần "làm việc chậm" 50 ms rồi tăng `dem`. Bản đầu giữ khóa suốt cả lúc chậm; bản sau chỉ khóa khi tăng `dem`. Hàm `chay` nhận một con trỏ hàm ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) và đo thời gian chạy bằng `std::chrono` ([Bài 24](24-thread-co-ban.md)). Chương trình chỉ in `0`/`1` trả lời các câu hỏi so sánh, vì mili giây thật đổi theo máy.
 
 ```cpp
 #include <chrono>
@@ -291,15 +290,11 @@ giu khoa khi cho: it nhat 200 ms? 1
 nha khoa khi cho: duoi 200 ms? 1
 ```
 
-Giải thích: ở bản đầu bốn lần ngủ 50 ms phải nối đuôi nhau (4 x 50 = 200 ms trở lên). Ở bản sau cả bốn ngủ cùng lúc. Khi mình in thẳng số đo (năm lần liền), được `200` và `50` ms trên máy mình; bạn sẽ ra số khác, nhưng cái chênh lệch cỡ bốn lần thì có lý do rõ ràng. Hai câu in trên chỉ đúng khi máy không quá bận.
+Giải thích: ở bản đầu bốn lần ngủ 50 ms phải nối đuôi nhau (4 x 50 = 200 ms trở lên). Ở bản sau cả bốn ngủ cùng lúc. Khi mình in thẳng số đo (năm lần liền), được `200` và `50` ms trên máy mình; bạn sẽ ra số khác, nhưng cái chênh lệch cỡ bốn lần thì có lý do rõ ràng.
 
 ### 7. Hai thứ chỉ cần nhận ra tên: `thread_local` và `std::shared_mutex`
 
-**`thread_local`** đặt trước khai báo biến làm cho **mỗi luồng có một bản riêng** của biến đó (bắt đầu bằng giá trị khởi tạo). Không ai chung với ai nên không cần khóa; nhưng bạn cũng không dùng nó để các luồng chia sẻ dữ liệu.
-
-Mình chạy thử: ba luồng, mỗi luồng `++dem` 1000 lần rồi chép `dem` của mình vào một ô riêng của `vector`. Cả ba ô đều là `1000`, còn `dem` của luồng chính vẫn `0` (ba lần liền, TSan sạch).
-
-**`std::shared_mutex`** (C++17, `#include <shared_mutex>`) là mutex cho kiểu "nhiều người đọc, một người ghi": nhiều luồng đọc cùng lúc được (khóa chia sẻ bằng `std::shared_lock`), luồng ghi thì giữ riêng (`std::unique_lock`). Mình biên dịch thử một ví dụ nhỏ thì chạy được với `-std=c++17` và lỗi `'shared_mutex' in namespace 'std' does not name a type` với `-std=c++14`. Bài này không đi sâu hơn.
+**`thread_local`** đặt trước một khai báo biến cho **mỗi luồng một bản riêng** (không cần khóa, nhưng cũng không dùng để chia sẻ dữ liệu); câu 8 có ví dụ (mình đã chạy thử: mỗi luồng ra `1000`, luồng chính vẫn `0`, TSan sạch). **`std::shared_mutex`** (C++17, `#include <shared_mutex>`) là mutex "nhiều người đọc, một người ghi": nhiều luồng đọc cùng lúc (`std::shared_lock`), luồng ghi giữ riêng (`std::unique_lock`); `-std=c++14` báo `'shared_mutex' in namespace 'std' does not name a type`.
 
 ## 💻 Ví dụ code
 
@@ -307,7 +302,7 @@ Mình chạy thử: ba luồng, mỗi luồng `++dem` 1000 lần rồi chép `de
 
 Cách làm bền hơn một mutex toàn cục đứng riêng là **đóng gói**: đặt dữ liệu và mutex bảo vệ nó vào **cùng một lớp**, giấu cả hai đi, và chỉ cho bên ngoài đụng vào qua các hàm tự khóa. Khi đó người dùng lớp không thể quên khóa, vì không có cách nào đụng vào dữ liệu mà không đi qua hàm.
 
-Ta cần một thứ cú pháp mới. Với `struct` ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct`), mọi thành viên ai cũng truy cập được. Viết `class` rồi chia **`public:`** (ai cũng dùng được) và **`private:`** (chỉ hàm của chính lớp được đụng vào; từ ngoài truy cập là lỗi biên dịch). Ta dùng `private:` để giấu mutex và biến đếm. Dòng `int dem = 0;` trong lớp cho thành viên `dem` giá trị ban đầu 0.
+Ta cần một thứ cú pháp mới. Với `struct` ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct`), mọi thành viên ai cũng truy cập được. Viết `class` rồi chia **`public:`** (ai cũng dùng được) và **`private:`** (chỉ hàm của chính lớp được đụng vào; từ ngoài truy cập là lỗi biên dịch). Ta dùng `private:` để giấu mutex và biến đếm. Dòng `int dem = 0;` trong lớp cho thành viên `dem` giá trị ban đầu 0. Trong thân lớp, hàm thành viên thấy mọi thành viên dù khai báo trước hay sau nó.
 
 ```cpp
 #include <iostream>
@@ -373,7 +368,6 @@ Giả sử `BoDem` có hàm `int& thamChieu()` khóa rồi trả `dem` bằng **
 #include <mutex>
 #include <thread>
 #include <vector>
-
 class BoDemHong {
 public:
     int& thamChieu() {
@@ -385,7 +379,6 @@ private:
     std::mutex khoa;
     int dem = 0;
 };
-
 int main() {
     BoDemHong b;
     std::vector<std::thread> cacLuong;
@@ -400,7 +393,13 @@ int main() {
 }
 ```
 
-Mình biên dịch sạch và chạy năm lần: in `199646`, `198657`, `198225`, `198729`, `198857` (mong đợi 200000; máy bạn ra số khác). Với `-fsanitize=thread`, TSan báo `data race` ở dòng (3) (đọc và ghi cùng ô ở hai luồng). Cách sửa: giữ khóa suốt lúc **dùng** dữ liệu, hoặc trả bản sao, hoặc đưa việc cần làm vào **bên trong** lớp thành một hàm (như `tang()`).
+Mình biên dịch sạch và chạy năm lần: in `199646`, `198657`, `198225`, `198729`, `198857` (mong đợi 200000; máy bạn ra số khác). Với `-fsanitize=thread`, TSan báo `data race` ở dòng (3) (đọc và ghi cùng ô ở hai luồng). Ở (3), `thamChieu()` trả biệt danh của `dem`, nên `++` tăng đúng `dem` chứ không phải một bản sao.
+
+Cách sửa, chọn một:
+
+- giữ khóa suốt lúc **dùng** dữ liệu;
+- trả bản sao;
+- đưa việc cần làm vào **bên trong** lớp thành một hàm (như `tang()`).
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -411,10 +410,10 @@ Mình biên dịch sạch và chạy năm lần: in `199646`, `198657`, `198225`
     Mutex bảo vệ một **đoạn code** nhiều lệnh (có thể đụng nhiều biến, một bất biến phải giữ nguyên); luồng không có khóa phải chờ. `std::atomic` (Bài 28) làm **một** thao tác trên **một** biến thành nguyên tử, thường không cần khóa. Biến đếm đơn giản hợp với atomic; hễ cần giữ nhất quán giữa nhiều biến hay cả một cấu trúc thì dùng mutex. Cả hai đều là cách đồng bộ hợp lệ để tránh data race.
 
 ??? question "`lock_guard` khác `unique_lock` thế nào?"
-    Cả hai là RAII: xin khóa lúc tạo, trả lúc hủy. `lock_guard` đơn giản và nhẹ: không nhả sớm được, không chuyển đi được. `unique_lock` cho `unlock()` rồi `lock()` lại giữa chừng, hoãn việc khóa lúc tạo, và là thứ `condition_variable` đòi hỏi (Bài 27); đổi lại nặng hơn một chút. Mặc định dùng `lock_guard`, chỉ nâng lên `unique_lock` khi cần.
+    Cả hai là RAII: xin khóa lúc tạo, trả lúc hủy. `lock_guard` đơn giản và nhẹ, không nhả sớm được. `unique_lock` cho `unlock()` rồi `lock()` lại giữa chừng, có kiểu tạo không khóa ngay (không đi sâu ở đây), và là thứ `condition_variable` đòi (Bài 27); đổi lại nặng hơn một chút. Mặc định dùng `lock_guard`.
 
 ??? question "Tại sao nên dùng RAII cho mutex thay vì gọi `lock()`/`unlock()` tay?"
-    Vì hàm có nhiều lối thoát: `return` sớm, ngoại lệ (kể cả từ chỗ ta không để ý, như cấp phát bộ nhớ). Gọi tay thì chỉ cần một lối thoát bỏ qua `unlock()` là khóa bị giữ mãi và các luồng khác treo, như ví dụ mục 3 mà mình đã chạy ra mã 124. Hàm hủy của biến cục bộ chạy trên mọi lối thoát, nên `lock_guard` trả khóa không phụ thuộc trí nhớ của lập trình viên. Đó cũng là cùng ý với `defer mu.Unlock()` của Go.
+    Vì hàm có nhiều lối thoát: `return` sớm, ngoại lệ (kể cả từ chỗ ta không để ý, như cấp phát bộ nhớ). Gọi tay thì chỉ cần một lối thoát bỏ qua `unlock()` là khóa bị giữ mãi và các luồng khác treo, như ví dụ mục 3 mà mình đã chạy ra mã 124. Hàm hủy của biến cục bộ chạy trên mọi lối thoát bình thường và khi ngoại lệ được bắt, nên `lock_guard` trả khóa không phụ thuộc trí nhớ của lập trình viên. Đó cũng là cùng ý với `defer mu.Unlock()` của Go.
 
 ## ⚠️ Lỗi thường gặp
 
@@ -423,12 +422,6 @@ Mình biên dịch sạch và chạy năm lần: in `199646`, `198657`, `198225`
 
 !!! warning "Lỗi 2: Quên khóa ở một chỗ"
     Mutex chỉ bảo vệ khi **mọi** chỗ đụng tới dữ liệu đều xin khóa, kể cả chỗ chỉ **đọc**. Một chỗ quên là data race trở lại (mình đã chạy: xóa đúng một dòng `lock_guard` là kết quả sai ngay). Đóng gói dữ liệu cùng mutex trong một lớp để không ai quên được.
-
-!!! warning "Lỗi 3: Giữ khóa lúc làm việc chậm"
-    Giữ khóa khi ngủ, đọc tệp hay chờ mạng làm cả đám luồng xếp hàng (mình đã đo: 200 ms thay vì 50 ms). Khóa chỉ bọc đúng phần đụng dữ liệu chung.
-
-!!! warning "Lỗi 4: Trả tham chiếu hay con trỏ tới dữ liệu được bảo vệ"
-    Người gọi dùng nó sau khi khóa đã nhả. Trả bản sao, hoặc để việc xảy ra bên trong hàm của lớp.
 
 ## ✍️ Trắc nghiệm
 
@@ -456,7 +449,7 @@ void tang() { for (int i = 0; i < 100000; ++i) ++dem; }
 - `dem` chắc chắn nhỏ hơn 400000, vì các lần tăng bị mất
 - `dem` chắc chắn bằng 400000, vì mỗi luồng cộng đúng 100000
 - Chuẩn không hứa gì, vì chương trình có data race
-- `dem` nằm giữa 100000 và 400000, vì mỗi luồng tự cộng được phần mình
+- Chuẩn bảo đảm `dem` nằm giữa 100000 và 400000, vì mỗi luồng cộng phần mình
 
 <p class="giai-thich" markdown>Có data race thì chương trình là hành vi không xác định, nên chuẩn không bảo đảm con số nào. Nói "chắc chắn nhỏ hơn" là sai ngay cả trên thực tế: với `-O2` mình chạy 20 lần đều ra đúng 400000. Nói "chắc chắn bằng 400000" thì sai vì không có đồng bộ nào bảo đảm. Còn khoảng 100000 đến 400000 là suy đoán dựa trên cách máy hay hỏng, không phải điều chuẩn cho phép tin.</p>
 </div>
@@ -482,14 +475,14 @@ void f(int x) {
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
-**Câu 4.** Trong một hàm, bạn cần giữ khóa lúc lấy việc từ hàng đợi, nhả khóa để xử lý, rồi xin lại khóa để ghi kết quả. Nên dùng gì?
+**Câu 4.** Bạn muốn một lớp bọc RAII (tự trả khóa khi bị hủy) mà vẫn cho gọi `unlock()` rồi `lock()` lại giữa hàm. Nên dùng lớp nào?
 
-- `std::lock_guard`, vì nó có `unlock()` để nhả sớm khi cần
-- `std::lock_guard`, rồi gọi `unlock()` bằng tay trên chính cái mutex đó
-- Không dùng được lớp bọc nào, phải gọi `lock()`/`unlock()` tay hết
+- `std::lock_guard`, vì nó có `unlock()` và `lock()` như `unique_lock`
+- `std::lock_guard`, vì hàm hủy của nó tự xin lại khóa sau khi nhả
+- Không lớp bọc nào làm được, phải gọi tay trên chính mutex
 - `std::unique_lock`, vì có `unlock()` và `lock()` mà vẫn tự nhả khi hủy
 
-<p class="giai-thich" markdown>`unique_lock` cho nhả và xin lại giữa chừng mà vẫn là RAII: hàm hủy chỉ trả khóa nếu lúc đó nó còn giữ. `lock_guard` không có `unlock()` nên lựa chọn đầu bịa ra một hàm không tồn tại. Gọi `unlock()` tay trên mutex khi `lock_guard` còn sống là hỏng: hàm hủy của `lock_guard` sẽ trả khóa thêm một lần nữa, một lỗi nữa chứ không phải cách sửa. Việc phải bỏ hết RAII cũng không đúng vì `unique_lock` sinh ra cho đúng trường hợp này.</p>
+<p class="giai-thich" markdown>`unique_lock` cho nhả và xin lại giữa chừng mà vẫn là RAII: hàm hủy chỉ trả khóa nếu lúc đó nó còn giữ. `lock_guard` chỉ xin khóa lúc tạo và trả lúc hủy, không có `unlock()` hay `lock()`, và hàm hủy của nó cũng không xin khóa lại. Bỏ hết lớp bọc để gọi tay là bỏ luôn lợi ích RAII, trong khi đã có `unique_lock` làm đúng việc này.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -534,7 +527,7 @@ if (b.doc() == 0) { b.tang(); }
 ```
 
 - Có data race, vì cả hai luồng cùng đọc `dem` cùng lúc
-- Không có data race, nhưng có race condition: dem có thể thành 2
+- Không có data race nhưng có race condition, vì `dem` có thể thành 2
 - Không có lỗi nào, vì mỗi hàm đã tự khóa nên cả dòng an toàn
 - Chắc chắn `dem` thành 1, vì luồng sau thấy `dem` đã khác 0
 
@@ -560,8 +553,8 @@ thread_local int dem = 0;
 
 ## 🔑 Tóm tắt
 
-1. **Data race** (chuẩn C++): hai luồng cùng truy cập một ô nhớ, ít nhất một bên ghi, không có đồng bộ giữa chúng; hậu quả là **hành vi không xác định**, không chỉ là kết quả sai. `++dem` từ nhiều luồng là đọc-sửa-ghi không nguyên tử; mình chạy ra số nhỏ hơn mong đợi và khác mỗi lần (với `-O2` lại ra đúng nhưng TSan vẫn báo), và TSan chỉ ra dòng xung đột.
+1. **Data race** (chuẩn C++): hai luồng cùng truy cập một ô nhớ, ít nhất một bên ghi, không có đồng bộ giữa chúng; hậu quả là **hành vi không xác định**, không chỉ là kết quả sai. `++dem` là đọc-sửa-ghi không nguyên tử: mình chạy ra số nhỏ hơn mong đợi, khác mỗi lần; TSan chỉ ra dòng xung đột.
 2. `std::mutex` (`lock`/`unlock`) cho các luồng xếp hàng qua một vùng găng và tạo thứ tự đồng bộ; gọi `lock`/`unlock` tay nguy hiểm vì `return` sớm hay ngoại lệ làm khóa không được trả (mình chạy: treo, mã 124).
 3. Dùng `std::lock_guard` (RAII, nối [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md); Go dùng `defer mu.Unlock()`); `std::unique_lock` khi cần nhả/xin lại giữa chừng hoặc dùng với `condition_variable` (Bài 27). Giữ vùng găng nhỏ nhất, không giữ khóa lúc ngủ/I/O/tính nặng.
 4. Khóa đi theo dữ liệu: đóng gói dữ liệu `private` cùng mutex trong một lớp (như `BoDem`), mọi hàm đụng dữ liệu đều khóa và trả **bản sao**; trả tham chiếu hay con trỏ tới dữ liệu được bảo vệ phá vỡ bảo vệ.
-5. Data race khác race condition: race condition là lỗi logic theo thứ tự chạy, có thể còn dù hết data race (kiểm-rồi-làm giữa hai lần khóa); `thread_local` cho mỗi luồng một bản riêng, `std::shared_mutex` (C++17) cho nhiều đọc một ghi; `go run -race` của Go ứng với TSan.
+5. Race condition là lỗi logic theo thứ tự chạy, còn được dù hết data race (kiểm-rồi-làm giữa hai lần khóa); `thread_local` và `std::shared_mutex` (C++17) chỉ cần nhận ra tên; `-race` của Go ứng với TSan.
