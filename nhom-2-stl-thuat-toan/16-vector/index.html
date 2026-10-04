@@ -1396,7 +1396,7 @@
 <p>Vector gần giống slice về công dụng (<code>append</code> ≈ <code>push_back</code>, <code>len</code> ≈ <code>size</code>, <code>cap</code> ≈ <code>capacity</code>), nhưng khác ba điều. Một: slice là <strong>cửa sổ</strong> <code>(con trỏ, len, cap)</code> nhìn vào một mảng, và nhiều slice có thể cùng nhìn một mảng; vector <strong>sở hữu</strong> mảng của mình và không ai khác chung nó. Hai: gán <code>b = a</code> trong Go chép cửa sổ (hai slice chung mảng); <code>b = a</code> với vector chép <strong>cả mảng</strong> (mục 7). Ba: <code>append</code> trả slice mới và bạn phải gán lại; <code>push_back</code> sửa chính vector, không trả gì.</p>
 </div>
 <h3 id="4-khi-ay-xin-ke-moi-va-tham-chieu-cu-co-the-hong">4. Khi đầy: xin kệ mới, và tham chiếu cũ có thể hỏng<a class="headerlink" href="#4-khi-ay-xin-ke-moi-va-tham-chieu-cu-co-the-hong" title="Permanent link">&para;</a></h3>
-<p><code>push_back</code> khi size &lt; capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải <strong>tái cấp phát (reallocation)</strong>: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a>), trả mảng cũ. Nhờ vậy <code>push_back</code> vẫn nhanh <strong>trung bình</strong>: capacity tăng theo tỉ lệ nên việc chuyển nhà hiếm dần.</p>
+<p><code>push_back</code> khi size &lt; capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải <strong>tái cấp phát (reallocation)</strong>: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a>), trả mảng cũ. Nhờ vậy <code>push_back</code> vẫn rẻ theo nghĩa <strong>amortized (phân bổ)</strong>: capacity tăng theo tỉ lệ nên việc chuyển nhà hiếm dần, và chia đều chi phí cho cả chuỗi thì mỗi lần chỉ cỡ hằng số, dù dữ liệu thế nào (<a href="../21-big-o-cau-truc-du-lieu/">Bài 21</a> nói kỹ; đừng nhầm với "trung bình" nhờ dữ liệu may mắn).</p>
 <p>Chương trình dưới đẩy 10 phần tử vào vector rỗng và báo mỗi lần capacity đổi.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
@@ -1475,13 +1475,13 @@
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>cuoi: size=10 capacity=16
 </code></pre></div>
 <p>Quy luật "gấp đôi" (1, 2, 4, 8, 16) là của <code>g++ 11</code> trên máy mình; <strong>chuẩn C++ không quy định</strong> capacity tăng thế nào.</p>
-<p>Chuẩn bảo đảm capacity ≥ size và <code>push_back</code> rẻ <strong>trung bình</strong> (amortized). Muốn vậy mọi cài đặt thực tế đều tăng capacity theo tỉ lệ, nhưng hệ số (2, 1,5...) tùy thư viện.</p>
+<p>Chuẩn bảo đảm capacity ≥ size và <code>push_back</code> rẻ kiểu <strong>amortized (phân bổ)</strong>. Muốn vậy mọi cài đặt thực tế đều tăng capacity theo tỉ lệ, nhưng hệ số (2, 1,5...) tùy thư viện.</p>
 <p>Địa chỉ in ra khác ở máy bạn; chỉ cần thấy nó <strong>đổi</strong> mỗi lần tái cấp phát. Dòng i=3 tình cờ trùng địa chỉ lần đầu vì khối cũ vừa được trả, không phải luật.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
 <p>Đây đúng là chuyện của <code>append</code> khi <code>len == cap</code>: Go cũng xin mảng lớn hơn và chép sang. Khác ở chỗ Go còn giữ mảng cũ sống nếu slice cũ vẫn nhìn vào nó (GC), nên slice cũ vẫn đọc được. C++ <strong>trả luôn</strong> mảng cũ: ai còn giữ địa chỉ vào nó thì cầm một địa chỉ đã chết.</p>
 </div>
-<p><strong>Hệ quả quan trọng.</strong> Sau một lần tái cấp phát, mọi thứ trỏ vào mảng cũ đều <strong>hỏng</strong>: tham chiếu <code>int&amp; r = v[0];</code>, con trỏ <code>&amp;v[0]</code>, và cả iterator (đối tượng "chỉ vào một phần tử" mà Bài 19 sẽ dạy). Dùng chúng là hành vi không xác định, giống tham chiếu treo ở <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a>. Chi tiết từng container ở Bài 19; bài này chỉ cần nhớ: <strong>sau <code>push_back</code>, đừng dùng lại tham chiếu/con trỏ lấy từ trước</strong>.</p>
+<p><strong>Hệ quả quan trọng.</strong> Sau một lần tái cấp phát, mọi thứ trỏ vào mảng cũ đều <strong>hỏng</strong>: tham chiếu <code>int&amp; r = v[0];</code>, con trỏ <code>&amp;v[0]</code>, và cả iterator (đối tượng "chỉ vào một phần tử" mà <a href="../19-iterator-vo-hieu/">Bài 19</a> sẽ dạy). Dùng chúng là hành vi không xác định, giống tham chiếu treo ở <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a>. Chi tiết từng container ở <a href="../19-iterator-vo-hieu/">Bài 19</a>; bài này chỉ cần nhớ: <strong>sau <code>push_back</code>, đừng dùng lại tham chiếu/con trỏ lấy từ trước</strong>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// bo-qua-kiem-tra</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
@@ -1733,7 +1733,7 @@
 <h3 id="8-emplace_back-vectorbool-va-nhung-thao-tac-chua-day">8. <code>emplace_back</code>, <code>vector&lt;bool&gt;</code> và những thao tác chưa dạy<a class="headerlink" href="#8-emplace_back-vectorbool-va-nhung-thao-tac-chua-day" title="Permanent link">&para;</a></h3>
 <p><code>push_back(x)</code> nhận một đối tượng <strong>đã được tạo</strong> rồi đưa vào vector. <code>emplace_back(...)</code> nhận <strong>các đối số của hàm tạo</strong> và dựng đối tượng ngay trong ô cuối, không qua đối tượng tạm. Với <code>int</code> hai cách như nhau. Với kiểu có hàm tạo, mình đã chạy thử một struct <code>Cay</code> có hàm tạo <code>Cay(int)</code>, hàm tạo sao chép và hàm tạo di chuyển <code>noexcept</code> (sau <code>reserve</code>): <code>push_back(Cay(1))</code> in <code>tao Cay 1</code> rồi <code>move Cay 1</code>, còn <code>emplace_back(2)</code> chỉ in <code>tao Cay 2</code>. Chênh lệch chỉ là một lần move, nên có sẵn đối tượng thì cứ <code>push_back</code>, muốn tạo mới từ vài đối số thì <code>emplace_back</code>. (Nếu không <code>reserve</code> và hàm tạo di chuyển không có <code>noexcept</code>, lúc chuyển nhà vector sẽ <strong>chép</strong> thay vì move: <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a>, mục 8.)</p>
 <p><code>std::vector&lt;bool&gt;</code> là <strong>trường hợp đặc biệt</strong>: bên trong nén mỗi phần tử thành 1 bit, nên <code>v[i]</code> không trả về tham chiếu thật tới một <code>bool</code>. Cần vector <code>bool</code> bình thường thì dùng <code>std::vector&lt;char&gt;</code>.</p>
-<p>Bài này chưa dạy chèn hoặc xóa ở giữa vector (<code>insert</code>, <code>erase</code>, <code>clear</code>): chúng phải dời các phần tử phía sau nên tốn thời gian tỉ lệ với số phần tử, và Bài 19 sẽ dạy <code>erase</code>. Gọi <code>pop_back</code> hay <code>back()</code> trên vector rỗng là UB.</p>
+<p>Bài này chưa dạy chèn hoặc xóa ở giữa vector (<code>insert</code>, <code>erase</code>, <code>clear</code>): chúng phải dời các phần tử phía sau nên tốn thời gian tỉ lệ với số phần tử, và <a href="../19-iterator-vo-hieu/">Bài 19</a> sẽ dạy <code>erase</code>. Gọi <code>pop_back</code> hay <code>back()</code> trên vector rỗng là UB.</p>
 <h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
 <p>Các chương trình ở phần 📖 (mục 2, 4, 5, 6, 7) là ví dụ để chạy. Dưới đây là một bài ngắn dùng chung những gì đã học: lấy các số chẵn từ một dãy.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
@@ -1769,7 +1769,7 @@
 <h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
 <details class="question">
 <summary>size và capacity của vector khác nhau thế nào?</summary>
-<p><strong>size</strong> là số phần tử đang chứa; <strong>capacity</strong> là số phần tử mảng bên trong chứa được mà chưa phải xin chỗ mới. Luôn có <code>capacity &gt;= size</code>. Khi <code>push_back</code> mà size đã bằng capacity, vector xin mảng lớn hơn, chuyển phần tử sang và trả mảng cũ. Cách tăng capacity là tùy cài đặt (thường nhân lên một hệ số), chuẩn chỉ yêu cầu <code>push_back</code> rẻ trung bình.</p>
+<p><strong>size</strong> là số phần tử đang chứa; <strong>capacity</strong> là số phần tử mảng bên trong chứa được mà chưa phải xin chỗ mới. Luôn có <code>capacity &gt;= size</code>. Khi <code>push_back</code> mà size đã bằng capacity, vector xin mảng lớn hơn, chuyển phần tử sang và trả mảng cũ. Cách tăng capacity là tùy cài đặt (thường nhân lên một hệ số), chuẩn chỉ yêu cầu <code>push_back</code> rẻ kiểu amortized (chia đều trên cả chuỗi thao tác).</p>
 </details>
 <details class="question">
 <summary>Vì sao <code>push_back</code> có thể làm hỏng tham chiếu, con trỏ, iterator lấy từ trước?</summary>
@@ -1807,7 +1807,7 @@
 <ul>
 <li>Vector này luôn có đúng hai phần tử</li>
 <li>Vector này chỉ gồm các số nguyên không dấu</li>
-<li>Mọi phần tử của vector đều là <code>double</code></li>
+<li>Mọi phần tử của vector đều cùng kiểu <code>double</code></li>
 <li>Vector này nhận được mọi kiểu dữ liệu</li>
 </ul>
 <p class="giai-thich">Phần trong <code>&lt; &gt;</code> là tham số khuôn mẫu: nó chọn loại phần tử mà vector chứa, và mọi phần tử đều cùng loại đó. Số lượng phần tử không nằm ở đây mà do <code>size</code> quyết định và thay đổi được. <code>double</code> là số thực, không phải số nguyên không dấu. Vector không lẫn lộn nhiều kiểu: muốn chứa kiểu khác phải khai báo một vector kiểu khác.</p>
@@ -1890,7 +1890,7 @@
 <h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
 <ol>
 <li>STL là bộ kiểu chứa và hàm có sẵn của C++; <code>std::vector&lt;T&gt;</code> (<code>#include &lt;vector&gt;</code>) là mảng co giãn mà mọi phần tử cùng kiểu <code>T</code>, giống slice của Go nhưng <strong>sở hữu</strong> mảng ở heap; <code>v(n)</code> là n phần tử, <code>v{n}</code> là danh sách một phần tử.</li>
-<li>size là số phần tử đang có, capacity là số chỗ đã xin (luôn ≥ size); <code>push_back</code> khi đầy làm vector tái cấp phát sang mảng lớn hơn, cách tăng là tùy cài đặt, nên tham chiếu, con trỏ, iterator lấy từ trước có thể hỏng (Bài 19 nói kỹ).</li>
+<li>size là số phần tử đang có, capacity là số chỗ đã xin (luôn ≥ size); <code>push_back</code> khi đầy làm vector tái cấp phát sang mảng lớn hơn, cách tăng là tùy cài đặt, nên tham chiếu, con trỏ, iterator lấy từ trước có thể hỏng (<a href="../19-iterator-vo-hieu/">Bài 19</a> nói kỹ).</li>
 <li><code>reserve(n)</code> xin sẵn chỗ để khỏi chuyển nhà nhưng không tạo phần tử; <code>[]</code> không kiểm tra biên (ngoài biên là UB), <code>at</code> kiểm tra và ném <code>std::out_of_range</code>; <code>size() - 1</code> trên vector rỗng quấn thành số rất lớn.</li>
 <li>Truyền theo giá trị và <code>b = a</code> đều sao chép sâu cả mảng; chỉ đọc thì nhận <code>const std::vector&lt;T&gt;&amp;</code>, cần sửa bản gốc thì <code>std::vector&lt;T&gt;&amp;</code>; khác slice của Go vốn chung mảng.</li>
 <li><code>push_back(x)</code> nhận đối tượng đã tạo, <code>emplace_back(đối số...)</code> dựng ngay trong vector để bớt một lần move; <code>std::vector&lt;bool&gt;</code> là trường hợp đặc biệt (nén thành bit), nên tránh khi cần <code>bool</code> thường; <code>reserve</code> đổi capacity còn <code>resize</code> đổi size.</li>

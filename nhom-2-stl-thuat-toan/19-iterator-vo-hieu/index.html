@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bai-19-iterator-va-iterator-invalidation-duyet-container-va-khi-nao-iterator-hong" class="md-skip">
+        <a href="#bai-19-iterator-va-iterator-invalidation" class="md-skip">
           Bỏ qua
         </a>
       
@@ -1201,7 +1201,7 @@
   
 
 
-<h1 id="bai-19-iterator-va-iterator-invalidation-duyet-container-va-khi-nao-iterator-hong">Bài 19 — Iterator và iterator invalidation: duyệt container, và khi nào iterator hỏng<a class="headerlink" href="#bai-19-iterator-va-iterator-invalidation-duyet-container-va-khi-nao-iterator-hong" title="Permanent link">&para;</a></h1>
+<h1 id="bai-19-iterator-va-iterator-invalidation">Bài 19 — Iterator và iterator invalidation<a class="headerlink" href="#bai-19-iterator-va-iterator-invalidation" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
 <ul>
@@ -1212,7 +1212,7 @@
 </div>
 <p><strong>Bạn cần biết trước:</strong> <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/">Bài 03</a> (<code>-&gt;</code>), <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/">Bài 05</a> (phép tính con trỏ, vị trí ngay sau phần tử cuối), <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a> (<code>const</code>, tham chiếu treo), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (<code>auto</code>, range-for), <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (UB, ASan), <a href="../16-vector/">Bài 16</a> (tái cấp phát), <a href="../17-string-array-deque-list/">Bài 17</a> (<code>deque</code>, <code>list</code>) và <a href="../18-map-set-unordered/">Bài 18</a> (<code>map</code>, <code>find</code>).</p>
 <h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
-<p>Quay lại <strong>kệ sách</strong> của Bài 16. Bạn cầm một <strong>ngón tay</strong> chỉ vào một cuốn sách: ngón tay ấy là <strong>iterator</strong>. Bạn đọc cuốn đang chỉ (<code>*it</code>), nhích sang cuốn kế (<code>++it</code>), và biết đã hết khi ngón tay chạm <strong>chỗ ngay sau cuốn cuối</strong> (đó là <code>end()</code>: chỗ ấy không có sách để đọc).</p>
+<p>Quay lại <strong>kệ sách</strong> của <a href="../16-vector/">Bài 16</a>. Bạn cầm một <strong>ngón tay</strong> chỉ vào một cuốn sách: ngón tay ấy là <strong>iterator</strong>. Bạn đọc cuốn đang chỉ (<code>*it</code>), nhích sang cuốn kế (<code>++it</code>), và biết đã hết khi ngón tay chạm <strong>chỗ ngay sau cuốn cuối</strong> (đó là <code>end()</code>: chỗ ấy không có sách để đọc).</p>
 <p>Điểm hay: dù là kệ liền khối (<code>vector</code>), các tấm thẻ rời nối bằng dây (<code>list</code>) hay danh bạ (<code>map</code>), bạn vẫn dùng <strong>cùng một cách</strong> cầm ngón tay. Còn chuyện <strong>ngón tay hỏng</strong> là: bạn chỉ vào một cuốn rồi ai đó dọn kệ sang chỗ khác, hoặc rút cuốn đó ra. Ngón tay vẫn đứng nguyên nhưng chỉ vào chỗ không còn là cuốn sách ấy.</p>
 <div class="admonition info">
 <p class="admonition-title">Chỗ nào ví dụ ngón tay không còn đúng?</p>
@@ -1308,7 +1308,7 @@
 <p><strong>Thử thay đổi: viết <code>int* it = v.begin();</code>.</strong> Mình đã chạy: lỗi biên dịch <code>cannot convert 'std::vector&lt;int&gt;::iterator' to 'int*'</code>. Iterator <strong>dùng giống</strong> con trỏ nhưng là một kiểu riêng, không phải con trỏ.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
-<p>Go không có iterator: bạn viết <code>for i, x := range s</code> và ngôn ngữ lo phần duyệt. C++ cũng có range-for (mục 2), nhưng bên dưới nó dùng iterator, và iterator còn là thứ bạn <strong>truyền cho hàm</strong> của thư viện (Bài 20) và giữ lại để xóa/chèn giữa dãy (mục 5).</p>
+<p>Go không có iterator: bạn viết <code>for i, x := range s</code> và ngôn ngữ lo phần duyệt. C++ cũng có range-for (mục 2), nhưng bên dưới nó dùng iterator, và iterator còn là thứ bạn <strong>truyền cho hàm</strong> của thư viện (<a href="../20-algorithm-lambda/">Bài 20</a>) và giữ lại để xóa/chèn giữa dãy (mục 5).</p>
 </div>
 <h3 id="2-range-for-thuc-chat-chay-the-nao">2. Range-for thực chất chạy thế nào<a class="headerlink" href="#2-range-for-thuc-chat-chay-the-nao" title="Permanent link">&para;</a></h3>
 <p>Vòng <code>for (auto x : v)</code> ở Bài 13 là cách viết gọn. Máy dịch nó gần như thành đoạn trong dấu <code>{ }</code> ở chương trình dưới. Chú ý chỗ <code>end()</code> được lấy <strong>một lần</strong>, trước khi vòng lặp bắt đầu.</p>
@@ -1368,7 +1368,7 @@
 </code></pre></div>
 <p>Với mảng C, range-for dùng chính con trỏ <code>a</code> và <code>a + N</code> như mục 1. Hệ quả quan trọng của việc lấy <code>end()</code> một lần: nếu thân vòng lặp <strong>thêm hoặc xóa</strong> phần tử của chính vector đang duyệt, <code>dau</code> và <code>cuoi</code> có thể đã hỏng mà vòng lặp không hề biết (mục 4).</p>
 <h3 id="3-it-const_iterator-va-cac-hinh-dang-iterator">3. <code>it-&gt;</code>, <code>const_iterator</code> và các "hình dạng" iterator<a class="headerlink" href="#3-it-const_iterator-va-cac-hinh-dang-iterator" title="Permanent link">&para;</a></h3>
-<p>Iterator của <code>map</code> trỏ vào một <code>std::pair</code> (Bài 18), nên dùng <code>it-&gt;first</code> và <code>it-&gt;second</code>; <code>it-&gt;</code> là viết gọn của <code>(*it).</code>, giống con trỏ ở Bài 03. Iterator <strong>chỉ-đọc</strong> (<code>const_iterator</code>) cho đọc mà không cho sửa phần tử: lấy bằng <code>cbegin()</code>/<code>cend()</code>, hoặc bằng <code>begin()</code> trên container <code>const</code>.</p>
+<p>Iterator của <code>map</code> trỏ vào một <code>std::pair</code> (<a href="../18-map-set-unordered/">Bài 18</a>), nên dùng <code>it-&gt;first</code> và <code>it-&gt;second</code>; <code>it-&gt;</code> là viết gọn của <code>(*it).</code>, giống con trỏ ở Bài 03. Iterator <strong>chỉ-đọc</strong> (<code>const_iterator</code>) cho đọc mà không cho sửa phần tử: lấy bằng <code>cbegin()</code>/<code>cend()</code>, hoặc bằng <code>begin()</code> trên container <code>const</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;deque&gt;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iterator&gt;</span>
@@ -1468,13 +1468,13 @@
 </tr>
 <tr>
 <td><code>unordered_*</code></td>
-<td>Không rehash: không cái nào hỏng. Có rehash (Bài 18): <strong>iterator</strong> hỏng, tham chiếu và con trỏ vẫn sống</td>
+<td>Không rehash: không cái nào hỏng. Có rehash (<a href="../18-map-set-unordered/">Bài 18</a>): <strong>iterator</strong> hỏng, tham chiếu và con trỏ vẫn sống</td>
 <td>Chỉ cái bị xóa hỏng</td>
 </tr>
 </tbody>
 </table>
-<p>Đọc bảng cho đúng: "còn sống" là điều chuẩn <strong>bảo đảm</strong>; "hỏng" nghĩa là chuẩn <strong>không hứa gì</strong>, có thể trông vẫn chạy. Một ví dụ: <code>reserve</code> đủ lớn trước khi thêm là cách để vector không tái cấp phát (Bài 16). Chương trình ở 💻 chạy thử mấy ô "còn sống".</p>
-<p>Ví dụ kinh điển nhất là vector đầy rồi <code>push_back</code> (đúng chuyện của Bài 16):</p>
+<p>Đọc bảng cho đúng: "còn sống" là điều chuẩn <strong>bảo đảm</strong>; "hỏng" nghĩa là chuẩn <strong>không hứa gì</strong>, có thể trông vẫn chạy. Một ví dụ: <code>reserve</code> đủ lớn trước khi thêm là cách để vector không tái cấp phát (<a href="../16-vector/">Bài 16</a>). Chương trình ở 💻 chạy thử mấy ô "còn sống".</p>
+<p>Ví dụ kinh điển nhất là vector đầy rồi <code>push_back</code> (đúng chuyện của <a href="../16-vector/">Bài 16</a>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// bo-qua-kiem-tra</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
@@ -1518,7 +1518,7 @@
 <p>Cách sửa thật: duyệt bằng chỉ số <code>for (std::size_t i = 0; i &lt; v.size(); ++i)</code> (mình đã chạy: in <code>1 2 3 9</code>, <code>size</code> 4), hoặc gom việc cần thêm vào một vector khác rồi thêm sau vòng lặp.</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
-<p>Go không có lớp lỗi này, nhưng có chuyện gần giống. <code>for _, x := range s { if x == 2 { s = append(s, 9) } }</code> thì <strong>an toàn</strong>: <code>range</code> tính <code>s</code> đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; <code>len(s)</code> thành 4) và slice cũ vẫn đọc được nhờ GC (Bài 16). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go thông thường không cho đọc rác kiểu này.</p>
+<p>Go không có lớp lỗi này, nhưng có chuyện gần giống. <code>for _, x := range s { if x == 2 { s = append(s, 9) } }</code> thì <strong>an toàn</strong>: <code>range</code> tính <code>s</code> đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; <code>len(s)</code> thành 4) và slice cũ vẫn đọc được nhờ GC (<a href="../16-vector/">Bài 16</a>). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go thông thường không cho đọc rác kiểu này.</p>
 </div>
 <h3 id="5-xoa-khi-ang-duyet-erase-tra-iterator-ke-tiep">5. Xóa khi đang duyệt: <code>erase</code> trả iterator kế tiếp<a class="headerlink" href="#5-xoa-khi-ang-duyet-erase-tra-iterator-ke-tiep" title="Permanent link">&para;</a></h3>
 <p><code>c.erase(it)</code> xóa phần tử <code>it</code> chỉ tới, và <strong>trả về iterator của phần tử kế tiếp</strong> (hoặc <code>end()</code> nếu đó là phần tử cuối). Vì chính <code>it</code> đã hỏng sau lệnh này, lời gọi <code>++it</code> ngay sau <code>erase(it)</code> là UB. Đây là sai lầm hay gặp nhất:</p>
@@ -1609,7 +1609,7 @@
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>1 3 
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>1=10 3=30 
 </code></pre></div>
-<p>Vài điều cần nhớ. Với <code>vector</code> (và <code>deque</code>), <code>erase</code> làm <code>end()</code> cũ hỏng, nên phải gọi <code>v.end()</code> <strong>mỗi vòng</strong>, đừng lưu vào biến trước vòng lặp; với <code>list</code>/<code>map</code> lưu được, nhưng gọi lại mỗi vòng là thói quen an toàn cho mọi container. Không bao giờ <code>erase(c.end())</code>: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom (khuôn viết quen thuộc) <strong>remove-erase</strong> ở Bài 20 (C++20 còn có <code>std::erase_if</code>).</p>
+<p>Vài điều cần nhớ. Với <code>vector</code> (và <code>deque</code>), <code>erase</code> làm <code>end()</code> cũ hỏng, nên phải gọi <code>v.end()</code> <strong>mỗi vòng</strong>, đừng lưu vào biến trước vòng lặp; với <code>list</code>/<code>map</code> lưu được, nhưng gọi lại mỗi vòng là thói quen an toàn cho mọi container. Không bao giờ <code>erase(c.end())</code>: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom (khuôn viết quen thuộc) <strong>remove-erase</strong> ở <a href="../20-algorithm-lambda/">Bài 20</a> (C++20 còn có <code>std::erase_if</code>).</p>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
 <p>Xóa khi <code>range</code> map trong Go là <strong>hợp lệ</strong>: <code>for k := range m { if k%2 == 0 { delete(m, k) } }</code> chạy đúng (mình đã chạy: còn <code>map[1:10 3:30]</code>), và đặc tả Go nói mục chưa duyệt tới mà bị xóa thì sẽ không được trả ra. C++ khác hẳn: an toàn khi bạn lấy iterator kế tiếp <strong>trước</strong> khi dùng lại <code>it</code> đã xóa, đơn giản nhất là <code>it = c.erase(it)</code>. Với slice Go, <code>t = append(t[:i], t[i+1:]...)</code> trong <code>range</code> không gây UB nhưng cũng <strong>bỏ sót</strong> phần tử y như ví dụ <code>1 2 3</code> ở trên (mình đã chạy: <code>[1 2 3]</code>).</p>
@@ -1656,8 +1656,8 @@
 <tbody>
 <tr>
 <td>(1)</td>
-<td>Xin chỗ trước: capacity ít nhất 100 chưa có iterator nào; <code>it</code> lấy ở dòng kế</td>
-<td></td>
+<td>Xin chỗ trước: capacity ít nhất 100</td>
+<td>chưa có iterator nào; <code>it</code> lấy ở dòng kế</td>
 </tr>
 <tr>
 <td>(2)</td>
@@ -1676,7 +1676,7 @@
 </tr>
 <tr>
 <td>(5)</td>
-<td>Giữ tham chiếu tới giá trị khóa 1; <code>bucket_count()</code> cho biết số hộp hiện có của bảng (Bài 18)</td>
+<td>Giữ tham chiếu tới giá trị khóa 1; <code>bucket_count()</code> cho biết số hộp hiện có của bảng (<a href="../18-map-set-unordered/">Bài 18</a>)</td>
 <td><code>r</code> là biệt danh của giá trị 10</td>
 </tr>
 <tr>
@@ -1699,7 +1699,7 @@
 </details>
 <details class="question">
 <summary>Xóa các phần tử thỏa điều kiện khi đang duyệt thì viết thế nào?</summary>
-<p>Dùng iterator mà <code>erase</code> trả về: <code>for (auto it = c.begin(); it != c.end();) { if (cd(*it)) it = c.erase(it); else ++it; }</code>, gọi lại <code>c.end()</code> mỗi vòng. Sai là <code>c.erase(it); ++it;</code> (dùng <code>it</code> đã hỏng). Với <code>vector</code>, nếu xóa nhiều phần tử thì dùng remove-erase (Bài 20) vì mỗi lần <code>erase</code> giữa vector là O(n).</p>
+<p>Dùng iterator mà <code>erase</code> trả về: <code>for (auto it = c.begin(); it != c.end();) { if (cd(*it)) it = c.erase(it); else ++it; }</code>, gọi lại <code>c.end()</code> mỗi vòng. Sai là <code>c.erase(it); ++it;</code> (dùng <code>it</code> đã hỏng). Với <code>vector</code>, nếu xóa nhiều phần tử thì dùng remove-erase (<a href="../20-algorithm-lambda/">Bài 20</a>) vì mỗi lần <code>erase</code> giữa vector là O(n).</p>
 </details>
 <details class="question">
 <summary>Vì sao <code>end()</code> trỏ sau phần tử cuối? Và range-for chạy thế nào?</summary>
@@ -1728,7 +1728,7 @@
 <li>Phần tử đầu tiên, giống hệt <code>v.begin()</code></li>
 <li>Ô nhớ cuối cùng mà vector đã xin, kể cả ô chưa dùng</li>
 </ul>
-<p class="giai-thich"><code>end()</code> là vị trí ngay sau phần tử cuối: nó có thể so sánh nhưng không được <code>*</code>, giống <code>a + 3</code> của mảng ba phần tử ở Bài 05. Nếu nó chỉ vào phần tử cuối thì không biểu diễn được dãy rỗng. Chỉ vào phần tử đầu là việc của <code>begin()</code>; hai iterator này bằng nhau chỉ khi vector rỗng. Còn "con trỏ rỗng dùng chung" sai vì mỗi <code>end()</code> thuộc về đúng container của nó.</p>
+<p class="giai-thich"><code>end()</code> là vị trí ngay sau phần tử cuối: nó có thể so sánh nhưng không được <code>*</code>, giống <code>a + 3</code> của mảng ba phần tử ở Bài 05. Nếu nó chỉ vào phần tử cuối thì không biểu diễn được dãy rỗng. Chỉ vào phần tử đầu là việc của <code>begin()</code>; hai iterator này bằng nhau chỉ khi vector rỗng. Còn <code>end()</code> không liên quan tới capacity: nó ở ngay sau phần tử cuối (theo size), không phải sau ô cuối mà vector đã xin.</p>
 </div>
 <div class="cau-hoi" data-dap-an="3">
 <p><strong>Câu 2.</strong> Đọc đoạn code sau. Nó in ra gì?</p>
@@ -1741,7 +1741,7 @@
 <ul>
 <li><code>6 1</code>, vì <code>*it = 60</code> chỉ sửa một bản chép tạm</li>
 <li><code>60 2</code>, vì chỉ số của iterator đếm từ 1, không từ 0</li>
-<li><code>60 1</code>, vì <code>*it</code> sửa thẳng phần tử thứ hai</li>
+<li><code>60 1</code>, vì <code>*it</code> sửa thẳng phần tử thật, tức phần tử thứ hai</li>
 <li><code>5 60</code>, vì <code>it</code> vẫn trỏ vào phần tử đầu tiên</li>
 </ul>
 <p class="giai-thich"><code>++it</code> nhích từ phần tử 0 sang phần tử 1, <code>*it = 60</code> sửa chính phần tử đó trong vector nên <code>v[1]</code> là 60, và <code>it - v.begin()</code> là 1. Iterator không phải bản chép: qua nó sửa được phần tử thật. Chỉ số vẫn đếm từ 0 nên không thể là 2. Việc <code>it</code> còn ở phần tử đầu chỉ đúng trước khi gọi <code>++it</code>.</p>
@@ -1827,7 +1827,7 @@
 <li>Range-for lấy <code>begin()</code>/<code>end()</code> một lần rồi lặp <code>++</code>; <code>cbegin()</code>/<code>const_iterator</code> cho đọc mà không sửa, và <code>auto</code> giúp khỏi gõ kiểu dài.</li>
 <li>Iterator invalidation: thao tác làm iterator cũ hết hợp lệ, dùng tiếp là UB; theo chuẩn, <code>vector</code> tái cấp phát hỏng tất cả, <code>deque</code> giữa hỏng tất cả, <code>list</code>/<code>map</code> chỉ hỏng cái bị xóa, <code>unordered_*</code> rehash hỏng iterator (tham chiếu vẫn sống).</li>
 <li>g++ bản thường không kiểm tra (đọc rác, hoặc "chạy ra đúng" một cách tình cờ); ASan hoặc <code>-D_GLIBCXX_DEBUG</code> giúp bắt lỗi khi chạy thử.</li>
-<li>Xóa khi duyệt: <code>it = c.erase(it)</code> và chỉ <code>++it</code> khi không xóa, gọi lại <code>c.end()</code> mỗi vòng; Go cho phép xóa khi <code>range</code> map, C++ thì không; xóa nhiều phần tử của vector dùng remove-erase (Bài 20).</li>
+<li>Xóa khi duyệt: <code>it = c.erase(it)</code> và chỉ <code>++it</code> khi không xóa, gọi lại <code>c.end()</code> mỗi vòng; Go cho phép xóa khi <code>range</code> map, còn C++ chỉ an toàn khi lấy iterator kế tiếp trước (<code>it = c.erase(it)</code>); xóa nhiều phần tử của vector dùng remove-erase (<a href="../20-algorithm-lambda/">Bài 20</a>).</li>
 </ol>
 
 
