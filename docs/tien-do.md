@@ -40,3 +40,4 @@
 | [Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu](nhom-4-oop-patterns/34-template.md) | <span class="diem" data-bai="34"></span> |
 | [Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít](nhom-4-oop-patterns/35-pattern-singleton-factory.md) | <span class="diem" data-bai="35"></span> |
 | [Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy](nhom-4-oop-patterns/36-pattern-observer-strategy.md) | <span class="diem" data-bai="36"></span> |
+| [Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa](nhom-4-oop-patterns/37-solid-thiet-ke.md) | <span class="diem" data-bai="37"></span> |
