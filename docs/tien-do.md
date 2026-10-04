@@ -37,3 +37,4 @@
 | [Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ](nhom-4-oop-patterns/31-lop-dong-goi.md) | <span class="diem" data-bai="31"></span> |
 | [Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên](nhom-4-oop-patterns/32-ke-thua.md) | <span class="diem" data-bai="32"></span> |
 | [Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật](nhom-4-oop-patterns/33-da-hinh-virtual.md) | <span class="diem" data-bai="33"></span> |
+| [Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu](nhom-4-oop-patterns/34-template.md) | <span class="diem" data-bai="34"></span> |
