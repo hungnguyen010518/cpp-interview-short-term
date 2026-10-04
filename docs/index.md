@@ -22,7 +22,9 @@ Hãy học **Nhóm 1 — Nền tảng và bộ nhớ** từ [Bài 1](nhom-1-nen-
 
 Sau đó học **Nhóm 2 — STL và thuật toán** từ [Bài 16](nhom-2-stl-thuat-toan/16-vector.md) đến [Bài 23](nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi.md): vector, string, map/set, iterator, thuật toán và lambda, Big-O, cấu trúc dữ liệu và các thuật toán hay hỏi.
 
-Các nhóm sau (đa luồng, OOP, hệ thống) sẽ được thêm dần.
+Tiếp theo là **Nhóm 3 — Đa luồng** từ [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) đến [Bài 30](nhom-3-da-luong/30-thread-pool-hieu-nang.md): thread, mutex, deadlock, condition_variable, atomic, async/future và thread pool.
+
+Các nhóm sau (OOP, hệ thống) sẽ được thêm dần.
 
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).
