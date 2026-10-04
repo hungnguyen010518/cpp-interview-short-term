@@ -12,7 +12,7 @@
 
 Quay lại **nhà bếp** của [Bài 25](25-data-race-mutex.md): cả bếp dùng chung bảng treo tường, và để đụng vào thớt chung phải lấy **thẻ vào thớt** (mutex). Nhưng có việc nhỏ hơn nhiều: đếm số đĩa đã ra khỏi bếp. Bắt mỗi người lấy thẻ thớt chỉ để cộng một vào một con số thì phí.
 
-Vì vậy bếp gắn lên bảng một **bộ đếm bấm tay**. Bấm một cái là cộng một cái, trọn vẹn: hai đầu bếp bấm cùng lúc thì máy vẫn xếp thành hai lần bấm riêng, không ai làm mất lần bấm của ai. Không cần thẻ, không ai phải đứng chờ lâu. Bộ đếm đó chính là `std::atomic`.
+Vì vậy bếp gắn lên bảng một **bộ đếm bấm tay**. Bấm một cái là cộng một cái, trọn vẹn: hai đầu bếp bấm cùng lúc thì máy vẫn xếp thành hai lần bấm riêng, không ai làm mất lần bấm của ai. Không ai phải xin thẻ. Bộ đếm đó chính là `std::atomic`.
 
 !!! info "Chỗ nào ví von bộ đếm bấm tay không còn đúng?"
     Bộ đếm chỉ làm được **một phép trên đúng một con số**. Muốn đổi **hai** con số cùng lúc (trừ ở bảng này, cộng ở bảng kia) mà không ai thấy trạng thái dở dang thì máy bấm tay không đủ, phải quay lại thẻ thớt (phần 💻 ở dưới). Máy bấm thật chỉ cộng; `std::atomic` còn đặt số mới và "chỉ đổi nếu đúng số này" (mục 4). Cuối cùng, bấm máy cũng có giá: mục 3 đo giá đó.
@@ -23,41 +23,17 @@ Vì vậy bếp gắn lên bảng một **bộ đếm bấm tay**. Bấm một c
 
 Một thao tác **nguyên tử** (atomic) là thao tác mà luồng khác chỉ có thể thấy **trước** hoặc **sau** nó, không bao giờ thấy giữa chừng. [Bài 25](25-data-race-mutex.md) cho thấy `++dem` trên `int` thường là ba bước (đọc, cộng, ghi) và luồng khác chen vào được. Kiểu `std::atomic<int>` (cần `#include <atomic>`) biến mỗi thao tác của nó thành một khối như vậy. Chuẩn C++ nói: các thao tác trên cùng một đối tượng atomic từ nhiều luồng **không** tạo ra data race.
 
-Cú pháp `std::atomic<int> n{10};` tạo atomic với giá trị đầu 10 (cặp `<int>` cho biết kiểu, ngoặc nhọn là giá trị đầu, giống `vector` ở [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)). Chương trình dưới chạy **một luồng**, chỉ để xem từng thao tác làm gì và trả về gì.
+Cú pháp `std::atomic<int> n{10};` tạo atomic với giá trị đầu 10 (cặp `<int>` cho biết kiểu, ngoặc nhọn là giá trị đầu, giống `vector` ở [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)). Các thao tác chính:
 
-```cpp
-#include <atomic>
-#include <iostream>
-
-int main() {
-    std::atomic<int> n{10};                 // (1) khởi tạo 10
-    n.store(20);                            // (2) ghi 20
-    int cu = n.fetch_add(5);                // (3) cộng 5, trả giá trị TRƯỚC khi cộng
-    int truoc = n.exchange(100);            // (4) đặt 100, trả giá trị cũ
-    ++n;                                    // (5) ++ cũng nguyên tử
-    std::cout << "load: " << n.load() << "\n";                           // (6) đọc
-    std::cout << "fetch_add tra " << cu << ", exchange tra " << truoc << "\n";
-    return 0;
-}
-```
-
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | `n` lúc này |
+| Thao tác | Làm gì (một khối không chia cắt) | Trả về |
 |---|---|---|
-| (2) | `store(20)` ghi 20, một khối không chia cắt | 20 |
-| (3) | `fetch_add(5)` đọc rồi cộng trong **một** khối, `cu` nhận số cũ 20 | 25 |
-| (4)(5) | `exchange(100)` đặt số mới, `truoc` nhận số cũ 25; `++n` cộng 1 | 101 |
-| (6) | `load()` đọc `n` | 101 |
+| `n.load()` | đọc `n` | giá trị hiện tại |
+| `n.store(v)` | ghi `v` vào `n` | không |
+| `n.fetch_add(k)` | cộng `k` vào `n` | giá trị **cũ** (trước khi cộng) |
+| `n.exchange(v)` | đặt `n = v` | giá trị **cũ** |
+| `++n`, `n += k` | cộng vào `n` | giá trị mới |
 
-**Kết quả khi chạy** (mình chạy thật):
-
-```text
-load: 101
-fetch_add tra 20, exchange tra 25
-```
-
-Hai điều hay nhầm: `fetch_add` trả giá trị **cũ** (trước khi cộng), và `std::atomic` **không sao chép được** (mình thử `std::atomic<int> b = a;`: `error: use of deleted function ‘std::atomic<int>::atomic(const std::atomic<int>&)’`).
+Mình chạy một luồng với `n{10}`: `store(20)`, rồi `fetch_add(5)` trả `20` (và `n` thành 25), rồi `exchange(100)` trả `25`, rồi `++n` cho `n = 101`. Hai điều hay nhầm: `fetch_add` trả giá trị **cũ**, và `std::atomic` **không sao chép được** (mình thử `std::atomic<int> b = a;`: `error: use of deleted function ‘std::atomic<int>::atomic(const std::atomic<int>&)’`).
 
 ### 2. Nối lại ví dụ đếm chung của Bài 25
 
@@ -118,7 +94,7 @@ Mình chạy với `-fsanitize=thread` (cả không tối ưu và `-O2`, qua `se
 
 ### 3. Atomic và mutex: đo chi phí
 
-Cùng một việc đếm, hai cách: `lock_guard` quanh `++` ([Bài 25](25-data-race-mutex.md)) hay atomic. Ta thêm bản thứ ba, `fetch_add(1, std::memory_order_relaxed)` (một **thứ tự bộ nhớ** yếu hơn, nói ở mục 6). Mỗi luồng tăng một triệu lần, bốn luồng; `chay` nhận một con trỏ hàm và đo bằng `std::chrono`, như Bài 25.
+Cùng một việc đếm, hai cách: `lock_guard` quanh `++` ([Bài 25](25-data-race-mutex.md)) hay atomic. Mỗi luồng tăng một triệu lần, bốn luồng; `chay` nhận một con trỏ hàm và đo bằng `std::chrono`, như Bài 25.
 
 ```cpp
 #include <atomic>
@@ -132,17 +108,13 @@ const int MOI_LUONG = 1000000;             // mỗi luồng tăng một triệu 
 
 std::mutex khoa;
 long long demKhoa = 0;                     // bảo vệ bằng mutex
-std::atomic<long long> demNguyenTu{0};     // (1) atomic, thứ tự mặc định
-std::atomic<long long> demThongKe{0};      // (2) atomic, thứ tự relaxed
+std::atomic<long long> demNguyenTu{0};     // bảo vệ bằng atomic
 
 void bangMutex() {
     for (int i = 0; i < MOI_LUONG; ++i) { std::lock_guard<std::mutex> giu(khoa); ++demKhoa; }
 }
 void bangAtomic() {
     for (int i = 0; i < MOI_LUONG; ++i) ++demNguyenTu;
-}
-void bangRelaxed() {
-    for (int i = 0; i < MOI_LUONG; ++i) demThongKe.fetch_add(1, std::memory_order_relaxed);
 }
 
 long long chay(void (*ham)()) {            // chạy 4 luồng, trả số mili giây
@@ -157,10 +129,8 @@ long long chay(void (*ham)()) {            // chạy 4 luồng, trả số mili 
 int main() {
     long long msKhoa = chay(bangMutex);
     long long msNguyenTu = chay(bangAtomic);
-    long long msRelaxed = chay(bangRelaxed);
-    std::cout << "tong: " << demKhoa << " " << demNguyenTu << " " << demThongKe << "\n";
-    std::cout << "mutex " << msKhoa << " ms, atomic " << msNguyenTu
-              << " ms, relaxed " << msRelaxed << " ms\n";
+    std::cout << "tong: " << demKhoa << " " << demNguyenTu << "\n";
+    std::cout << "mutex " << msKhoa << " ms, atomic " << msNguyenTu << " ms\n";
     return 0;
 }
 ```
@@ -171,24 +141,23 @@ int main() {
 |---|---|---|
 | `chay(bangMutex)` | Bốn luồng xếp hàng xin thẻ cho từng lần `++` | 4 triệu lần xin và trả khóa |
 | `chay(bangAtomic)` | Bốn luồng cùng `++` một biến atomic, không thẻ | 4 triệu thao tác nguyên tử |
-| `chay(bangRelaxed)` | Như trên nhưng thứ tự relaxed | 4 triệu thao tác nguyên tử |
 
-**Kết quả khi chạy** (g++ 11, máy 8 lõi, CPU x86-64; ba lần liền, dòng đầu luôn như nhau):
+**Kết quả khi chạy** (g++ 11, máy 8 lõi, CPU x86-64, không tối ưu; dòng đầu luôn như nhau):
 
 ```text
-tong: 4000000 4000000 4000000
-mutex 258 ms, atomic 57 ms, relaxed 52 ms
+tong: 4000000 4000000
+mutex 254 ms, atomic 69 ms
 ```
 
-Dòng thứ hai là một lần chạy không tối ưu; hai lần kia ra `254/53/47` và `251/57/51` ms. Với `-O2` mình chạy ba lần: mutex 184 đến 204 ms, atomic 38 đến 46 ms, relaxed 38 đến 50 ms. Mọi con số đổi theo máy, số lõi, mức `-O` và độ bận lúc chạy, nên chỉ **mẫu** đáng nhớ: trên máy mình atomic nhanh hơn mutex cỡ bốn đến năm lần ở việc đếm này. Với `-fsanitize=thread` thời gian lên hẳn (một lần chạy của mình mất gần 5 s tổng), nên đừng đo hiệu năng khi đang bật TSan.
-
-Hai quan sát khác. Một: `relaxed` **không** nhanh hơn rõ rệt trên máy mình; mình xem mã hợp ngữ ở `-O2`, cả hai bản đều ra cùng một lệnh `lock addq $1, ...` (lệnh cộng có tiền tố `lock`: CPU giữ riêng ô nhớ trong lúc cộng). Hai: atomic không miễn phí, vì các lõi vẫn phải tranh nhau cùng một ô nhớ; nó chỉ rẻ hơn việc xin khóa, nhả khóa và (khi tranh nhau) ngủ chờ.
+Mẫu đáng nhớ: trên máy mình atomic nhanh hơn mutex khoảng 4 lần ở việc đếm này (các lần chạy của mình ra từ 3,7 đến 5,4 lần, cả không tối ưu lẫn `-O2`). Mọi con số đổi theo máy, số lõi, mức `-O` và độ bận lúc chạy. Atomic cũng không miễn phí: các lõi vẫn phải tranh nhau một ô nhớ; nó chỉ rẻ hơn việc xin khóa, nhả khóa và ngủ chờ. Đừng đo hiệu năng khi bật TSan: một lần chạy của mình mất gần 5 s tổng.
 
 ### 4. `compare_exchange`: so sánh rồi đổi trong một nhịp
 
 Bài toán: tăng `dem` thêm 1 **chỉ khi** nó còn nhỏ hơn một giới hạn (250000), từ bốn luồng, mỗi luồng cố tăng 100000 lần. Cách "kiểm rồi tăng" bằng hai lệnh atomic rời nhau (`if (dem.load() < GIOI_HAN) dem.fetch_add(1);`) là sai: giữa kiểm và tăng, luồng khác chen vào được.
 
-Mình chạy đúng cách làm đó 10 lần ở mỗi mức tối ưu (không tối ưu và `-O2`): `dem` luôn **vượt** giới hạn, ra `250002` hoặc `250003`, và TSan (chạy một lần) **không** báo gì, mã thoát 0. Đây là **race condition** ([Bài 25](25-data-race-mutex.md)), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.
+Mình chạy đúng cách làm đó 20 lần ở mỗi mức tối ưu (không tối ưu và `-O2`): lần này `dem` lần nào cũng vượt giới hạn (`250002` hoặc `250003`). Kết quả đổi theo mức tối ưu, theo lần chạy và độ bận của máy; có lúc ra đúng `250000` do may, nên "ra đúng" không chứng minh cách này đúng, và chuẩn không hứa kết quả cụ thể nào. TSan (chạy một lần) không báo gì, mã thoát 0.
+
+Đây là **race condition** ([Bài 25](25-data-race-mutex.md)), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.
 
 Cách đúng là **`compare_exchange`**: "nếu `dem` **vẫn đang bằng** giá trị `cu` tôi đã thấy thì đổi thành `cu + 1` và báo `true`; nếu không thì **không đổi** và báo `false`". Cả việc so sánh lẫn việc đổi là **một nhịp** nguyên tử, không ai chen vào giữa. Khi thất bại, hàm còn **ghi giá trị hiện tại vào `cu`** (nên `cu` được truyền như tham chiếu) để bạn thử lại ngay.
 
@@ -248,7 +217,9 @@ Tổng 400000 lần thử, đúng 250000 lần thành công, `dem` dừng đúng
 
 **`weak` hay `strong`?** Chuẩn C++ nói `compare_exchange_weak` **được phép thất bại giả** (spurious failure): trả `false` dù giá trị đang đúng bằng `cu`; `compare_exchange_strong` thì chỉ thất bại khi giá trị thật sự khác. Vì thế `weak` hợp với **vòng lặp thử lại** như trên.
 
-Mình chạy một luồng, 100 triệu lần `weak` với giá trị đúng: **0** lần thất bại giả trên máy này, và đổi `weak` thành `strong` ở chương trình trên ra cùng kết quả. Đừng suy ra "`weak` không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa. Quy tắc dễ nhớ: trong vòng lặp dùng `weak`; một lần duy nhất không lặp thì dùng `strong`.
+Mình chạy một luồng, 100 triệu lần `weak` với giá trị đúng: **0** lần thất bại giả trên máy này, và đổi `weak` thành `strong` ở chương trình trên ra cùng kết quả. Đừng suy ra "`weak` không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa.
+
+**Quy tắc dễ nhớ:** trong vòng lặp dùng `weak`; một lần duy nhất không lặp thì dùng `strong`.
 
 !!! info "Bạn biết Go?"
     `CompareAndSwap(old, new)` của Go (cả `atomic.CompareAndSwapInt64(&n, old, new)` lẫn `n.CompareAndSwap(old, new)`) chỉ trả `bool`; nó **không** cập nhật `old` như C++, nên vòng lặp của Go phải tự `Load()` lại ở đầu mỗi vòng. Mình chạy bản Go của bài toán trên: `250000 250000`, `go run -race` sạch. Go chỉ có một loại CAS, không có `weak`/`strong` để chọn.
@@ -295,7 +266,7 @@ int main() {
 luong nen da dung
 ```
 
-Điều chương trình **bảo đảm**: sau `join`, luồng nền đã thoát, và việc ghi `true` rồi đọc cờ không phải data race. Về "bao lâu thì luồng nền thấy `true`", chuẩn chỉ *khuyến khích* cài đặt cho giá trị mới hiện ra trong thời gian hợp lý và không hứa con số; trên máy mình nó dừng ngay.
+Chương trình bảo đảm: sau `join` luồng nền đã thoát, và ghi `true` rồi đọc cờ không phải data race. Chuẩn chỉ *khuyến khích* giá trị mới hiện ra trong thời gian hợp lý, không hứa con số; trên máy mình nó dừng ngay.
 
 **Vì sao KHÔNG dùng `bool` thường?** Thử đúng chương trình trên với `bool dung = false;` và vòng `while (!dung) ++soVong;` (không ngủ, `soVong` là một `long long` thường), bỏ `atomic`:
 
@@ -320,67 +291,42 @@ int main() {
 }
 ```
 
-Chuẩn nói đây là **data race**, tức hành vi không xác định ([Bài 25](25-data-race-mutex.md)): chương trình không có nghĩa nào được bảo đảm. Mình chạy với `timeout 5`: không tối ưu thì in `da dung`, mã 0; còn `-O1` và `-O2` đều **treo** tới khi `timeout` giết, mã **124**.
+**Chạy từng dòng** (như g++ -O2 làm)
+
+| Dòng | Chuyện gì xảy ra | `dung` mà luồng nền thấy |
+|---|---|---|
+| (2) | Luồng nền đọc `dung` một lần, thấy `false`, rồi lặp mãi không đọc lại | `false` |
+| (3) | Luồng chính ghi `true` sau 50 ms, nhưng luồng nền không còn nhìn | không đổi |
+| `join` | Chờ luồng nền, mà nó không bao giờ thoát | treo |
+
+Chuẩn nói đây là **data race**, tức hành vi không xác định ([Bài 25](25-data-race-mutex.md)): chương trình không có nghĩa nào được bảo đảm. Trên g++ 11 của mình, chạy với `timeout 5`: không tối ưu thì in `da dung`, mã 0; còn `-O1` và `-O2` đều **treo** tới khi `timeout` giết, mã **124**. Chuẩn không hứa treo, cũng không hứa dừng.
 
 Mã hợp ngữ của `-O2` cho thấy lý do trên máy mình: hàm `luongNen` đọc `dung` **một lần** (`cmpb $0, dung(%rip)`: so sánh một byte với 0), thấy `false` rồi nhảy vào một vòng lặp vô hạn không đọc lại nữa (`jmp`, lệnh nhảy, về chính nó). Trình biên dịch được phép làm vậy vì theo chuẩn, nếu không có đồng bộ thì không luồng nào khác ghi `dung` trong lúc ta lặp. TSan (`-fsanitize=thread`) báo `data race` ở cả hai mức tối ưu: một bên ghi `dung` ở `main`, bên kia đọc ở `luongNen`.
 
-**Nối Go:** cờ dừng của Go cũng là `atomic.Bool` (Go 1.19); mình chạy `for !dung.Load() { ... }` với `dung.Store(true)` ở luồng chính, `go run -race` sạch. Trong chương trình Go thật bạn thường dùng `context` hoặc đóng một channel; C++ chuẩn không có channel.
+!!! info "Bạn biết Go?"
+    Cờ dừng của Go cũng là `atomic.Bool` (Go 1.19); mình chạy `for !dung.Load() { ... }` với `dung.Store(true)` ở luồng chính, `go run -race` sạch. Trong chương trình Go thật bạn thường dùng `context` hoặc đóng một channel; C++ chuẩn không có channel.
 
 ### 6. `memory_order`: chỉ nhắc, người mới dùng mặc định
 
-Mọi thao tác atomic nhận thêm một tham số tùy chọn **`std::memory_order`** (thứ tự bộ nhớ): nó nói thao tác đó ràng buộc thứ tự với các lần đọc ghi **khác** quanh nó mạnh đến đâu. Mặc định là **`std::memory_order_seq_cst`**, mạnh nhất và dễ suy luận nhất: mọi luồng thấy mọi thao tác atomic theo cùng một thứ tự chung. Bài này **không** dạy các mức giữa (`acquire`/`release`); đó là chủ đề riêng và dễ sai.
+Các hàm thành viên như `load`, `store`, `fetch_add`, `exchange` nhận thêm một tham số tùy chọn **`std::memory_order`** (thứ tự bộ nhớ): nó nói thao tác đó ràng buộc thứ tự với các lần đọc ghi **khác** quanh nó mạnh đến đâu. Các toán tử như `++n` hay `n = v` không có chỗ truyền tham số này và luôn dùng mức mặc định. Mặc định là **`std::memory_order_seq_cst`**, mạnh nhất và dễ suy luận nhất: mọi luồng thấy mọi thao tác atomic theo cùng một thứ tự chung.
 
-**Người mới dùng mặc định `seq_cst`** (tức là đừng ghi gì thêm, như ở mọi ví dụ trên).
+Bài này **không** dạy các mức giữa (`acquire`/`release`); đó là chủ đề riêng và dễ sai. **Người mới dùng mặc định `seq_cst`**: đừng ghi tham số thứ tự, như ở mọi ví dụ trong bài.
 
-Mức duy nhất bài nhắc là **`std::memory_order_relaxed`**: nó chỉ bảo đảm thao tác **nguyên tử**, không ràng buộc thứ tự với việc khác. Nó hợp với **bộ đếm thống kê** (như `demThongKe` ở mục 3: mọi luồng chỉ cộng, và bạn chỉ đọc kết quả sau `join`). Đừng dùng `relaxed` cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Và nhớ kết quả mục 3: ở máy mình, `relaxed` không nhanh hơn.
+Mức duy nhất bài nhắc là **`std::memory_order_relaxed`**, ví dụ `n.fetch_add(1, std::memory_order_relaxed)`: nó chỉ bảo đảm thao tác **nguyên tử**, không ràng buộc thứ tự với việc khác. Nó hợp với **bộ đếm thống kê** (mọi luồng chỉ cộng, bạn chỉ đọc kết quả sau `join`). Đừng dùng `relaxed` cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Mình thử đổi bộ đếm ở mục 3 sang `relaxed`: g++ `-O2` sinh cùng lệnh `lock addq $1, ...` cho cả hai, và thời gian không khác rõ rệt (atomic 40 đến 50 ms, relaxed 44 đến 47 ms trong ba lần chạy). Đó là chuyện của máy x86-64 mình; trên CPU khác `relaxed` có thể rẻ hơn.
 
 **`volatile` không phải atomic.** Từ khóa `volatile` của C++ dặn trình biên dịch đừng bỏ các lần đọc ghi biến (dùng cho thanh ghi phần cứng); nó **không** làm `++` nguyên tử và **không** tạo đồng bộ giữa luồng, nên data race trên biến `volatile` vẫn là hành vi không xác định.
 
-Mình thử `volatile int dem` trong chương trình đếm của [Bài 25](25-data-race-mutex.md), `-O2`: ba lần ra `163455`, `131218`, `163086` (mong 400000), và TSan báo `data race`. Lưu ý trái ngược Java: `volatile` ở Java là công cụ đồng bộ luồng (mà `++` vẫn không nguyên tử); Go gọi thẳng `sync/atomic`. Ở C++, thứ tương đương là `std::atomic`.
+Mình thử `volatile int dem` trong chương trình đếm của [Bài 25](25-data-race-mutex.md), `-O2`: ba lần ra `163455`, `131218`, `163086` (mong 400000), và TSan báo `data race`. Ở C++, thứ dùng chung giữa luồng là `std::atomic` (hoặc mutex).
+
+Trái với Java, nơi `volatile` là công cụ đồng bộ luồng (dù `++` vẫn không nguyên tử); Go thì gọi thẳng `sync/atomic`.
 
 ### 7. Lock-free, `atomic_flag` và ABA
 
 **Lock-free** có hai nghĩa đời thường, đừng lẫn. Với kiểu atomic: `is_lock_free()` trả `true` nếu thao tác chạy bằng lệnh CPU, **không** dùng khóa ngầm trong thư viện. Với thuật toán: lock-free nghĩa là luôn có ít nhất một luồng tiến lên được, dù luồng khác bị hoãn (mục phỏng vấn nói kỹ hơn).
 
-Kiểu `std::atomic_flag` là atomic nhỏ nhất: một cờ hai trạng thái, với `test_and_set()` (đặt cờ lên, **trả giá trị cũ**) và `clear()` (hạ cờ). Chuẩn bảo đảm riêng `atomic_flag` là lock-free. Trong C++17 nó được khởi tạo bằng `ATOMIC_FLAG_INIT`. Chương trình dưới chạy một luồng để xem `test_and_set` trả gì, và in `is_lock_free()` của hai kiểu.
+Mình gọi `is_lock_free()` thật trên g++ 11, x86-64: `std::atomic<int>` và `std::atomic<long long>` đều ra `1` (`true`), còn `std::atomic` của một `struct` 64 byte ra `0`. Đó là kết quả của máy mình, chuẩn không hứa.
 
-```cpp
-#include <atomic>
-#include <iostream>
-
-int main() {
-    std::atomic_flag co = ATOMIC_FLAG_INIT;    // (1) cờ nguyên tử, ban đầu "hạ"
-    bool lan1 = co.test_and_set();             // (2) đặt cờ lên, trả giá trị cũ (hạ)
-    bool lan2 = co.test_and_set();             // (3) cờ đang lên, trả giá trị cũ (lên)
-    co.clear();                                // (4) hạ cờ
-    bool lan3 = co.test_and_set();             // (5) lại như lần đầu
-    std::cout << lan1 << lan2 << lan3 << "\n";
-
-    std::atomic<int> a{0};
-    std::atomic<long long> b{0};
-    std::cout << "atomic<int>: " << a.is_lock_free() << "\n";
-    std::cout << "atomic<long long>: " << b.is_lock_free() << "\n";
-    return 0;
-}
-```
-
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Cờ `co` sau dòng |
-|---|---|---|
-| (2) | Cờ đang hạ: `test_and_set` trả `false` (in `0`) và đặt cờ lên | lên |
-| (3) | Cờ đang lên: trả `true` (in `1`), cờ vẫn lên | lên |
-| (4)(5) | `clear()` hạ cờ; `test_and_set` lại trả `false` và đặt lên | lên |
-
-**Kết quả khi chạy** (mình chạy thật):
-
-```text
-010
-atomic<int>: 1
-atomic<long long>: 1
-```
-
-Hai dòng cuối là kết quả của g++ 11 trên x86-64 của mình, **không** phải điều chuẩn hứa (chỉ `atomic_flag` được bảo đảm). Mình thử thêm `std::atomic` của một `struct` 64 byte: phải thêm `-latomic` khi liên kết (không thì `undefined reference to '__atomic_is_lock_free'`), và `is_lock_free()` ra `0`: loại atomic lớn thường dùng khóa ngầm. Có người dùng `test_and_set` trong vòng `while` để dựng **khóa quay** (luồng chưa lấy được cờ thì quay vòng hỏi lại, đốt CPU như vòng chờ bận ở [Bài 27](27-condition-variable.md)); bài này không dạy, mặc định bạn dùng `std::mutex`.
+Kiểu `std::atomic_flag` là atomic nhỏ nhất: một cờ hai trạng thái, với `test_and_set()` (đặt cờ lên, **trả giá trị cũ**) và `clear()` (hạ cờ). Riêng nó được chuẩn bảo đảm lock-free; mình chạy một luồng: `test_and_set()` hai lần liền, `clear()`, rồi `test_and_set()` lần nữa, ra `false`, `true`, `false`.
 
 **ABA** (chỉ nêu tên): luồng A đọc giá trị `A`, rồi luồng khác đổi `A` thành `B` rồi lại thành `A`; `compare_exchange` của A thấy "vẫn là `A`" nên thành công dù trạng thái đã đổi giữa chừng. Lỗi này hay gặp khi tự viết cấu trúc lock-free dùng con trỏ; người mới nên dùng mutex hoặc thư viện có sẵn thay vì tự viết.
 
@@ -432,7 +378,9 @@ int main() {
 | (3)(4) | Luồng chính chen vào đúng lúc này, đọc `a` rồi `b` | thấy 999 |
 | (2) | Luồng `chuyen` cộng `b` | 1000 |
 
-Mình chạy 10 lần (năm không tối ưu, năm `-O2`): tổng cuối luôn `1000`, nhưng số lần luồng chính thấy tổng sai **lần nào cũng lớn hơn 0**, ví dụ `1987`, `273`, `964` (không tối ưu), `3174`, `1015` (`-O2`); số đổi theo lần chạy và máy bạn ra số khác. Với `-fsanitize=thread`: sạch, mã thoát 0. Vậy đây là **race condition** chứ không phải data race. Thứ tự mặc định `seq_cst` đã là mạnh nhất mà vẫn thấy tổng sai, vì lỗi nằm ở khoảng hở giữa hai lệnh chứ không ở thứ tự.
+Mình chạy 10 lần (năm không tối ưu, năm `-O2`): tổng cuối luôn `1000`, nhưng số lần luồng chính thấy tổng sai **lần nào cũng lớn hơn 0**, ví dụ `1987`, `273`, `964` (không tối ưu), `3174`, `1015` (`-O2`); số đổi theo lần chạy và máy bạn ra số khác.
+
+Với `-fsanitize=thread`: sạch, mã thoát 0. Vậy đây là **race condition** chứ không phải data race. Thứ tự mặc định `seq_cst` đã là mạnh nhất mà vẫn thấy tổng sai, vì lỗi nằm ở khoảng hở giữa hai lệnh chứ không ở thứ tự.
 
 Cách sửa: để một mutex bảo vệ **cả hai** biến, và mọi chỗ đụng vào cả hai đi qua hàm tự khóa (như `BoDem` của [Bài 25](25-data-race-mutex.md), ở đây viết bằng hàm cho gọn). Bên trong khóa, hai biến là `int` thường vì mutex đã lo; cờ `xong` vẫn là `atomic<bool>`.
 
@@ -491,7 +439,7 @@ Số `0` ổn định vì đọc cả hai biến và đổi cả hai biến đ�
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "`std::atomic` là gì, khác mutex thế nào?"
-    `std::atomic<T>` làm mỗi thao tác trên **một** biến thành nguyên tử: luồng khác thấy trước hoặc sau, không thấy giữa chừng, và theo chuẩn không tạo data race. Nó thường chạy bằng lệnh CPU, không khóa, nên rẻ hơn mutex (mình đo cỡ bốn đến năm lần trên máy mình, con số đổi theo máy). Mutex bảo vệ cả **đoạn code** nhiều lệnh và nhiều biến, giữ một bất biến; luồng không có khóa phải chờ. Một biến đơn giản (bộ đếm, cờ) thì atomic; hai biến phải đổi cùng nhau thì mutex, vì hai atomic riêng vẫn có khoảng hở giữa hai lệnh. Atomic chỉ bảo vệ từng thao tác, nên `x = x + 1` vẫn mất lần tăng.
+    `std::atomic<T>` làm mỗi thao tác trên **một** biến thành nguyên tử: luồng khác thấy trước hoặc sau, không thấy giữa chừng, và theo chuẩn không tạo data race. Nó thường chạy bằng lệnh CPU, không khóa, nên rẻ hơn mutex (mình đo cỡ 4 lần trên máy mình, con số đổi theo máy). Mutex bảo vệ cả **đoạn code** nhiều lệnh và nhiều biến, giữ một bất biến; luồng không có khóa phải chờ. Một biến đơn giản (bộ đếm, cờ) thì atomic; hai biến phải đổi cùng nhau thì mutex, vì hai atomic riêng vẫn có khoảng hở giữa hai lệnh. Atomic chỉ bảo vệ từng thao tác, nên `x = x + 1` vẫn mất lần tăng.
 
 ??? question "`compare_exchange` hoạt động thế nào?"
     `x.compare_exchange_strong(mongDoi, mong)` làm trong một nhịp nguyên tử: nếu `x == mongDoi` thì đặt `x = mong` và trả `true`; nếu không thì **không đổi `x`**, ghi giá trị hiện tại của `x` vào `mongDoi`, trả `false`. Dùng để tự viết thao tác "đọc, tính, ghi nếu chưa ai đổi" bằng vòng lặp thử lại (ví dụ tăng đến giới hạn). `weak` được phép thất bại giả dù giá trị đúng, nên dùng trong vòng lặp; `strong` chỉ thất bại khi giá trị khác. Điểm cần nêu thêm là **ABA**: giá trị đổi `A` thành `B` rồi về `A` thì CAS vẫn thành công dù trạng thái đã đổi.
@@ -505,7 +453,7 @@ Số `0` ổn định vì đọc cả hai biến và đổi cả hai biến đ�
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Dùng `bool` thường làm cờ dừng"
-    Là data race: mình chạy `-O2` thì luồng nền treo mãi (mã 124), không tối ưu thì lại dừng đúng. Dùng `std::atomic<bool>`.
+    Là data race: trên g++ 11 của mình, `-O2` làm luồng nền treo mãi (mã 124), không tối ưu thì lại dừng đúng. Dùng `std::atomic<bool>`.
 
 !!! warning "Lỗi 2: Tưởng hai atomic giữ được bất biến, hoặc `x = x + 1`"
     Mỗi thao tác atomic riêng lẻ chỉ bảo vệ một biến và một thao tác. `dem = dem + 1` mình chạy ra thiếu (TSan vẫn sạch), và `--a; ++b;` để luồng khác thấy tổng sai lần nào cũng có. Nhiều biến hoặc nhiều bước thì dùng mutex, hoặc `compare_exchange` trên một biến.
@@ -551,12 +499,12 @@ bool ok = x.compare_exchange_strong(cu, 9);
 <div class="cau-hoi" data-dap-an="3" markdown>
 **Câu 3.** Vì sao `compare_exchange_weak` thường được đặt trong một vòng lặp?
 
-- Vì nó chỉ đổi được một phần của giá trị, nên phải gọi nhiều lần cho đủ
+- Vì mỗi lần nó chỉ so sánh, nên phải gọi tiếp để thực sự đổi giá trị
 - Vì nó trả `true` khi thất bại, nên phải lặp đến khi trả `false` mới xong
 - Vì chuẩn cho phép nó trả `false` dù giá trị đúng bằng giá trị mong đợi
-- Vì nó chỉ chạy được khi có luồng khác đang giữ mutex, nên phải chờ
+- Vì nó không cập nhật giá trị mong đợi khi thất bại, nên phải đọc lại
 
-<p class="giai-thich" markdown>Chuẩn cho phép `weak` thất bại giả: trả `false` dù giá trị đang đúng bằng giá trị mong đợi. Vòng lặp thử lại biến tình huống đó thành vô hại. Nó vẫn đổi cả giá trị trong một nhịp nguyên tử, không đổi từng phần. Nó trả `true` khi đổi được, `false` khi thất bại. Và nó không cần mutex nào; atomic hoạt động mà không có khóa.</p>
+<p class="giai-thich" markdown>Chuẩn cho phép `weak` thất bại giả: trả `false` dù giá trị đang đúng bằng giá trị mong đợi. Vòng lặp thử lại biến tình huống đó thành vô hại. Nó so sánh và đổi trong một nhịp, không cần gọi thêm lần nữa để đổi. Nó cũng cập nhật giá trị mong đợi khi thất bại (cả `weak` lẫn `strong`), nên vòng lặp không phải đọc lại bằng tay; nhầm điều này là nhầm với `CompareAndSwap` của Go. Nó trả `true` khi đổi được, `false` khi thất bại.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -603,12 +551,27 @@ bool dung = false;
 <p class="giai-thich" markdown>Chuẩn C++ không cho `volatile` ý nghĩa đồng bộ giữa luồng, và `++` trên nó vẫn là đọc, cộng, ghi rời nhau. Mình chạy với `-O2`: kết quả thiếu so với 400000, và TSan báo data race. Việc "đi thẳng vào bộ nhớ" chỉ ngăn trình biên dịch bỏ lần đọc ghi, không ngăn luồng khác chen vào giữa. Còn ý "ghi một `int` là một lệnh" chỉ nói về lệnh ghi; `++` là ba bước, và chuẩn không cho phép dựa vào điều đó.</p>
 </div>
 
+<div class="cau-hoi" data-dap-an="3" markdown>
+**Câu 7.** Đọc đoạn sau. `dem` là `std::atomic<int>` bắt đầu bằng 0; bốn luồng, mỗi luồng chạy dòng sau 100000 lần. Sau khi cả bốn `join`, điều nào đúng?
+
+```text
+dem = dem + 1;
+```
+
+- Luôn đúng 400000, vì phép gán `=` của atomic là một thao tác nguyên tử
+- Là hành vi không xác định, vì bốn luồng cùng ghi một biến mà không khóa
+- Không có data race, nhưng có thể thiếu, vì đọc và ghi là hai thao tác rời
+- Luôn nhỏ hơn 400000, vì mỗi luồng ghi đè hết kết quả của luồng khác
+
+<p class="giai-thich" markdown>`dem + 1` là một lần `load()`, rồi `=` là một lần `store()`; mỗi lần đều nguyên tử nên không có data race, nhưng giữa hai lần luồng khác chen vào được, nên có thể mất lần tăng. Mình chạy thật: kết quả thiếu và đổi mỗi lần, TSan vẫn sạch. Nói "luôn đúng" nhầm giữa từng thao tác và cả câu lệnh. Nói hành vi không xác định nhầm vì mọi truy cập đều qua atomic. Còn "luôn nhỏ hơn" quá chắc: chuẩn không hứa kết quả cụ thể nào, chỉ là có thể thiếu.</p>
+</div>
+
 </div>
 
 ## 🔑 Tóm tắt
 
 1. `std::atomic<T>` (`#include <atomic>`) làm mỗi thao tác trên **một** biến thành khối không chia cắt, nên không tạo data race: `++dem` trên `atomic<int>` ra đúng 400000 và TSan sạch, còn `x = x + 1` vẫn mất lần tăng vì là hai thao tác rời. `fetch_add` và `exchange` trả giá trị **cũ**; `atomic` không sao chép được.
-2. Việc đếm: atomic rẻ hơn mutex (mình đo cỡ bốn đến năm lần trên g++ 11, x86-64; con số đổi theo máy, `-O`, số lõi). `compare_exchange_weak/strong` là "so sánh rồi đổi trong một nhịp"; thất bại thì ghi giá trị hiện tại vào biến mong đợi; `weak` được phép thất bại giả nên đặt trong vòng lặp.
-3. Cờ dừng phải là `std::atomic<bool>`; `bool` thường là data race, mình chạy: `-O2` treo mãi (mã 124), không tối ưu thì dừng. `volatile` của C++ không thread-safe (khác Java); Go `sync/atomic`: `atomic.Int64` từ Go 1.19, `Add` trả giá trị **mới**.
+2. Việc đếm: atomic rẻ hơn mutex (mình đo cỡ 4 lần trên g++ 11, x86-64; con số đổi theo máy, `-O`, số lõi). `compare_exchange_weak/strong` là "so sánh rồi đổi trong một nhịp"; thất bại thì ghi giá trị hiện tại vào biến mong đợi; `weak` được phép thất bại giả nên đặt trong vòng lặp.
+3. Cờ dừng phải là `std::atomic<bool>`; `bool` thường là data race, trên g++ 11 của mình `-O2` treo mãi (mã 124), không tối ưu thì dừng. `volatile` của C++ không thread-safe (khác Java); Go `sync/atomic`: `atomic.Int64` từ Go 1.19, `Add` trả giá trị **mới**.
 4. Atomic cho một biến đơn giản; bất biến nhiều biến (như `a + b` luôn 1000) cần mutex, vì hai atomic vẫn có khoảng hở: mình chạy, luồng đọc thấy tổng sai lần nào cũng có, còn bản mutex ra đúng 0.
-5. `memory_order`: mặc định `seq_cst`, người mới dùng mặc định; `relaxed` chỉ cho bộ đếm thống kê (máy mình không nhanh hơn). `is_lock_free()` tùy kiểu và máy (chuẩn chỉ bảo đảm cho `atomic_flag`); ABA chỉ cần biết tên: giá trị đổi `A` thành `B` rồi về `A` làm CAS đánh lừa.
+5. `memory_order`: mặc định `seq_cst`, người mới dùng mặc định; `relaxed` chỉ cho bộ đếm thống kê (máy mình không nhanh hơn); toán tử như `++n` luôn dùng `seq_cst`. `is_lock_free()` tùy kiểu và máy (chuẩn chỉ bảo đảm cho `atomic_flag`); ABA chỉ cần biết tên: giá trị đổi `A` thành `B` rồi về `A` làm CAS đánh lừa.
