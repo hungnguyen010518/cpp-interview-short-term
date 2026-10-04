@@ -287,7 +287,7 @@ Ba điểm đáng nhớ:
 - **Dừng sạch** là ba bước: đặt cờ `xong` dưới khóa, `notify_all`, rồi `join`. Quên `notify_all`, consumer đang ngủ không biết cờ đổi (xem Lỗi 1).
 - **Xử lý ngoài khóa** (dòng (3)): giữ khóa suốt lúc tính thì các consumer thành tuần tự, như phạm vi khóa nhỏ nhất ở [Bài 25](25-data-race-mutex.md).
 
-**Thử thay đổi: ở dòng (7) đổi `notify_all()` thành `notify_one()`.** Mình đã chạy 100 lần: 99 lần ra đúng `tong = 500500`, **1 lần treo** (`timeout 3` mã 124). Con số đổi theo máy và theo lần chạy (có lần chạy lại mình thấy 0 lần treo). Chuẩn chỉ hứa `notify_one` đánh thức nhiều nhất một luồng, không hứa gì hơn.
+**Thử thay đổi: ở dòng (7) đổi `notify_all()` thành `notify_one()`.** Mình đã chạy 100 lần: 99 lần ra đúng `tong = 500500`, **1 lần treo** (`timeout 3` mã 124). Con số đổi theo máy và theo lần chạy: chạy lại 100 lần khác có thể cho 0 lần treo, nên đừng dựa vào con số cụ thể. Chuẩn chỉ hứa `notify_one` đánh thức nhiều nhất một luồng, không hứa gì hơn.
 
 - Treo xảy ra khi cả hai consumer đã ngủ lúc producer báo dừng: `notify_one` chỉ đánh thức một, luồng kia ngủ mãi và `join` chờ nó.
 - Những lần "ổn" là cái bẫy: lỗi hiếm và hên xui như deadlock ở [Bài 26](26-deadlock.md).
