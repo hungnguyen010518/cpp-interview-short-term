@@ -63,6 +63,11 @@ int main() {
 }
 ```
 
+| Dòng | Chuyện gì xảy ra | Chương trình |
+|---|---|---|
+| lambda ném | Ngoại lệ thoát khỏi hàm của luồng phụ, không `catch` nào ở đó nên gọi `std::terminate` | bị hủy ngay |
+| `catch` ở `main` | Không bao giờ chạy: nó không bắt được ngoại lệ của luồng khác | không tới |
+
 Mình chạy: in `terminate called after throwing an instance of 'std::runtime_error'` và `what():  loi trong luong`, mã thoát 134. Dòng `catch` của `main` không chạy. `std::future` giải quyết cả hai chuyện.
 
 ### 2. `std::async` trả về `std::future`
@@ -87,10 +92,8 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Phiếu `f` |
 |---|---|---|
-| (1) | Một luồng bắt đầu tính `binhPhuong(7)`; `main` nhận phiếu ngay | đang giữ chỗ cho một `int` |
-| (2) | `valid()` hỏi "phiếu này còn gắn với một kết quả không?" | `1` (có) |
-| (3) | `get()` chờ luồng xong (nếu chưa) rồi trả 49 | kết quả đã được lấy ra |
-| (4) | Sau `get()`, phiếu không còn gắn với gì | `0` |
+| (1)(2) | Luồng bắt đầu tính `binhPhuong(7)`; `main` nhận phiếu ngay; `valid()` hỏi "phiếu còn gắn kết quả không?" | `1` (có) |
+| (3)(4) | `get()` chờ luồng xong rồi trả 49; sau đó phiếu không còn gắn gì | `0` |
 
 **Kết quả khi chạy:**
 
@@ -100,13 +103,11 @@ kq = 49
 valid sau get: 0
 ```
 
-TSan sạch (mã 0). `get()` chờ xong rồi mới trả, nên không cần `join`: luồng do `async` tạo được future lo.
-
-Ba thao tác khác của future:
+TSan sạch (mã 0). `get()` chờ xong rồi mới trả, nên không cần `join`. Ba thao tác khác của future:
 
 - `valid()`: `true` nếu future còn gắn với một kết quả chưa lấy.
 - `wait()`: chờ cho tới khi có kết quả nhưng **không** lấy ra (sau đó vẫn `get()` được).
-- `wait_for(thời gian)`: chờ tối đa chừng đó rồi trả `std::future_status::ready` (đã xong), `timeout` (chưa), hoặc `deferred` (mục 4). Mình chạy một tác vụ ngủ 200 ms: `wait_for` 50 ms ra `timeout`, sau `wait()` ra `ready`. Dùng `std::chrono` như Bài 24.
+- `wait_for(thời gian)`: chờ tối đa chừng đó rồi trả `std::future_status::ready` (đã xong), `timeout` (chưa), hoặc `deferred` (mục 4). Thời gian viết bằng `std::chrono` như Bài 24 (`std::chrono::seconds(0)` là 0 giây, tức chỉ hỏi chứ không chờ). Mình chạy một tác vụ ngủ 200 ms: `wait_for` 50 ms ra `timeout`, sau `wait()` ra `ready`.
 
 **`get()` chỉ lấy được một lần.** Lấy kết quả xong là món đã giao đi (nên `valid()` thành `0`).
 
@@ -127,7 +128,12 @@ int main() {
 }
 ```
 
-Mình chạy trên g++ 11: in `42`, rồi `loi: std::future_error: No associated state`. Chuẩn đòi `valid() == true` trước mỗi `get()`, nên gọi lần hai là lỗi của người gọi. Việc g++ ném `std::future_error` chỉ là cách cài đặt này xử lý; đừng viết code dựa vào nó.
+| Dòng | Chuyện gì xảy ra | `valid()` |
+|---|---|---|
+| `f.get()` đầu | Chờ rồi trả 42, lấy kết quả ra | thành `false` |
+| (1) | `get()` trên future không còn gắn kết quả nào | `false` |
+
+Mình chạy trên g++ 11: in `42`, rồi `loi: std::future_error: No associated state` (`std::future_error` là kiểu ngoại lệ riêng của `<future>`, ném khi dùng future sai). Chuẩn đòi `valid() == true` trước mỗi `get()`; vi phạm thì chuẩn không hứa gì (Bài 15: hành vi không xác định). Việc g++ ném `std::future_error` chỉ là cách cài đặt này xử lý; đừng viết code dựa vào nó.
 
 
 ### 3. Ngoại lệ đi qua future
@@ -162,14 +168,7 @@ int main() {
 | (1) | `chia(1, 0)` ném `runtime_error`; `async` bắt lại và cất vào future | luồng của tác vụ |
 | (2) | `get()` lấy ngoại lệ ra và ném lại; khối `catch` chạy | luồng `main` |
 
-**Kết quả khi chạy:**
-
-```text
-tot = 5
-bat duoc o get: chia cho 0
-```
-
-TSan sạch. Khác hẳn mục 1: không còn `terminate`. Mình cũng thử một tác vụ ném ngoại lệ mà chỉ `wait()` rồi bỏ future, không `get()`: chương trình thoát bình thường, ngoại lệ bị nuốt im lặng. Vậy đừng quên `get()` nếu bạn muốn biết tác vụ có lỗi.
+**Kết quả khi chạy:** hai dòng `tot = 5` và `bat duoc o get: chia cho 0`; TSan sạch. Khác hẳn mục 1: không còn `terminate`. Mình cũng thử một tác vụ ném ngoại lệ mà chỉ `wait()` rồi bỏ future, không `get()`: chương trình thoát bình thường, ngoại lệ bị nuốt im lặng. Vậy đừng quên `get()` nếu bạn muốn biết tác vụ có lỗi.
 
 ### 4. `std::launch`: `async`, `deferred` và mặc định
 
@@ -219,7 +218,9 @@ mac dinh, wait_for tra deferred? 0
 m = 7
 ```
 
-Dòng áp chót nói riêng cho g++ 11 trên máy mình: ở chế độ mặc định nó **không** chọn `deferred`. Đó là cách cài đặt này làm, chuẩn không hứa, và bản g++ khác có thể khác. Muốn chắc có luồng riêng, hãy viết `std::launch::async`. Lỗi hay gặp: tác vụ `deferred` mà không bao giờ `get()`/`wait()` thì **không bao giờ chạy**.
+Dòng áp chót nói riêng cho g++ 11 trên máy mình: ở chế độ mặc định nó **không** chọn `deferred`. Đó là cách cài đặt này làm, chuẩn không hứa, và bản g++ khác có thể khác. Muốn chắc có luồng riêng, hãy viết `std::launch::async`.
+
+Lỗi hay gặp: tác vụ `deferred` mà không bao giờ `get()`/`wait()` thì **không bao giờ chạy**.
 
 ### 5. Cái bẫy: future tạm bị hủy thì phải chờ
 
@@ -255,16 +256,17 @@ int main() {
 }
 ```
 
-`future<void>` là phiếu hẹn cho tác vụ không trả gì. Mình chạy bốn lần: lần nào cũng 300 đến 303 ms và 600 đến 603 ms; một lần chạy thật:
+`future<void>` là phiếu hẹn cho tác vụ không trả gì. Mình chạy bốn lần: lần nào cũng `giu future` ra 300 đến 303 ms và `bo future` ra 600 đến 603 ms.
 
-```text
-giu future:  300 ms
-bo future:   600 ms
-```
+| Dòng | Chuyện gì xảy ra | Đã trôi |
+|---|---|---|
+| (1)(2) | Hai tác vụ chạy song song; hủy `a`, `b` chờ cả hai, chừng một lần ngủ | khoảng 300 ms |
+| (3) | Future tạm bị hủy ngay cuối dòng, nên dòng này chờ tác vụ xong | khoảng 300 ms |
+| (4) | Tác vụ thứ hai chỉ bắt đầu bây giờ, rồi cũng bị chờ | khoảng 600 ms |
 
-Dòng (1): hai tác vụ chạy song song nên cả khối mất khoảng 300 ms. Dòng (3), (4): mỗi dòng chờ 300 ms, tổng khoảng 600 ms. Con số đổi theo máy và độ bận lúc chạy; chỉ cái mẫu "gấp đôi" là ổn định, vì việc chính là `sleep_for`. Trình biên dịch còn cảnh báo ở hai dòng này: `ignoring return value of ... declared with attribute 'nodiscard'` (bỏ qua giá trị trả về của hàm đánh dấu "đừng bỏ"), nên chương trình này không nằm trong khối được kiểm tự động.
+Con số đổi theo máy và độ bận lúc chạy; chỉ cái mẫu "gấp đôi" là ổn định, vì việc chính là `sleep_for`.
 
-Mình thử thêm: hủy future lấy từ `std::promise` (mục 6) khi tác vụ còn ngủ 300 ms thì hàm hủy trả về ngay (0 ms); chờ trong hàm hủy là đặc điểm của future do `async` trả về.
+Ở dòng (3), (4) trình biên dịch cảnh báo `ignoring return value of ... declared with attribute 'nodiscard'` (bỏ qua giá trị trả về của hàm đánh dấu "đừng bỏ"). Cảnh báo đó chính là dấu hiệu bạn đang bỏ future, nên chương trình này cố ý có cảnh báo.
 
 ### 6. `std::promise`: tự tay đặt giá trị
 
@@ -302,14 +304,9 @@ int main() {
 | (3)(4) | Luồng `set_value(42)`; `get()` ở `main` trả 42 | có giá trị |
 | (6) | `catch (...)` (ba dấu chấm thật) bắt ngoại lệ **bất kỳ kiểu nào**; `std::current_exception()` gói ngoại lệ đang bắt, `set_exception` đặt nó vào promise | có ngoại lệ |
 
-**Kết quả khi chạy** (TSan sạch):
+**Kết quả khi chạy** (TSan sạch): `nhan 42`, rồi `loi: khong tinh duoc`.
 
-```text
-nhan 42
-loi: khong tinh duoc
-```
-
-**Promise bị hủy mà chưa đặt gì.** Đây là món "chưa làm xong mà khay đã dọn": người chờ không thể chờ mãi, nên future nhận một lỗi.
+**Promise bị hủy mà chưa đặt gì.** Đây là món "chưa làm xong mà khay đã dọn": người chờ không thể chờ mãi, nên future nhận một lỗi. Lỗi đó là một `std::future_error`; `e.code()` trả mã lỗi để so với `std::future_errc::broken_promise` ("lời hứa bị phá"). Dòng `std::future<int> f;` tạo một future rỗng (chưa gắn gì); dòng sau gán phiếu thật vào nó.
 
 ```cpp
 #include <future>
@@ -338,28 +335,22 @@ loi: std::future_error: Broken promise
 la broken_promise? 1
 ```
 
-Hàm hủy của `p` (dòng (2)) đặt lỗi `broken_promise` vào future, nên `get()` ném `std::future_error` thay vì treo mãi. Nghĩa là luồng ghi mà quên `set_value` (do `return` sớm, ngoại lệ...) thì luồng đọc nhận lỗi rõ ràng.
+| Dòng | Chuyện gì xảy ra | Future `f` |
+|---|---|---|
+| (1) | Tạo promise, lấy phiếu đọc đưa cho `f` | chờ giá trị |
+| (2) | `p` bị hủy khi hết khối mà chưa `set_value`: hàm hủy đặt lỗi `broken_promise` vào đó | mang lỗi |
+| `f.get()` | Ném `std::future_error` thay vì treo mãi | `catch` bắt được |
+
+Nghĩa là luồng ghi mà quên `set_value` (do `return` sớm, ngoại lệ...) và promise bị hủy thì luồng đọc nhận lỗi rõ ràng. Nếu promise còn sống mà không ai đặt, `get()` vẫn chờ.
+
 
 ### 7. `packaged_task` và `shared_future` (chỉ nhắc)
 
-`std::packaged_task<int(int, int)>` bọc một hàm; hàm đó **không** chạy lúc tạo, mà chạy khi bạn gọi nó (ở đây trao cho một luồng). Kết quả hoặc ngoại lệ tự vào future. Kiểu `int(int, int)` đọc như `std::function<bool(int)>` ở [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md): "nhận hai `int`, trả `int`".
+`std::packaged_task<int(int, int)>` bọc một hàm; hàm đó **không** chạy lúc tạo, mà chạy khi bạn gọi nó (ví dụ trao cho một luồng). Kết quả hoặc ngoại lệ tự vào future. Kiểu `int(int, int)` đọc như `std::function<bool(int)>` ở [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md): "nhận hai `int`, trả `int`".
 
-```cpp
-#include <future>
-#include <iostream>
-#include <thread>
+Dùng: `goi` được tạo từ lambda `a + b`; `auto kq = goi.get_future();` lấy phiếu; `std::thread t(std::move(goi), 3, 4);` trao gói cho luồng (không sao chép được nên phải `std::move`, Bài 12). Mình chạy đủ chương trình: `kq.get()` ra `3 + 4 = 7`, TSan sạch. Nó hay dùng khi cài hàng đợi công việc (Bài 30).
 
-int main() {
-    std::packaged_task<int(int, int)> goi([](int a, int b) { return a + b; });   // (1)
-    std::future<int> kq = goi.get_future();                                      // (2)
-    std::thread t(std::move(goi), 3, 4);                                         // (3) chuyển gói cho luồng
-    std::cout << "3 + 4 = " << kq.get() << "\n";
-    t.join();
-    return 0;
-}
-```
-
-Mình chạy: `3 + 4 = 7`, TSan sạch. `packaged_task` không sao chép được nên phải `std::move` (Bài 12), như `unique_ptr` ở Bài 24. Nó hay dùng khi cài hàng đợi công việc (Bài 30). `std::shared_future<T>`: future sao chép được, nhiều luồng cùng `get()`; chỉ cần biết tên. Còn `std::future` thì không sao chép được (mình thử `std::future<int> b = a;`: `use of deleted function`).
+`std::shared_future<T>` là future sao chép được, nhiều luồng cùng `get()`; chỉ cần biết tên. Còn `std::future` thì không sao chép được.
 
 !!! info "Bạn biết Go?"
     Go không có `future` trong thư viện chuẩn. Cách quen thuộc: một **channel** có đệm 1 để nhận kết quả (`ch := make(chan int, 1)`, goroutine làm `ch <- f()`, nơi cần thì `v := <-ch`). Phép nhận `<-ch` tương ứng `future.get()`: chờ tới khi có.
@@ -370,7 +361,6 @@ Mình chạy: `3 + 4 = 7`, TSan sạch. `packaged_task` không sao chép đượ
     - Channel đã `close` thì nhận ra giá trị 0 và `ok == false`; future không có khái niệm tương tự.
     - Lỗi trong goroutine không tự đi theo channel (ném `panic` làm cả chương trình chết, như Bài 24); bạn phải gửi `error` qua channel, hoặc dùng `errgroup` của module `golang.org/x/sync` (không thuộc thư viện chuẩn, mình không chạy ở bài này). `future` mang ngoại lệ sẵn.
     - `sync.WaitGroup` chỉ chờ xong, không mang kết quả: giống `join` hơn `get`.
-    - Goroutine không phải thread (do runtime Go lập lịch), còn `std::async` với `launch::async` thường dùng luồng hệ điều hành.
 
 ## 💻 Ví dụ code
 
@@ -396,7 +386,8 @@ int main() {
 
     std::vector<std::future<long long>> cacPhan;         // (1) bốn "phiếu hẹn" kiểu long long
     for (int k = 0; k < 4; ++k) {
-        cacPhan.push_back(std::async(std::launch::async, congDoan, std::ref(so), k * CO, (k + 1) * CO));   // (2)
+        int dau = k * CO, cuoi = (k + 1) * CO;
+        cacPhan.push_back(std::async(std::launch::async, congDoan, std::ref(so), dau, cuoi));   // (2)
     }
     long long tong = 0;
     for (std::future<long long>& f : cacPhan) tong += f.get();   // (3) chờ từng phần rồi cộng
@@ -423,9 +414,9 @@ Các luồng chỉ **đọc** `so` và mỗi luồng trả kết quả riêng qu
 tong = 500000500000
 ```
 
-**Thử thay đổi: bỏ `std::ref(so)`, viết `so`.** Mình đã chạy: vẫn đúng 500000500000, nhưng mỗi `async` sao chép cả vector 4 MB (đối số bị sao chép mặc định, Bài 24) mà không cần.
+**Thử thay đổi: bỏ `std::ref(so)`, viết `so`.** Mình đã chạy: vẫn đúng 500000500000, nhưng mỗi `async` sao chép cả vector (cỡ 4 MB trên máy mình) (đối số bị sao chép mặc định, Bài 24) mà không cần.
 
-**Có nhanh hơn không?** Mình đo riêng cùng dãy này (chương trình khác, không đưa vào bài): không tối ưu thì 4 phần nhanh hơn cộng một luồng một chút (khoảng 6 đến 7 ms so với 10 ms), còn `-O2` thì ngang nhau (cả hai nửa mili giây): việc quá nhỏ so với chi phí tạo luồng. Số liệu đổi theo máy và `-O`; Bài 30 đo kỹ.
+**Có nhanh hơn không?** Với dãy cỡ này, việc cộng quá nhỏ so với chi phí tạo bốn luồng, nên bốn `async` chỉ nhanh hơn một luồng chút ít hoặc ngang nhau, và kết quả đổi theo lần chạy và mức `-O`. Mình đo riêng nhiều lần (chương trình đo không đưa vào bài) và không tin được con số nào, nên bài không ghi số. Bài 30 đo kỹ.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -447,7 +438,7 @@ tong = 500000500000
     Future tạm bị hủy ngay và chờ tác vụ xong (mình đo: hai tác vụ 300 ms thành khoảng 600 ms). Gán vào biến và `get()` khi cần. g++ 11 còn cảnh báo `nodiscard` ở dòng đó.
 
 !!! warning "Lỗi 2: Gọi `get()` hai lần"
-    `get()` lấy kết quả **ra** khỏi future; lần hai là lỗi. Lưu vào biến ngay lần đầu.
+    `get()` lấy kết quả **ra**; lần hai là lỗi. Lưu vào biến ngay lần đầu.
 
 ## ✍️ Trắc nghiệm
 
@@ -482,7 +473,7 @@ void chay() {
 
 - Gần 0 giây, vì `async` chạy nền và `chay()` trả về ngay
 - Khoảng 1 giây, vì hai tác vụ chạy song song trên hai luồng
-- Khoảng 2 giây, vì hàm hủy future tạm chờ tác vụ xong
+- Khoảng 2 giây, vì hàm hủy future tạm chờ tác vụ xong rồi đi tiếp
 - Gần 0 giây, vì future không được giữ nên tác vụ bị bỏ dở
 
 <p class="giai-thich" markdown>Future do `async` trả về mà bị hủy khi tác vụ chưa xong thì hàm hủy **chờ** tác vụ xong. Ở đây mỗi future là một giá trị tạm, bị hủy ngay cuối dòng, nên dòng thứ hai chỉ bắt đầu sau khi dòng thứ nhất xong: tổng cỡ 2 giây. Nghĩ hai tác vụ chạy song song là quên mất việc chờ này, và "trả về ngay" cũng vậy. Còn tác vụ không hề bị bỏ dở khi future bị hủy; nó được chờ cho xong.</p>
@@ -531,12 +522,12 @@ int x = f.get();
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 6.** Gọi `std::async(f)` mà không nêu policy. Chuẩn C++ nói gì?
 
-- Cài đặt được chọn chạy ngay trên luồng riêng hoặc hoãn tới `get()` hay `wait()`
-- Luôn chạy trên luồng mới, giống hệt khi nêu `std::launch::async`
-- Luôn hoãn tới `get()` hay `wait()`, giống hệt `std::launch::deferred`
-- Hệ điều hành chọn tùy lúc nào luồng chính rảnh, chuẩn không nói gì
+- Cài đặt tự chọn: chạy luồng riêng hoặc hoãn tới `get()`/`wait()`
+- Luôn chạy trên một luồng mới, giống khi nêu `std::launch::async`
+- Luôn hoãn tới `get()` hay `wait()`, giống khi nêu `std::launch::deferred`
+- Chuẩn bảo đảm chọn `async` nếu máy còn lõi rảnh, không thì hoãn
 
-<p class="giai-thich" markdown>Không nêu policy tương đương `async | deferred`: chuẩn cho phép cả hai và để cài đặt chọn, nên cùng đoạn code có thể chạy khác nhau giữa các trình biên dịch. Nói "luôn luồng mới" hay "luôn hoãn" đều khẳng định hơn chuẩn (g++ 11 trên máy mình thì không hoãn, nhưng đó chỉ là cách cài đặt này). Còn việc chọn do thư viện chuẩn quyết định, không phải do thời điểm luồng chính rảnh.</p>
+<p class="giai-thich" markdown>Không nêu policy tương đương `async | deferred`: chuẩn cho phép cả hai và để cài đặt chọn, nên cùng đoạn code có thể chạy khác nhau giữa các trình biên dịch. Nói "luôn luồng mới" hay "luôn hoãn" đều khẳng định hơn chuẩn (g++ 11 trên máy mình thì không hoãn, nhưng đó chỉ là cách cài đặt này). Chuẩn cũng không hứa kiểu "chọn `async` nếu còn lõi rảnh": cách chọn là việc của cài đặt.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
