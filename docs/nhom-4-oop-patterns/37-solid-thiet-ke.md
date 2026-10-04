@@ -12,7 +12,7 @@
 
 Trở lại **xưởng đồ chơi** của [Bài 31](31-lop-dong-goi.md). Một xưởng làm ăn lâu dài có vài nếp: mỗi thợ chỉ lo **một việc** (không ai vừa cắt, vừa sơn, vừa đóng hộp); thêm mẫu đồ chơi mới thì thêm bản vẽ, **không đập dây chuyền cũ**; món con làm ra phải **thay được** món cha ở mọi chỗ trên dây chuyền; phiếu việc ghi đúng việc cần, không kèm việc thừa; dây chuyền nhận "khuôn tiêu chuẩn" chứ không nhận một cái máy cụ thể.
 
-Năm nếp đó chính là **SOLID**, năm chữ đầu của năm nguyên tắc thiết kế lớp (Single responsibility, Open/closed, Liskov, Interface segregation, Dependency inversion). Chúng là **nguyên tắc** (kinh nghiệm đúc kết), không phải luật: dùng đúng chỗ thì code dễ đổi, dùng cứng nhắc thì thành thiết kế thừa.
+Năm nếp đó chính là **SOLID**, ghép từ chữ cái đầu của năm nguyên tắc thiết kế lớp (Single responsibility, Open/closed, Liskov, Interface segregation, Dependency inversion). Chúng là **nguyên tắc** (kinh nghiệm đúc kết), không phải luật: dùng đúng chỗ thì code dễ đổi, dùng cứng nhắc thì thành thiết kế thừa.
 
 !!! info "Chỗ nào ví von không còn đúng?"
     Xưởng đồ chơi chỉ dùng ở đoạn mở đầu này. Các ví dụ bên dưới **đổi chủ đề** theo từng nguyên tắc (bảng điểm, hình học, máy in, máy chủ báo động, xe); mình báo ở đầu mỗi ví dụ. Và "đập dây chuyền" ngoài đời tốn tiền, còn trong code "sửa mã cũ" tốn ở chỗ có thể làm hỏng chỗ đang chạy tốt.
@@ -37,33 +37,37 @@ Lớp `BaoCao` vừa **tính** trung bình, vừa **in**, vừa **lưu** thì c�
 
 ### 3. O: thêm kiểu mới mà không sửa mã cũ
 
-Hàm `tongDienTich` duyệt `vector<unique_ptr<Hinh>>` và gọi `dienTich()` ([Bài 33](33-da-hinh-virtual.md)). Thêm `HinhTamGiac` chỉ cần **viết thêm một lớp**: hàm cũ không đổi một dòng (Ví dụ 2). Nếu thay vì hàm ảo ta dùng chuỗi `if (loai == "tron") ... else if (loai == "chu nhat") ...`, mỗi hình mới là một lần sửa hàm đó.
+Hàm `tong(const Hinh&, const Hinh&)` ở Ví dụ 2 chỉ biết `Hinh` và gọi `dienTich()` ([Bài 33](33-da-hinh-virtual.md)). Thêm `TamGiac` chỉ cần **viết thêm một lớp**: `tong` không đổi một dòng. Nếu thay vì hàm ảo ta dùng chuỗi `if (loai == "tron") ... else if (...)`, mỗi hình mới là một lần sửa hàm đó.
 
-Hai bài trước đã là O: registry factory ([Bài 35](35-pattern-singleton-factory.md)) cho "đăng ký loại mới không sửa factory", và Strategy ([Bài 36](36-pattern-observer-strategy.md)) cho "cách tính mới không sửa đơn hàng". Điểm chung: phần **đổi** nằm sau một interface, phần **ổn định** chỉ biết interface.
+"Đóng với sửa đổi" không có nghĩa không bao giờ sửa: nó có nghĩa loại thay đổi dự đoán được (thêm loại hình) không đòi sửa phần ổn định. Hai bài trước đã là O: registry factory ([Bài 35](35-pattern-singleton-factory.md)) cho "đăng ký loại mới không sửa factory", và Strategy ([Bài 36](36-pattern-observer-strategy.md)) cho "cách tính mới không sửa đơn hàng". Điểm chung: phần **đổi** nằm sau một interface, phần **ổn định** chỉ biết interface.
 
 ### 4. L: lớp con phải giữ hợp đồng của lớp cha
 
-Quy tắc Liskov: ở đâu dùng được lớp cha thì thay bằng lớp con vẫn chạy **đúng**. "Đúng" nói về **hợp đồng** của lớp cha: những điều người dùng được phép trông đợi (ví dụ: sau `datRong(5)` thì rộng là 5 **và cao không đổi**), cộng với các bất biến ([Bài 31](31-lop-dong-goi.md)). Lớp con được làm thêm, không được phá những điều đó.
+Quy tắc Liskov: ở đâu dùng được lớp cha thì thay bằng lớp con vẫn chạy **đúng**. "Đúng" nói về **hợp đồng** của lớp cha: những điều người dùng được phép trông đợi (ví dụ: sau `datRong(5)` thì rộng là 5 **và cao không đổi**), cộng với các bất biến ([Bài 31](31-lop-dong-goi.md)). Lớp con được thêm khả năng, nhưng không được làm hợp đồng và bất biến của cha sai đi.
 
-Hình vuông kế thừa hình chữ nhật có hàm `datRong` là ví dụ kinh điển ([Bài 32](32-ke-thua.md) đã hẹn). Muốn vuông còn vuông thì `datRong` phải đổi cả cao, và kỳ vọng "cao không đổi" của chữ nhật vỡ; không đổi cao thì vuông hết vuông. **Không có cách viết lớp con nào đúng cả hai** (Ví dụ 3 chạy cả hai).
+Hình vuông kế thừa hình chữ nhật có hàm `datRong` là ví dụ kinh điển ([Bài 32](32-ke-thua.md) đã hẹn). Muốn vuông còn vuông thì `datRong` phải đổi cả cao, và kỳ vọng "cao không đổi" của chữ nhật vỡ; không đổi cao thì vuông hết vuông. **Với `datRong` công khai và yêu cầu vuông luôn có hai cạnh bằng nhau, không có cách viết lớp con nào đúng cả hai** (Ví dụ 2 chạy cả hai).
 
-Cách sửa: **bỏ kế thừa**, dùng interface chung `Hinh` với `dienTich()`; `ChuNhat` và `Vuong` là hai lớp anh em, không có hàm "sửa cạnh" nên không có hợp đồng nào để phá. Bài học: "là một" trong toán không tự thành is-a trong code; câu hỏi đúng là "mọi nơi dùng cha có còn đúng với con không".
+Cách sửa: **bỏ kế thừa**, dùng interface chung `Hinh` với `dienTich()`; `ChuNhat` và `Vuong` là hai lớp anh em, không có hàm "sửa cạnh" nên không có hợp đồng "đổi rộng, cao giữ nguyên" để phá. Bài học: "là một" trong toán không tự thành is-a trong code; câu hỏi đúng là "mọi nơi dùng cha có còn đúng với con không".
 
 ### 5. I: interface nhỏ, mỗi chỗ cần gì thì nhận cái đó
 
-Một interface `MayVanPhong` có `in`, `quet`, `fax` buộc mọi lớp cài đặt phải viết cả ba, kể cả máy chỉ biết in. Tách thành `MayIn` và `MayQuet`: máy in đơn chỉ cài `MayIn`; máy đa năng cài cả hai bằng kế thừa nhiều interface (an toàn ở đây vì interface chỉ có hàm thuần ảo, không có dữ liệu nên không có bài toán kim cương của [Bài 32](32-ke-thua.md)). Hàm `inBienLai(MayIn&)` nhận đúng thứ nó cần (Ví dụ 4).
+Một interface `MayVanPhong` có `in`, `quet`, `fax` buộc mọi lớp cài đặt phải viết cả ba, kể cả máy chỉ biết in. Tách thành `MayIn` và `MayQuet`: máy in đơn chỉ cài `MayIn`; máy đa năng cài cả hai bằng kế thừa nhiều interface.
+
+Kế thừa nhiều interface ở đây không dính bài toán kim cương của [Bài 32](32-ke-thua.md), vì `MayIn` và `MayQuet` **không có cha chung** (mình chạy thử: hai interface cùng kế thừa một interface gốc rồi gộp vào một lớp thì vẫn lỗi `'G' is an ambiguous base of 'C'`, dù gốc không có dữ liệu). Hàm `inBienLai(MayIn&)` nhận đúng thứ nó cần (Ví dụ 3).
 
 ### 6. D: phụ thuộc interface; Dependency Inversion khác Dependency Injection
 
-**Dependency Inversion** (đảo phụ thuộc, **nguyên tắc**): lớp cấp cao (làm việc nghiệp vụ, như `DichVuBaoDong`) không phụ thuộc lớp cấp thấp (như `MayChuThat`); cả hai phụ thuộc một **interface** (`MayChu`), và interface do bên cấp cao định ra. **Dependency Injection** (truyền phụ thuộc vào, **kỹ thuật** của [Bài 35](35-pattern-singleton-factory.md)): thứ cần dùng được đưa vào qua tham số hay hàm tạo, không tự tạo bên trong. Injection là cách thường dùng để **thực hiện** inversion.
+**Dependency Inversion** (đảo phụ thuộc, **nguyên tắc**): bình thường lớp cấp cao (làm việc nghiệp vụ, như `DichVuBaoDong`) phụ thuộc thẳng lớp cấp thấp (như `MayChuThat`), mũi tên đi từ cao xuống thấp. Thêm interface `MayChu` do bên cấp cao định ra: `DichVuBaoDong` chỉ phụ thuộc `MayChu`, còn `MayChuThat` phải cài `MayChu`. Mũi tên phía cấp thấp **đổi chiều** (từ lớp thấp hướng về interface của lớp cao): đó là chữ "đảo".
 
-Lợi ích thấy ngay: kiểm thử. `DichVuBaoDong` nhận `MayChu&`, nên bài kiểm đưa vào `MayChuGia` (đối tượng giả: ghi lại tin nhận, hoặc cố ý báo hỏng) mà không gửi gì thật (Ví dụ 5). Nếu `DichVuBaoDong` tự tạo `MayChuThat` bên trong, không có chỗ nào để thay.
+**Dependency Injection** (truyền phụ thuộc vào, **kỹ thuật** của [Bài 35](35-pattern-singleton-factory.md)): thứ cần dùng được đưa vào qua tham số hay hàm tạo, không tự tạo bên trong. Injection là cách thường dùng để **thực hiện** inversion.
+
+Lợi ích thấy ngay: kiểm thử. `DichVuBaoDong` nhận `MayChu&`, nên bài kiểm đưa vào `MayChuGia` (đối tượng giả: ghi lại tin nhận, hoặc cố ý báo hỏng) mà không gửi gì thật (Ví dụ 4). Nếu `DichVuBaoDong` tự tạo `MayChuThat` bên trong, không có chỗ nào để thay.
 
 ### 7. Composition hơn inheritance, và Rule of 0
 
 [Bài 32](32-ke-thua.md) nói: chỉ kế thừa công khai khi đúng is-a; chỉ muốn dùng lại thì dùng thành viên (has-a). Kế thừa buộc con vào **toàn bộ** giao diện cha (và mọi thay đổi của cha), còn thành viên chỉ lộ ra những hàm bạn chọn và đổi được sau này. `Xe` **có một** `DongCo` thì viết `DongCo dongCo_;` và gọi `dongCo_.no()`, không viết `class Xe : public DongCo`.
 
-Thiết kế bằng thành viên còn cho **Rule of 0** ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)): nếu mọi thành viên tự quản lý mình (`std::string`, `std::vector`, `std::unique_ptr`, hoặc một lớp khác cũng như vậy) thì bạn **không viết** hàm hủy, hàm tạo/gán sao chép hay di chuyển nào, và trình biên dịch sinh đúng cho bạn (Ví dụ 6). Chỉ khi một lớp trực tiếp giữ tài nguyên thô mới cần Rule of 5.
+Thiết kế bằng thành viên còn cho **Rule of 0** ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)): nếu mọi thành viên tự quản lý mình (`std::string`, `std::vector`, `std::unique_ptr`, hoặc một lớp khác cũng như vậy) thì bạn **không viết** hàm hủy, hàm tạo/gán sao chép hay di chuyển nào, và trình biên dịch sinh đúng cho bạn (Ví dụ 5). Rule of 5 chỉ cần khi một lớp trực tiếp giữ tài nguyên thô; ngoại lệ hay gặp là hàm hủy ảo `= default` của lớp cha đa hình ([Bài 33](33-da-hinh-virtual.md)).
 
 ### 8. Interface bằng lớp trừu tượng, template, hay `std::function`?
 
@@ -74,7 +78,7 @@ Ba bài trước đã cho ba cách viết "một chỗ, nhiều cách làm". B�
 | Chọn lúc nào | Lúc chạy | Lúc biên dịch | Lúc chạy |
 | Chứa lẫn nhiều loại trong một dãy | Được | Không (`vector<H>` chỉ một kiểu) | Được, nếu cùng chữ ký |
 | Yêu cầu với kiểu | Phải kế thừa lớp cha, ghi đè đủ hàm thuần ảo | Chỉ cần có đúng các hàm được gọi; lỗi có thể dài | Chỉ cần gọi được với chữ ký đó |
-| Chi phí | Gọi gián tiếp qua bảng hàm ảo | Thường gọi thẳng; mỗi kiểu một bản mã | Gọi gián tiếp; có thể cấp phát heap |
+| Chi phí | Gọi gián tiếp (thường qua bảng hàm ảo) | Thường gọi thẳng; mỗi kiểu một bản mã | Gọi gián tiếp; lúc tạo có thể cấp phát heap |
 | Hợp khi | Nhiều thao tác, nhiều loại, quyết định lúc chạy | Thuật toán chung, kiểu biết lúc viết | Chỉ **một** hành động nhỏ, viết tại chỗ |
 
 ### 9. Đừng thiết kế thừa: KISS và YAGNI
@@ -85,11 +89,12 @@ Ba bài trước đã cho ba cách viết "một chỗ, nhiều cách làm". B�
 
 ### Ví dụ 1 (S): `BaoCaoXau` làm ba việc, rồi tách
 
-**Chủ đề: bảng điểm.** (Từ đây các interface viết bằng `struct` cho gọn: mặc định `public`, [Bài 31](31-lop-dong-goi.md); kế thừa của `struct` cũng mặc định `public`, [Bài 32](32-ke-thua.md).) `BaoCaoXau` có `trungBinh` (1), `in` (2) và `luu` (3) (ghi một dòng vào `kho`, thay cho file). Bản sau tách thành hàm `trungBinh` (4), hàm `inBaoCao` (5) và lớp `KhoLuu` (6).
+**Chủ đề: bảng điểm.** `BaoCaoXau` có `trungBinh` (1), `in` (2) và `luu` (3) (thêm trung bình vào `kho`, một dãy số thay cho file). Bản sau tách thành hàm `trungBinh` (4), hàm `inBaoCao` (5) và lớp `KhoLuu` (6).
+
+(Từ đây các interface viết bằng `struct` cho gọn: mặc định `public`, [Bài 31](31-lop-dong-goi.md); kế thừa của `struct` cũng mặc định `public`, [Bài 32](32-ke-thua.md).)
 
 ```cpp
 #include <iostream>
-#include <string>
 #include <vector>
 
 // Truoc: mot lop lam ba viec (tinh, in, luu)
@@ -102,9 +107,7 @@ public:
         return t / diem_.size();
     }
     void in() const { std::cout << "Trung binh: " << trungBinh() << "\n"; }   // (2)
-    void luu(std::vector<std::string>& kho) const {                  // (3)
-        kho.push_back("TB=" + std::to_string(trungBinh()));
-    }
+    void luu(std::vector<double>& kho) const { kho.push_back(trungBinh()); }   // (3)
 private:
     std::vector<int> diem_;
 };
@@ -118,24 +121,24 @@ double trungBinh(const std::vector<int>& diem) {                     // (4)
 void inBaoCao(double tb) { std::cout << "Trung binh: " << tb << "\n"; }    // (5)
 class KhoLuu {                                                       // (6)
 public:
-    void them(const std::string& dong) { dong_.push_back(dong); }
-    std::size_t soDong() const { return dong_.size(); }
+    void them(double giaTri) { gia_.push_back(giaTri); }
+    std::size_t soGiaTri() const { return gia_.size(); }
 private:
-    std::vector<std::string> dong_;
+    std::vector<double> gia_;
 };
 
 int main() {
     std::vector<int> diem = {7, 8, 9, 10};
-    std::vector<std::string> kho;
+    std::vector<double> kho;
     BaoCaoXau xau(diem);
     xau.in();
     xau.luu(kho);
-    std::cout << "kho (truoc): " << kho.size() << " dong\n";
+    std::cout << "kho (truoc): " << kho.size() << " gia tri\n";
 
     inBaoCao(trungBinh(diem));
     KhoLuu kho2;
-    kho2.them("TB=" + std::to_string(trungBinh(diem)));
-    std::cout << "kho (sau): " << kho2.soDong() << " dong\n";
+    kho2.them(trungBinh(diem));
+    std::cout << "kho (sau): " << kho2.soGiaTri() << " gia tri\n";
     return 0;
 }
 ```
@@ -143,80 +146,24 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | (1), (2), (3) | Bản xấu: một lớp, ba lý do đổi (công thức, cách in, nơi lưu); `in` và `luu` đều gọi `trungBinh` | `xau.diem_`: 7, 8, 9, 10 |
-| `xau.in()`, `xau.luu(kho)` | In `8.5`; `luu` thêm một dòng vào `kho` | `kho`: 1 dòng |
+| `xau.in()`, `xau.luu(kho)` | In `8.5`; `luu` thêm một giá trị vào `kho` | `kho`: 1 giá trị |
 | (4), (5), (6) | Bản sau: tính, in, lưu là ba chỗ riêng; đổi cách in chỉ sửa (5) | không đổi |
-| `kho2.them(...)` | Cùng kết quả: một dòng trong kho | `kho2.dong_`: 1 dòng |
+| `kho2.them(...)` | Cùng kết quả: một giá trị trong kho | `kho2.gia_`: 1 giá trị |
 
 **Kết quả khi chạy:**
 
 ```text
 Trung binh: 8.5
-kho (truoc): 1 dong
+kho (truoc): 1 gia tri
 Trung binh: 8.5
-kho (sau): 1 dong
+kho (sau): 1 gia tri
 ```
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Hai bản **cho cùng kết quả**: S không đổi hành vi, chỉ đổi chỗ phải sửa khi yêu cầu đổi.
 
-### Ví dụ 2 (O): thêm `HinhTamGiac` mà không sửa gì cũ
+### Ví dụ 2 (L, rồi O): hình vuông phá hợp đồng của hình chữ nhật
 
-**Chủ đề đổi sang hình học** (như Bài 33, 35). `tongDienTich` (1) chỉ biết `Hinh`. `HinhTamGiac` (2) là lớp viết thêm; (3) cho nó vào danh sách.
-
-```cpp
-#include <iostream>
-#include <memory>
-#include <vector>
-
-struct Hinh {
-    virtual ~Hinh() = default;
-    virtual double dienTich() const = 0;
-};
-struct HinhChuNhat : Hinh {
-    double r, c;
-    HinhChuNhat(double r_, double c_) : r(r_), c(c_) {}
-    double dienTich() const override { return r * c; }
-};
-
-double tongDienTich(const std::vector<std::unique_ptr<Hinh>>& ds) {   // (1)
-    double tong = 0;
-    for (const auto& h : ds) tong += h->dienTich();
-    return tong;
-}
-
-// --- Them kieu moi: chi viet them lop, KHONG sua Hinh va tongDienTich ---
-struct HinhTamGiac : Hinh {                                            // (2)
-    double day, cao;
-    HinhTamGiac(double d, double c) : day(d), cao(c) {}
-    double dienTich() const override { return day * cao / 2; }
-};
-
-int main() {
-    std::vector<std::unique_ptr<Hinh>> ds;
-    ds.push_back(std::make_unique<HinhChuNhat>(3, 4));
-    std::cout << "tong: " << tongDienTich(ds) << "\n";
-    ds.push_back(std::make_unique<HinhTamGiac>(6, 5));                 // (3)
-    std::cout << "tong: " << tongDienTich(ds) << "\n";
-    return 0;
-}
-```
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| (1) | Duyệt danh sách, gọi `dienTich()` qua `Hinh`; hàm ảo chọn bản của món thật | `ds`: 1 món |
-| (2), (3) | `HinhTamGiac` là mã mới; `Hinh` và `tongDienTich` không đổi dòng nào; 6 x 5 / 2 = 15 | `ds`: 2 món |
-
-**Kết quả khi chạy:**
-
-```text
-tong: 12
-tong: 27
-```
-
-Mình chạy với ASan + UBSan, `-O2` và `-D_GLIBCXX_DEBUG`: sạch, mã thoát 0. "Đóng với sửa đổi" không có nghĩa không bao giờ sửa: nó có nghĩa **loại thay đổi dự đoán được** (thêm loại hình) không đòi sửa phần ổn định.
-
-### Ví dụ 3 (L): hình vuông phá hợp đồng của hình chữ nhật
-
-**Chủ đề: hình học.** Hàm `dungKyVong` (3) viết theo hợp đồng của `ChuNhatSua`: nhớ cao cũ, `datRong(5)`, kỳ vọng diện tích bằng `5 * caoCu` (4). `VuongSua` ghi đè `datRong` để giữ vuông (2). Bản sửa ở dưới: `Hinh`, `ChuNhat`, `Vuong` không kế thừa nhau.
+**Chủ đề: hình học.** Hàm `dungKyVong` (3) viết theo hợp đồng của `ChuNhatSua`: nhớ cao cũ, `datRong(5)`, kỳ vọng diện tích bằng `5 * caoCu` (4). `VuongSua` ghi đè `datRong` để giữ vuông (2). Bản sửa ở dưới: `Hinh`, `ChuNhat`, `Vuong` không kế thừa nhau. Cuối cùng thêm `TamGiac` (6) làm ví dụ cho O: `Hinh` và `tong` không đổi.
 
 ```cpp
 #include <iostream>
@@ -263,6 +210,13 @@ struct Vuong : Hinh {
 };
 int tong(const Hinh& a, const Hinh& b) { return a.dienTich() + b.dienTich(); }   // (5)
 
+// --- Them kieu moi: chi viet them lop, KHONG sua Hinh va tong ---
+struct TamGiac : Hinh {                                              // (6)
+    int day, cao;
+    TamGiac(int d, int c) : day(d), cao(c) {}
+    int dienTich() const override { return day * cao / 2; }
+};
+
 int main() {
     ChuNhatSua cn(3, 4);
     VuongSua v(4);
@@ -270,6 +224,7 @@ int main() {
     std::cout << "vuong:    " << (dungKyVong(v) ? "dung ky vong" : "vo ky vong") << "\n";
     std::cout << "vuong sau do: " << v.rong() << " x " << v.cao() << "\n";
     std::cout << "tong (ban sua): " << tong(ChuNhat(3, 4), Vuong(4)) << "\n";
+    std::cout << "tong (them tam giac): " << tong(TamGiac(6, 5), Vuong(4)) << "\n";
     return 0;
 }
 ```
@@ -278,7 +233,8 @@ int main() {
 |---|---|---|
 | (1), (3), (4) với `cn` | Cao cũ 4; `datRong` (1) chỉ đổi rộng: 5 x 4 = 20, bằng `5 * caoCu` = 20: đúng kỳ vọng | `cn`: 5 x 4 |
 | (2), (3), (4) với `v` | `v` là một `ChuNhatSua` (upcast, [Bài 32](32-ke-thua.md)); cao cũ 4; `datRong(5)` của vuông đổi cả cao: 5 x 5 = 25, khác 5 x 4 | `v`: 5 x 5 |
-| (5) | Bản sửa: `tong` nhận hai `Hinh`; `Vuong` là 4 x 4 = 16, `ChuNhat` 3 x 4 = 12 | không có hàm sửa cạnh nên không có gì để phá |
+| (5) | Bản sửa: `tong` nhận hai `Hinh` (đối tượng tạm, sống tới hết câu lệnh); `Vuong` là 4 x 4 = 16, `ChuNhat` 3 x 4 = 12 | không có hàm sửa cạnh nên không có gì để phá |
+| (6) | `TamGiac` là mã mới: 6 x 5 / 2 = 15, cộng `Vuong` 16 = 31; `Hinh` và `tong` không đổi dòng nào | |
 
 **Kết quả khi chạy:**
 
@@ -287,13 +243,14 @@ chu nhat: dung ky vong
 vuong:    vo ky vong
 vuong sau do: 5 x 5
 tong (ban sua): 28
+tong (them tam giac): 31
 ```
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Chương trình vẫn **biên dịch và chạy êm**: Liskov là lỗi thiết kế, không phải lỗi cú pháp, và trình biên dịch không bắt được. **Thử thay đổi** (đã chạy):
 
 - **Đổi (2) thành `void datRong(int r) override { r_ = r; }`** (không đổi cao). Dòng vuông ra `dung ky vong`, nhưng `vuong sau do` thành `5 x 4`: hợp đồng cha giữ được mà **bất biến "hai cạnh bằng nhau"** của hình vuông thì vỡ. Hai cách viết, đều hỏng một trong hai.
 
-### Ví dụ 4 (I): `MayIn` và `MayQuet` tách riêng
+### Ví dụ 3 (I): `MayIn` và `MayQuet` tách riêng
 
 **Chủ đề đổi sang văn phòng: máy in, máy quét.** `MayIn` (1) và `MayQuet` (2) là hai interface một hàm. `MayInDon` (3) chỉ cài `MayIn`; `MayDaNang` (4) cài cả hai. `inBienLai` (5) chỉ cần `MayIn&`.
 
@@ -347,29 +304,28 @@ luu anh-giay-A4
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đã chạy):
 
-- **Gộp** thành một interface `MayVanPhong` có cả `in` và `quet` thuần ảo, cho `MayInDon` kế thừa nó và chỉ viết `in`. Biên dịch lỗi: `cannot declare variable 'don' to be of abstract type 'MayInDon'`, vì `quet` vẫn thuần ảo. Muốn qua, máy in đơn phải viết một hàm `quet` giả: đó là mùi của interface quá to.
+- **Gộp** thành một interface `MayVanPhong` có cả `in` và `quet` thuần ảo, cho `MayInDon` kế thừa nó và chỉ viết `in`. Biên dịch lỗi: `cannot declare variable 'don' to be of abstract type 'MayInDon'`, vì `quet` vẫn thuần ảo. Muốn qua, máy in đơn phải viết một hàm `quet` giả: đó là dấu hiệu của interface quá to.
 
-### Ví dụ 5 (D): `MayChuThat` và `MayChuGia`, test không gửi gì thật
+### Ví dụ 4 (D): `MayChuThat` và `MayChuGia`, test không gửi gì thật
 
-**Chủ đề đổi sang báo động.** `MayChu` (1) là interface do bên cấp cao (`DichVuBaoDong`) cần. `MayChuThat` (2) in ra "gửi thật"; `MayChuGia` (3) ghi tin nhận vào `daNhan` và có thể giả vờ hỏng. `DichVuBaoDong` giữ `MayChu&` (5), nhận qua hàm tạo (4).
+**Chủ đề đổi sang báo động.** `MayChu` (1) là interface do bên cấp cao (`DichVuBaoDong`) cần. `MayChuThat` (2) in ra "gửi thật"; `MayChuGia` (3) ghi tin nhận vào `daNhan` và có thể giả vờ hỏng. `DichVuBaoDong` (4) là lớp; hàm tạo `explicit DichVuBaoDong(MayChu& mc)` nhận tham chiếu, và nó giữ `MayChu&` (5). Tin là nhiệt độ (số nguyên).
 
 ```cpp
 #include <iostream>
-#include <string>
 #include <vector>
 
 struct MayChu {                                                      // (1)
     virtual ~MayChu() = default;
-    virtual bool gui(const std::string& tin) = 0;
+    virtual bool gui(int doC) = 0;
 };
 struct MayChuThat : MayChu {                                         // (2)
-    bool gui(const std::string& tin) override { std::cout << "[that] gui: " << tin << "\n"; return true; }
+    bool gui(int doC) override { std::cout << "[that] bao nong: " << doC << "\n"; return true; }
 };
 struct MayChuGia : MayChu {                                          // (3)
     bool hong;
-    std::vector<std::string> daNhan;
+    std::vector<int> daNhan;
     explicit MayChuGia(bool h) : hong(h) {}
-    bool gui(const std::string& tin) override { daNhan.push_back(tin); return !hong; }
+    bool gui(int doC) override { daNhan.push_back(doC); return !hong; }
 };
 
 class DichVuBaoDong {                                                // (4)
@@ -377,7 +333,7 @@ public:
     explicit DichVuBaoDong(MayChu& mc) : mc_(mc) {}
     void baoNhiet(int doC) {
         if (doC <= 40) return;
-        if (!mc_.gui("nong: " + std::to_string(doC))) ++soLoi_;
+        if (!mc_.gui(doC)) ++soLoi_;
     }
     int soLoi() const { return soLoi_; }
 private:
@@ -409,22 +365,22 @@ int main() {
 | (1), (2), (3) | Một interface, hai cài đặt: bản thật in ra; bản giả ghi vào `daNhan` | |
 | (4), (5) | `DichVuBaoDong` chỉ biết `MayChu`; nó giữ **tham chiếu** tới món do người ngoài tạo | `dvThat.mc_` -> `that` |
 | `dvThat.baoNhiet(45)` | 45 > 40: gọi `gui` của món thật, in một dòng | |
-| (6), `dv1` | Gia tốt: 30 không gửi (không quá 40); 45 gửi: `daNhan` có 1 tin, không lỗi | `tot.daNhan`: 1 tin |
-| `dv2` | Gia hỏng: `gui` trả `false`, `soLoi_` lên 1; tin vẫn được ghi | `hong.daNhan`: 1 tin |
+| (6), `dv1` | Giả tốt: 30 không gửi (không quá 40); 45 gửi: `daNhan` có 1 tin, không lỗi | `tot.daNhan`: 1 tin |
+| `dv2` | Giả hỏng: `gui` trả `false`, `soLoi_` lên 1; tin vẫn được ghi | `hong.daNhan`: 1 tin |
 
 **Kết quả khi chạy:**
 
 ```text
-[that] gui: nong: 45
+[that] bao nong: 45
 gia tot: nhan 1 tin, loi 0
 gia hong: nhan 1 tin, loi 1
 ```
 
-Mình chạy với ASan + UBSan: sạch, mã thoát 0. Hai dòng cuối là một bài kiểm thu nhỏ **không cần mạng**, và còn thử được trường hợp lỗi mà máy chủ thật khó tái hiện. Chú ý `DichVuBaoDong` không sở hữu máy chủ (giữ tham chiếu): người tạo phải để `MayChu` sống lâu hơn dịch vụ, cùng bẫy vòng đời ở [Bài 36](36-pattern-observer-strategy.md).
+Mình chạy với ASan + UBSan: sạch, mã thoát 0. Hai dòng cuối là một bài kiểm thử nhỏ **không cần mạng**, và còn thử được trường hợp lỗi mà máy chủ thật khó tái hiện. Chú ý `DichVuBaoDong` không sở hữu máy chủ (giữ tham chiếu): người tạo phải để `MayChu` sống lâu hơn dịch vụ, cùng bẫy vòng đời ở [Bài 36](36-pattern-observer-strategy.md).
 
-### Ví dụ 6 (composition và Rule of 0): `Xe` có `DongCo`
+### Ví dụ 5 (composition và Rule of 0): `Xe` có `DongCo`
 
-**Chủ đề đổi sang xe** (như Bài 32). `Xe` giữ `ten_`, `dongCo_`, `nhatKy_` làm thành viên (4) và **không viết hàm đặc biệt nào** (5). `Xe b = a;` (6) sao chép, `std::move(a)` (7) di chuyển.
+**Chủ đề đổi sang xe** (như Bài 32). `Xe` giữ `ten_`, `dongCo_`, `nhatKy_` làm thành viên (4) và **không viết hàm đặc biệt nào** (5), nên không có hàm hủy hay hàm sao chép/di chuyển do ta viết. `dongCo_{congSuat}` (2) khởi tạo `DongCo` bằng ngoặc nhọn. `Xe b = a;` (6) sao chép, `std::move(a)` (7) di chuyển.
 
 ```cpp
 #include <iostream>
@@ -465,8 +421,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (1), (4), (5) | `Xe` chứa ba thành viên, không có hàm hủy hay hàm sao chép/di chuyển nào do ta viết | |
-| (2), (3) | `Xe` **dùng** `DongCo` qua thành viên; bên ngoài chỉ thấy `chay()`, không thấy `no()` | `a`: `ten_`, `dongCo_`, `nhatKy_` ["chay"] sau lần chạy đầu |
+| (2), (3) | Hàm tạo nhận `string` theo giá trị rồi `std::move` vào `ten_` để khỏi chép thêm; `Xe` **dùng** `DongCo` qua thành viên; bên ngoài chỉ thấy `chay()`, không thấy `no()` | `a`: `ten_`, `dongCo_`, `nhatKy_` ["chay"] sau lần chạy đầu |
 | (6) | `b` là bản sao: mỗi thành viên tự sao chép mình (chuỗi, động cơ, vector), nên `b.nhatKy_` cũng có 1 mục | `b` độc lập với `a` |
 | `b.chay()` | `b.nhatKy_` thành 2 mục; `a` không đổi | |
 | (7) | `c` lấy ruột của `a` bằng hàm di chuyển do trình biên dịch sinh; `c.nhatKy_` có 1 mục (của `a`) | `a`: không dùng nữa ([Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)) |
@@ -498,7 +453,7 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
     S: một lớp một lý do để đổi (tách `BaoCao` thành tính, in, lưu). O: thêm hành vi bằng thêm mã, không sửa mã cũ (thêm `HinhTamGiac` mà `tongDienTich` không đổi; registry factory, Strategy). L: lớp con dùng được ở mọi chỗ lớp cha dùng mà không phá hợp đồng (hình vuông không thay được hình chữ nhật có `datRong`). I: nhiều interface nhỏ (`MayIn`, `MayQuet` thay cho `MayVanPhong`). D: lớp cấp cao phụ thuộc interface (`DichVuBaoDong` nhận `MayChu&`, test bằng `MayChuGia`). Thêm: đây là nguyên tắc, áp cứng nhắc thì thành thiết kế thừa.
 
 ??? question "Liskov là gì? Cho ví dụ vi phạm."
-    Ở đâu dùng đối tượng lớp cha thì thay bằng lớp con vẫn đúng: lớp con giữ hợp đồng của cha (điều kiện người dùng được trông đợi) và các bất biến. Ví dụ vi phạm: `HinhVuong : HinhChuNhat` có `datRong`; hàm viết cho chữ nhật kỳ vọng "đổi rộng thì cao giữ nguyên", vuông phải đổi cả cao nên vỡ (mình chạy). Cách sửa: bỏ kế thừa, dùng interface `Hinh` chung, hoặc cho lớp bất biến không có hàm sửa cạnh.
+    Ở đâu dùng đối tượng lớp cha thì thay bằng lớp con vẫn đúng: lớp con giữ hợp đồng của cha (điều kiện người dùng được trông đợi) và các bất biến. Ví dụ vi phạm: `VuongSua` kế thừa `ChuNhatSua` có `datRong` (Bài 32 gọi là `HinhVuong`, `HinhChuNhat`); hàm viết cho chữ nhật kỳ vọng "đổi rộng thì cao giữ nguyên", vuông phải đổi cả cao nên vỡ (mình chạy). Cách sửa: bỏ kế thừa, dùng interface `Hinh` chung, hoặc cho lớp bất biến không có hàm sửa cạnh.
 
 ??? question "Dependency Inversion khác Dependency Injection thế nào?"
     Inversion là **nguyên tắc**: lớp cấp cao và cấp thấp cùng phụ thuộc một interface, interface do bên cấp cao định ra. Injection là **kỹ thuật**: đưa thứ cần dùng vào qua hàm tạo hay tham số, không tự tạo bên trong. Injection là cách phổ biến để thực hiện inversion, và cho phép thay bằng đối tượng giả khi test; nhưng có thể inject một lớp cụ thể (vẫn là Injection mà không có Inversion).
@@ -521,13 +476,14 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
     - **Factory?** Hàm/registry trả `unique_ptr<Hinh>`, che lớp cụ thể: [Bài 35](35-pattern-singleton-factory.md).
     - **Observer?** Chủ đề báo cho danh sách qua interface hoặc callback; coi chừng vòng đời: [Bài 36](36-pattern-observer-strategy.md).
     - **Strategy?** Tách cách làm thay được: giao diện, `std::function` hoặc template: [Bài 36](36-pattern-observer-strategy.md).
-    - **SOLID?** Năm nguyên tắc, bài này.
+    - **Gọi hàm ảo trong hàm tạo/hàm hủy?** Không đa hình ở đó, chạy bản của lớp đang dựng/hủy: [Bài 33](33-da-hinh-virtual.md).
+    - **Rule of 3/5/0?** Tự quản lý tài nguyên thì quyết định cả 3/5 hàm; thành viên tự quản lý thì Rule of 0: [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md).
     - **Khi nào dùng pattern?** Khi vấn đề có thật và pattern làm code đơn giản hơn; không dùng để "cho đủ bộ": [Bài 35](35-pattern-singleton-factory.md), mục 9 bài này.
 
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Kế thừa chỉ để dùng lại hàm, hoặc tin 'toán nói vuông là chữ nhật'"
-    Kế thừa công khai nói "Con thay được Cha ở mọi chỗ". Hình vuông kế thừa chữ nhật có `datRong` phá hợp đồng mà trình biên dịch không báo gì (Ví dụ 3). Muốn dùng lại: thành viên (Ví dụ 6); muốn thay thế: interface chung.
+    Kế thừa công khai nói "Con thay được Cha ở mọi chỗ". Hình vuông kế thừa chữ nhật có `datRong` phá hợp đồng mà trình biên dịch không báo gì (Ví dụ 2). Muốn dùng lại: thành viên (Ví dụ 5); muốn thay thế: interface chung.
 
 !!! warning "Lỗi 2: Áp SOLID khi chưa có lý do (thiết kế thừa)"
     Mỗi lớp một interface, mỗi hàm một lớp, trong khi chỉ có một cài đặt và chưa ai cần thay: code dài, khó theo dõi, không lợi gì. Viết đơn giản trước, tách khi sự thay đổi hoặc nhu cầu test xuất hiện (mục 9).
@@ -537,39 +493,39 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
 <div class="quiz" data-bai="37" markdown>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
-**Câu 1.** Đọc đoạn sau. Gọi `f` với một `Vuong`, chuyện gì đúng?
+**Câu 1.** Đọc đoạn sau (hai lớp như ở Ví dụ 2). Gọi `f` với một `VuongSua`, chuyện gì đúng?
 
 ```text
-class ChuNhat { public: virtual void datRong(int r) { r_ = r; } ... };
-class Vuong : public ChuNhat { public: void datRong(int r) override { r_ = r; c_ = r; } };
-void f(ChuNhat& h) {
+class ChuNhatSua { public: virtual void datRong(int r) { r_ = r; } ... };
+class VuongSua : public ChuNhatSua { public: void datRong(int r) override { r_ = r; c_ = r; } };
+void f(ChuNhatSua& h) {
     int caoCu = h.cao();
     h.datRong(5);          // f trông đợi: cao() vẫn bằng caoCu
 }
 ```
 
-- `f` vẫn đúng, vì `Vuong` ghi đè bằng `override` nên khớp hợp đồng của lớp cha
-- Lỗi biên dịch, vì `Vuong` ghi đè một hàm mà làm đổi hai thành viên cùng lúc
-- Trông đợi của `f` bị vỡ, vì `Vuong` đổi cả cao khi đặt rộng
-- `f` vẫn đúng, vì tham chiếu `ChuNhat&` chỉ cho `datRong` chạm phần của lớp cha
+- `f` vẫn đúng, vì `VuongSua` ghi đè bằng `override` nên khớp hợp đồng của lớp cha
+- Lỗi biên dịch, vì `VuongSua` ghi đè một hàm mà làm đổi hai thành viên cùng lúc
+- Trông đợi của `f` bị vỡ, vì `VuongSua` đổi cả cao khi đặt rộng
+- `f` vẫn đúng, vì tham chiếu `ChuNhatSua&` chỉ cho `datRong` chạm phần của lớp cha
 
-<p class="giai-thich" markdown>`Vuong` đổi `c_` cùng lúc với `r_`, nên sau `datRong(5)` thì `cao()` không còn bằng `caoCu`: trông đợi của hàm `f` viết cho chữ nhật bị phá, dù chương trình biên dịch và chạy bình thường (mình chạy ở Ví dụ 3). `override` chỉ bảo đảm chữ ký khớp, không bảo đảm hợp đồng được giữ. Không có quy tắc nào của C++ cấm ghi đè đổi nhiều thành viên, nên không có lỗi biên dịch. Và `Vuong&` bên trong vẫn là món `Vuong`, nên hàm ảo chạy bản của vuông chứ không chỉ "phần của cha".</p>
+<p class="giai-thich" markdown>`VuongSua` đổi `c_` cùng lúc với `r_`, nên sau `datRong(5)` thì `cao()` không còn bằng `caoCu`: trông đợi của hàm `f` viết cho chữ nhật bị phá, dù chương trình biên dịch và chạy bình thường (mình chạy ở Ví dụ 2). `override` chỉ bảo đảm chữ ký khớp, không bảo đảm hợp đồng được giữ. Không có quy tắc nào của C++ cấm ghi đè đổi nhiều thành viên, nên không có lỗi biên dịch. Và tham chiếu `ChuNhatSua&` vẫn trỏ tới một món `VuongSua`, nên hàm ảo chạy bản của vuông chứ không chỉ "phần của cha".</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
-**Câu 2.** Muốn kiểm `DichVuBaoDong` mà không gửi tin thật, thiết kế nào làm được?
+<div class="cau-hoi" data-dap-an="2" markdown>
+**Câu 2.** `Xe` chỉ muốn dùng lại hàm `no()` của `DongCo`, và không phải một loại động cơ. Nhận xét nào đúng?
 
 ```text
-A:  class DichVuBaoDong { MayChuThat mc_; ... };
-B:  class DichVuBaoDong { MayChu& mc_; explicit DichVuBaoDong(MayChu& mc) : mc_(mc) {} ... };
+A:  class Xe : public DongCo { ... };    // gọi no() trực tiếp
+B:  class Xe { DongCo dongCo_; ... };    // gọi dongCo_.no() bên trong
 ```
 
-- Chỉ thiết kế B: đưa `MayChuGia` vào qua hàm tạo, vì dịch vụ chỉ biết interface
-- Chỉ thiết kế A: vì `MayChuThat` là lớp cụ thể nên kiểm được kỹ hơn đối tượng giả
-- Cả hai làm được, vì `MayChuGia` kế thừa `MayChuThat` thì đặt vào `mc_` được
-- Không thiết kế nào làm được, vì hàm kiểm thử luôn phải gửi tin thật mới đo được
+- Nên chọn A: kế thừa cho phép đổi động cơ lúc chạy dễ hơn thành viên
+- Nên chọn B: ở A, `Xe` nhận được ở mọi chỗ cần `DongCo` và lộ hết hàm của nó
+- Hai cách như nhau, vì cả hai đều chứa một phần `DongCo` trong đối tượng `Xe`
+- Nên chọn A: kế thừa là cách duy nhất để `Xe` gọi được hàm `public` của `DongCo`
 
-<p class="giai-thich" markdown>Ở thiết kế B dịch vụ chỉ phụ thuộc interface `MayChu` và nhận món cần dùng từ ngoài, nên bài kiểm đưa `MayChuGia` vào mà không gửi gì thật (Ví dụ 5). Ở thiết kế A, `mc_` là một `MayChuThat` nằm sẵn trong dịch vụ, không có chỗ để thay; lớp cụ thể không làm bài kiểm "kỹ hơn", chỉ gắn chặt hơn vào thứ thật. `MayChuGia` kế thừa `MayChu` chứ không kế thừa `MayChuThat`, nên cũng không đặt vào một `MayChuThat` được. Và việc kiểm không bắt buộc gửi thật: đó chính là lý do có đối tượng giả.</p>
+<p class="giai-thich" markdown>Thiết kế A nói "xe là một động cơ": hàm nhận `const DongCo&` nhận cả `Xe`, và mọi hàm `public` của động cơ lộ ra ngoài `Xe` ([Bài 32](32-ke-thua.md)). Thành viên (B) chỉ lộ những gì `Xe` chọn và đổi được sau này. Kế thừa không giúp đổi động cơ lúc chạy, và thành viên cũng gọi được hàm `public` của `DongCo`. Hai cách giống nhau ở chỗ cùng chứa một phần động cơ trong bộ nhớ, nhưng khác ở quan hệ kiểu (is-a và has-a), nên không "như nhau".</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -586,13 +542,13 @@ Xe b = a;
 
 - Lỗi biên dịch, vì `Xe` chưa có hàm tạo sao chép tự viết
 - Chạy được, nhưng `b.nhatKy_` dùng chung vùng nhớ với `a.nhatKy_`
-- Chạy được, nhưng `b.nhatKy_` rỗng vì trình biên dịch chỉ chép `ten_`
+- Chạy được, nhưng `ten_` của `b` rỗng vì `string` không chép ngầm
 - Chạy được, `b` có bản sao riêng của `ten_` và `nhatKy_` (3 mục)
 
-<p class="giai-thich" markdown>Hàm tạo sao chép do trình biên dịch sinh ra chép **từng thành viên** bằng hàm sao chép của chính thành viên đó; `std::string` và `std::vector` tự sao chép sâu, nên `b` có bản riêng (Rule of 0, Ví dụ 6). Không phải viết tay: lớp không giữ tài nguyên thô thì hàm sinh sẵn đủ dùng. Dùng chung vùng nhớ chỉ xảy ra khi thành viên là con trỏ thô bị chép nông ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), không phải `vector`. Và chép từng thành viên thì không có thành viên nào bị bỏ rỗng.</p>
+<p class="giai-thich" markdown>Hàm tạo sao chép do trình biên dịch sinh ra chép **từng thành viên** bằng hàm sao chép của chính thành viên đó; `std::string` và `std::vector` tự sao chép sâu, nên `b` có bản riêng (Rule of 0, Ví dụ 5). Không phải viết tay: lớp không giữ tài nguyên thô thì hàm sinh sẵn đủ dùng. Dùng chung vùng nhớ chỉ xảy ra khi thành viên là con trỏ thô bị chép nông ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), không phải `vector`. Và `std::string` được chép bình thường khi lớp chứa nó được chép, nên `ten_` không rỗng.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="2" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 4.** Đọc đoạn sau. Chuyện gì xảy ra khi biên dịch `main`?
 
 ```text
@@ -609,12 +565,12 @@ public:
 int main() { MayInDon don; }
 ```
 
-- Biên dịch được, và gọi `don.quet()` sau này trả chuỗi rỗng
-- Lỗi biên dịch: `MayInDon` vẫn trừu tượng vì chưa viết `quet`, nên không tạo `don` được
-- Biên dịch được, và gọi `don.quet()` sau này là hành vi không xác định
-- Biên dịch được, và gọi `don.quet()` sau này ném ngoại lệ chưa cài
+- Lỗi biên dịch: `MayInDon` vẫn trừu tượng vì chưa viết `quet`
+- Lỗi biên dịch: `in` thiếu chữ `virtual` nên `override` không khớp
+- Lỗi liên kết: `quet` được khai báo mà chưa có định nghĩa nào
+- Biên dịch được, và `don.quet()` sau này trả về chuỗi rỗng
 
-<p class="giai-thich" markdown>Lớp con chưa viết hết hàm thuần ảo thì vẫn là lớp trừu tượng và không tạo được đối tượng, nên lỗi hiện ngay lúc biên dịch (mình chạy: `cannot declare variable 'don' to be of abstract type`). Không có bản `quet` mặc định nào trả rỗng hay ném ngoại lệ, và cũng không có chuyện gọi hàm "chưa cài" lúc chạy vì chương trình không biên dịch được. Đây chính là lý do Interface Segregation: tách `MayIn` và `MayQuet` để máy in đơn không bị ép viết hàm nó không có.</p>
+<p class="giai-thich" markdown>Lớp con chưa viết hết hàm thuần ảo thì vẫn là lớp trừu tượng và không tạo được đối tượng, nên lỗi hiện ngay lúc biên dịch (mình chạy: `cannot declare variable 'don' to be of abstract type`). `override` ở `in` khớp chữ ký của hàm ảo cha, nên không có lỗi ở đó. Chương trình không qua được biên dịch, nên cũng không tới bước liên kết, và không có bản `quet` mặc định nào trả chuỗi rỗng. Đây chính là lý do Interface Segregation: tách `MayIn` và `MayQuet` để máy in đơn không bị ép viết hàm nó không có.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -625,7 +581,7 @@ int main() { MayInDon don; }
 - Injection là nguyên tắc thiết kế, còn Inversion là cách viết hàm tạo nhận tham số
 - Inversion bắt buộc dùng thư viện tiêm phụ thuộc, còn Injection thì viết tay được
 
-<p class="giai-thich" markdown>Inversion nói về **hướng phụ thuộc**: cấp cao và cấp thấp cùng dựa vào một interface. Injection nói về **cách đưa** thứ cần dùng vào đối tượng (tham số, hàm tạo), và thường dùng để đạt được Inversion. Hai thứ khác nhau: có thể inject một lớp cụ thể mà chẳng có interface nào. Không bên nào đòi thư viện: ở Ví dụ 5 chỉ dùng hàm tạo bình thường.</p>
+<p class="giai-thich" markdown>Inversion nói về **hướng phụ thuộc**: cấp cao và cấp thấp cùng dựa vào một interface. Injection nói về **cách đưa** thứ cần dùng vào đối tượng (tham số, hàm tạo), và thường dùng để đạt được Inversion. Hai thứ khác nhau: có thể inject một lớp cụ thể mà chẳng có interface nào. Không bên nào đòi thư viện: ở Ví dụ 4 chỉ dùng hàm tạo bình thường.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -646,7 +602,7 @@ fmt.Println(x.CongSuat, y.CongSuat)
 - `90 1`, vì `y := x` sao chép cả struct kể cả phần nhúng
 - `1 1`, vì phần nhúng `DongCo` được dùng chung giữa `x` và `y`
 - Lỗi biên dịch, vì `y := x` không sao chép được struct có phần nhúng
-- `90 90`, vì gán vào `y.CongSuat` bị bỏ qua do trường được nhúng
+- `90 0`, vì `y := x` chỉ chép `Ten`, phần nhúng `DongCo` về giá trị mặc định
 
 <p class="giai-thich" markdown>Struct Go truyền và gán theo giá trị: `y := x` chép toàn bộ, kể cả phần nhúng `DongCo`, nên đổi `y.CongSuat` không đụng `x` (mình chạy: `90 1`). Phần nhúng không phải con trỏ, nên không có chuyện dùng chung. Struct có phần nhúng sao chép bình thường. Và `y.CongSuat` là trường được nâng lên, gán vào nó có hiệu lực trên `y`.</p>
 </div>
@@ -655,8 +611,8 @@ fmt.Println(x.CongSuat, y.CongSuat)
 
 ## 🔑 Tóm tắt
 
-1. **SOLID** là năm nguyên tắc, không phải luật: S một lý do để đổi (tách tính, in, lưu); O thêm mã chứ không sửa mã cũ (`HinhTamGiac`, registry Bài 35, Strategy Bài 36); L lớp con giữ hợp đồng của cha (vuông/chữ nhật có `datRong` vỡ, mình chạy; sửa bằng interface `Hinh` chung); I interface nhỏ (`MayIn`, `MayQuet`); D phụ thuộc interface.
-2. **Dependency Inversion** là nguyên tắc (cấp cao và cấp thấp cùng dựa interface do cấp cao định); **Dependency Injection** là kỹ thuật đưa phụ thuộc vào qua hàm tạo/tham số, nhờ đó test bằng `MayChuGia`.
-3. **Composition hơn inheritance**: `Xe` có `DongCo` làm thành viên; kế thừa công khai chỉ khi đúng is-a theo Liskov. **Rule of 0**: thành viên tự quản lý (`string`, `vector`, `unique_ptr`) thì không viết hàm đặc biệt (thêm `unique_ptr` thì lớp chỉ di chuyển được, mình chạy).
-4. Chọn lớp trừu tượng (nhiều loại, nhiều thao tác, lúc chạy), template (kiểu biết lúc viết) hay `std::function` (một hành động nhỏ). KISS/YAGNI: viết đơn giản, tách khi sự thay đổi có thật; SOLID dùng cứng nhắc là thiết kế thừa.
-5. Go không có kế thừa nên mặc định là composition (embedding, sao chép theo giá trị) và interface nhỏ định nghĩa ở nơi dùng ("accept interfaces, return structs", tục lệ); interface ngầm định làm I và D rất rẻ. Câu hỏi phỏng vấn OOP: danh sách một dòng mỗi câu, liên kết Bài 31–36.
+1. **SOLID** là năm nguyên tắc, không phải luật: S một lý do để đổi; O thêm mã chứ không sửa mã cũ; L lớp con giữ hợp đồng của cha (vuông/chữ nhật có `datRong` vỡ, mình chạy; sửa bằng interface `Hinh` chung); I interface nhỏ; D phụ thuộc interface.
+2. **Dependency Inversion** là nguyên tắc (cấp cao và cấp thấp cùng dựa vào interface do cấp cao định, nên mũi tên phụ thuộc phía cấp thấp đổi chiều); **Dependency Injection** là kỹ thuật đưa phụ thuộc vào, nhờ đó test bằng `MayChuGia`.
+3. **Composition hơn inheritance** (`Xe` có `DongCo`); kế thừa công khai chỉ khi đúng is-a. **Rule of 0**: thành viên tự quản lý thì không viết hàm đặc biệt (thêm `unique_ptr` thì lớp chỉ di chuyển được, mình chạy).
+4. Chọn lớp trừu tượng (nhiều loại, nhiều thao tác), template (kiểu biết lúc viết) hay `std::function` (một hành động nhỏ); KISS/YAGNI: tách khi thay đổi có thật, SOLID cứng nhắc là thiết kế thừa.
+5. Go không có kế thừa nên mặc định là composition và interface nhỏ định nghĩa ở nơi dùng ("accept interfaces, return structs", tục lệ); phỏng vấn OOP: danh sách một dòng mỗi câu, liên kết Bài 31–36.
