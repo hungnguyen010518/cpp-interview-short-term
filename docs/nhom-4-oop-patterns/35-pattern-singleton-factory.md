@@ -6,13 +6,13 @@
     - Chỉ ra bằng chương trình chạy thật vì sao Singleton bị chê (phụ thuộc ngầm, khó test, thứ tự hủy), và dùng **truyền phụ thuộc vào** (dependency injection) thay thế.
     - Viết **Simple Factory** trả `std::unique_ptr<Hinh>`, hiểu đó là chuyển sở hữu cho người gọi, làm "đăng ký kiểu mới không sửa hàm factory" bằng `map` + `std::function`; nhận ra Factory Method, Abstract Factory, Builder; so với Go (`sync.Once`, `NewX`, functional options, đã chạy Go 1.27.1).
 
-**Bạn cần biết trước:** [Bài 33](33-da-hinh-virtual.md) (`Hinh`, hàm ảo, `vector<unique_ptr<Hinh>>`), [Bài 31](31-lop-dong-goi.md) (hàm tạo `private`, thành viên `static`, `this`), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (`unique_ptr`, `make_unique`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến `static` cục bộ), [Bài 24](../nhom-3-da-luong/24-thread-co-ban.md) và [Bài 25](../nhom-3-da-luong/25-data-race-mutex.md) (luồng, data race, `mutex`, `lock_guard`), [Bài 18](../nhom-2-stl-thuat-toan/18-map-set-unordered.md) (`map`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `std::function`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`).
+**Bạn cần biết trước:** [Bài 33](33-da-hinh-virtual.md) (`Hinh`, hàm ảo, `vector<unique_ptr<Hinh>>`), [Bài 31](31-lop-dong-goi.md) (hàm tạo `private`, thành viên `static`, `this`), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (`unique_ptr`, `make_unique`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến `static` cục bộ), [Bài 24](../nhom-3-da-luong/24-thread-co-ban.md), [Bài 25](../nhom-3-da-luong/25-data-race-mutex.md) và [Bài 28](../nhom-3-da-luong/28-atomic.md) (luồng, data race, `mutex`, `lock_guard`, `std::atomic`), [Bài 18](../nhom-2-stl-thuat-toan/18-map-set-unordered.md) (`map`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `std::function`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`).
 
 ## 🧠 Câu chuyện mở đầu
 
 Hai thợ mộc nói với nhau "chỗ này làm mộng đuôi én", và cả hai hiểu ngay mà không phải vẽ lại cách ghép. **Design pattern (mẫu thiết kế)** cũng vậy: một **cái tên** cho một cách tổ chức code đã được dùng nhiều lần cho một vấn đề thiết kế hay gặp. Điều có giá trị nhất là **từ vựng chung**: nói "chỗ này là factory", đồng nghiệp biết bạn định làm gì.
 
-Bài này kể hai mẫu, và đều gắn với xưởng đồ chơi. **Singleton** là "bản vẽ chỉ cho làm đúng **một** món, treo ở bảng treo tường" ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)): ví dụ một cuốn sổ ghi chép chung của cả xưởng. **Factory** là "quầy nhận đơn": khách nói tên loại, quầy làm ra món và đưa lại. Từ phần Factory, ví dụ dùng lại `Hinh` của [Bài 33](33-da-hinh-virtual.md) (tính diện tích cho gọn); mình sẽ nói rõ lúc chuyển.
+Bài này kể hai mẫu, và đều gắn với xưởng đồ chơi. **Singleton** là một cuốn sổ chung đóng đinh trên bảng treo tường ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)): cả xưởng chỉ có **một** cuốn, ai cũng lấy được. **Factory** là "quầy nhận đơn": khách nói tên loại, quầy làm ra món và đưa lại. Từ phần Factory, ví dụ dùng lại `Hinh` của [Bài 33](33-da-hinh-virtual.md) (tính diện tích cho gọn); mình sẽ nói rõ lúc chuyển.
 
 !!! info "Chỗ nào ví von không còn đúng?"
     Bảng treo tường thì **ai trong xưởng cũng thấy và sửa được**: chính điều này làm Singleton bị chê (mục 3). Quầy nhận đơn đời thường chỉ đưa món, còn quầy của C++ đưa món **kèm quyền sở hữu** (`unique_ptr`): người nhận phải lo bỏ nó đi, và `unique_ptr` làm việc đó tự động.
@@ -21,13 +21,17 @@ Bài này kể hai mẫu, và đều gắn với xưởng đồ chơi. **Singlet
 
 ### 1. Design pattern là gì, và đừng lạm dụng
 
-Một pattern gồm: một vấn đề hay gặp, một cách giải đã được kiểm chứng, và một cái tên. Cuốn sách kinh điển về chủ đề này (1994) liệt kê 23 mẫu; bài chỉ dạy những mẫu hay bị hỏi. Pattern là **từ vựng và gợi ý**, không phải luật. Cảnh báo chính là **over-engineering** (thiết kế quá tay): thêm lớp, interface, factory cho việc mà một hàm thường là đủ. Chỉ dùng khi code đã có vấn đề nó giải; có pattern còn biến mất khi ngôn ngữ có sẵn công cụ, như lambda (Bài 36 sẽ gặp lại).
+Một pattern gồm: một vấn đề hay gặp, một cách giải đã được kiểm chứng, và một cái tên. Cuốn sách kinh điển về chủ đề này (1994) liệt kê 23 mẫu; bài chỉ dạy những mẫu hay bị hỏi. Pattern là **từ vựng và gợi ý**, không phải luật.
+
+Cảnh báo chính là **over-engineering** (thiết kế quá tay): thêm lớp, interface, factory cho việc mà một hàm thường là đủ. Chỉ dùng pattern khi code đã có vấn đề nó giải.
 
 ### 2. Singleton: một thể hiện duy nhất, truy cập toàn cục
 
-Mục tiêu có hai vế: cả chương trình chỉ có **một** đối tượng của lớp đó, và ở đâu cũng lấy được nó. Cách viết gọn nhất trong C++ là một hàm `static` có **biến `static` cục bộ** ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md): sinh ra ở lần chạy qua khai báo đầu tiên, chết lúc chương trình kết thúc): `static SoGhi& lay() { static SoGhi so; return so; }`. Kiểu viết này quen gọi là **Meyers singleton**. Ví dụ 1 chạy thật.
+Mục tiêu có hai vế: cả chương trình chỉ có **một** đối tượng của lớp đó, và ở đâu cũng lấy được nó. Cách viết gọn nhất trong C++ là một hàm `static` có **biến `static` cục bộ** ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md): sinh ra ở lần chạy qua khai báo đầu tiên, chết lúc chương trình kết thúc).
 
-Muốn "chỉ một" thật sự thì cần ba mảnh ghép. Hàm tạo để `private` (bên ngoài không tạo thêm được). Hàm sao chép và phép gán sao chép `= delete` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), nếu không `SoGhi a = SoGhi::lay();` vẫn chép ra bản thứ hai (mình đã chạy, Ví dụ 1, Thử thay đổi). Và một hàm `static` như `lay()` để lấy đối tượng, trả **tham chiếu** chứ không trả bản sao.
+Cách viết là `static SoGhi& lay() { static SoGhi so; return so; }`, quen gọi là **Meyers singleton**. Ví dụ 1 chạy thật.
+
+Muốn "chỉ một" thật sự thì cần ba mảnh ghép. Hàm tạo để `private` (bên ngoài không tạo thêm được). Hàm sao chép và phép gán sao chép `= delete` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), nếu không, với lớp chép được như `Cau` (không có mutex), `Cau a = Cau::lay();` vẫn chép ra bản thứ hai (mình đã chạy, Ví dụ 1, Thử thay đổi). Và một hàm `static` như `lay()` để lấy đối tượng, trả **tham chiếu** chứ không trả bản sao.
 
 **Vì sao an toàn luồng.** Câu hỏi hay gặp: nếu nhiều luồng ([Bài 24](../nhom-3-da-luong/24-thread-co-ban.md)) cùng gọi `lay()` lần đầu cùng lúc, hàm tạo có chạy nhiều lần không? Từ **C++11**, chuẩn quy định không: nếu một luồng đang khởi tạo biến `static` cục bộ thì luồng đến sau **chờ** tới khi nó xong. Cơ chế này không chính thức hay gọi là **"magic statics"**; chuẩn trước C++11 chưa có khái niệm luồng nên không hứa gì.
 
@@ -35,19 +39,21 @@ Hai giới hạn cần nhớ. Một: chỉ **việc khởi tạo** được bả
 
 ### 3. Vì sao Singleton bị chê
 
-Singleton là biến toàn cục mặc áo đẹp, nên mang tật của biến toàn cục. Ba điều dưới đây mình đã chạy thật:
+Singleton là biến toàn cục mặc áo đẹp, nên mang tật của biến toàn cục. Hai trong ba điều dưới đây mình đã chạy thật (khó test, thứ tự hủy):
 
 - **Phụ thuộc ngầm, trạng thái toàn cục ẩn**: hàm `tinhTien1(int gia)` dùng Singleton bên trong, nhưng chữ ký không hề cho thấy nó đọc cấu hình thuế. Ai sửa trạng thái ở đâu cũng ảnh hưởng chỗ khác.
 - **Khó test**: các bài kiểm chạy trong cùng một chương trình dùng chung một Singleton, nên bài này để lại trạng thái cho bài sau. Ví dụ 2 cho thấy kết quả sai vì thứ tự chạy.
 - **Thứ tự hủy**: các Singleton bị hủy lúc kết thúc chương trình, theo thứ tự **ngược** với thứ tự tạo xong. Nếu hàm hủy của một cái dùng một cái đã bị hủy trước đó, đó là hành vi không xác định (Ví dụ 3, ASan báo lỗi thật).
 
-Vì thế nhiều người coi lạm dụng Singleton là **anti-pattern** (cách làm hay gây hại). Với thứ thật sự duy nhất, gần như chỉ ghi vào (như sổ nhật ký) nó vẫn được dùng; vấn đề là khi nó thành đường tắt dùng khắp nơi.
+Vì thế nhiều người coi lạm dụng Singleton là **anti-pattern** (cách làm hay gây hại). Với thứ thật sự duy nhất, gần như chỉ ghi vào (như sổ nhật ký), nhiều người vẫn chấp nhận nó; vấn đề là khi nó thành đường tắt dùng khắp nơi.
 
 ### 4. Thay thế: truyền phụ thuộc vào (dependency injection)
 
-**Dependency injection** (truyền phụ thuộc vào) nghĩa là: đối tượng hay hàm cần gì thì **nhận cái đó qua tham số** (hàm tạo hoặc hàm), thay vì tự đi lấy từ chỗ toàn cục. Chữ ký giờ nói rõ nó cần gì, và bài kiểm tự tạo một bản riêng. Hai cách hay dùng: nhận **tham chiếu** (`const BangThue&`) khi chỉ mượn dùng, hoặc nhận `std::unique_ptr` khi đối tượng **trở thành chủ** của thứ đó ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md): truyền bằng `std::move`). Ví dụ 2 làm cả hai.
+**Dependency injection** (truyền phụ thuộc vào) nghĩa là: đối tượng hay hàm cần gì thì **nhận cái đó qua tham số** (hàm tạo hoặc hàm), thay vì tự đi lấy từ chỗ toàn cục. Chữ ký giờ nói rõ nó cần gì, và bài kiểm tự tạo một bản riêng.
 
-### 5. Factory: quầy nhận đơn, trả về `unique_ptr<Base>`
+Hai cách hay dùng: nhận **tham chiếu** (`const BangThue&`) khi chỉ mượn dùng, hoặc nhận `std::unique_ptr` khi đối tượng **trở thành chủ** của thứ đó ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md): truyền bằng `std::move`). Ví dụ 2 làm cả hai.
+
+### 5. Factory: quầy nhận đơn, trả về `unique_ptr<Hinh>`
 
 **Từ đây ví dụ đổi sang `Hinh`** của [Bài 33](33-da-hinh-virtual.md) (ví von quầy nhận đơn vẫn dùng được: khách nói "tron", quầy trao một hình tròn). **Simple Factory** là một hàm nhận một "tên loại" và trả đúng loại đối tượng, ví dụ `taoHinh(const std::string& loai)`. Người gọi chỉ biết `Hinh`, không cần biết `HinhTron` hay `HinhChuNhat`, và việc chọn lớp con nằm gọn trong một hàm.
 
@@ -55,7 +61,20 @@ Kiểu trả về là `std::unique_ptr<Hinh>` vì hai lý do: hình khác loại
 
 Hạn chế của `taoHinh` là chuỗi `if`: thêm một loại hình là phải **sửa hàm**. **Registry factory** (factory có sổ đăng ký) đảo lại chuyện đó: một `std::map<std::string, std::function<std::unique_ptr<Hinh>()>>` ([Bài 18](../nhom-2-stl-thuat-toan/18-map-set-unordered.md), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) ghi "tên loại -> hàm làm ra nó". Muốn thêm loại mới, chỉ **đăng ký** thêm một dòng, không sửa lớp factory: ý "mở để mở rộng, đóng với sửa đổi" mà Bài 37 gọi là Open/Closed.
 
-**Factory Method** là biến thể dùng kế thừa: lớp cha có hàm ảo trả sản phẩm, **lớp con quyết định tạo gì**, còn code ở lớp cha dùng sản phẩm mà không biết kiểu thật (Ví dụ 4, phần 3).
+**Factory Method** là biến thể dùng kế thừa: lớp cha có hàm ảo trả sản phẩm, **lớp con quyết định tạo gì**, còn code ở lớp cha dùng sản phẩm mà không biết kiểu thật. Phác thảo (không phải chương trình đầy đủ, mình không chạy):
+
+```text
+class BanLamHinh {                       // lớp cha, có hàm ảo (Bài 33)
+public:
+    void baoCao() const { auto h = tao(); /* dùng h->dienTich() */ }
+protected:
+    virtual std::unique_ptr<Hinh> tao() const = 0;   // factory method
+};
+class BanLamTron : public BanLamHinh {   // lớp con quyết định: làm hình tròn
+protected:
+    std::unique_ptr<Hinh> tao() const override { return std::make_unique<HinhTron>(2); }
+};
+```
 
 ### 6. Chỉ nhắc: Abstract Factory và Builder
 
@@ -149,7 +168,7 @@ Mình chạy ba lần (cùng kết quả), với ASan + UBSan sạch và với T
 
 - **Thay (1)-(2) bằng cách tự viết**: `static SoGhi* p = nullptr; if (p == nullptr) p = new SoGhi; return *p;`. Ba lần chạy đều in `so lan tao: 8`, `cung mot doi tuong: 0`, `so dong da ghi: 1` (tám sổ khác nhau, chỉ một cái còn được `p` trỏ tới); ThreadSanitizer báo `data race` ngay ở dòng đó. Chuẩn không hứa số cụ thể nào: `sleep` ở (6) làm lỗi lộ rõ.
 - **Viết `SoGhi s;` trong `main`**: g++ báo `‘SoGhi::SoGhi()’ is private within this context`.
-- **Cái `= delete` ở (3) làm gì?** `SoGhi` có `std::mutex` (không chép được) nên bỏ (3) vẫn lỗi `use of deleted function`. Với lớp gọn `Cau` không có mutex, thiếu `= delete` thì `Cau a = Cau::lay();` **biên dịch được** và `&a != &Cau::lay()`: hai đối tượng; có `Cau(const Cau&) = delete;` thì lỗi `use of deleted function ‘Cau::Cau(const Cau&)’`.
+- **Cái `= delete` ở (3) làm gì?** Bỏ hai dòng `= delete` mà `main` không chép `SoGhi` thì biên dịch và chạy y như cũ. Thêm `SoGhi z = SoGhi::lay();` vào `main` thì vẫn lỗi `use of deleted function ‘SoGhi::SoGhi(const SoGhi&)’`, do `std::mutex` không chép được chứ không do bạn. Với lớp gọn `Cau` không có mutex, thiếu `= delete` thì `Cau a = Cau::lay();` **biên dịch được** và `&a != &Cau::lay()`: hai đối tượng; có `Cau(const Cau&) = delete;` thì lỗi `use of deleted function ‘Cau::Cau(const Cau&)’`.
 
 ### Ví dụ 2: Singleton khó test, truyền phụ thuộc vào thì dễ
 
@@ -227,7 +246,7 @@ kiem 2: 100, mong 100
 quay thu thue 5: 105
 ```
 
-Mình chạy với ASan + UBSan: sạch, mã thoát 0. Bài kiểm 2 của bản Singleton sai **chỉ vì** bài 1 chạy trước và để lại thuế 10; bản truyền vào không có chuyện đó vì không còn trạng thái chung.
+Mình chạy với ASan + UBSan: sạch, mã thoát 0. (`unique_ptr` cho struct nhỏ này chỉ để minh họa chuyển quyền sở hữu; thực tế cứ giữ thẳng giá trị.) Bài kiểm 2 của bản Singleton sai **chỉ vì** bài 1 chạy trước và để lại thuế 10; bản truyền vào không có chuyện đó vì không còn trạng thái chung.
 
 ### Ví dụ 3: thứ tự hủy của hai Singleton
 
@@ -288,9 +307,9 @@ Thoát 0, **không báo gì**: lỗi nằm im. Chuẩn không hứa kết quả 
 
 **Thử thay đổi (đã chạy):** thêm `Bao::lay();` vào đầu hàm tạo `KetNoi`. `Bao` dựng xong trước nên hủy sau: in `tao Bao`, `tao KetNoi`, `het main`, `huy KetNoi`, `huy Bao`, ASan sạch. Nhưng bạn phải **nhớ** thêm dòng đó cho mỗi cặp phụ thuộc.
 
-### Ví dụ 4: Simple Factory, registry factory và Factory Method
+### Ví dụ 4: Simple Factory và registry factory
 
-Ba phần. Phần 1 là `taoHinh` (chuỗi `if`). Phần 2 là `XuongHinh` có sổ đăng ký: `HinhVuong` được định nghĩa **sau** `XuongHinh` và đăng ký trong `main`, `XuongHinh` không bị sửa. Để gọn, kích thước cố định (tròn bán kính 2, chữ nhật 3 x 4, vuông cạnh 5) và các lớp hình dùng `struct` (kế thừa và thành viên mặc định `public`, [Bài 32](32-ke-thua.md)). Phần 3 là Factory Method: `BanLamHinh::baoCao()` dùng một hình mà nó **không tự tạo**, lớp con quyết định qua hàm ảo `tao()`.
+Phần 1 là `taoHinh` (chuỗi `if`). Phần 2 là `XuongHinh` có sổ đăng ký: `HinhVuong` được định nghĩa **sau** `XuongHinh` và đăng ký trong `main`, `XuongHinh` không bị sửa. Để gọn, kích thước cố định (tròn bán kính 2, chữ nhật 3 x 4, vuông cạnh 5) và các lớp hình dùng `struct` (kế thừa và thành viên mặc định `public`, [Bài 32](32-ke-thua.md)).
 
 ```cpp
 #include <functional>
@@ -345,27 +364,6 @@ struct HinhVuong : Hinh {                                           // (7)
     double dienTich() const override { return canh * canh; }
 };
 
-class BanLamHinh {                                                  // (10)
-public:
-    virtual ~BanLamHinh() = default;
-    void baoCao() const {
-        std::unique_ptr<Hinh> h = tao();
-        std::cout << "dien tich: " << h->dienTich() << "\n";
-    }
-protected:
-    virtual std::unique_ptr<Hinh> tao() const = 0;                  // (11)
-};
-
-class BanLamTron : public BanLamHinh {
-protected:
-    std::unique_ptr<Hinh> tao() const override { return std::make_unique<HinhTron>(2); }
-};
-
-class BanLamVuong : public BanLamHinh {
-protected:
-    std::unique_ptr<Hinh> tao() const override { return std::make_unique<HinhVuong>(5); }
-};
-
 int main() {
     std::cout << "--- Simple Factory ---\n";
     std::unique_ptr<Hinh> a = taoHinh("tron");                      // (8)
@@ -383,24 +381,17 @@ int main() {
         if (h) std::cout << loai << ": " << h->dienTich() << "\n";
         else std::cout << loai << ": chua dang ky\n";
     }
-
-    std::cout << "--- Factory Method ---\n";
-    BanLamTron tron;                                                // (12)
-    BanLamVuong vuong;
-    const BanLamHinh* ban[] = {&tron, &vuong};
-    for (const BanLamHinh* b : ban) b->baoCao();
     return 0;
 }
 ```
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (1), (8) | `taoHinh` chọn lớp con theo chuỗi; `unique_ptr<HinhTron>` đổi sang `unique_ptr<Hinh>` khi trả về; `a` **nhận** quyền sở hữu, hết `main` tự xóa món qua hàm hủy ảo | `a` -> một món `HinhTron` |
-| (2) | Loại lạ trả `nullptr`; người gọi phải kiểm | không có món |
-| (10)-(12) | `tao()` thuần ảo (11) là **factory method**, `protected` ([Bài 32](32-ke-thua.md)) để chỉ lớp con ghi đè. `baoCao()` ở lớp cha chạy `tao()` theo món thật (`BanLamTron` hay `BanLamVuong`), nên ra hình tương ứng; hết hàm `h` tự xóa hình | mỗi lần một `Hinh` tạm |
-| (7), (9) | `HinhVuong` viết sau `XuongHinh`; (9) đăng ký lambda `[] { ... }` ("hàm làm ra hình vuông"), cất vào `kho_` ở (4) | `kho_`: 3 mục |
-| (5) | `find` trả `end()` khi không có tên: phải kiểm trước, vì dùng `it->second` trên `end()` là sai | không đổi |
-| (6) | `it->second` là một `std::function`; `()` gọi nó, nhận về `unique_ptr<Hinh>` mới và trả thẳng ra | mỗi lần một món mới |
+| (8), (1) | `taoHinh("tron")` chọn lớp con theo chuỗi; `unique_ptr<HinhTron>` đổi sang `unique_ptr<Hinh>` khi trả về; `a` **nhận** quyền sở hữu, hết `main` tự xóa món qua hàm hủy ảo | `a` -> một món `HinhTron` |
+| (2) | `taoHinh("sao hoa")`: loại lạ trả `nullptr`; người gọi phải kiểm | không có món |
+| (3), (9), (4) | Tạo `xuong` (3); `dangKy` ba lần, mỗi lần đưa một lambda `[] { ... }` ("hàm làm ra hình") và cất vào `kho_` ở (4); (9) đăng ký `HinhVuong` viết ở (7) sau lớp factory | `kho_`: 3 mục |
+| (5) | Trong vòng lặp, `xuong.tao("tam giac")`: `find` trả `end()` khi không có tên, phải kiểm trước vì dùng `it->second` trên `end()` là sai | không đổi |
+| (6) | Với tên có đăng ký, `it->second` là một `std::function`; `()` gọi nó, nhận `unique_ptr<Hinh>` mới và trả thẳng ra | mỗi lần một món mới |
 
 **Kết quả khi chạy:**
 
@@ -413,26 +404,22 @@ tron: 12.56
 chu nhat: 12
 vuong: 25
 tam giac: chua dang ky
---- Factory Method ---
-dien tich: 12.56
-dien tich: 25
 ```
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi** (đã chạy):
 
 - **Thêm `std::unique_ptr<Hinh> b = a;` sau (8)**: lỗi biên dịch `use of deleted function ‘std::unique_ptr<...>::unique_ptr(const std::unique_ptr<...>&)’`: chỉ một chủ, chuyển được chứ không chép được.
-- **Cho `taoHinh` trả `Hinh*` (`return new HinhTron(2);`), `main` không `delete`**: LeakSanitizer báo `Direct leak of 16 byte(s)`. Trả `unique_ptr` làm quên xóa không xảy ra.
-- **Thêm `BanLamHinh bb;` vào `main`**: `cannot declare variable ‘bb’ to be of abstract type ‘BanLamHinh’`, vì `tao()` thuần ảo ([Bài 33](33-da-hinh-virtual.md)).
-- **Xóa dòng (5)**: với `"tam giac"` chưa đăng ký, mình gặp ASan báo `stack-use-after-scope` trong `std::function::operator()`. Chuẩn không hứa gì (hành vi không xác định): phải kiểm `end()`.
+- **Cho `taoHinh` trả `Hinh*` (`return new ...`), `main` không `delete`**: LeakSanitizer báo `Direct leak of 16 byte(s)`. Trả `unique_ptr` làm quên xóa không xảy ra.
+- **Xóa dòng (5)**: với `"tam giac"` chưa đăng ký, ASan báo lỗi truy cập bộ nhớ trong `std::function` (mình gặp `stack-use-after-scope`; tên loại lỗi có thể đổi theo bản g++, mức tối ưu hay bố cục code). Chuẩn không hứa gì (hành vi không xác định): phải kiểm `end()`.
 
-## Go: `sync.Once`, `NewX` trả interface, functional options
+## Go: `sync.Once`, hàm `NewX`, functional options
 
 !!! info "Bạn biết Go?"
     Mình đã chạy chương trình Go 1.27.1 nhỏ (cả `go vet` và `-race` sạch) để kiểm các ý dưới đây.
     - **Singleton bằng `sync.Once`**: `once.Do(func() { ... })` chạy hàm **đúng một lần** dù nhiều goroutine cùng gọi, và mọi lời gọi `Do` chỉ trả về **sau khi** hàm đó chạy xong. Mình cho tám goroutine gọi `once.Do` với hàm ngủ 100 ms: hàm chạy 1 lần và không goroutine nào thấy nó chưa xong. Từ Go 1.21 có thêm `sync.OnceValue` (mình gọi hai lần, chữ "tinh mot lan" in một lần).
-    - **Biến cấp gói + `init()`**: biến cấp gói được khởi tạo và hàm `init()` chạy **trước** `main` (mình in ra thứ tự: biến, `init()`, `main`). Biến cấp gói mà là trạng thái chung thì phàn nàn ở mục 3 vẫn đúng.
-    - **Không có hàm tạo `private`, không có `= delete`**: Go giấu bằng tên chữ thường (không xuất khẩu ra ngoài gói). Cũng **không có hàm hủy** nên không có chuyện thứ tự hủy như Ví dụ 3.
-    - **Factory**: `NewX` chỉ là **quy ước đặt tên**, không phải tính năng. `NewHinh(loai string) (Hinh, error)` trả interface `Hinh`; loại lạ trả `(nil, error)` và mình kiểm `h == nil` ra `true`. Không có `unique_ptr`: có GC nên không bàn chuyện ai sở hữu.
+    - **Biến cấp gói + `init()`**: biến cấp gói được khởi tạo và hàm `init()` chạy **trước** `main` (mình in ra thứ tự: biến, `init()`, `main`). Biến cấp gói mà là trạng thái chung thì điều bị chê ở mục 3 vẫn đúng.
+    - **Không có hàm tạo `private`, không có `= delete`**: Go giấu bằng tên chữ thường (không xuất khẩu ra ngoài gói). Cũng **không có hàm hủy gắn với kiểu** (dọn dẹp dùng `defer`) nên không có chuyện thứ tự hủy như Ví dụ 3.
+    - **Factory**: `NewX` chỉ là **quy ước đặt tên**, không phải tính năng, và thường trả `*X` (con trỏ tới struct; hay nói "nhận interface, trả struct"). `NewHinh(loai string) (Hinh, error)` trả interface vì nó chọn loại cụ thể lúc chạy; loại lạ trả `(nil, error)` và mình kiểm `h == nil` ra `true`. Không có `unique_ptr`: có GC nên không bàn chuyện ai sở hữu.
     - **Functional options** (Builder kiểu Go): `type Option func(*Server)`, rồi `NewServer(addr string, opts ...Option)`; gọi `NewServer("a", WithPort(8443), WithTLS())` ra `{addr:a port:8443 tls:true}`, còn `NewServer("a")` ra `{addr:a port:80 tls:false}`. Go không có tham số mặc định hay nạp chồng hàm nên hay dùng cách này.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
@@ -447,7 +434,7 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi*
     Factory (Simple Factory hoặc Factory Method) tạo **một loại** sản phẩm, chọn lớp cụ thể theo tham số hoặc theo lớp con. Abstract Factory là một interface có **nhiều** hàm tạo, tạo ra cả họ sản phẩm liên quan đi cùng nhau (ví dụ nút và cửa sổ cùng giao diện tối); đổi nhà máy là đổi cả họ. Factory Method dùng kế thừa (lớp con quyết định), Simple Factory chỉ là một hàm.
 
 ??? question "Factory để làm gì?"
-    Tách việc **chọn lớp cụ thể** khỏi code dùng nó: người gọi chỉ biết `Hinh`, factory lo `HinhTron` hay `HinhChuNhat`. Trong C++ nó thường trả `unique_ptr<Base>`, tức chuyển sở hữu cho người gọi. Thêm loại mới thì sửa một chỗ, hoặc không sửa chỗ nào nếu dùng registry (`map` tên -> hàm tạo). Đừng thêm factory khi chỉ có một loại và không có kế hoạch thêm: đó là over-engineering.
+    Tách việc **chọn lớp cụ thể** khỏi code dùng nó: người gọi chỉ biết `Hinh`, factory lo `HinhTron` hay `HinhChuNhat`. Trong C++ nó thường trả `unique_ptr` của lớp cha (như `unique_ptr<Hinh>`), tức chuyển sở hữu cho người gọi. Thêm loại mới thì sửa một chỗ, hoặc không sửa chỗ nào nếu dùng registry (`map` tên -> hàm tạo). Đừng thêm factory khi chỉ có một loại và không có kế hoạch thêm: đó là over-engineering.
 
 ??? question "Khi nào dùng Builder?"
     Khi đối tượng có nhiều tham số, trong đó nhiều cái tùy chọn, và hàm tạo dài dễ nhầm thứ tự. Builder cho gọi từng bước có tên (`.port(8443).tls().build()`) rồi tạo đối tượng một lần. Ở Go, tương đương là functional options.
@@ -455,7 +442,7 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi*
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Tự viết kiểm-rồi-tạo cho Singleton"
-    `if (p == nullptr) p = new T;` bị data race khi nhiều luồng gọi (Ví dụ 1, Thử thay đổi: tám bản). Dùng biến `static` cục bộ, và nhớ `= delete` sao chép kẻo `T a = T::lay();` âm thầm tạo bản thứ hai.
+    `if (p == nullptr) p = new T;` bị data race khi nhiều luồng gọi (Ví dụ 1, Thử thay đổi: trên máy mình ra tám bản). Dùng biến `static` cục bộ, và với lớp chép được thì nhớ `= delete` sao chép kẻo `T a = T::lay();` âm thầm tạo bản thứ hai.
 
 !!! warning "Lỗi 2: Factory trả con trỏ thô"
     `Hinh* taoHinh(...)` buộc người gọi nhớ `delete` (LeakSanitizer báo rò ở Ví dụ 4, Thử thay đổi). Trả `std::unique_ptr<Hinh>`.
@@ -509,11 +496,11 @@ int main() { Cau a = Cau::lay(); }
 **Câu 3.** Hàm `tinhTien(int gia)` bên trong gọi `CauHinh::lay().thue()` (Singleton). Điểm yếu thiết kế chính của cách này là gì?
 
 - Chữ ký hàm giấu mất sự phụ thuộc, và các bài kiểm chạy chung chương trình dùng chung trạng thái
-- Singleton không cho dùng bên trong một hàm, nên đoạn này không biên dịch được
+- Mỗi file `.cpp` gọi `lay()` nhận một bản riêng, nên chương trình có nhiều bản
 - Khởi tạo Singleton không an toàn luồng, vì biến `static` cục bộ có thể bị tạo nhiều lần
-- Singleton buộc cấp phát bằng `new`, nên mỗi lần gọi `tinhTien` đều bị rò bộ nhớ
+- Singleton không bao giờ bị hủy, nên lúc chương trình kết thúc nó bị rò bộ nhớ
 
-<p class="giai-thich" markdown>Hàm đọc trạng thái toàn cục mà chữ ký không nói, nên khó hiểu, và bài kiểm này để lại giá trị cho bài kiểm sau (Ví dụ 2: kiểm 2 ra 110 thay vì 100). Kiểu Meyers singleton dùng được trong mọi hàm bình thường và biên dịch tốt. Nó cũng không dùng `new`, chính biến `static` cục bộ tự lo vòng đời. Và việc khởi tạo của biến `static` cục bộ là an toàn luồng từ C++11, nên "tạo nhiều lần" không phải điểm yếu của cách viết này.</p>
+<p class="giai-thich" markdown>Hàm đọc trạng thái toàn cục mà chữ ký không nói, nên khó hiểu, và bài kiểm này để lại giá trị cho bài kiểm sau (Ví dụ 2: kiểm 2 ra 110 thay vì 100). Biến `static` cục bộ chỉ có một bản cho cả chương trình, dù bao nhiêu file `.cpp` gọi `lay()`. Nó cũng được hủy bình thường lúc chương trình kết thúc, nên không bị rò. Và việc khởi tạo của biến `static` cục bộ là an toàn luồng từ C++11, nên "tạo nhiều lần" không phải điểm yếu của cách viết này.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -522,9 +509,9 @@ int main() { Cau a = Cau::lay(); }
 - Factory vẫn giữ món và người gọi chỉ mượn, nên factory tự xóa nó khi chương trình kết thúc
 - Người gọi phải tự `delete` con trỏ lấy qua `get()` khi dùng xong, nếu không món sẽ bị rò
 - Người gọi nhận quyền sở hữu, và món tự được xóa khi `unique_ptr` hết đời
-- Mỗi lần gọi trả về cùng một món đã tạo sẵn, giống cách Singleton làm
+- Người gọi chỉ nhận bản sao của hình, còn hình gốc vẫn ở lại trong factory
 
-<p class="giai-thich" markdown>`unique_ptr` trả về giá trị chuyển quyền sở hữu cho người nhận: khi biến nhận nó ra khỏi phạm vi, món bị xóa qua hàm hủy ảo, không cần `delete` tay ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)). Factory không giữ lại gì để mà "tự xóa sau". Tự `delete` con trỏ của `get()` còn gây xóa hai lần, vì `unique_ptr` cũng sẽ xóa. Và mỗi lần gọi `taoHinh` tạo món mới: trả lại cùng một món là chuyện của Singleton.</p>
+<p class="giai-thich" markdown>`unique_ptr` trả về giá trị chuyển quyền sở hữu cho người nhận: khi biến nhận nó ra khỏi phạm vi, món bị xóa qua hàm hủy ảo, không cần `delete` tay ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)). Factory không giữ lại gì để mà "tự xóa sau". Tự `delete` con trỏ của `get()` còn gây xóa hai lần, vì `unique_ptr` cũng sẽ xóa. Và người gọi nhận chính món đó, không phải bản sao: `unique_ptr` còn không chép được.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -550,10 +537,10 @@ auto h = it->second();
 
 - `f` chạy đúng một lần, và mọi lời gọi `Do` chỉ trả về sau khi `f` đã chạy xong
 - `f` chạy đúng một lần, nhưng goroutine đến sau trả về ngay mà không chờ `f` xong
-- `f` có thể chạy nhiều lần, `sync.Once` chỉ giảm bớt số lần chạy
+- `f` chạy đúng một lần, nhưng có thể chạy trên một goroutine không gọi `Do`
 - Phải tự bọc `once.Do` bằng `sync.Mutex`, nếu không `f` có thể chạy nhiều lần
 
-<p class="giai-thich" markdown>Mình đã chạy tám goroutine với `f` ngủ 100 ms: `f` chạy 1 lần và không goroutine nào thấy `f` chưa xong khi `Do` trả về. Việc chờ đó chính là điều khiến `once.Do` dùng được cho khởi tạo Singleton. `Do` tự an toàn khi nhiều goroutine gọi, nên không cần mutex bọc ngoài. Và nó cũng không chỉ "giảm bớt": số lần chạy đúng bằng một.</p>
+<p class="giai-thich" markdown>Mình đã chạy tám goroutine với `f` ngủ 100 ms: `f` chạy 1 lần và không goroutine nào thấy `f` chưa xong khi `Do` trả về. Việc chờ đó chính là điều khiến `once.Do` dùng được cho khởi tạo Singleton. `Do` tự an toàn khi nhiều goroutine gọi, nên không cần mutex bọc ngoài. Và `f` chạy ngay trong goroutine đầu tiên gọi `Do`, không đi nơi khác.</p>
 </div>
 
 </div>
@@ -561,7 +548,7 @@ auto h = it->second();
 ## 🔑 Tóm tắt
 
 1. **Design pattern** là tên chung cho một lời giải mẫu của vấn đề thiết kế hay gặp, tức từ vựng chung, không phải luật; dùng khi code có vấn đề đó, còn không là over-engineering. Bài này có Singleton, Factory (Simple, Method), nhắc Abstract Factory và Builder.
-2. **Singleton**: hàm tạo `private`, `= delete` sao chép/gán, `static T& lay() { static T t; return t; }` (Meyers singleton). Từ C++11 khởi tạo biến `static` cục bộ an toàn luồng ("magic statics"): mình chạy 8 luồng, hàm tạo chạy 1 lần; cách tự viết kiểm-rồi-tạo ra 8 lần. Chỉ khởi tạo được bảo vệ, dùng đối tượng vẫn cần mutex.
+2. **Singleton**: hàm tạo `private`, `= delete` sao chép/gán, `static T& lay() { static T t; return t; }` (Meyers singleton). Từ C++11 khởi tạo biến `static` cục bộ an toàn luồng ("magic statics"): mình chạy 8 luồng, hàm tạo chạy 1 lần; cách tự viết kiểm-rồi-tạo ra 8 lần trên máy mình. Chỉ khởi tạo được bảo vệ, dùng đối tượng vẫn cần mutex.
 3. **Vì sao bị chê** (mình đã chạy): phụ thuộc ngầm và khó test (kiểm 2 ra 110 thay vì 100), thứ tự hủy ngược thứ tự tạo xong (hàm hủy dùng Singleton đã hủy: ASan báo `double-free`). Thay bằng truyền phụ thuộc vào qua tham chiếu hoặc `unique_ptr`.
 4. **Factory**: `taoHinh` trả `std::unique_ptr<Hinh>`, tức chuyển sở hữu cho người gọi (quên xóa không xảy ra); registry `map<string, function<unique_ptr<Hinh>()>>` thêm loại mới không sửa factory (cần kiểm `find` trả `end()`); Factory Method để lớp con quyết định tạo gì; Abstract Factory tạo cả họ; Builder cho đối tượng nhiều tham số tùy chọn.
-5. Go: `sync.Once` (`once.Do` chạy một lần, mọi lời gọi chờ `f` xong), biến cấp gói và `init()` chạy trước `main`, `NewX` trả interface (quy ước, không có `unique_ptr`), functional options thay Builder; Go không có `= delete`, không có hàm hủy.
+5. Go: `sync.Once` (`once.Do` chạy một lần, mọi lời gọi chờ `f` xong), biến cấp gói và `init()` chạy trước `main`, `NewX` là quy ước tên, thường trả `*X` (trả interface khi chọn loại lúc chạy; không có `unique_ptr`), functional options thay Builder; Go không có `= delete`, không có hàm hủy.
