@@ -31,3 +31,4 @@
 | [Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến](nhom-3-da-luong/25-data-race-mutex.md) | <span class="diem" data-bai="25"></span> |
 | [Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi](nhom-3-da-luong/26-deadlock.md) | <span class="diem" data-bai="26"></span> |
 | [Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục](nhom-3-da-luong/27-condition-variable.md) | <span class="diem" data-bai="27"></span> |
+| [Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng](nhom-3-da-luong/28-atomic.md) | <span class="diem" data-bai="28"></span> |
