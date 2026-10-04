@@ -10,7 +10,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Trong **xưởng đồ chơi** ([Bài 31](31-lop-dong-goi.md)), bản vẽ `XeChay` không cần vẽ lại từ đầu. Nó ghi: "lấy nguyên bản vẽ `DoChoi`, rồi thêm pin và bánh". Món `XeChay` làm ra gồm **một phần `DoChoi` lắp trước**, rồi phần riêng của xe lắp sau.
+Trong **xưởng đồ chơi** ([Bài 31](31-lop-dong-goi.md)), bản vẽ `XeChay` không cần vẽ lại từ đầu. Nó ghi: "dựa trên bản vẽ `DoChoi`, rồi thêm pin và bánh". Món `XeChay` làm ra gồm **một phần `DoChoi` lắp trước**, rồi phần riêng của xe lắp sau.
 
 Đó là **kế thừa (inheritance)**: bản vẽ gốc gọi là **lớp cha (base class)**, bản vẽ thêm bớt gọi là **lớp con (derived class)**. Lớp con dùng lại được mọi thứ lớp cha cho phép, và thêm của riêng mình. Điều quan trọng không phải là "đỡ gõ lại" mà là một lời hứa: **mọi `XeChay` đều là một `DoChoi` thật sự**. Bài này dạy cú pháp, rồi dạy cách kiểm lời hứa đó.
 
@@ -42,33 +42,39 @@ Hàm của cha viết thành `Cha::ham()` gọi được từ con (nếu hàm đ
 
 ### 4. Che hàm (name hiding)
 
-Lớp con khai báo một hàm **cùng tên** với hàm của cha thì hàm đó **che** (hide) hàm của cha. Đến đây chưa phải "ghi đè" (override) của **đa hình** (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần `virtual` ở Bài 33. Quy tắc che là theo **tên**, không theo danh sách kiểu tham số: tìm tên `in` trong lớp con trước, thấy là dừng, **không** nhìn lên cha nữa.
+Lớp con khai báo một hàm **cùng tên** với hàm của cha thì hàm đó **che** (hide) hàm của cha. Quy tắc che là theo **tên**, không theo danh sách kiểu tham số: tìm tên `in` trong lớp con trước, thấy là dừng, **không** nhìn lên cha nữa.
 
-Hệ quả bất ngờ: cha có hai hàm cùng tên `in(int)` và `in(const std::string&)` (gọi là hai bản **quá tải**, overload: cùng tên, khác kiểu tham số, trình biên dịch chọn theo đối số), con chỉ thêm `in(double)`, thì cả hai bản của cha bị che. Gọi `con.in("abc")` là lỗi biên dịch, dù cha có bản nhận chuỗi. Ví dụ 3 chạy thật; cách gỡ là `using Cha::in;` trong con (kéo tên về) hoặc gọi rõ `con.Cha::in(...)`.
+Đây chưa phải "ghi đè" (override) của **đa hình** (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần `virtual` ở Bài 33.
+
+Hệ quả bất ngờ: giả sử cha có hai hàm cùng tên `in(int)` và `in(const std::string&)`. Hai hàm như vậy gọi là hai bản **quá tải** (overload): cùng tên, khác kiểu tham số, trình biên dịch chọn bản theo đối số. Nếu con chỉ thêm `in(double)` thì cả hai bản của cha bị che, và `con.in("abc")` là lỗi biên dịch dù cha có bản nhận chuỗi (Ví dụ 3 chạy thật).
+
+Có hai cách gỡ. Gọi rõ `con.Cha::in(...)`, hoặc viết `using Cha::in;` như một dòng bên trong thân lớp con (thuộc phần `public:`), nghĩa là "đưa các hàm `in` của `Cha` vào để cùng xét với `in` của con". Ví dụ 3 có thử cả hai.
 
 ### 5. Upcast, slicing và kích thước
 
-Vì `XeChay` là một `DoChoi`, bạn gán **con trỏ hoặc tham chiếu** `XeChay` cho `DoChoi*`, `DoChoi&` được, không cần ép kiểu: đó là **upcast** (nâng lên lớp cha). Hàm nhận `const DoChoi&` nhận được mọi loại đồ chơi con. Chiều ngược lại (`DoChoi` sang `XeChay`) bị cấm vì một `DoChoi` thường chưa chắc là xe.
+Vì `XeChay` là một `DoChoi`, bạn gán **con trỏ hoặc tham chiếu** `XeChay` cho `DoChoi*`, `DoChoi&` được, không cần ép kiểu: đó là **upcast** (nâng lên lớp cha). Hàm nhận `const DoChoi&` nhận được mọi loại đồ chơi con. Chiều ngược lại (`DoChoi` sang `XeChay`) không tự chuyển được, vì một `DoChoi` thường chưa chắc là xe. Ép kiểu tường minh vẫn biên dịch được nhưng dễ sai (gọi là downcast, nói ở bài sau).
 
 Qua `DoChoi&` bạn chỉ **thấy** phần `DoChoi`. Hàm nào được gọi lúc này do **kiểu khai báo** (`DoChoi&`) quyết định, nên hàm `gioiThieu` của cha chạy dù đối tượng thật là xe (Ví dụ 4). Đó **chưa phải đa hình**: Bài 33 sẽ thêm `virtual` để đổi đúng chuyện này.
 
 Gán **cả đối tượng** `XeChay` vào một biến kiểu `DoChoi` (không phải tham chiếu) thì chỉ phần cha được chép, phần xe bị cắt mất: gọi là **slicing** (cắt lát). Bài 33 dạy kỹ; ở đây chỉ cần nhớ bẫy là có thật, và Ví dụ 4 có một dòng làm vậy.
 
-Cuối cùng, `sizeof(Con)` thường lớn hơn `sizeof(Cha)` và không nhỏ hơn trong mọi lần mình đo, vì món con chứa cả phần cha. Con số cụ thể tùy máy và trình biên dịch (có **căn lề**: máy chèn byte đệm để mỗi thành viên nằm ở địa chỉ thuận tiện), nên chỉ nên tin con số mình đo trên máy mình.
+Cuối cùng, `sizeof(Con)` không nhỏ hơn `sizeof(Cha)` vì món con chứa cả phần cha; thường là lớn hơn. Con số cụ thể tùy máy và trình biên dịch (có **căn lề**: máy chèn byte đệm để mỗi thành viên nằm ở địa chỉ thuận tiện), nên chỉ nên tin con số mình đo trên máy mình.
 
 ### 6. "Là một" hay "có một"
 
-Hai cách dùng lại code: **kế thừa** nói "Con **là một** Cha" (is-a), còn **thành viên** nói "Con **có một** Cha" (has-a, hay **composition**, tạm dịch "ghép"). Xe hơi **có một** động cơ, không **là một** động cơ, nên động cơ là thành viên (Ví dụ 6).
+Hai cách dùng lại code: **kế thừa** nói "Con **là một** Cha" (is-a), còn **thành viên** nói "Con **có một** Cha" (has-a, hay **composition**, tạm dịch "ghép"). Xe hơi **có một** động cơ, không **là một** động cơ, nên động cơ là thành viên.
 
 Quy tắc: **chỉ kế thừa công khai khi đúng là is-a**, nghĩa là mọi nơi dùng `Cha` thì thay bằng `Con` vẫn đúng. "Muốn dùng lại hàm của cha" không phải lý do: dùng thành viên được mà không dính chặt hai lớp.
+
+Mình đã chạy hai bản của xe. Bản đúng: `XeHoi` giữ `DongCo dongCo_;` là thành viên `private` và chỉ đưa ra hàm `chay()`. Bản sai: `class XeXau : public DongCo {};` chỉ để dùng lại `khoiDong()`; khi đó hàm `lapVaoMayBom(const DongCo&)` nhận được cả xe (upcast hợp lệ), và ai cũng gọi được hàm của động cơ trên xe.
 
 Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật, nhưng trong code thì sao? Ví dụ 5 cho thấy nó vỡ ở đâu. Ý tổng quát (**nguyên lý thay thế Liskov**) sẽ dạy đủ ở Bài 37; bài này chỉ cần biết câu hỏi để tự hỏi.
 
 ### 7. Chỉ nhắc: kế thừa `private`/`protected`, `final`, kế thừa đa
 
-**Kế thừa `private`** (`class Con : private Cha`, cũng là mặc định của `class`) nghĩa là "con dùng cha để làm việc bên trong", không còn là is-a với bên ngoài: hàm của cha thành `private` trong con và upcast từ ngoài bị cấm (mình đã chạy ra lỗi). Kế thừa `protected` tương tự, nhưng lớp con của con vẫn thấy. Muốn "dùng lại để làm bên trong" thì thành viên thường gọn hơn.
+**Kế thừa `private`** (`class Con : private Cha`, cũng là mặc định của `class`) nghĩa là "con dùng cha để làm việc bên trong", không còn là is-a với bên ngoài: hàm của cha thành `private` trong con và upcast từ ngoài bị cấm (mình đã chạy: `class Con1 : Cha {}` rồi `Con1 a; a.ham();` ra `‘void Cha::ham() const’ is inaccessible within this context`, còn `Cha& r = a;` ra `‘Cha’ is an inaccessible base of ‘Con1’`). Kế thừa `protected` tương tự, nhưng lớp con của con vẫn thấy. Muốn "dùng lại để làm bên trong" thì thành viên thường gọn hơn.
 
-**`final`** đặt sau tên lớp (`class Kin final {}`) cấm mọi lớp kế thừa nó ([Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) đã nhắc tên; Ví dụ 7 chạy thật).
+**`final`** đặt sau tên lớp (`class Kin final {}`) cấm mọi lớp kế thừa nó ([Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) đã nhắc tên). Mình đã chạy: `class Con : public Kin {}` ra `error: cannot derive from ‘final’ base ‘Kin’ in derived type ‘Con’`.
 
 **Kế thừa đa (multiple inheritance)**: `class C : public A, public B` kế thừa từ hai cha cùng lúc. Cha dựng theo thứ tự **liệt kê** `A` rồi `B`, hủy ngược lại. C++ cho phép, Go thì không có kế thừa nào. Rắc rối khi hai cha cùng có chung **một ông**, gọi là **bài toán kim cương**:
 
@@ -80,7 +86,9 @@ Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật
      XeDieuKhien        <- con
 ```
 
-Mặc định `XeDieuKhien` chứa **hai bản** `DoChoi`, một qua `CoPin`, một qua `CoBanh`; gọi `x.ma` không biết bản nào nên lỗi biên dịch (Ví dụ 7). Muốn chỉ một bản thì hai cha phải kế thừa kiểu **`virtual`** (`: virtual DoChoi`, kế thừa ảo, mình đã chạy thử thì `x.ma` hợp lệ); chi tiết thuộc phần nâng cao, không dạy ở đây.
+Mặc định `XeDieuKhien` chứa **hai bản** `DoChoi`, một qua `CoPin`, một qua `CoBanh`; gọi `x.ma` không biết bản nào nên lỗi biên dịch.
+
+Mình đã chạy với `struct DoChoi { int ma = 1; };`, `struct CoPin : DoChoi {};`, `struct CoBanh : DoChoi {};`, `struct XeDieuKhien : CoPin, CoBanh {};`. `x.ma` ra `error: request for member ‘ma’ is ambiguous`; `x.CoPin::ma = 10;` rồi in `x.CoPin::ma` và `x.CoBanh::ma` ra `10 1` (hai bản riêng); `sizeof(XeDieuKhien)` là 8, gấp đôi `sizeof(DoChoi)` là 4 (máy mình). Muốn chỉ một bản thì hai cha kế thừa kiểu **`virtual`** (`: virtual DoChoi`, kế thừa ảo): mình chạy thử thì `x.ma` hợp lệ, nhưng `sizeof` lên 24 vì có thêm dữ liệu nội bộ. Chi tiết thuộc phần nâng cao, không dạy ở đây.
 
 ## 💻 Ví dụ code
 
@@ -203,7 +211,7 @@ int main() {
 | (7) `x.gioiThieu()` | Tìm tên trong `XeChay` trước: thấy (4), chạy bản của con | `x`: `ten_` "xe dua", `toc_` 30 |
 | (5) | `DoChoi::gioiThieu()` gọi hàm (1) của cha: in `do choi: xe dua` | không đổi |
 | (6) | Con đọc `ten_` được vì `protected` (2): in `xe chay toc do 30, ten_ = xe dua` | không đổi |
-| (8) | Từ ngoài, `x.DoChoi::gioiThieu()` gọi thẳng bản của cha | in `do choi: xe dua` |
+| (8) | Từ ngoài, `x.DoChoi::gioiThieu()` gọi thẳng bản của cha: in `do choi: xe dua` | không đổi |
 
 **Kết quả khi chạy:**
 
@@ -249,9 +257,9 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (4) `g.in(5)` | Tìm `in` trong `GhiMau`: thấy (3), dừng. Cha (1) (2) không được xét; `5` đổi sang `double` | in `GhiMau::in(double) 5` |
-| (5) | `Ghi::in` chỉ rõ cha, nên (1) khớp `int` | in `Ghi::in(int) 5` |
-| (6) | Cùng cách, bản (2) của cha | in `Ghi::in(string) abc` |
+| (4) `g.in(5)` | Tìm `in` trong `GhiMau`: thấy (3), dừng. Cha (1) (2) không được xét; `5` đổi sang `double`, in `GhiMau::in(double) 5` | `g` không đổi (hàm không sửa gì) |
+| (5) | `Ghi::in` chỉ rõ cha, nên (1) khớp `int`: in `Ghi::in(int) 5` | không đổi |
+| (6) | Cùng cách, bản (2) của cha: in `Ghi::in(string) abc` | không đổi |
 
 **Kết quả khi chạy:**
 
@@ -264,7 +272,7 @@ Ghi::in(string) abc
 Mình chạy với ASan + UBSan: sạch. Hai **Thử thay đổi** (đã chạy):
 
 - **Thêm `g.in(std::string("abc"));` vào `main`**: lỗi biên dịch `error: cannot convert ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} to ‘double’`; bản `in(const std::string&)` của cha có đó nhưng không được xét.
-- **Thêm `using Ghi::in;` ngay trước (3)**: `g.in(5)` giờ in `Ghi::in(int) 5` (bản `int` khớp chính xác hơn), `g.in(std::string("abc"))` chạy được, và `g.in(2.5)` vẫn vào `GhiMau::in(double)`.
+- **Thêm dòng `using Ghi::in;` trong lớp `GhiMau`, ngay trước (3), rồi thêm `g.in(std::string("abc"));` và `g.in(2.5);` vào `main`**: `g.in(5)` giờ in `Ghi::in(int) 5` (bản `int` khớp chính xác hơn), `g.in(std::string("abc"))` chạy được (bản của cha), và `g.in(2.5)` vẫn vào `GhiMau::in(double)`.
 
 ### Ví dụ 4: upcast, gọi theo kiểu khai báo, slicing, `sizeof`
 
@@ -325,9 +333,9 @@ DoChoi xe dua
 sizeof DoChoi = 32, sizeof XeChay = 40
 ```
 
-Mình chạy với ASan + UBSan: sạch. `XeChay` hơn `DoChoi` 8 byte dù chỉ thêm một `int` 4 byte: phần còn lại là byte đệm để căn lề. Với `struct A { int x; }; struct B : A { int y; }; struct C : A { char c; };` mình đo `sizeof` là 4, 8, 8.
+Mình chạy với ASan + UBSan: sạch. `XeChay` hơn `DoChoi` 8 byte dù chỉ thêm một `int` 4 byte: phần còn lại là byte đệm để căn lề. Với `struct A { int x; };`, `struct B : A { int y; };`, `struct C : A { char c; };` mình đo `sizeof` là 4, 8, 8: `C` thêm có 1 byte `char` mà vẫn thành 8 vì byte đệm.
 
-**Thử thay đổi (đã chạy, đều lỗi biên dịch):** chiều ngược lại bị cấm. `XeChay y = r;` cho `error: conversion from ‘DoChoi’ to non-scalar type ‘XeChay’ requested`; `XeChay* q = &cat;` cho `error: invalid conversion from ‘DoChoi*’ to ‘XeChay*’`.
+**Thử thay đổi (đã chạy, đều lỗi biên dịch):** chiều ngược lại không tự chuyển được. `XeChay y = r;` cho `error: conversion from ‘DoChoi’ to non-scalar type ‘XeChay’ requested`; `XeChay* q = &cat;` cho `error: invalid conversion from ‘DoChoi*’ to ‘XeChay*’`.
 
 ### Ví dụ 5: hình vuông có phải hình chữ nhật không?
 
@@ -381,65 +389,15 @@ chu nhat: 6 x 3
 hinh vuong: 6 x 3
 ```
 
-Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng **"hình vuông" 6 x 3 không còn vuông**: bất biến "hai cạnh bằng nhau" ([Bài 31](31-lop-dong-goi.md)) bị vỡ qua hàm của cha. Hàm `keoDaiNgang` hợp lý với mọi chữ nhật mà hỏng với hình vuông, tức `HinhVuong` **không thay được** `HinhChuNhat`, nên "vuông là chữ nhật" trong toán không thành is-a trong code. Sửa thế nào (đa hình, hoặc thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở Bài 33 và Bài 37.
-
-### Ví dụ 6: "có một" bằng thành viên, và kế thừa sai chỗ
-
-Mình viết hai bản và chạy cả hai (ASan + UBSan sạch). Bản đúng: `XeHoi` giữ `DongCo dongCo_;` là thành viên `private`, hàm `chay()` gọi `dongCo_.khoiDong()`, bên ngoài chỉ thấy `chay()`. Bản sai: `class XeXau : public DongCo {};` chỉ để dùng lại `khoiDong()`.
-
-```text
-XeHoi xe;   xe.chay();              // in: dong co no / xe chay
-XeXau xau;  xau.khoiDong();         // chạy: ai cũng gọi được hàm của động cơ trên xe
-void lapVaoMayBom(const DongCo&);   // in: lap vao may bom nuoc
-lapVaoMayBom(xau);                  // chạy: upcast hợp lệ, xe lắp được vào máy bơm
-```
-
-Dòng cuối cho thấy hậu quả của kế thừa sai: mọi hàm nhận `DongCo&` giờ nhận được xe, vô lý như câu "xe là một động cơ". Thành viên không bị chuyện đó: `XeHoi` tự quyết cái gì đưa ra ngoài, và đổi `DongCo` thành loại khác không ảnh hưởng người gọi.
-
-### Ví dụ 7: kim cương, `final` và kế thừa `private`
-
-```cpp
-#include <iostream>
-
-struct DoChoi { int ma = 1; };
-struct CoPin : DoChoi {};
-struct CoBanh : DoChoi {};
-struct XeDieuKhien : CoPin, CoBanh {};                       // (1)
-
-int main() {
-    XeDieuKhien x;
-    x.CoPin::ma = 10;                                        // (2)
-    std::cout << x.CoPin::ma << " " << x.CoBanh::ma << "\n";
-    std::cout << sizeof(XeDieuKhien) << "\n";
-    return 0;
-}
-```
-
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
-|---|---|---|
-| (1) | Hai cha, mỗi cha chứa riêng một `DoChoi` | `x`: `[DoChoi qua CoPin][DoChoi qua CoBanh]` |
-| (2) | Chỉ rõ đường qua `CoPin` rồi ghi 10 | bản qua `CoPin`: ma = 10; bản kia vẫn 1 |
-
-**Kết quả khi chạy:**
-
-```text
-10 1
-8
-```
-
-Hai bản `DoChoi` chứa hai `ma` khác nhau, nên `sizeof` là 8, gấp đôi `sizeof(DoChoi)` (4, đo trên máy mình). Mình chạy cả ba đoạn lỗi sau (đều lỗi biên dịch):
-
-- **Thêm `std::cout << x.ma;`**: `error: request for member ‘ma’ is ambiguous`, g++ liệt kê hai ứng viên `DoChoi::ma`.
-- **`class Kin final {}; class Con : public Kin {};`**: `error: cannot derive from ‘final’ base ‘Kin’ in derived type ‘Con’`.
-- **`struct Cha { void ham() const {} }; class Con1 : Cha {};`**, rồi `Con1 a; a.ham();` cho `‘void Cha::ham() const’ is inaccessible within this context`, và `Cha& r = a;` cho `‘Cha’ is an inaccessible base of ‘Con1’`: kế thừa mặc định của `class` là `private`.
+Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng **"hình vuông" 6 x 3 không còn vuông**: bất biến "hai cạnh bằng nhau" ([Bài 31](31-lop-dong-goi.md)) bị vỡ qua hàm của cha. Cha có một **hợp đồng** ngầm: "đổi chiều rộng thì chiều cao giữ nguyên", và `HinhVuong` không giữ được hợp đồng đó. Vì vậy `HinhVuong` **không thay được** `HinhChuNhat`, và "vuông là chữ nhật" trong toán không thành is-a trong code. Đây là lỗi thiết kế chứ không phải thiếu tính năng của C++; cách sửa (như thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở Bài 37.
 
 ## Go: embedding giống ở một chỗ, khác ở ba chỗ
 
 !!! info "Bạn biết Go?"
     Go không có kế thừa. Thứ gần nhất là **embedding** (nhúng): `type XeChay struct { dochoi.DoChoi; Toc int }`. Mình đã chạy một gói Go 1.27.1 nhỏ để kiểm:
-    - **Giống**: gọi `x.GioiThieu()` được như hàm của XeChay (hàm "được nâng lên"); viết `x.DoChoi.GioiThieu()` thì gọi rõ phần nhúng, như `Cha::ham()`. Hàm cùng tên đặt ở struct ngoài che hàm nhúng (mình chạy: `x.Ten2()` ra bản của `XeChay`, `x.DoChoi.Ten2()` ra bản của `DoChoi`). Hai struct nhúng cùng có `Ham()` thì gọi `r.Ham()` là lỗi `ambiguous selector r.Ham`, gần giống kim cương.
+    - **Giống**: gọi `x.GioiThieu()` được như hàm của XeChay (hàm "được nâng lên"); viết `x.DoChoi.GioiThieu()` thì gọi rõ phần nhúng, như `Cha::ham()`. Hàm cùng tên đặt ở struct ngoài che hàm nhúng (mình chạy: `x.Ten2()` ra bản của `XeChay`, `x.DoChoi.Ten2()` ra bản của `DoChoi`).
     - **Khác 1, không có upcast**: `var d dochoi.DoChoi = x` lỗi `cannot use x (variable of struct type XeChay) as dochoi.DoChoi value in variable declaration`; phải viết `x.DoChoi` lấy phần nhúng ra (một bản sao).
-    - **Khác 2, receiver vẫn là phần cha**: bên trong hàm của `DoChoi`, `d` có kiểu `dochoi.DoChoi` (mình in `%T`), và khi nó gọi `d.Ten2()` thì chạy bản của `DoChoi`, không phải bản che của `XeChay`. Với struct nhúng, Go không có thứ như `this` trỏ về "con".
+    - **Khác 2, receiver vẫn là phần cha**: bên trong hàm của `DoChoi`, `d` có kiểu `dochoi.DoChoi` (mình in `%T`); khi nó gọi `d.Ten2()` thì chạy bản của `DoChoi`, không phải bản che của `XeChay`. Với struct nhúng, Go không có thứ như `this` trỏ về "con".
     - **Khác 3, không có `protected`**: Go có hai mức: viết hoa (thấy từ package khác) và viết thường (chỉ trong package). Mình chạy: `x.ma` ở package khác lỗi `cannot refer to unexported field ma`.
     - **Đa hình** của Go là **interface**: `XeChay` thỏa interface `GioiThieuer` nhờ hàm được nâng lên, mà không cần khai báo gì (mình chạy). Bài 33 sẽ so với `virtual` của C++.
 
@@ -455,7 +413,7 @@ Hai bản `DoChoi` chứa hai `ma` khác nhau, nên `sizeof` là 8, gấp đôi 
     Kế thừa công khai chỉ khi đúng is-a: mọi nơi dùng `Cha` thay bằng `Con` vẫn đúng (Liskov). Nếu chỉ muốn dùng lại cài đặt thì dùng thành viên: ghép lỏng hơn, che được phần không muốn lộ, đổi được sau này. Mặc định nên nghiêng về composition; hình vuông/chữ nhật là ví dụ kế thừa nghe hợp lý mà vỡ.
 
 ??? question "Bài toán kim cương (diamond problem) là gì?"
-    Lớp `D` kế thừa đa từ `B` và `C`, cả hai cùng kế thừa `A`. Mặc định `D` chứa hai bản `A`, nên gọi thành viên của `A` qua `D` là mơ hồ (lỗi biên dịch) và tốn bộ nhớ gấp đôi. Cách chữa là kế thừa `virtual` (`: virtual A`) để chỉ có một bản `A`; cách tránh gọn hơn là thiết kế sao cho không có kim cương.
+    Lớp `D` kế thừa đa từ `B` và `C`, cả hai cùng kế thừa `A`. Mặc định `D` chứa hai bản `A`, nên gọi thành viên của `A` qua `D` là mơ hồ (lỗi biên dịch). Cách chữa là kế thừa `virtual` (`: virtual A`) để chỉ có một bản `A`, đổi lại thêm chi phí và độ phức tạp (cách cài đặt tùy trình biên dịch); cách tránh gọn hơn là thiết kế sao cho không có kim cương.
 
 ??? question "Name hiding (che hàm) là gì?"
     Hàm ở lớp con cùng **tên** với hàm của cha thì che toàn bộ hàm cùng tên của cha, kể cả các bản quá tải khác kiểu tham số, vì tìm tên dừng ở lớp con. Gọi bản bị che phải viết `Cha::ham()` hoặc kéo tên về bằng `using Cha::ham;`. Đây chưa phải ghi đè đa hình (cần `virtual`, Bài 33).
@@ -463,7 +421,7 @@ Hai bản `DoChoi` chứa hai `ma` khác nhau, nên `sizeof` là 8, gấp đôi 
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Kế thừa chỉ để dùng lại code"
-    Kế thừa công khai là lời hứa "là một" với mọi nơi nhận `Cha&`; dùng nó chỉ để khỏi gõ lại hàm thì `XeXau` ở Ví dụ 6 lắp được vào máy bơm nước. Muốn dùng lại cài đặt thì đặt thành viên.
+    Kế thừa công khai là lời hứa "là một" với mọi nơi nhận `Cha&`; dùng nó chỉ để khỏi gõ lại hàm thì `XeXau` ở mục 6 lắp được vào máy bơm nước. Muốn dùng lại cài đặt thì đặt thành viên.
 
 !!! warning "Lỗi 2: Thêm `in(double)` ở con rồi hỏi vì sao `in` của cha biến mất"
     Hàm cùng tên ở con che mọi hàm cùng tên của cha, không chỉ hàm cùng kiểu tham số. Thêm `using Cha::in;` hoặc gọi `Cha::in(...)`.
@@ -502,10 +460,10 @@ int main() { Con o; }
 
 - Từ code của chính `Cha` và của các lớp con, nhưng không từ code bên ngoài
 - Chỉ từ code của chính `Cha`, còn lớp con thì phải dùng hàm công khai
-- Từ mọi nơi, giống `public`, chỉ khác là g++ in thêm cảnh báo
-- Từ lớp con và từ bên ngoài, nhưng không từ code của chính `Cha`
+- Từ lớp con và từ bên ngoài, nhưng bên ngoài phải đi qua hàm công khai
+- Từ mọi lớp cùng thư mục, vì `protected` mở theo tệp chứ không theo lớp
 
-<p class="giai-thich" markdown>`protected` mở thêm một cửa cho lớp con so với `private`, còn bên ngoài vẫn bị chặn (g++ báo `is protected within this context`). Mức "chỉ chính lớp" là của `private`, không phải `protected`. `protected` không giống `public` và không có cảnh báo nào thay cho việc chặn. Cũng không có chuyện chính lớp bị chặn mà bên ngoài lại vào được.</p>
+<p class="giai-thich" markdown>`protected` mở thêm một cửa cho lớp con so với `private`, còn bên ngoài vẫn bị chặn (g++ báo `is protected within this context`). Mức "chỉ chính lớp" là của `private`, không phải `protected`. Bên ngoài không có đường vòng nào qua hàm công khai: truy cập thẳng vào thành viên `protected` là lỗi. Và quyền truy cập C++ tính theo lớp, không theo tệp.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -544,8 +502,9 @@ int main() {
 - `concon`, vì `r` thực ra trỏ vào một `Con` nên chạy hàm của con
 - Không biên dịch được, vì không gán `Con` cho `Cha&` được
 - `chacon`, vì hàm nào chạy tùy kiểu của biến dùng để gọi
+- `chacha`, vì mọi lời gọi qua đối tượng `Con` đều dùng hàm của cha
 
-<p class="giai-thich" markdown>`r` có kiểu khai báo `Cha&` nên `r.noi()` gọi `Cha::noi` (in `cha`), còn `c` có kiểu `Con` nên in `con`; không có `virtual` thì kiểu biến quyết định (Bài 33 đổi điều này). Đối tượng thật là `Con` không làm hàm của con chạy khi gọi qua `Cha&`. Còn gán `Con` cho `Cha&` hợp lệ (upcast), nên chương trình biên dịch được.</p>
+<p class="giai-thich" markdown>`r` có kiểu khai báo `Cha&` nên `r.noi()` gọi `Cha::noi` (in `cha`), còn `c` có kiểu `Con` nên in `con`; không có `virtual` thì kiểu biến quyết định (Bài 33 đổi điều này). Đối tượng thật là `Con` không làm hàm của con chạy khi gọi qua `Cha&`. Gán `Con` cho `Cha&` hợp lệ (upcast), nên chương trình biên dịch được. Và `c.noi()` có kiểu `Con` nên dùng hàm của con, không phải của cha.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -561,12 +520,12 @@ d.x = 1;       // dòng 1
 d.B::x = 1;    // dòng 2
 ```
 
-- Cả hai dòng, vì không được truy cập thành viên của kế thừa đa
-- Chỉ dòng 2, vì `B::x` không viết được ở ngoài lớp
-- Không dòng nào, vì chỉ có một `x` trong `A` nên gọi bằng cách nào cũng được
-- Chỉ dòng 1, vì `D` chứa hai bản `A` nên `x` không rõ của bản nào
+- Cả hai dòng, vì `D` có hai cha nên mọi thành viên của cha đều bị mơ hồ
+- Chỉ dòng 2, vì cú pháp `B::x` chỉ dùng được bên trong hàm của lớp
+- Không dòng nào, vì trong `A` chỉ khai báo một `x` nên chỉ có một bản trong `D`
+- Chỉ dòng 1, vì `D` chứa hai bản `A` nên `x` không rõ là của bản nào
 
-<p class="giai-thich" markdown>Mỗi đường (qua `B`, qua `C`) mang một bản `A` riêng, nên `d.x` mơ hồ (`request for member ‘x’ is ambiguous`), còn `d.B::x` chỉ rõ bản nào nên hợp lệ. Kế thừa đa không cấm truy cập thành viên. Cú pháp `d.B::x` viết ở ngoài lớp được. Và chuyện có đúng một `x` trong định nghĩa `A` không đủ: mỗi bản `A` trong `D` có `x` riêng.</p>
+<p class="giai-thich" markdown>Mỗi đường (qua `B`, qua `C`) mang một bản `A` riêng, nên `d.x` mơ hồ (`request for member ‘x’ is ambiguous`), còn `d.B::x` chỉ rõ bản nào nên hợp lệ. Mơ hồ chỉ xảy ra với thành viên của ông `A` được kế thừa hai đường, và `d.B::x` viết ở ngoài lớp được. Chuyện `A` chỉ khai báo một `x` không đủ: mỗi bản `A` trong `D` có `x` riêng.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
