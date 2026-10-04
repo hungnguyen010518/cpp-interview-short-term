@@ -1,0 +1,2486 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-4-oop-patterns/34-template/">
+      
+      
+        <link rel="prev" href="../33-da-hinh-virtual/">
+      
+      
+        <link rel="next" href="../35-pattern-singleton-factory/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-34-template-viet-mot-lan-trinh-bien-dich-lam-ban-cho-tung-kieu" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 2 — STL và thuật toán
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 2 — STL và thuật toán
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/16-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 16 — std::vector: mảng co giãn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 17 — string, string_view, array, deque, list
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 18 — map, set, unordered_map: tra cứu theo khóa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 19 — Iterator và iterator invalidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 20 — <algorithm> và lambda: sort, find, transform, remove-erase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 21 — Big-O, danh sách liên kết, stack và queue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 3 — Đa luồng
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 3 — Đa luồng
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/24-thread-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/25-data-race-mutex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/26-deadlock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/27-condition-variable/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/28-atomic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/29-async-future/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 29 — std::async và std::future: lấy kết quả từ luồng khác
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 4 — OOP, template và Design Patterns
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 4 — OOP, template và Design Patterns
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../31-lop-dong-goi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../32-ke-thua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../33-da-hinh-virtual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-template-ham-mot-than-ham-nhieu-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Template hàm: một thân hàm, nhiều kiểu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-suy-luan-oi-so-khi-nao-phai-ghi-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Suy luận đối số: khi nào phải ghi &lt;kiểu&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-template-lop-tham-so-khong-phai-kieu-gia-tri-mac-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Template lớp, tham số không phải kiểu, giá trị mặc định
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-chuyen-biet-hoa-specialization-chi-nhac" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Chuyên biệt hóa (specialization): chỉ nhắc
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-template-hay-ham-ao-hai-kieu-a-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Template hay hàm ảo? Hai kiểu đa hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-hai-cai-gia-loi-dai-va-code-bloat" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Hai cái giá: lỗi dài và code bloat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-vi-sao-than-template-nam-trong-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Vì sao thân template nằm trong header
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chi-nhac-static_assert-type_traits-concepts-sfinae-lambda-auto" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chỉ nhắc: static_assert, type_traits, concepts, SFINAE, lambda auto
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-1-mot-ham-ba-ban-va-lambda-auto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 1: một hàm, ba bản, và lambda auto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-2-ngant-n-template-lop-voi-tham-so-kieu-va-khong-phai-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 2: Ngan&lt;T, N&gt;, template lớp với tham số kiểu và không phải kiểu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-3-chuyen-biet-hoa-nhanbool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 3: chuyên biệt hóa Nhan&lt;bool&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-4-cung-viec-cong-dien-tich-lam-bang-ham-ao-va-bang-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 4: cùng việc "cộng diện tích", làm bằng hàm ảo và bằng template
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-5-tach-template-ra-cpp-gap-undefined-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 5: tách template ra .cpp, gặp undefined reference
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#go-generics-co-rang-buoc-khong-co-chuyen-biet-hoa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Go: generics có ràng buộc, không có chuyên biệt hóa
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../35-pattern-singleton-factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../36-pattern-observer-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-template-ham-mot-than-ham-nhieu-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Template hàm: một thân hàm, nhiều kiểu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-suy-luan-oi-so-khi-nao-phai-ghi-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Suy luận đối số: khi nào phải ghi &lt;kiểu&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-template-lop-tham-so-khong-phai-kieu-gia-tri-mac-inh" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Template lớp, tham số không phải kiểu, giá trị mặc định
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-chuyen-biet-hoa-specialization-chi-nhac" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Chuyên biệt hóa (specialization): chỉ nhắc
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-template-hay-ham-ao-hai-kieu-a-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Template hay hàm ảo? Hai kiểu đa hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-hai-cai-gia-loi-dai-va-code-bloat" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Hai cái giá: lỗi dài và code bloat
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-vi-sao-than-template-nam-trong-header" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Vì sao thân template nằm trong header
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chi-nhac-static_assert-type_traits-concepts-sfinae-lambda-auto" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chỉ nhắc: static_assert, type_traits, concepts, SFINAE, lambda auto
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-1-mot-ham-ba-ban-va-lambda-auto" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 1: một hàm, ba bản, và lambda auto
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-2-ngant-n-template-lop-voi-tham-so-kieu-va-khong-phai-kieu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 2: Ngan&lt;T, N&gt;, template lớp với tham số kiểu và không phải kiểu
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-3-chuyen-biet-hoa-nhanbool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 3: chuyên biệt hóa Nhan&lt;bool&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-4-cung-viec-cong-dien-tich-lam-bang-ham-ao-va-bang-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 4: cùng việc "cộng diện tích", làm bằng hàm ảo và bằng template
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-5-tach-template-ra-cpp-gap-undefined-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ 5: tách template ra .cpp, gặp undefined reference
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#go-generics-co-rang-buoc-khong-co-chuyen-biet-hoa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Go: generics có ràng buộc, không có chuyên biệt hóa
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-34-template-viet-mot-lan-trinh-bien-dich-lam-ban-cho-tung-kieu">Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu<a class="headerlink" href="#bai-34-template-viet-mot-lan-trinh-bien-dich-lam-ban-cho-tung-kieu" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Viết được template hàm và template lớp (<code>template &lt;typename T&gt;</code>), hiểu trình biên dịch <strong>sinh một bản riêng cho mỗi kiểu được dùng</strong> (chạy thật, thấy hai ba bản bằng <code>__PRETTY_FUNCTION__</code> và <code>nm</code>), và biết <code>max(3, 4.5)</code> lỗi vì sao, sửa bằng <code>max&lt;double&gt;(3, 4.5)</code>.</li>
+<li>Đọc được <code>std::vector&lt;int&gt;</code> và <code>std::array&lt;int, 4&gt;</code> như hai template lớp (tham số kiểu, tham số không phải kiểu, giá trị mặc định), và biết chuyên biệt hóa là gì (chỉ nhắc, một ví dụ nhỏ).</li>
+<li>So được template (đa hình lúc biên dịch) với hàm ảo của <a href="../33-da-hinh-virtual/">Bài 33</a> bằng cùng một việc làm hai cách, biết cái giá: thông báo lỗi dài (một lỗi thật rút gọn), code bloat (số đo thật), và vì sao thân template phải nằm trong header (lỗi <code>undefined reference</code> chạy thật).</li>
+<li>Biết nhắc tên <code>static_assert</code>/<code>type_traits</code>, concepts C++20, SFINAE, lambda <code>auto</code> thực chất là template, và so với generics của Go (đã chạy Go 1.27.1).</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../33-da-hinh-virtual/">Bài 33</a> (hàm ảo, đa hình lúc chạy), <a href="../31-lop-dong-goi/">Bài 31</a> (lớp, thành viên <code>static</code>, bước liên kết), <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a> (<code>std::vector&lt;int&gt;</code>, khuôn mẫu được nhắc lần đầu), <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/">Bài 17</a> (<code>std::array&lt;int, 4&gt;</code>), <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a> (lambda tham số <code>auto</code>), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (<code>static_assert</code>).</p>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Xưởng đồ chơi cần các <strong>hộp đựng</strong>: hộp đựng xe, hộp đựng gấu, hộp đựng robot. Cách làm vụng: vẽ ba bản vẽ gần giống hệt, chỉ khác chữ "xe", "gấu", "robot". Cách gọn: làm <strong>một khuôn có chỗ trống</strong> "hộp đựng ___", rồi mỗi lần cần loại nào thì điền vào chỗ trống và có ngay một bản vẽ thật.</p>
+<p>Đó là <strong>template (khuôn mẫu)</strong>: một khuôn có chỗ trống để điền <strong>kiểu</strong>. Bạn đã dùng nó từ lâu: <code>std::vector&lt;int&gt;</code> là khuôn "dãy đựng ___" với chỗ trống điền <code>int</code> (<a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a>). Template hàm cũng vậy: một hàm có chỗ trống ở kiểu, điền xong thành một hàm thật.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví von xưởng đồ chơi không còn đúng?</p>
+<p>Ở xưởng, bản vẽ dùng được ngay còn "món" làm ra sau. Template thì <strong>chưa phải bản vẽ</strong>, nó là khuôn để làm ra bản vẽ: điền kiểu xong mới ra một bản vẽ thật (một lớp), rồi từ đó mới làm ra món (với template hàm, điền xong ra thẳng một hàm). Việc điền chỗ trống do <strong>trình biên dịch tự làm lúc biên dịch</strong>, khi nó thấy bạn dùng, và lúc đó chưa có món nào cả. Các ví dụ phía dưới (ngăn xếp, nhãn, hình) rời xưởng đồ chơi: chỉ cần nhớ "khuôn có chỗ trống".</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-template-ham-mot-than-ham-nhieu-kieu">1. Template hàm: một thân hàm, nhiều kiểu<a class="headerlink" href="#1-template-ham-mot-than-ham-nhieu-kieu" title="Permanent link">&para;</a></h3>
+<p>Viết <code>template &lt;typename T&gt;</code> ngay trước một hàm: <code>T</code> là <strong>tên chỗ trống</strong> cho một kiểu, dùng được trong cả hàm như kiểu thường. Mỗi lần bạn gọi hàm với một kiểu mới, trình biên dịch <strong>sinh ra một hàm thật</strong> cho kiểu đó (gọi là <strong>instantiation</strong>, "sinh bản"). Ví dụ 1 chạy thật và đếm các bản sinh ra.</p>
+<p><code>template &lt;class T&gt;</code> và <code>template &lt;typename T&gt;</code> <strong>giống hệt nhau</strong> ở chỗ này (mình đã đổi và chạy: kết quả y hệt). Nhiều người viết <code>typename</code> vì chữ <code>class</code> dễ làm tưởng <code>T</code> phải là lớp, trong khi <code>int</code> cũng được.</p>
+<h3 id="2-suy-luan-oi-so-khi-nao-phai-ghi-kieu">2. Suy luận đối số: khi nào phải ghi <code>&lt;kiểu&gt;</code><a class="headerlink" href="#2-suy-luan-oi-so-khi-nao-phai-ghi-kieu" title="Permanent link">&para;</a></h3>
+<p>Gọi <code>lonHon(3, 4)</code> mà không ghi <code>&lt;int&gt;</code>: trình biên dịch nhìn kiểu của từng đối số để <strong>tự suy ra</strong> <code>T</code> (<strong>suy luận đối số</strong>, template argument deduction). Hai đối số <code>3</code> (<code>int</code>) và <code>4.5</code> (<code>double</code>) cho hai kết quả khác nhau cho cùng một <code>T</code>, nên nó bỏ cuộc và báo lỗi; hàm thường thì tự đổi <code>int</code> sang <code>double</code>. Cách chữa: ghi kiểu ra, <code>lonHon&lt;double&gt;(3, 4.5)</code>, lúc này không cần suy luận nên <code>3</code> được đổi sang <code>double</code> như hàm thường. <code>std::max</code> của thư viện chuẩn gặp đúng chuyện này (Ví dụ 1, Thử thay đổi).</p>
+<h3 id="3-template-lop-tham-so-khong-phai-kieu-gia-tri-mac-inh">3. Template lớp, tham số không phải kiểu, giá trị mặc định<a class="headerlink" href="#3-template-lop-tham-so-khong-phai-kieu-gia-tri-mac-inh" title="Permanent link">&para;</a></h3>
+<p>Template lớp cũng có chỗ trống: <code>template &lt;typename T&gt; class Ngan { ... };</code> rồi dùng <code>Ngan&lt;int&gt;</code>. Mỗi <code>Ngan&lt;int&gt;</code>, <code>Ngan&lt;std::string&gt;</code> là <strong>một lớp riêng</strong>, và trình biên dịch chỉ sinh phần hàm thành viên bạn <strong>thật sự gọi</strong> (Ví dụ 2 xem bằng <code>nm</code>). Khi khai báo biến, bạn thường phải ghi <code>&lt;kiểu&gt;</code> ra như <code>std::vector&lt;int&gt;</code> (<a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a>); C++17 có suy luận cho một số trường hợp, mình không dạy.</p>
+<p>Chỗ trống không chỉ là kiểu. <strong>Tham số không phải kiểu</strong> (non-type) là một <strong>số</strong> biết lúc biên dịch: <code>template &lt;typename T, int N&gt;</code> rồi <code>Ngan&lt;int, 4&gt;</code>. Đó chính là <code>std::array&lt;int, 4&gt;</code> của <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/">Bài 17</a>: cỡ <code>4</code> nằm <strong>trong kiểu</strong>, nên cỡ khác là kiểu khác. Chỗ trống có thể có <strong>giá trị mặc định</strong>: <code>int N = 4</code> cho phép viết <code>Ngan&lt;int&gt;</code> (chỉ nhắc, Ví dụ 2 dùng).</p>
+<h3 id="4-chuyen-biet-hoa-specialization-chi-nhac">4. Chuyên biệt hóa (specialization): chỉ nhắc<a class="headerlink" href="#4-chuyen-biet-hoa-specialization-chi-nhac" title="Permanent link">&para;</a></h3>
+<p>Đôi khi một kiểu cần cách làm riêng. <strong>Chuyên biệt hóa</strong> là viết thêm một bản <strong>dành riêng</strong> cho kiểu đó, bằng <code>template &lt;&gt;</code> rồi tên lớp có kiểu cụ thể (<code>Nhan&lt;bool&gt;</code>); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng thay vì bản chung. Ví dụ 3 làm với <code>bool</code>. Chuẩn còn có <strong>chuyên biệt hóa từng phần</strong> (cho một nhóm kiểu, như mọi con trỏ), mình chỉ nêu tên.</p>
+<p>Ví dụ nổi tiếng trong thư viện chuẩn: <code>std::vector&lt;bool&gt;</code> là bản chuyên biệt hóa mà g++ cài bằng cách lưu mỗi phần tử một bit (chuẩn chỉ cho phép dạng gọn). Vì vậy <code>&amp;v[0]</code> không cho <code>bool*</code> (mình đã thử: g++ báo <code>cannot convert ‘std::vector&lt;bool&gt;::reference*’ to ‘bool*’</code>); đây là lý do nhiều người tránh <code>vector&lt;bool&gt;</code>.</p>
+<h3 id="5-template-hay-ham-ao-hai-kieu-a-hinh">5. Template hay hàm ảo? Hai kiểu đa hình<a class="headerlink" href="#5-template-hay-ham-ao-hai-kieu-a-hinh" title="Permanent link">&para;</a></h3>
+<p><a href="../33-da-hinh-virtual/">Bài 33</a> dạy đa hình <strong>lúc chạy</strong>: một mã, nhiều lớp con, hàm được chọn theo món thật. Template là đa hình <strong>lúc biên dịch</strong>: trình biên dịch sinh sẵn một bản cho mỗi kiểu và gọi thẳng, không cần lớp cha chung. Ví dụ 4 làm một việc (cộng diện tích) bằng cả hai.</p>
+<table>
+<thead>
+<tr>
+<th>Tiêu chí</th>
+<th>Hàm ảo (lúc chạy)</th>
+<th>Template (lúc biên dịch)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chọn hàm khi nào</td>
+<td>Lúc chạy, theo món thật</td>
+<td>Lúc biên dịch, theo kiểu</td>
+</tr>
+<tr>
+<td>Cần lớp cha chung</td>
+<td>Có</td>
+<td>Không, chỉ cần kiểu có đúng hàm cần gọi</td>
+</tr>
+<tr>
+<td>Trộn nhiều kiểu trong một dãy</td>
+<td>Được (<code>vector&lt;unique_ptr&lt;Hinh&gt;&gt;</code>)</td>
+<td>Không: <code>vector&lt;H&gt;</code> chỉ một kiểu <code>H</code></td>
+</tr>
+<tr>
+<td>Chi phí gọi</td>
+<td>Qua bảng hàm ảo, khó inline (Bài 33)</td>
+<td>Gọi thẳng, thường inline được</td>
+</tr>
+<tr>
+<td>Mã nhị phân</td>
+<td>Một bản hàm duyệt (như <code>tongAo</code>) cho mọi lớp con; mỗi lớp con vẫn có hàm ghi đè riêng</td>
+<td>Một bản hàm duyệt cho <strong>mỗi kiểu</strong> dùng, sinh lúc biên dịch</td>
+</tr>
+<tr>
+<td>Lỗi báo</td>
+<td>Thường ngắn, đúng chỗ gọi</td>
+<td>Có thể dài (mục 6)</td>
+</tr>
+</tbody>
+</table>
+<p>Không bên nào "tốt hơn" tuyệt đối: cần chứa lẫn nhiều loại và quyết định lúc chạy thì chọn hàm ảo; cùng một thuật toán cho nhiều kiểu, kiểu biết từ lúc viết thì chọn template. Mình không đo thời gian ở bài này.</p>
+<h3 id="6-hai-cai-gia-loi-dai-va-code-bloat">6. Hai cái giá: lỗi dài và code bloat<a class="headerlink" href="#6-hai-cai-gia-loi-dai-va-code-bloat" title="Permanent link">&para;</a></h3>
+<p><strong>Thông báo lỗi dài.</strong> Lỗi trong template hay hiện ở sâu trong thư viện, kèm cả chuỗi "được sinh bản từ đâu". Mình <code>std::sort</code> một <code>vector&lt;Mon&gt;</code> (với <code>struct Mon { int gia; };</code>, file thử <code>l1.cpp</code>) mà <code>Mon</code> không có <code>operator&lt;</code> (<a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a>: <code>std::sort</code> sắp xếp bằng <code>&lt;</code>); g++ 11.4 in <strong>114 dòng</strong>. Rút gọn (cắt giữa dòng, <code>...</code> là phần lược):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>predefined_ops.h: In instantiation of ‘constexpr bool __ops::_Iter_less_iter::operator()(...)’ [with ... = Mon*...]:
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>stl_algo.h:82:17:   required from ‘void std::__move_median_to_first(...)’
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>stl_algo.h:1904:34: required from ‘... std::__unguarded_partition_pivot(...)’
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>stl_algo.h:4842:18: required from ‘void std::sort(_RAIter, _RAIter) [with _RAIter = ...&lt;Mon*, std::vector&lt;Mon&gt; &gt;]’
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>l1.cpp:6:14:   required from here
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>predefined_ops.h:45:23: error: no match for ‘operator&lt;’ (operand types are ‘Mon’ and ‘Mon’)
+</code></pre></div>
+<p>Cách đọc: tìm dòng có chữ <code>error:</code> (nói thiếu <code>operator&lt;</code> cho <code>Mon</code>), rồi dòng <code>required from here</code> có tên <strong>file của bạn</strong> (<code>l1.cpp:6:14</code>, chỗ bạn gọi <code>sort</code>). Phần giữa là đường đi bên trong thư viện, thường không cần đọc; lỗi này lặp vài lần, đọc lần đầu là đủ.</p>
+<p><strong>Code bloat</strong> là chương trình phình to vì nhiều bản sinh ra. Mình thử một hàm template (sắp xếp một <code>vector</code> rồi cộng) với 1, 2, 4, 8 kiểu số, đo phần mã (<code>.text</code>) của file đối tượng (<code>.o</code>: kết quả dịch một file <code>.cpp</code>, chưa ghép) bằng lệnh <code>size</code>, lệnh in cỡ phần mã và phần dữ liệu của một file <code>.o</code>. Chương trình đo (bản 2 kiểu; bản 4 và 8 kiểu thêm các dòng <code>tong&lt;float&gt;</code>, <code>tong&lt;short&gt;</code>...):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>#include &lt;algorithm&gt;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>#include &lt;iostream&gt;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>#include &lt;vector&gt;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>template &lt;typename T&gt; T tong(std::vector&lt;T&gt; v) { std::sort(v.begin(), v.end()); T t{}; for (const T&amp; x : v) t += x; return t; }
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>int main() {
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>  std::cout &lt;&lt; tong&lt;int&gt;({3, 1, 2}) &lt;&lt; "\n";
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  std::cout &lt;&lt; tong&lt;long&gt;({3, 1, 2}) &lt;&lt; "\n";
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>}
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>// g++ -std=c++17 -O0 -c b.cpp -o b.o &amp;&amp; size b.o      (cột text)
+</code></pre></div>
+<p>Với <code>-O0</code>: 11818, 22929, 45505, 89528 byte, tức mỗi kiểu thêm gần cả chục nghìn byte. Với <code>-O2</code>: 1716, 3766, 7353, 14300 byte. Số đổi theo hàm, kiểu, cờ và trình biên dịch; chỉ nhớ <strong>mẫu</strong>: càng nhiều kiểu thì càng nhiều bản.</p>
+<h3 id="7-vi-sao-than-template-nam-trong-header">7. Vì sao thân template nằm trong header<a class="headerlink" href="#7-vi-sao-than-template-nam-trong-header" title="Permanent link">&para;</a></h3>
+<p>Chương trình lớn chia thành nhiều file <code>.cpp</code>, mỗi file được biên dịch <strong>riêng</strong>, rồi bước liên kết (<a href="../31-lop-dong-goi/">Bài 31</a>) ghép lại. File <strong>header</strong> (<code>.h</code>) là đoạn chữ mà <code>#include "lon.h"</code> dán vào mọi file dùng nó (ngoặc kép <code>" "</code> là file của mình, ngoặc nhọn <code>&lt; &gt;</code> là thư viện chuẩn). Hàm thường: khai báo ở <code>.h</code>, thân ở <code>.cpp</code>.</p>
+<p>Template không làm vậy được. Khi biên dịch <code>main.cpp</code> thấy <code>lonHon&lt;int&gt;</code>, trình biên dịch phải <strong>có thân template trước mắt</strong> để sinh bản <code>int</code>; nếu chỉ thấy khai báo thì nó đành để lại một lời gọi chưa có thân và hy vọng nơi khác có. File <code>lon.cpp</code> thì có thân nhưng <strong>không ai yêu cầu bản <code>int</code></strong> ở đó nên không sinh gì. Kết quả: liên kết báo <code>undefined reference</code> (Ví dụ 5).</p>
+<p>Cách chữa thông dụng: <strong>để cả thân template ngay trong header</strong>. (Có cách khác là "sinh bản tường minh" cho từng kiểu trong <code>.cpp</code>; mình chỉ nhắc tên, vì khi đó chỉ những kiểu đã liệt kê mới dùng được.)</p>
+<h3 id="8-chi-nhac-static_assert-type_traits-concepts-sfinae-lambda-auto">8. Chỉ nhắc: <code>static_assert</code>, <code>type_traits</code>, concepts, SFINAE, lambda <code>auto</code><a class="headerlink" href="#8-chi-nhac-static_assert-type_traits-concepts-sfinae-lambda-auto" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>static_assert</code> và <code>&lt;type_traits&gt;</code></strong>: <code>static_assert(điều kiện, "lời nhắn")</code> (<a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a>) kiểm tra lúc biên dịch, nên rất hợp trong template để chặn kiểu sai bằng lời nhắn rõ ràng. <code>&lt;type_traits&gt;</code> cho các phép kiểm kiểu như <code>std::is_same_v&lt;A, B&gt;</code> ("A và B cùng kiểu?") và <code>std::is_integral_v&lt;T&gt;</code> ("T là kiểu số nguyên?"); <code>static_assert(N &gt; 0, ...)</code> ở Ví dụ 2 dùng đúng cách này, và mình đã chạy một template với <code>static_assert(std::is_integral_v&lt;T&gt;, ...)</code> cho lời nhắn đúng khi truyền <code>double</code>.</li>
+<li><strong>Concepts (C++20)</strong>: viết ràng buộc ngay trong khai báo, như <code>template &lt;std::integral T&gt; T gap(T x)</code>. Mình đã thử g++ 11.4 với <code>-std=c++20</code> (không cần cờ phụ, cần <code>#include &lt;concepts&gt;</code>): <code>gap(4)</code> chạy, <code>gap(2.5)</code> báo <code>no matching function</code> kèm <code>constraints not satisfied</code>. Khóa này biên dịch bằng C++17 nên chỉ nhắc.</li>
+<li><strong>SFINAE</strong>: tên cũ của kỹ thuật "thay kiểu vào template mà hỏng thì chỉ loại bản đó khỏi các ứng viên, không báo lỗi" (Substitution Failure Is Not An Error). Concepts C++20 làm việc này dễ đọc hơn; ở đây chỉ để bạn nhận ra cái tên.</li>
+<li><strong>Lambda tham số <code>auto</code></strong> (<a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a>): <code>[](auto x) {...}</code> thực chất là một lambda có hàm gọi là <strong>template</strong>, nên mỗi kiểu đối số lại sinh một bản (Ví dụ 1 thấy hai bản).</li>
+</ul>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="vi-du-1-mot-ham-ba-ban-va-lambda-auto">Ví dụ 1: một hàm, ba bản, và lambda <code>auto</code><a class="headerlink" href="#vi-du-1-mot-ham-ba-ban-va-lambda-auto" title="Permanent link">&para;</a></h3>
+<p><code>lonHon</code> có một chỗ trống <code>T</code>. <code>__PRETTY_FUNCTION__</code> là chữ do <strong>g++/clang</strong> có (không phải chuẩn C++) chứa tên đầy đủ của hàm đang chạy kèm <code>T</code> đã điền; dùng nó để thấy bản nào đang chạy.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">T</span><span class="w"> </span><span class="n">lonHon</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">__PRETTY_FUNCTION__</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">   </span><span class="c1">// (1)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">lonHon</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">                  </span><span class="c1">// (2)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">lonHon</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">              </span><span class="c1">// (3)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">lonHon</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mf">4.5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">        </span><span class="c1">// (4)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">lonHon</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"an"</span><span class="p">),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"binh"</span><span class="p">))</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">  </span><span class="c1">// (5)</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">gap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">auto</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                             </span><span class="c1">// (6)</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">__PRETTY_FUNCTION__</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="p">};</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">gap</span><span class="p">(</span><span class="mi">21</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">gap</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"ha"</span><span class="p">))</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(2)</td>
+<td>Hai đối số <code>int</code>: suy ra <code>T = int</code>, sinh bản <code>lonHon&lt;int&gt;</code>; (1) in tên bản đó</td>
+<td>file có bản <code>int</code></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td>Hai <code>double</code>: suy ra <code>T = double</code>, sinh bản thứ hai</td>
+<td>thêm bản <code>double</code></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Ghi <code>&lt;double&gt;</code>: không suy luận, <code>3</code> đổi sang <code>double</code>; bản <code>double</code> <strong>đã có</strong>, dùng lại, không sinh thêm</td>
+<td>vẫn hai bản (<code>int</code>, <code>double</code>)</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>Hai <code>std::string</code>: bản thứ ba</td>
+<td>ba bản: <code>int</code>, <code>double</code>, <code>string</code></td>
+</tr>
+<tr>
+<td>(6)</td>
+<td>Lambda có <code>auto</code>: gọi với <code>int</code> rồi <code>std::string</code> sinh hai bản của hàm gọi</td>
+<td>thêm hai bản của hàm gọi lambda</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (g++ 11.4, tên đầy đủ của <code>string</code> rất dài nên bản in này giữ nguyên chữ g++ in):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>  T lonHon(T, T) [with T = int]
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>4
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  T lonHon(T, T) [with T = double]
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>2.5
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  T lonHon(T, T) [with T = double]
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>4.5
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  T lonHon(T, T) [with T = std::__cxx11::basic_string&lt;char&gt;]
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>binh
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  main()::&lt;lambda(auto:1)&gt; [with auto:1 = int]
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>42
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>  main()::&lt;lambda(auto:1)&gt; [with auto:1 = std::__cxx11::basic_string&lt;char&gt;]
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>haha
+</code></pre></div>
+<p>Mình chạy với ASan + UBSan: sạch, mã thoát 0. Có <strong>ba</strong> bản <code>lonHon</code> (<code>int</code>, <code>double</code>, <code>string</code>), không phải bốn: lời gọi (4) dùng lại bản <code>double</code>. Chữ in <code>__PRETTY_FUNCTION__</code> đổi theo trình biên dịch. Cách xem bản sinh ra trong file thật: lệnh <code>nm</code> liệt kê tên các hàm có trong file đã biên dịch, và <code>-C</code> giải mã tên cho dễ đọc (biên dịch <code>-O0</code>, các dòng <code>string</code> dài đã lược):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>W double lonHon&lt;double&gt;(double, double)
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>W int lonHon&lt;int&gt;(int, int)
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>W ... lonHon&lt;std::__cxx11::basic_string&lt;...&gt; &gt;(...)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>t auto main::{lambda(auto:1)#1}::operator()&lt;int&gt;(int) const
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>t auto main::{lambda(auto:1)#1}::operator()&lt;std::__cxx11::basic_string&lt;...&gt; &gt;(...) const
+</code></pre></div>
+<p>Ba bản <code>lonHon</code> và hai bản của hàm gọi trong lambda, đúng số kiểu đã dùng. (Chữ <code>W</code> ở đầu là ký hiệu "yếu": nhiều file cùng sinh một bản vẫn ghép được; ta chỉ đọc phần tên.) Các <strong>Thử thay đổi</strong> (đã chạy):</p>
+<ul>
+<li><strong>Viết <code>lonHon(3, 4.5)</code></strong>: <code>error: no match for call to ‘lonHon(int, double)’</code>, ghi chú <code>deduced conflicting types for parameter ‘T’ (‘int’ and ‘double’)</code>. <code>std::max(3, 4.5)</code> cho lỗi cùng kiểu (<code>no matching function for call to ‘max(int, double)’</code>).</li>
+<li><strong>Đổi <code>typename</code> thành <code>class</code></strong> ở dòng template: kết quả y hệt, từng chữ.</li>
+</ul>
+<h3 id="vi-du-2-ngant-n-template-lop-voi-tham-so-kieu-va-khong-phai-kieu">Ví dụ 2: <code>Ngan&lt;T, N&gt;</code>, template lớp với tham số kiểu và không phải kiểu<a class="headerlink" href="#vi-du-2-ngant-n-template-lop-voi-tham-so-kieu-va-khong-phai-kieu" title="Permanent link">&para;</a></h3>
+<p>Một ngăn xếp nhỏ (stack dữ liệu, khác stack bộ nhớ của Bài 02: thêm và lấy cùng một đầu, cái vào sau ra trước) giữ tối đa <code>N</code> phần tử kiểu <code>T</code>, nằm trên một <code>std::array&lt;T, N&gt;</code> (<a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/">Bài 17</a>). <code>N</code> có mặc định 4.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;array&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="o">&gt;</span><span class="w">                       </span><span class="c1">// (1)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">Ngan</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="k">static_assert</span><span class="p">(</span><span class="n">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">"N phai duong"</span><span class="p">);</span><span class="w">              </span><span class="c1">// (2)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">them</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                            </span><span class="c1">// (3)</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dem_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">N</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">        </span><span class="n">a_</span><span class="p">[</span><span class="n">dem_</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="o">++</span><span class="n">dem_</span><span class="p">;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">lay</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ra</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                                  </span><span class="c1">// (4)</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dem_</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">        </span><span class="o">--</span><span class="n">dem_</span><span class="p">;</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">        </span><span class="n">ra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_</span><span class="p">[</span><span class="n">dem_</span><span class="p">];</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">dem_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="k">private</span><span class="o">:</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_</span><span class="p">;</span><span class="w">                               </span><span class="c1">// (5)</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">dem_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="p">};</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">    </span><span class="n">Ngan</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">                                       </span><span class="c1">// (6)</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"them "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">": "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">    </span><span class="n">a</span><span class="p">.</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"lay ra "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", con "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">    </span><span class="n">Ngan</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">                            </span><span class="c1">// (7)</span>
+<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="s">"an"</span><span class="p">);</span>
+<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="s">"binh"</span><span class="p">);</span>
+<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"b day? "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">!</span><span class="n">b</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="s">"chi"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Ngan</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">Ngan</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">  </span><span class="c1">// (8)</span>
+<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>Hai chỗ trống: kiểu <code>T</code> và số <code>N</code>; <code>N</code> mặc định 4</td>
+<td></td>
+</tr>
+<tr>
+<td>(6)</td>
+<td><code>Ngan&lt;int&gt;</code> = <code>Ngan&lt;int, 4&gt;</code>: một lớp thật, <code>a_</code> là <code>array&lt;int, 4&gt;</code></td>
+<td><code>a</code>: <code>[? ? ? ?]</code>, <code>dem_</code> = 0</td>
+</tr>
+<tr>
+<td><code>them</code> 1..5</td>
+<td>Bốn lần đầu nhận (10, 20, 30, 40); lần năm <code>dem_ == N</code> nên trả <code>false</code></td>
+<td><code>[10 20 30 40]</code>, <code>dem_</code> = 4</td>
+</tr>
+<tr>
+<td><code>lay(x)</code></td>
+<td><code>dem_</code> còn 3, <code>x</code> = <code>a_[3]</code> = 40</td>
+<td><code>[10 20 30 (40)]</code>, <code>dem_</code> = 3</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td><code>Ngan&lt;std::string, 2&gt;</code>: lớp thứ hai, hoàn toàn khác <code>Ngan&lt;int, 4&gt;</code></td>
+<td><code>[an binh]</code>, đầy</td>
+</tr>
+<tr>
+<td>(8)</td>
+<td>Cỡ nằm trong kiểu nên <code>sizeof</code> khác nhau</td>
+<td>in <code>20 36</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>them 1: 1
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>them 2: 1
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>them 3: 1
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>them 4: 1
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>them 5: 0
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>lay ra 40, con 3
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>b day? 1
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>20 36
+</code></pre></div>
+<p>Mình chạy với ASan + UBSan: sạch. <code>20</code> và <code>36</code> là của máy mình (<code>int</code> 4 byte: 4 × 4 + <code>dem_</code> 4 = 20; 8 × 4 + 4 = 36), máy khác có thể ra số khác. Xem bản sinh ra bằng <code>nm -C</code> (rút gọn <code>string</code>): trong các hàm bạn gọi có <code>Ngan&lt;int, 4&gt;::them</code>, <code>lay</code>, <code>size</code> và <code>Ngan&lt;string, 2&gt;::them</code> (cộng hàm tạo/hủy tự sinh); <strong>không có</strong> <code>Ngan&lt;string, 2&gt;::lay</code> hay <code>size</code> vì chương trình không gọi. Các <strong>Thử thay đổi</strong> (đã chạy, đều lỗi biên dịch):</p>
+<ul>
+<li><strong>Thêm <code>Ngan&lt;int, 0&gt; z;</code></strong>: <code>error: static assertion failed: N phai duong</code>.</li>
+<li><strong>Thêm <code>Ngan&lt;int, 2&gt; p; Ngan&lt;int, 4&gt; q; p = q;</code></strong>: <code>no match for ‘operator=’ (operand types are ‘Ngan&lt;int, 2&gt;’ and ‘Ngan&lt;int, 4&gt;’)</code>: hai cỡ là hai kiểu khác nhau.</li>
+<li><strong>Thêm <code>Ngan&lt;int&gt; a2; a2.them("x");</code></strong>: <code>invalid conversion from ‘const char*’ to ‘int’</code>. <strong>Thêm <code>a2.foo();</code></strong>: <code>‘class Ngan&lt;int, 4&gt;’ has no member named ‘foo’</code>.</li>
+</ul>
+<h3 id="vi-du-3-chuyen-biet-hoa-nhanbool">Ví dụ 3: chuyên biệt hóa <code>Nhan&lt;bool&gt;</code><a class="headerlink" href="#vi-du-3-chuyen-biet-hoa-nhanbool" title="Permanent link">&para;</a></h3>
+<p><code>Nhan&lt;T&gt;::in</code> in giá trị trong ngoặc vuông. Với <code>bool</code>, in <code>1</code>/<code>0</code> thì khó đọc, nên viết bản riêng in <code>dung</code>/<code>sai</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Nhan</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">in</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"["</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"]</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// (1)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">};</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Nhan</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">                                                   </span><span class="c1">// (2)</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">in</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"["</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">v</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"dung"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"sai"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"]</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="p">};</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="n">Nhan</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">in</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span><span class="w">                                                </span><span class="c1">// (3)</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="n">Nhan</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;::</span><span class="n">in</span><span class="p">(</span><span class="s">"xin chao"</span><span class="p">);</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="n">Nhan</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;::</span><span class="n">in</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">                                             </span><span class="c1">// (4)</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>Bản chung cho mọi <code>T</code>; <code>static</code> nên gọi <code>Nhan&lt;int&gt;::in(...)</code> không cần tạo món (<a href="../31-lop-dong-goi/">Bài 31</a>)</td>
+<td></td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>template &lt;&gt;</code> rồi <code>Nhan&lt;bool&gt;</code>: bản <strong>dành riêng</strong> cho <code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>T = int</code>: dùng bản chung, in <code>[42]</code></td>
+<td></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>T = bool</code>: trình biên dịch chọn bản riêng (2)</td>
+<td>in <code>[dung]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>[42]
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>[xin chao]
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>[dung]
+</code></pre></div>
+<p>Mình chạy với ASan + UBSan: sạch. <strong>Thử thay đổi: xóa khối <code>template &lt;&gt; struct Nhan&lt;bool&gt; {...};</code></strong> (đã chạy): dòng cuối thành <code>[1]</code>, vì bản chung in <code>bool</code> ra <code>1</code>.</p>
+<h3 id="vi-du-4-cung-viec-cong-dien-tich-lam-bang-ham-ao-va-bang-template">Ví dụ 4: cùng việc "cộng diện tích", làm bằng hàm ảo và bằng template<a class="headerlink" href="#vi-du-4-cung-viec-cong-dien-tich-lam-bang-ham-ao-va-bang-template" title="Permanent link">&para;</a></h3>
+<p><code>Tron</code>, <code>Vuong</code> kế thừa <code>Hinh</code> giống ý của Bài 33 (tên lớp ngắn lại); <code>Luoi</code> <strong>không</strong> kế thừa gì, chỉ có hàm <code>dienTich</code> cùng tên. <code>tongAo</code> dùng hàm ảo, <code>tongMau</code> dùng template.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">Hinh</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Hinh</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">dienTich</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">};</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Tron</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Hinh</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">Tron</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">r_</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dienTich</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r_</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">r_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="k">private</span><span class="o">:</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">r_</span><span class="p">;</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="p">};</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="k">class</span><span class="w"> </span><span class="nc">Vuong</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Hinh</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">Vuong</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">c_</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dienTich</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">c_</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c_</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="k">private</span><span class="o">:</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">c_</span><span class="p">;</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="p">};</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Luoi</span><span class="w"> </span><span class="p">{</span><span class="w">                                                 </span><span class="c1">// (1)</span>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="nf">dienTich</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="p">};</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a>
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="kt">double</span><span class="w"> </span><span class="nf">tongAo</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Hinh</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">     </span><span class="c1">// (2)</span>
+<a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">h</span><span class="o">-&gt;</span><span class="n">dienTich</span><span class="p">();</span>
+<a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">t</span><span class="p">;</span>
+<a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a><span class="p">}</span>
+<a id="__codelineno-9-36" name="__codelineno-9-36" href="#__codelineno-9-36"></a>
+<a id="__codelineno-9-37" name="__codelineno-9-37" href="#__codelineno-9-37"></a><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">H</span><span class="o">&gt;</span>
+<a id="__codelineno-9-38" name="__codelineno-9-38" href="#__codelineno-9-38"></a><span class="kt">double</span><span class="w"> </span><span class="n">tongMau</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">H</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                   </span><span class="c1">// (3)</span>
+<a id="__codelineno-9-39" name="__codelineno-9-39" href="#__codelineno-9-39"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-40" name="__codelineno-9-40" href="#__codelineno-9-40"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">h</span><span class="p">.</span><span class="n">dienTich</span><span class="p">();</span>
+<a id="__codelineno-9-41" name="__codelineno-9-41" href="#__codelineno-9-41"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">t</span><span class="p">;</span>
+<a id="__codelineno-9-42" name="__codelineno-9-42" href="#__codelineno-9-42"></a><span class="p">}</span>
+<a id="__codelineno-9-43" name="__codelineno-9-43" href="#__codelineno-9-43"></a>
+<a id="__codelineno-9-44" name="__codelineno-9-44" href="#__codelineno-9-44"></a><span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-45" name="__codelineno-9-45" href="#__codelineno-9-45"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Hinh</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">lan</span><span class="p">;</span><span class="w">                  </span><span class="c1">// (4)</span>
+<a id="__codelineno-9-46" name="__codelineno-9-46" href="#__codelineno-9-46"></a><span class="w">    </span><span class="n">lan</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Tron</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<a id="__codelineno-9-47" name="__codelineno-9-47" href="#__codelineno-9-47"></a><span class="w">    </span><span class="n">lan</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Vuong</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<a id="__codelineno-9-48" name="__codelineno-9-48" href="#__codelineno-9-48"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ao:  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tongAo</span><span class="p">(</span><span class="n">lan</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-49" name="__codelineno-9-49" href="#__codelineno-9-49"></a>
+<a id="__codelineno-9-50" name="__codelineno-9-50" href="#__codelineno-9-50"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Tron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">toanTron</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">Tron</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">Tron</span><span class="p">(</span><span class="mi">2</span><span class="p">)};</span><span class="w">         </span><span class="c1">// (5)</span>
+<a id="__codelineno-9-51" name="__codelineno-9-51" href="#__codelineno-9-51"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Luoi</span><span class="o">&gt;</span><span class="w"> </span><span class="n">toanLuoi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">Luoi</span><span class="p">(),</span><span class="w"> </span><span class="n">Luoi</span><span class="p">()};</span>
+<a id="__codelineno-9-52" name="__codelineno-9-52" href="#__codelineno-9-52"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"mau: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tongMau</span><span class="p">(</span><span class="n">toanTron</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tongMau</span><span class="p">(</span><span class="n">toanLuoi</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-53" name="__codelineno-9-53" href="#__codelineno-9-53"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-54" name="__codelineno-9-54" href="#__codelineno-9-54"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(4)</td>
+<td>Dãy con trỏ tới <code>Hinh</code>: trộn một tròn và một vuông</td>
+<td><code>[ptr][ptr]</code> tới hai món ở kho</td>
+</tr>
+<tr>
+<td><code>tongAo(lan)</code> (2)</td>
+<td><code>h-&gt;dienTich()</code> là hàm ảo: chạy bản của món thật, 3 + 4</td>
+<td>in <code>ao:  7</code></td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>Mỗi dãy chỉ <strong>một kiểu</strong>: <code>vector&lt;Tron&gt;</code> và <code>vector&lt;Luoi&gt;</code></td>
+<td>hai dãy, món nằm ngay trong dãy</td>
+</tr>
+<tr>
+<td><code>tongMau(toanTron)</code> (3)</td>
+<td><code>H = Tron</code>: sinh bản <code>tongMau&lt;Tron&gt;</code>, gọi thẳng <code>Tron::dienTich</code>: 3 + 12</td>
+<td>15</td>
+</tr>
+<tr>
+<td><code>tongMau(toanLuoi)</code></td>
+<td><code>H = Luoi</code>: bản thứ hai; <code>Luoi</code> (1) không có lớp cha vẫn dùng được, chỉ cần có <code>dienTich()</code></td>
+<td>7 + 7 = 14</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>ao:  7
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>mau: 15 14
+</code></pre></div>
+<p>Mình chạy với ASan + UBSan: sạch. <code>nm -C</code> thấy đúng hai bản <code>tongMau&lt;Luoi&gt;</code> và <code>tongMau&lt;Tron&gt;</code>. Cái mà hàm ảo làm được và template không: <code>tongAo</code> nhận <strong>lẫn</strong> tròn và vuông trong một dãy. <strong>Thử thay đổi (đã chạy):</strong> thêm <code>tongMau(lan);</code> vào <code>main</code> thì g++ báo <code>required from here</code> ở dòng đó và <code>error: ‘const class std::unique_ptr&lt;Hinh&gt;’ has no member named ‘dienTich’</code>: <code>H</code> bị suy ra là <code>unique_ptr&lt;Hinh&gt;</code>, và lỗi chỉ lộ khi sinh bản, không lộ lúc viết template.</p>
+<h3 id="vi-du-5-tach-template-ra-cpp-gap-undefined-reference">Ví dụ 5: tách template ra <code>.cpp</code>, gặp <code>undefined reference</code><a class="headerlink" href="#vi-du-5-tach-template-ra-cpp-gap-undefined-reference" title="Permanent link">&para;</a></h3>
+<p>Ba file trong một thư mục tạm (ở đây không dùng <code>```cpp</code> vì cần ghép nhiều file). <code>-c</code> bảo g++ chỉ dịch ra file <code>.o</code>, chưa liên kết; lệnh cuối <code>g++ main.o lon.o -o app</code> mới ghép các <code>.o</code> thành chương trình.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>lon.h:
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>template &lt;typename T&gt;
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>T lonHon(T a, T b);
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>lon.cpp:
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>#include "lon.h"
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>template &lt;typename T&gt;
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>T lonHon(T a, T b) { if (a &lt; b) return b; return a; }
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>main.cpp:
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>#include &lt;iostream&gt;
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>#include "lon.h"
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>int main() { std::cout &lt;&lt; lonHon(3, 4) &lt;&lt; "\n"; return 0; }
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Chuyện gì xảy ra</th>
+<th>Trong file đối tượng</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>g++ -c lon.cpp -o lon.o</code></td>
+<td>Có thân template nhưng chưa ai dùng, <strong>không sinh bản nào</strong></td>
+<td><code>nm lon.o</code> không in gì</td>
+</tr>
+<tr>
+<td><code>g++ -c main.cpp -o main.o</code></td>
+<td>Chỉ thấy khai báo trong <code>lon.h</code>; để lại lời gọi <code>lonHon&lt;int&gt;</code> chưa có thân</td>
+<td><code>U int lonHon&lt;int&gt;(int, int)</code> (<code>U</code>: chưa định nghĩa)</td>
+</tr>
+<tr>
+<td><code>g++ main.o lon.o -o app</code></td>
+<td>Bước liên kết tìm <code>lonHon&lt;int&gt;</code> ở đâu cũng không có</td>
+<td>lỗi</td>
+</tr>
+</tbody>
+</table>
+<p>Kết quả thật khi liên kết:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/usr/bin/ld: main.o: in function `main':
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>main.cpp:(.text+0x13): undefined reference to `int lonHon&lt;int&gt;(int, int)'
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>collect2: error: ld returned 1 exit status
+</code></pre></div>
+<p>Hai lần biên dịch đều sạch lỗi, chỉ bước liên kết hỏng. <strong>Chữa (đã chạy, in <code>4</code>):</strong> bỏ <code>lon.cpp</code>, chuyển cả thân vào <code>lon.h</code>: <code>main.cpp</code> thấy thân nên tự sinh <code>lonHon&lt;int&gt;</code>. Cách chữa thứ hai (đã chạy, cũng in <code>4</code>): giữ <code>lon.cpp</code> và thêm dòng <code>template int lonHon&lt;int&gt;(int, int);</code> ở cuối nó, ép sinh bản <code>int</code> tại đó; cách này chỉ phục vụ các kiểu đã liệt kê.</p>
+<h2 id="go-generics-co-rang-buoc-khong-co-chuyen-biet-hoa">Go: generics có ràng buộc, không có chuyên biệt hóa<a class="headerlink" href="#go-generics-co-rang-buoc-khong-co-chuyen-biet-hoa" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Mình đã chạy chương trình Go 1.27.1 nhỏ để kiểm các ý dưới đây.
+- <strong>Cùng ý, khác cú pháp</strong>: <code>func Max[T cmp.Ordered](a, b T) T</code> và <code>type Hop[T any] struct{...}</code> tương ứng <code>template &lt;typename T&gt;</code>. <code>Max(3, 4)</code>, <code>Max("an", "binh")</code>, <code>Max[float64](3, 4.5)</code> đều chạy.
+- <strong>Suy luận khác nhau</strong>: Go mình dùng cho <code>Max(3, 4.5)</code> ra <code>4.5</code>, vì cả hai là hằng chưa định kiểu; C++ lỗi (mục 2). Nhưng <code>Max(i, f)</code> với <code>i</code> là <code>int</code> còn <code>f</code> là <code>float64</code> thì Go cũng lỗi: <code>type float64 of f does not match inferred type int for T</code>.
+- <strong>Ràng buộc</strong>: Go kiểm bằng một <strong>constraint</strong> (một interface). <code>Max(P{1}, P{2})</code> với <code>P</code> là struct báo <code>P does not satisfy cmp.Ordered</code>.
+- <strong>Lúc nào kiểm</strong>: thân hàm cũng được kiểm theo constraint ngay lúc định nghĩa: <code>func Dung[T any](a, b T) bool { return a &lt; b }</code> lỗi <code>type parameter T cannot use operator &lt;</code> dù chưa ai gọi. C++ (không dùng concepts) kiểm lúc <strong>sinh bản</strong>, như duck typing lúc biên dịch: mình đã biên dịch một template chưa ai gọi mà thân gọi <code>x.size()</code> thì g++ im lặng, đến khi gọi với <code>int</code> mới báo lỗi.
+- <strong>Không có chuyên biệt hóa</strong>: Go không có cách viết bản riêng cho <code>bool</code> như <code>Nhan&lt;bool&gt;</code>; muốn khác thì rẽ nhánh trong thân hoặc dùng interface.
+- <strong>Cài đặt, chỉ để lấy ý</strong>: với trình biên dịch gc mình dùng, <code>Max</code> cho <code>int</code>, <code>float64</code>, <code>string</code> ra ba ký hiệu <code>main.Max[go.shape.int]</code>, <code>[go.shape.float64]</code>, <code>[go.shape.string]</code>; còn <code>Max(A(1), A(2))</code>, <code>Max(B(3), B(4))</code> với <code>type A int</code>, <code>type B int</code> <strong>dùng chung</strong> bản <code>go.shape.int</code> (<code>go tool nm</code> thấy một ký hiệu; biên dịch với <code>-gcflags=-l</code> để <code>Max</code> không bị inline, không thì khó thấy). Cách này gọi là "GC shape stenciling"; đó là chi tiết cài đặt của gc, spec Go không quy định và có thể đổi. C++ thì mỗi kiểu một bản (Ví dụ 1).</p>
+</div>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>Template là gì? Khác macro thế nào?</summary>
+<p>Template là mã viết một lần với tham số kiểu (hoặc số); trình biên dịch sinh một bản riêng cho mỗi tổ hợp tham số được dùng (instantiation) và kiểm kiểu như code thường. Macro (<code>#define</code>) là bộ tiền xử lý thay chữ trước khi biên dịch, không biết kiểu và không biết phạm vi. Mình chạy <code>#define BINH(x) x * x</code> rồi <code>BINH(1 + 2)</code>: ra <code>5</code> chứ không phải <code>9</code>, vì chữ bị thay thành <code>1 + 2 * 1 + 2</code>.</p>
+</details>
+<details class="question">
+<summary>Template và đa hình lúc chạy khác nhau thế nào? Chọn cái nào?</summary>
+<p>Đa hình lúc biên dịch (template) chọn theo kiểu lúc biên dịch, không cần lớp cha chung, không có vtable, thường inline được, nhưng mỗi kiểu một bản mã sinh lúc biên dịch và một dãy chỉ chứa một kiểu. Đa hình lúc chạy (hàm ảo) chọn theo món thật lúc chạy, trộn nhiều loại trong một dãy, hàm duyệt chỉ một bản (mỗi lớp con vẫn có hàm ghi đè riêng, chọn lúc chạy qua vtable), đổi lại gọi gián tiếp. Cần trộn loại hoặc quyết định lúc chạy thì hàm ảo; cùng thuật toán cho nhiều kiểu biết trước thì template.</p>
+</details>
+<details class="question">
+<summary>Tại sao định nghĩa template thường nằm trong header?</summary>
+<p>Mỗi file <code>.cpp</code> được biên dịch riêng. Để sinh bản cho <code>lonHon&lt;int&gt;</code>, trình biên dịch phải thấy thân template ngay tại file đang dịch; nếu thân nằm ở <code>.cpp</code> khác thì file dùng chỉ để lại lời gọi, còn file có thân không được yêu cầu sinh bản <code>int</code>, nên bước liên kết báo <code>undefined reference</code> (mình đã chạy). Chữa bằng cách để thân trong header, hoặc sinh bản tường minh cho vài kiểu cố định.</p>
+</details>
+<details class="question">
+<summary>Chuyên biệt hóa (specialization) là gì?</summary>
+<p>Là viết một bản template riêng cho một kiểu (toàn phần, <code>template &lt;&gt; struct Nhan&lt;bool&gt;</code>) hoặc một nhóm kiểu (từng phần, như mọi con trỏ); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng. Ví dụ trong thư viện chuẩn là <code>std::vector&lt;bool&gt;</code> (g++) lưu mỗi phần tử một bit, nên <code>&amp;v[0]</code> không cho <code>bool*</code>. Go không có chuyên biệt hóa.</p>
+</details>
+<details class="question">
+<summary>Code bloat là gì?</summary>
+<p>Mỗi kiểu dùng sinh một bản mã riêng, nên dùng một template với nhiều kiểu thì chương trình lớn hơn. Mình đo một hàm template với 1 rồi 8 kiểu số: phần mã của file đối tượng tăng từ 11818 lên 89528 byte ở <code>-O0</code>, và từ 1716 lên 14300 byte ở <code>-O2</code>; số đo đổi theo hàm, kiểu, cờ, trình biên dịch. Giảm bằng cách bớt kiểu thừa, để phần không phụ thuộc <code>T</code> ở hàm thường, hoặc dùng hàm ảo khi một hàm duyệt chung là đủ.</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Trộn hai kiểu cho một <code>T</code></p>
+<p><code>lonHon(3, 4.5)</code> lỗi vì suy ra hai <code>T</code> khác nhau (Ví dụ 1). Ghi kiểu rõ: <code>lonHon&lt;double&gt;(3, 4.5)</code>; Go có thể cho qua nếu cả hai là hằng, C++ thì không.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Khai báo template ở <code>.h</code>, định nghĩa ở <code>.cpp</code></p>
+<p>Hai file đều biên dịch được, đến bước liên kết mới báo <code>undefined reference</code> (Ví dụ 5). Để thân template trong header.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Tin rằng template đã được kiểm kỹ khi viết</p>
+<p>Thân gọi <code>x.size()</code> mà chưa ai dùng thì g++ không phàn nàn; lỗi chỉ hiện khi có người gọi với kiểu sai, và hiện trong thư viện (mục 6). Thử gọi template với vài kiểu thật, hoặc dùng <code>static_assert</code>/concepts để báo lỗi sớm và rõ.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="34">
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 1.</strong> Cho template <code>lon</code> dưới đây. Dòng nào lỗi biên dịch?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>template &lt;typename T&gt;
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>T lon(T a, T b) { if (a &lt; b) return b; return a; }
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>// dòng A:  lon(2, 7)
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>// dòng B:  lon(2, 7.5)
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>// dòng C:  lon&lt;double&gt;(2, 7)
+</code></pre></div>
+<ul>
+<li>Dòng B và dòng C, vì ghi <code>&lt;double&gt;</code> mà đối số <code>2</code> và <code>7</code> lại là <code>int</code></li>
+<li>Chỉ dòng C, vì đã ghi kiểu rõ thì không được kèm đối số có kiểu khác</li>
+<li>Chỉ dòng B, vì hai đối số cho hai kiểu khác nhau mà chỉ có một <code>T</code></li>
+<li>Không dòng nào, vì <code>int</code> được tự đổi sang <code>double</code> giống mọi hàm thường</li>
+</ul>
+<p class="giai-thich">Ở dòng B, <code>2</code> là <code>int</code> còn <code>7.5</code> là <code>double</code>, nên trình biên dịch suy ra hai kiểu cho cùng một <code>T</code> và báo lỗi. Dòng C ghi <code>&lt;double&gt;</code> nên không cần suy luận và <code>2</code>, <code>7</code> được đổi sang <code>double</code> như hàm thường; dòng A cả hai đều <code>int</code>. Hàm thường đổi được <code>int</code> sang <code>double</code>, nhưng chính phần suy luận của template mới là chỗ vấp. Vậy "ghi kiểu rõ thì không được kèm đối số khác kiểu" là hiểu sai: chính cách đó sửa lỗi dòng B.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 2.</strong> Một chương trình gọi <code>lon(1, 2)</code>, <code>lon(3, 4)</code>, <code>lon(1.5, 2.5)</code> và <code>lon&lt;long&gt;(1, 2)</code>, với <code>lon</code> là template hàm như câu trước. Trình biên dịch sinh bao nhiêu bản của <code>lon</code>?</p>
+<ul>
+<li>Bốn bản, vì mỗi lời gọi sinh một bản riêng cho mình</li>
+<li>Ba bản, vì có ba kiểu khác: <code>int</code>, <code>double</code>, <code>long</code></li>
+<li>Hai bản, vì chỉ có hai nhóm kiểu: số nguyên, số thực</li>
+<li>Một bản dùng chung, vì thân hàm viết đúng một lần</li>
+</ul>
+<p class="giai-thich">Mỗi <strong>kiểu</strong> khác nhau được điền vào <code>T</code> sinh một bản: <code>int</code> (cho hai lời gọi đầu), <code>double</code> và <code>long</code>, tổng ba; hai lời gọi <code>lon(1, 2)</code> và <code>lon(3, 4)</code> dùng chung bản <code>int</code>. Số lời gọi không quyết định số bản, nên bốn là sai. Template không gom kiểu theo nhóm "nguyên/thực": <code>int</code> và <code>long</code> là hai bản riêng. Và thân viết một lần không có nghĩa là chỉ có một bản mã; mình đã thấy ba bản trong <code>nm</code> ở Ví dụ 1 với ba kiểu.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 3.</strong> Vì sao thân của template hàm thường phải để trong header, không để ở file <code>.cpp</code> riêng?</p>
+<ul>
+<li>Vì chuẩn C++ cấm viết thân template trong file <code>.cpp</code>, nên chỉ còn chỗ ở header</li>
+<li>Vì mã trong header được nạp nhanh hơn nên chương trình chạy nhanh hơn</li>
+<li>Vì template được sinh bản ngay lúc chạy nên thân phải sẵn trong bộ nhớ</li>
+<li>Vì nơi dùng phải thấy thân để sinh bản, không thì có <code>undefined reference</code></li>
+</ul>
+<p class="giai-thich">Mỗi file <code>.cpp</code> được biên dịch riêng; file <code>main.cpp</code> cần thân template để sinh bản <code>int</code>, còn file <code>lon.cpp</code> có thân thì không ai nhờ nó sinh bản đó. Không có bản nào thì bước liên kết báo <code>undefined reference</code> (mình đã chạy). Chuẩn không cấm đặt thân ở <code>.cpp</code>, vì sinh bản tường minh cho vài kiểu cố định vẫn dùng được. Sinh bản xảy ra lúc biên dịch chứ không phải lúc chạy, và vị trí header không làm chương trình chạy nhanh hơn.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 4.</strong> Việc cộng diện tích một dãy hình tròn lẫn hình vuông. Phát biểu nào về hai cách làm đúng?</p>
+<ul>
+<li>Hàm ảo trộn được hai loại trong một dãy con trỏ <code>Hinh</code>; một <code>vector&lt;H&gt;</code> chỉ chứa một kiểu <code>H</code></li>
+<li>Template trộn được hai loại trong một <code>vector&lt;H&gt;</code>, vì <code>H</code> chọn lại cho từng phần tử lúc chạy</li>
+<li>Hàm ảo không cần lớp cha chung, còn template bắt buộc các kiểu phải có chung một lớp cha</li>
+<li>Cùng có hàm <code>dienTich</code> là đủ để một <code>vector&lt;H&gt;</code> chứa cả hình tròn lẫn hình vuông</li>
+</ul>
+<p class="giai-thich"><code>vector&lt;H&gt;</code> có đúng một kiểu phần tử <code>H</code> đã định từ lúc biên dịch, nên muốn lẫn hai loại phải dùng con trỏ lớp cha và hàm ảo. <code>H</code> không được chọn lại lúc chạy: template là đa hình lúc biên dịch. Tên hàm giống nhau cũng không gộp được hai kiểu vào một <code>vector&lt;H&gt;</code>. Và hai vế bị đảo: hàm ảo cần lớp cha chung, còn template thì không (<code>Luoi</code> ở Ví dụ 4).</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 5.</strong> Đọc đoạn sau và cho biết kết quả khi biên dịch bằng g++ (<code>-std=c++17 -Wall -Wextra</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>template &lt;typename T&gt;
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>int f(T x) { return x.size(); }
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>int main() { }
+</code></pre></div>
+<ul>
+<li>Lỗi biên dịch, vì <code>T</code> chưa biết là kiểu nào nên không thể kiểm <code>x.size()</code> được</li>
+<li>Biên dịch được, vì chưa ai gọi <code>f</code> nên chưa có bản nào để kiểm <code>x.size()</code></li>
+<li>Biên dịch được, nhưng bước liên kết báo lỗi vì không tìm thấy hàm <code>size</code></li>
+<li>Lỗi biên dịch, vì template phải được gọi ít nhất một lần trong chương trình này</li>
+</ul>
+<p class="giai-thich">Mình đã biên dịch đoạn này: g++ không báo lỗi hay cảnh báo. Thân hàm phụ thuộc vào <code>T</code>, nên chuyện <code>x.size()</code> có hợp lệ hay không chỉ được kiểm khi sinh bản cho một kiểu cụ thể, mà không ai gọi <code>f</code>. Gọi <code>f(3)</code> thì mới báo <code>request for member ‘size’ in ‘x’, which is of non-class type ‘int’</code> (đã chạy). Và <code>main</code> rỗng không chạy gì nên cũng chẳng có lỗi lúc chạy; template cũng không bắt buộc phải được gọi.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 6.</strong> <code>Ngan&lt;int, 3&gt;</code> và <code>Ngan&lt;int, 5&gt;</code> là hai bản của template <code>template &lt;typename T, int N&gt; class Ngan</code>. Quan hệ giữa hai kiểu này là gì?</p>
+<ul>
+<li>Cùng một kiểu, vì <code>T</code> giống nhau; số 3 và 5 chỉ là cỡ ban đầu, đổi được lúc chạy</li>
+<li>Hai kiểu khác nhau nhưng gán được cho nhau, vì cùng <code>T</code> là <code>int</code></li>
+<li>Hai kiểu khác nhau, như <code>array&lt;int, 3&gt;</code> và <code>array&lt;int, 5&gt;</code>; gán nhau là lỗi</li>
+<li>Cùng một kiểu, vì <code>N</code> chỉ là số thường, không nằm trong tên kiểu</li>
+</ul>
+<p class="giai-thich"><code>N</code> là tham số không phải kiểu: giá trị của nó nằm <strong>trong</strong> kiểu, nên <code>Ngan&lt;int, 3&gt;</code> và <code>Ngan&lt;int, 5&gt;</code> là hai lớp riêng, và gán cho nhau báo <code>no match for ‘operator=’</code> (mình đã chạy ở Ví dụ 2). Số trong <code>&lt; &gt;</code> phải biết lúc biên dịch nên không đổi được lúc chạy. Cùng <code>T</code> không làm hai lớp gán được cho nhau. Và <code>N</code> không phải số thường: nó nằm trong tên kiểu, nên hai giá trị khác nhau cho hai kiểu khác nhau.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 7.</strong> Điều nào đúng khi so generics của Go (<code>func Max[T cmp.Ordered](a, b T) T</code>) với template C++?</p>
+<ul>
+<li>Go kiểm thân hàm theo constraint ngay khi định nghĩa; C++ không concepts kiểm khi sinh bản</li>
+<li>Go sinh một bản riêng cho từng kiểu như C++, và cũng cho chuyên biệt hóa từng kiểu</li>
+<li>Go kiểm ràng buộc lúc chạy, nên sai kiểu chỉ lộ ở lần chạy đầu tiên</li>
+<li>C++ kiểm ràng buộc bằng interface lúc biên dịch, còn Go chỉ kiểm khi gọi hàm</li>
+</ul>
+<p class="giai-thich">Mình đã chạy Go 1.27.1: <code>a &lt; b</code> trong hàm với <code>T any</code> bị chặn ngay ở thân hàm, và <code>Max</code> của hai struct bị chặn lúc biên dịch với <code>does not satisfy cmp.Ordered</code>; C++ không concepts thì chỉ kiểm khi sinh bản (Ví dụ 4, Câu 5). Go không có chuyên biệt hóa, và trình biên dịch gc còn cho nhiều kiểu cùng hình dạng (như <code>int</code> và <code>type A int</code>) dùng chung một bản. Go kiểm lúc biên dịch, không đợi lúc chạy. Còn câu nói C++ kiểm bằng interface thì đảo ngược: constraint (interface) là của Go, và hàm <code>Dung</code> chưa ai gọi vẫn bị Go chặn, nên không phải "chỉ khi gọi".</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Template</strong> là bản vẽ có chỗ trống cho kiểu (hoặc số): <code>template &lt;typename T&gt;</code> (<code>class</code> cũng được, giống hệt); mỗi kiểu được dùng sinh <strong>một bản riêng</strong> lúc biên dịch (mình chạy: 3 kiểu, 3 bản <code>lonHon</code>, thấy bằng <code>nm</code> và <code>__PRETTY_FUNCTION__</code>). <code>max(3, 4.5)</code> lỗi vì suy ra hai <code>T</code>; ghi <code>max&lt;double&gt;(3, 4.5)</code>.</li>
+<li><strong>Template lớp</strong> (<code>vector&lt;int&gt;</code>, <code>Ngan&lt;T, N&gt;</code>): mỗi bộ tham số là một lớp riêng; tham số không phải kiểu như <code>N</code> nằm trong kiểu (<code>array&lt;int, 3&gt;</code> khác <code>array&lt;int, 5&gt;</code>), có giá trị mặc định; chỉ hàm thành viên được gọi mới sinh; <strong>chuyên biệt hóa</strong> là bản riêng cho một kiểu (<code>Nhan&lt;bool&gt;</code>).</li>
+<li><strong>Template vs hàm ảo</strong>: lúc biên dịch (không cần lớp cha chung, gọi thẳng, một bản mỗi kiểu, một dãy một kiểu) so với lúc chạy (trộn loại, một hàm duyệt chung, mỗi lớp con vẫn có hàm ghi đè riêng, gọi gián tiếp). Không bên nào luôn tốt hơn; mình không đo thời gian.</li>
+<li><strong>Giá cả</strong>: lỗi dài (114 dòng cho một <code>sort</code> thiếu <code>operator&lt;</code>, đọc từ dòng <code>error:</code> và <code>required from here</code>), code bloat (mình đo: <code>.text</code> tăng 11818 lên 89528 byte khi 1 lên 8 kiểu ở <code>-O0</code>, đổi theo máy và cờ), và thân template phải ở header (tách <code>.cpp</code> thì <code>undefined reference</code>).</li>
+<li>Chỉ nhắc: <code>static_assert</code>/<code>type_traits</code>, concepts C++20 (g++ 11.4 <code>-std=c++20</code> chạy được), SFINAE, lambda <code>auto</code> là template. Go: generics kiểm constraint ngay ở thân hàm, không có chuyên biệt hóa, gc cho các kiểu cùng "hình dạng" dùng chung một bản (chi tiết cài đặt).</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../33-da-hinh-virtual/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../35-pattern-singleton-factory/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>
