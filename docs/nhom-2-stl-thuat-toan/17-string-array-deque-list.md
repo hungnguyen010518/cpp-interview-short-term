@@ -1,4 +1,4 @@
-# Bài 17 — string, string_view, array, deque, list: các kiểu chứa còn lại
+# Bài 17 — string, string_view, array, deque, list
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Dùng `std::string` (nối, so sánh, `find`, `substr`, `c_str`), biết SSO là gì và vì sao nó là chuyện của từng bản thư viện, và nhớ lại `std::string_view` chỉ là cửa sổ nhìn vào chuỗi người khác giữ.
@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Ở Bài 16, `vector` là **một kệ sách liền khối**. Bài này là cả cửa hàng đồ nội thất. `std::string` là kệ sách chỉ đựng chữ cái, có nhiều món tiện cho chữ (chuỗi ngắn thì kệ nhỏ treo ngay trên người cuốn sổ, ví dụ này dừng ở đó; mục 2).
+Ở [Bài 16](16-vector.md), `vector` là **một kệ sách liền khối**. Bài này là cả cửa hàng đồ nội thất. `std::string` là kệ sách chỉ đựng chữ cái, có nhiều món tiện cho chữ (chuỗi ngắn thì chữ được ghi luôn lên tờ giấy, tức chính đối tượng, khỏi thuê kệ ở kho; mục 2).
 
 `std::array` là kệ **đóng cố định vào tường**: cỡ chốt từ lúc xây, không nở ra. `std::deque` là **dãy nhiều kệ nhỏ** xếp nối nhau, kèm một bảng chỉ dẫn: thêm kệ ở đầu hay cuối đều dễ.
 
@@ -94,12 +94,12 @@ Mguyen An! | MXuyen An!
 size = 9
 ```
 
-`size()` và `length()` là một, và đều đếm **byte**, không đếm "chữ cái". Chữ viết ra thành byte theo **UTF-8**: chữ không dấu như `a` chiếm 1 byte, chữ có dấu như `à` chiếm 2 byte (hoặc hơn), nên "xin chào" là 9 byte. Go dùng cùng UTF-8 và `len("xin chào")` cũng ra 9. Con trỏ của `c_str()` chỉ dùng được khi chuỗi còn sống và chưa bị sửa, giống địa chỉ phần tử của vector ở Bài 16.
+`size()` và `length()` là một, và đều đếm **byte**, không đếm "chữ cái". Chữ viết ra thành byte theo **UTF-8**: chữ không dấu như `a` chiếm 1 byte, chữ có dấu như `à` chiếm 2 byte (hoặc hơn), nên "xin chào" là 9 byte. Go dùng cùng UTF-8 và `len("xin chào")` cũng ra 9. Con trỏ của `c_str()` chỉ dùng được khi chuỗi còn sống và chưa bị sửa, giống địa chỉ phần tử của vector ở [Bài 16](16-vector.md).
 
 **Thử thay đổi:** viết `std::string s = "xin" + " chao";` (cộng hai chuỗi hằng). Mình đã biên dịch: g++ báo `invalid operands of types 'const char [4]' and 'const char [6]' to binary 'operator+'`. Chuỗi hằng là mảng `char` ([Bài 05](../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro.md)), không có phép `+`; chỉ cần một vế là `std::string` thì `+` chạy.
 
 !!! info "Bạn biết Go?"
-    Chuỗi Go **bất biến**: `s[0] = 'M'` không biên dịch được, và `s += "x"` trong vòng lặp tạo chuỗi mới mỗi lần. `std::string` thì **sửa được** tại chỗ và cũng có size/capacity như vector, nên `+=` nhiều lần rẻ trung bình. Phần giống: cả hai đều là dãy **byte**. Cái giống chuỗi Go hơn cả là `std::string_view` (mục 3): một cặp (địa chỉ, độ dài) nhìn vào byte có sẵn.
+    Chuỗi Go **bất biến**: `s[0] = 'M'` không biên dịch được, và `s += "x"` trong vòng lặp tạo chuỗi mới mỗi lần. `std::string` thì **sửa được** tại chỗ và cũng có size/capacity như vector, nên `+=` nhiều lần rẻ kiểu amortized (phân bổ), giống `push_back` của vector. Phần giống: cả hai đều là dãy **byte**. Cái giống chuỗi Go hơn cả là `std::string_view` (mục 3): một cặp (địa chỉ, độ dài) nhìn vào byte có sẵn.
 
 ### 2. SSO: chuỗi ngắn nằm ngay trong đối tượng
 
@@ -120,7 +120,7 @@ int main() {
 }
 ```
 
-Dòng (2): `std::string(n, c)` tạo chuỗi gồm `n` ký tự `c`, giống `vector(n, giá trị)` ở Bài 16.
+Dòng (2): `std::string(n, c)` tạo chuỗi gồm `n` ký tự `c`, giống `vector(n, giá trị)` ở [Bài 16](16-vector.md).
 
 **Kết quả khi chạy:**
 
@@ -191,7 +191,7 @@ int main() {
 }
 ```
 
-Hàm `tongC` ở (1) viết chỉ để so sánh: tham số `int a[]` là con trỏ, nên phải kèm `n`. Hệ quả của "cỡ là một phần của kiểu": `tong` ở (2) chỉ nhận `std::array<int, 4>`, không nhận dãy 5 phần tử (muốn nhận mọi cỡ cần khuôn mẫu hàm, học sau).
+Hàm `tongC` ở (1) viết chỉ để so sánh: tham số `int a[]` là con trỏ, nên phải kèm `n`. Hệ quả của "cỡ là một phần của kiểu": `tong` ở (2) chỉ nhận `std::array<int, 4>`, không nhận dãy 5 phần tử (muốn nhận mọi cỡ cần khuôn mẫu hàm, ngoài phạm vi nhóm này).
 
 **Chạy từng dòng**
 
@@ -216,7 +216,7 @@ a[0] = 1, b[0] = 100, a == b? 0
 Khác `vector`: `array` **không có** `push_back`, không đổi cỡ, không dùng heap (phần tử nằm ngay trong đối tượng, tức trên stack nếu là biến cục bộ; `sizeof` ở trên cho thấy không tốn thêm byte nào so với mảng C). Vì stack có hạn ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)), đừng đặt `array` hàng triệu phần tử làm biến cục bộ.
 
 !!! info "Bạn biết Go?"
-    `std::array<int, 4>` chính là `[4]int` của Go: cỡ là một phần của kiểu, và gán hay truyền vào hàm đều **chép cả dãy** (Go cũng vậy). Mảng C mới là kẻ khác thường. Còn `std::vector` tương ứng với `[]int`, kể cả chuyện slice chung mảng đã nói ở Bài 16.
+    `std::array<int, 4>` chính là `[4]int` của Go: cỡ là một phần của kiểu, và gán hay truyền vào hàm đều **chép cả dãy** (Go cũng vậy). Mảng C mới là kẻ khác thường. Còn `std::vector` tương ứng với `[]int`, kể cả chuyện slice chung mảng đã nói ở [Bài 16](16-vector.md).
 
 ### 5. `std::deque`: thêm nhanh ở cả hai đầu
 
@@ -268,11 +268,11 @@ sau pop: size = 2, front = 1
 size = 2002, r van cung dia chi? 1, r = 1
 ```
 
-Điều đáng học thứ nhất: **tham chiếu tới phần tử vẫn sống** khi bạn thêm ở hai đầu (khác vector, [Bài 16](16-vector.md), mục 4). Chuẩn bảo đảm điều này cho tham chiếu và con trỏ tới phần tử với thao tác ở hai đầu, nhưng **không** cho iterator (Bài 19). Chèn hay xóa ở **giữa** thì phải dời phần tử như vector và làm hỏng cả tham chiếu.
+Điều đáng học thứ nhất: **tham chiếu tới phần tử vẫn sống** khi bạn thêm ở hai đầu (khác vector, [Bài 16](16-vector.md), mục 4). Chuẩn bảo đảm điều này cho tham chiếu và con trỏ tới phần tử với thao tác ở hai đầu, nhưng **không** cho iterator ([Bài 19](19-iterator-vo-hieu.md)). Chèn hay xóa ở **giữa** thì phải dời phần tử như vector và làm hỏng cả tham chiếu.
 
 Điều thứ hai: `deque` **không liền khối**, nên hai phần tử kề nhau đôi khi nằm ở hai khối khác nhau (khối to cỡ nào là tùy bản thư viện).
 
-Dùng `deque` khi cần thêm/lấy nhanh ở **cả hai đầu** mà vẫn muốn `d[i]`: hàng đợi, cửa sổ trượt. Bài 21 sẽ cho thấy `std::queue` mặc định dựng trên `deque`.
+Dùng `deque` khi cần thêm/lấy nhanh ở **cả hai đầu** mà vẫn muốn `d[i]`: hàng đợi, cửa sổ trượt. [Bài 21](21-big-o-cau-truc-du-lieu.md) sẽ cho thấy `std::queue` mặc định dựng trên `deque`.
 
 ### 6. `std::list`: các nút rời nhau
 
@@ -304,7 +304,7 @@ int main() {
 }
 ```
 
-`remove(10)` xóa **mọi** phần tử bằng 10; `sort()` là hàm sắp xếp riêng của `list` (Bài 20 sẽ nói vì sao nó cần hàm riêng).
+`remove(10)` xóa **mọi** phần tử bằng 10; `sort()` là hàm sắp xếp riêng của `list` ([Bài 20](20-algorithm-lambda.md) sẽ nói vì sao nó cần hàm riêng).
 
 **Chạy từng dòng**
 
@@ -356,19 +356,19 @@ Hai con trỏ (16 byte) cộng `int` (4 byte, thường là thế) cộng 4 byte
 Mỗi nút còn là một lần xin heap riêng. Sau nhiều lần thêm, xóa, các nút **rải rác** khắp heap và phải đi theo con trỏ từng bước, trong khi `vector` đặt các `int` sát nhau (4 byte một món) và CPU đọc sẵn các byte kề nhau rất nhanh. Nên duyệt `list` thường chậm hơn duyệt `vector` nhiều.
 
 !!! warning "Hay nhầm: 'chèn giữa nhanh nên dùng list'"
-    Chèn/xóa một nút chỉ tốn vài bước **khi bạn đã cầm sẵn vị trí** (iterator, Bài 19); để **tìm** vị trí đó vẫn phải đi qua từng nút. Cộng chi phí nút rời nói trên, `vector` thường vẫn thắng cả khi chèn giữa. Chỉ chọn `list` khi cần **địa chỉ phần tử ổn định** (như `p` ở trên) cùng việc chèn/xóa giữa dày đặc.
+    Chèn/xóa một nút chỉ tốn vài bước **khi bạn đã cầm sẵn vị trí** (iterator, [Bài 19](19-iterator-vo-hieu.md)); để **tìm** vị trí đó vẫn phải đi qua từng nút. Cộng chi phí nút rời nói trên, `vector` thường vẫn thắng cả khi chèn giữa. Chỉ chọn `list` khi cần **địa chỉ phần tử ổn định** (như `p` ở trên) cùng việc chèn/xóa giữa dày đặc.
 
 !!! info "Bạn biết Go?"
     Go có `container/list` trong thư viện chuẩn, đúng là danh sách liên kết đôi (chứa kiểu `any`), nhưng rất ít người dùng; Go **không có** deque chuẩn. Người viết Go dùng slice cho hầu hết việc (hàng đợi hay bỏ phần đầu bằng `s = s[1:]`). C++ cũng nên mặc định kiểu "dãy liền khối" (`vector`), nhưng có sẵn `deque` và `list` khi cần.
 
 ### 7. Chọn container nào?
 
-Để so sánh các thao tác, ký hiệu **O(1)** nghĩa là "thời gian gần như không phụ thuộc số phần tử n", **O(n)** là "tăng theo n" (Bài 21 nói kỹ). Số liệu dưới là kiến thức chung, không phải số đo máy bạn.
+Để so sánh các thao tác, ký hiệu **O(1)** nghĩa là "thời gian gần như không phụ thuộc số phần tử n", **O(n)** là "tăng theo n" ([Bài 21](21-big-o-cau-truc-du-lieu.md) nói kỹ). Số liệu dưới là kiến thức chung, không phải số đo máy bạn.
 
 | | `vector` | `deque` | `list` | `array` |
 |---|---|---|---|---|
 | `[i]` | O(1) | O(1) | không có | O(1) |
-| thêm ở cuối | O(1) trung bình | O(1) | O(1) | không thêm được |
+| thêm ở cuối | O(1) amortized | O(1) | O(1) | không thêm được |
 | thêm ở đầu | O(n) | O(1) | O(1) | không thêm được |
 | chèn/xóa ở giữa | O(n) | O(n) | O(1) *khi đã có vị trí* | không |
 | bộ nhớ | liền khối ở heap | nhiều khối nhỏ ở heap | mỗi nút một khối ở heap | ngay trong đối tượng |
@@ -381,13 +381,13 @@ Mỗi nút còn là một lần xin heap riêng. Sau nhiều lần thêm, xóa, 
 | Chỉ **đọc** một chuỗi (tham số hàm) | `std::string_view` | không chép; chỉ khi chuỗi gốc chắc còn sống |
 | Thêm/lấy ở cả hai đầu và vẫn cần `d[i]` | `std::deque` | hai đầu O(1), tham chiếu phần tử không hỏng khi thêm ở đầu/cuối |
 | Địa chỉ phần tử phải ổn định, chèn/xóa giữa dày đặc | `std::list` | nút không bao giờ bị dời |
-| Tìm theo khóa | `map`, `unordered_map` | Bài 18 |
+| Tìm theo khóa | `map`, `unordered_map` | [Bài 18](18-map-set-unordered.md) |
 
 **Quy tắc:** bắt đầu bằng `vector`. Chỉ đổi khi có lý do cụ thể (cỡ cố định thì `array`, thêm ở đầu thì `deque`, cần địa chỉ ổn định thì `list`), và nếu lo về tốc độ thì **đo** trước rồi mới đổi.
 
 ## 💻 Ví dụ code
 
-Chương trình dưới tách một câu thành các từ (bỏ khoảng trắng thừa). Nó dùng `string_view` làm tham số (mục 3), `find`/`substr` (mục 1) và `vector` trả về (Bài 16).
+Chương trình dưới tách một câu thành các từ (bỏ khoảng trắng thừa). Nó dùng `string_view` làm tham số (mục 3), `find`/`substr` (mục 1) và `vector` trả về ([Bài 16](16-vector.md)).
 
 ```cpp
 #include <iostream>

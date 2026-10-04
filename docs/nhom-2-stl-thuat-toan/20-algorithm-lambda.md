@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại **kệ sách** và **ngón tay** (iterator) của Bài 19. Bây giờ bạn thuê một **người quản thư**. Bạn chỉ đưa cho người ấy **hai ngón tay**: ngón đầu chỉ cuốn đầu của đoạn cần xử lý, ngón sau chỉ chỗ ngay sau cuốn cuối của đoạn. Người ấy không cần biết kệ làm bằng gỗ hay là các thẻ nối dây; cứ hai ngón tay là làm được nhiều việc: tìm một cuốn, đếm, lật ngược.
+Quay lại **kệ sách** và **ngón tay** (iterator) của [Bài 19](19-iterator-vo-hieu.md). Bây giờ bạn thuê một **người quản thư**. Bạn chỉ đưa cho người ấy **hai ngón tay**: ngón đầu chỉ cuốn đầu của đoạn cần xử lý, ngón sau chỉ chỗ ngay sau cuốn cuối của đoạn. Người ấy không cần biết kệ làm bằng gỗ hay là các thẻ nối dây; cứ hai ngón tay là làm được nhiều việc: tìm một cuốn, đếm, lật ngược.
 
 Đó là cách **thuật toán** của STL làm việc: `std::sort(đầu, cuối)`, `std::find(đầu, cuối, giá_trị)`... Khi việc cần một tiêu chí ("xếp theo điểm giảm dần", "tìm cuốn nào dày hơn 300 trang") bạn đưa thêm một **mẩu giấy ghi luật**: đó là **lambda**.
 
@@ -20,7 +20,7 @@ Quay lại **kệ sách** và **ngón tay** (iterator) của Bài 19. Bây giờ
 
 ### 1. Cặp iterator `[begin, end)` là giao diện chung
 
-Ngoài `<algorithm>`, ta cần `#include <numeric>` cho `std::accumulate` (mục 3). Mọi thuật toán nhận một đoạn **nửa mở** `[begin, end)`: tính `begin`, **không** tính `end` (đúng như `end()` của Bài 19). Vì vậy `v.begin() + 1, v.begin() + 4` là các phần tử ở chỉ số 1, 2, 3 (đếm từ 0; không gồm chỉ số 4).
+Ngoài `<algorithm>`, ta cần `#include <numeric>` cho `std::accumulate` (mục 3). Mọi thuật toán nhận một đoạn **nửa mở** `[begin, end)`: tính `begin`, **không** tính `end` (đúng như `end()` của [Bài 19](19-iterator-vo-hieu.md)). Vì vậy `v.begin() + 1, v.begin() + 4` là các phần tử ở chỉ số 1, 2, 3 (đếm từ 0; không gồm chỉ số 4).
 
 Các thuật toán tìm kiếm (`find`...) trả về **iterator**, không trả về giá trị: không tìm thấy thì trả về chính `end` mà bạn đưa vào. Bạn phải so với `end` **trước khi** dùng `*it`.
 
@@ -88,7 +88,7 @@ Một hàm `find` dùng được cho vector, list và mảng thường, vì nó 
 
 ### 2. `sort` và comparator
 
-`std::sort(đầu, cuối)` sắp xếp tăng dần bằng `<`, với thời gian O(n log n) (tăng chậm hơn nhiều so với bình phương số phần tử; Bài 21 nói kỹ). Muốn tiêu chí khác, đưa thêm một hàm **so sánh** (comparator) làm đối số thứ ba. Hàm đó nhận hai phần tử `a`, `b` và trả `true` nếu **`a` phải đứng trước `b`**.
+`std::sort(đầu, cuối)` sắp xếp tăng dần bằng `<`, với thời gian O(n log n) (tăng chậm hơn nhiều so với bình phương số phần tử; [Bài 21](21-big-o-cau-truc-du-lieu.md) nói kỹ). Muốn tiêu chí khác, đưa thêm một hàm **so sánh** (comparator) làm đối số thứ ba. Hàm đó nhận hai phần tử `a`, `b` và trả `true` nếu **`a` phải đứng trước `b`**.
 
 ```cpp
 #include <algorithm>
@@ -139,7 +139,7 @@ An:9 Cuong:9 Binh:7 Lan:7
 
 **Luật cho comparator.** Hàm phải cho **thứ tự chặt**: `comp(a, a)` luôn `false` (một phần tử không đứng trước chính nó), `comp(a, b)` với `comp(b, a)` không cùng `true`, và bắc cầu (`a` trước `b`, `b` trước `c` thì `a` trước `c`). Cứ dùng `<` hoặc `>`: `<=` hay `>=` vi phạm luật, và theo chuẩn thì sort khi đó là **hành vi không xác định** (mình không chạy thử và không nói nó in gì).
 
-**Thử thay đổi: `std::sort(l.begin(), l.end())` với `l` là `std::list<int>`.** Mình đã chạy: lỗi biên dịch `no match for 'operator-' (operand types are 'std::_List_iterator<int>' and 'std::_List_iterator<int>')`. `sort` cần iterator **truy cập ngẫu nhiên** (nhảy được, trừ nhau được như `vector`, `deque`, `array`, mảng thường), còn `list` chỉ nhích từng bước ([Bài 19](19-iterator-vo-hieu.md)). Đó là lý do `list` có hàm riêng `l.sort()` mà Bài 17 đã dùng.
+**Thử thay đổi: `std::sort(l.begin(), l.end())` với `l` là `std::list<int>`.** Mình đã chạy: lỗi biên dịch `no match for 'operator-' (operand types are 'std::_List_iterator<int>' and 'std::_List_iterator<int>')`. `sort` cần iterator **truy cập ngẫu nhiên** (nhảy được, trừ nhau được như `vector`, `deque`, `array`, mảng thường), còn `list` chỉ nhích từng bước ([Bài 19](19-iterator-vo-hieu.md)). Đó là lý do `list` có hàm riêng `l.sort()` mà [Bài 17](17-string-array-deque-list.md) đã dùng.
 
 !!! info "Bạn biết Go?"
     `sort.Slice(s, func(i, j int) bool { return s[i] > s[j] })` cùng ý "cái này có đứng trước cái kia không", nhưng less của Go nhận **chỉ số** `i`, `j`, còn comparator C++ nhận **hai phần tử**. Gói `slices` (từ Go 1.21) có `slices.SortFunc` với hàm trả số âm/0/dương, khác C++ trả `bool`.
@@ -282,7 +282,7 @@ std::function<int()> taoDem() {
 
 ### 5. Remove-erase: xóa theo điều kiện
 
-Bài 19 để lại một câu hỏi: xóa **nhiều** phần tử của vector bằng `erase` từng cái thì mỗi lần dồn các phần tử sau, tốn O(n) mỗi lần. `std::remove` làm cả việc đó trong **một lượt**. Nhưng nó chỉ có cặp iterator, không có container, nên **không thể** làm vector ngắn lại.
+[Bài 19](19-iterator-vo-hieu.md) để lại một câu hỏi: xóa **nhiều** phần tử của vector bằng `erase` từng cái thì mỗi lần dồn các phần tử sau, tốn O(n) mỗi lần. `std::remove` làm cả việc đó trong **một lượt**. Nhưng nó chỉ có cặp iterator, không có container, nên **không thể** làm vector ngắn lại.
 
 Việc nó làm: dồn các phần tử được **giữ** lên đầu, và trả về iterator tới chỗ ngay sau phần tử giữ cuối cùng. Phần phía sau ở trạng thái "dùng được nhưng không biết giá trị gì". Việc xóa thật sự do `erase` của container làm: `v.erase(std::remove(...), v.end())` cắt đoạn đuôi đó.
 
@@ -340,7 +340,7 @@ sau erase (size 3): 1 3 4
 bo >= 10 (size 3): 5 7 3
 ```
 
-Toàn bộ chỉ tốn O(n) (một lượt), thay cho nhiều lần `erase` O(n) của Bài 19. `list` thì có sẵn `l.remove(x)` và `l.remove_if(...)` **tự xóa luôn** (Bài 17); C++20 còn có `std::erase_if(v, vị_từ)` gói cả hai bước. `std::unique` cùng khuôn (`erase(unique(...), end)`) nhưng chỉ gộp các phần tử **liền kề** bằng nhau, nên phải sắp xếp trước.
+Toàn bộ chỉ tốn O(n) (một lượt), thay cho nhiều lần `erase` O(n) của [Bài 19](19-iterator-vo-hieu.md). `list` thì có sẵn `l.remove(x)` và `l.remove_if(...)` **tự xóa luôn** ([Bài 17](17-string-array-deque-list.md)); C++20 còn có `std::erase_if(v, vị_từ)` gói cả hai bước. `std::unique` cùng khuôn (`erase(unique(...), end)`) nhưng chỉ gộp các phần tử **liền kề** bằng nhau, nên phải sắp xếp trước.
 
 !!! info "Bạn biết Go?"
     Go xóa theo điều kiện bằng vòng lặp ghi đè `out := s[:0]; for _, x := range s { if giữ(x) { out = append(out, x) } }`: cùng ý "dồn phần giữ lại lên đầu rồi cắt". Từ Go 1.21 có `slices.DeleteFunc` làm trọn gói, ứng với remove_if cộng erase.
@@ -451,7 +451,7 @@ std::cout << v.size();
 
 - `6`, vì `remove` đã xóa nhưng `erase` không đổi gì
 - `5`, vì chỉ mỗi số `2` đầu tiên bị xóa
-- `3`, vì ba số `2` bị cắt
+- `3`, vì cả ba số `2` đều bị dồn ra đuôi rồi cắt
 - `4`, vì `remove` bỏ hai số `2` liền nhau
 
 <p class="giai-thich" markdown>`remove` dồn `1 3 4` lên đầu và trả chỗ ngay sau số `4`; `erase` cắt đoạn đuôi đó, nên còn đúng 3 phần tử. Nó xóa **mọi** số 2 chứ không chỉ số đầu tiên hay một cặp liền nhau. Con số `6` chỉ xuất hiện nếu bạn bỏ lời gọi `erase`, vì khi đó `size()` chưa bao giờ đổi.</p>
@@ -482,7 +482,7 @@ std::cout << v.size() << " " << (e - v.begin());
 - Trả vị trí mới của phần tử `a` trong dãy sau khi xếp
 - Trả `true` nếu `a` đứng trước `b`; bằng nhau thì `false`
 
-<p class="giai-thich" markdown>Comparator là câu hỏi "`a` có phải đứng trước `b` không", nên hai phần tử bằng nhau phải cho `false` (đó là điều mà `<` làm, còn `<=` thì không). Trả `true` khi bằng nhau vi phạm thứ tự chặt và là hành vi không xác định. Kiểu trả `-1/0/1` là của `slices.SortFunc` bên Go, còn ở C++ kiểu trả về là `bool`; và vị trí mới là việc của `sort`, không phải của comparator.</p>
+<p class="giai-thich" markdown>Comparator là câu hỏi "`a` có phải đứng trước `b` không", nên hai phần tử bằng nhau phải cho `false` (đó là điều mà `<` làm, còn `<=` thì không). Trả `true` khi bằng nhau vi phạm thứ tự chặt và là hành vi không xác định. Hàm so sánh trả số âm/0/dương là kiểu của `slices.SortFunc` bên Go, còn ở C++ kiểu trả về là `bool`; và vị trí mới là việc của `sort`, không phải của comparator.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -512,7 +512,7 @@ std::cout << std::accumulate(d.begin(), d.end(), 0);
 
 - `1`, vì ba số cộng lại đúng bằng 1 như phép toán thường
 - `1.0`, vì kết quả cộng từ `double` giữ kiểu `double`
-- `0`, vì giá trị đầu là `int`
+- `0`, vì giá trị đầu `0` là `int` nên bộ cộng là `int`
 - `0.5`, vì `accumulate` chỉ cộng phần tử đầu tiên
 
 <p class="giai-thich" markdown>Kiểu của giá trị đầu quyết định kiểu bộ cộng: `0` là `int` nên mỗi lần cộng phần thập phân bị cắt và ra `0`. Viết `0.0` mới được `1`. Việc "giữ kiểu `double`" là suy đoán sai: `accumulate` không lấy kiểu từ các phần tử. Phép cộng có chạy qua cả ba phần tử, nên `0.5` cũng sai.</p>

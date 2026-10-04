@@ -8,7 +8,7 @@
 **Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack là vùng nhớ vào sau ra trước), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`, `nullptr`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (hàm `const`), [Bài 07](../nhom-1-nen-tang-bo-nho/07-new-delete.md) (`new`/`delete`, ASan báo rò rỉ), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 16](16-vector.md), [Bài 17](17-string-array-deque-list.md) và [Bài 18](18-map-set-unordered.md) (các container).
 
 !!! note "Phạm vi bài này"
-    Cây nhị phân tìm kiếm, bảng băm tự cài và heap/`priority_queue` là một cụm riêng, để dành cho bài kế tiếp: nhồi chung sẽ quá dài. Bài này lo phần nền: Big-O, danh sách liên kết, stack, queue.
+    Cây nhị phân tìm kiếm, bảng băm tự cài và heap/`priority_queue` là một cụm riêng, để dành cho [Bài 22](22-bst-bang-bam-heap.md): nhồi chung sẽ quá dài. Bài này lo phần nền: Big-O, danh sách liên kết, stack, queue.
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -161,7 +161,7 @@ Mặc định vẫn chọn `vector`: các phần tử nằm liền nhau nên CPU
 
 **Danh sách liên kết đơn** là chuỗi các **nút** (node) nằm rời nhau ở heap: mỗi nút giữ một giá trị và **địa chỉ của nút kế tiếp**, y như tờ giấy ghi số ngăn ([Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md)). Nút cuối giữ `nullptr` để báo "hết". Danh sách chỉ cần nhớ **nút đầu**; từ đó lần theo mũi tên là đi hết.
 
-`std::list` của Bài 17 là bản **đôi** (mỗi nút có thêm mũi tên lùi); ở đây ta làm bản đơn (một chiều) vì đó là bản hay hỏi.
+`std::list` của [Bài 17](17-string-array-deque-list.md) là bản **đôi** (mỗi nút có thêm mũi tên lùi); ở đây ta làm bản đơn (một chiều) vì đó là bản hay hỏi.
 
 Có ba điểm cú pháp cần nói trước khi đọc code:
 
@@ -284,7 +284,7 @@ Hết vòng, `hien` là `nullptr` và `truoc` là nút cuối cũ, tức đầu 
 
 **Stack** (ngăn xếp) là chồng đĩa: đĩa đặt sau cùng lấy ra trước, gọi là **LIFO** (last in, first out). **Queue** (hàng đợi) là hàng xếp mua vé: người đến trước được phục vụ trước, gọi là **FIFO** (first in, first out).
 
-Vùng stack của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) cũng theo luật LIFO (khung hàm gọi sau thì trả trước), nên chúng cùng tên. Nhưng `std::stack` là một kiểu thư viện chứa dữ liệu trong một container (mặc định là `deque`), không phải vùng stack ấy.
+Vùng stack của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) cũng theo luật LIFO (khung hàm gọi sau thì trả trước), nên chúng cùng tên. Nhưng `std::stack` là một kiểu thư viện chứa dữ liệu trong một container (mặc định là `deque`, `std::queue` cũng vậy), không phải vùng stack ấy.
 
 `std::stack` (`#include <stack>`) và `std::queue` (`#include <queue>`) là **container adaptor** (bộ bọc): chúng giấu container bên trong và chỉ lộ vài thao tác. Vì vậy chúng không có iterator và không duyệt được. Bạn đổi container bên trong bằng tham số thứ hai: `std::stack<int, std::vector<int>>` được, còn `queue` cần container có `pop_front` nên dùng `deque` hoặc `list`.
 
@@ -362,8 +362,8 @@ Tự cài cũng dễ: stack tự cài bằng danh sách liên kết: `themDau`/`
 !!! info "Bạn biết Go?"
     Go **không có** stack/queue chuẩn: người ta dùng slice. Stack: `s = append(s, x)` để push, `x := s[len(s)-1]; s = s[:len(s)-1]` để pop. Queue: `q = append(q, x)` và `q = q[1:]` để lấy đầu, đơn giản nhưng phần đã bỏ vẫn nằm trong mảng nền cho đến lần `append` cấp mảng mới. Channel có đệm cũng là hàng đợi FIFO, nhưng để chuyển dữ liệu giữa các goroutine.
 
-!!! info "Một mảnh của bài kế tiếp: `priority_queue`"
-    `std::priority_queue` (`<queue>`) lấy phần tử **lớn nhất trước** thay vì vào trước ra trước, cài bằng heap (bài kế tiếp). Bên Go là `container/heap`: bạn tự viết năm hàm của `heap.Interface` (`Len`, `Less`, `Swap`, `Push`, `Pop`) và nó lấy phần tử mà `Less` xếp đầu (với `Less` là `<` thì là nhỏ nhất).
+!!! info "Một mảnh của Bài 22: `priority_queue`"
+    `std::priority_queue` (`<queue>`) lấy phần tử **lớn nhất trước** thay vì vào trước ra trước, cài bằng heap ([Bài 22](22-bst-bang-bam-heap.md)). Bên Go là `container/heap`: bạn tự viết năm hàm của `heap.Interface` (`Len`, `Less`, `Swap`, `Push`, `Pop`) và nó lấy phần tử mà `Less` xếp đầu (với `Less` là `<` thì là nhỏ nhất).
 
 ## 💻 Ví dụ code
 
@@ -548,7 +548,7 @@ q.pop();
 std::cout << q.front() << q.back();
 ```
 
-- `bc`, vì `pop` bỏ `a`
+- `bc`, vì `pop` bỏ `a` đang nằm ở đầu hàng
 - `ac`, vì `pop` bỏ `b` nằm ở giữa hàng
 - `ca`, vì queue lấy ngược từ cuối về đầu
 - `cb`, vì `pop` bỏ `a` rồi hàng bị đảo ngược
@@ -564,4 +564,4 @@ std::cout << q.front() << q.back();
 2. Nói rõ tốt nhất/trung bình/xấu nhất (phỏng vấn mặc định là xấu nhất): `unordered_map` O(1) trung bình, O(n) xấu nhất; **amortized** là bảo đảm trên cả chuỗi thao tác không nhờ dữ liệu (`push_back` của `vector`: đo thật được 1023 phần tử chuyển cho 1000 lần thêm).
 3. Bảng container: `vector` `[i]` O(1) và thêm cuối O(1) amortized, `deque` thêm hai đầu O(1), `list` chèn giữa O(1) khi đã có vị trí nhưng tìm O(n), `map`/`set` O(log n), `unordered_*` O(1) trung bình; mặc định chọn `vector` vì bộ nhớ liền.
 4. Danh sách liên kết đơn: nút gồm giá trị và `Nut* tiep` (con trỏ tới chính kiểu của nó là được, nhét nguyên nút thì lỗi), thêm/xóa đầu O(1), tìm O(n), hàm hủy phải trả mọi nút (RAII) và cấm sao chép bằng `= delete`; đảo ngược bằng ba con trỏ (`truoc`, `hien`, `ke`, nhớ `ke` trước khi quay mũi tên) là O(n) thời gian, O(1) bộ nhớ thêm.
-5. `stack` là LIFO (`push`, `top`, `pop`) và `queue` là FIFO (`push`, `front`, `pop`), cả hai là container adaptor O(1) mà `pop()` trả `void` và rỗng thì cấm `top`/`front`; Go không có hai kiểu này (dùng slice), và bảng băm tự cài, cây nhị phân tìm kiếm, heap/`priority_queue` (Go: `container/heap`) học ở bài kế tiếp.
+5. `stack` là LIFO (`push`, `top`, `pop`) và `queue` là FIFO (`push`, `front`, `pop`), cả hai là container adaptor O(1) mà `pop()` trả `void` và rỗng thì cấm `top`/`front`; Go không có hai kiểu này (dùng slice), và bảng băm tự cài, cây nhị phân tìm kiếm, heap/`priority_queue` (Go: `container/heap`) học ở [Bài 22](22-bst-bang-bam-heap.md).

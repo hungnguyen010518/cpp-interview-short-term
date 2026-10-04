@@ -123,7 +123,7 @@ Hai ô cuối là chỗ **đã xin nhưng chưa có phần tử**. Chạm vào c
 
 ### 4. Khi đầy: xin kệ mới, và tham chiếu cũ có thể hỏng
 
-`push_back` khi size < capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải **tái cấp phát (reallocation)**: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)), trả mảng cũ. Nhờ vậy `push_back` vẫn nhanh **trung bình**: capacity tăng theo tỉ lệ nên việc chuyển nhà hiếm dần.
+`push_back` khi size < capacity thì chỉ ghi vào ô trống ở cuối: nhanh. Khi size == capacity (đầy), vector phải **tái cấp phát (reallocation)**: xin một mảng lớn hơn ở heap, chuyển các phần tử cũ sang (copy hoặc move, [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md)), trả mảng cũ. Nhờ vậy `push_back` vẫn rẻ theo nghĩa **amortized (phân bổ)**: capacity tăng theo tỉ lệ nên việc chuyển nhà hiếm dần, và chia đều chi phí cho cả chuỗi thì mỗi lần chỉ cỡ hằng số, dù dữ liệu thế nào ([Bài 21](21-big-o-cau-truc-du-lieu.md) nói kỹ; đừng nhầm với "trung bình" nhờ dữ liệu may mắn).
 
 Chương trình dưới đẩy 10 phần tử vào vector rỗng và báo mỗi lần capacity đổi.
 
@@ -176,14 +176,14 @@ cuoi: size=10 capacity=16
 
 Quy luật "gấp đôi" (1, 2, 4, 8, 16) là của `g++ 11` trên máy mình; **chuẩn C++ không quy định** capacity tăng thế nào.
 
-Chuẩn bảo đảm capacity ≥ size và `push_back` rẻ **trung bình** (amortized). Muốn vậy mọi cài đặt thực tế đều tăng capacity theo tỉ lệ, nhưng hệ số (2, 1,5...) tùy thư viện.
+Chuẩn bảo đảm capacity ≥ size và `push_back` rẻ kiểu **amortized (phân bổ)**. Muốn vậy mọi cài đặt thực tế đều tăng capacity theo tỉ lệ, nhưng hệ số (2, 1,5...) tùy thư viện.
 
 Địa chỉ in ra khác ở máy bạn; chỉ cần thấy nó **đổi** mỗi lần tái cấp phát. Dòng i=3 tình cờ trùng địa chỉ lần đầu vì khối cũ vừa được trả, không phải luật.
 
 !!! info "Bạn biết Go?"
     Đây đúng là chuyện của `append` khi `len == cap`: Go cũng xin mảng lớn hơn và chép sang. Khác ở chỗ Go còn giữ mảng cũ sống nếu slice cũ vẫn nhìn vào nó (GC), nên slice cũ vẫn đọc được. C++ **trả luôn** mảng cũ: ai còn giữ địa chỉ vào nó thì cầm một địa chỉ đã chết.
 
-**Hệ quả quan trọng.** Sau một lần tái cấp phát, mọi thứ trỏ vào mảng cũ đều **hỏng**: tham chiếu `int& r = v[0];`, con trỏ `&v[0]`, và cả iterator (đối tượng "chỉ vào một phần tử" mà Bài 19 sẽ dạy). Dùng chúng là hành vi không xác định, giống tham chiếu treo ở [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md). Chi tiết từng container ở Bài 19; bài này chỉ cần nhớ: **sau `push_back`, đừng dùng lại tham chiếu/con trỏ lấy từ trước**.
+**Hệ quả quan trọng.** Sau một lần tái cấp phát, mọi thứ trỏ vào mảng cũ đều **hỏng**: tham chiếu `int& r = v[0];`, con trỏ `&v[0]`, và cả iterator (đối tượng "chỉ vào một phần tử" mà [Bài 19](19-iterator-vo-hieu.md) sẽ dạy). Dùng chúng là hành vi không xác định, giống tham chiếu treo ở [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md). Chi tiết từng container ở [Bài 19](19-iterator-vo-hieu.md); bài này chỉ cần nhớ: **sau `push_back`, đừng dùng lại tham chiếu/con trỏ lấy từ trước**.
 
 ```cpp
 // bo-qua-kiem-tra
@@ -396,7 +396,7 @@ Một điều nhẹ nhõm: **trả vector theo giá trị** từ hàm (`std::vec
 
 `std::vector<bool>` là **trường hợp đặc biệt**: bên trong nén mỗi phần tử thành 1 bit, nên `v[i]` không trả về tham chiếu thật tới một `bool`. Cần vector `bool` bình thường thì dùng `std::vector<char>`.
 
-Bài này chưa dạy chèn hoặc xóa ở giữa vector (`insert`, `erase`, `clear`): chúng phải dời các phần tử phía sau nên tốn thời gian tỉ lệ với số phần tử, và Bài 19 sẽ dạy `erase`. Gọi `pop_back` hay `back()` trên vector rỗng là UB.
+Bài này chưa dạy chèn hoặc xóa ở giữa vector (`insert`, `erase`, `clear`): chúng phải dời các phần tử phía sau nên tốn thời gian tỉ lệ với số phần tử, và [Bài 19](19-iterator-vo-hieu.md) sẽ dạy `erase`. Gọi `pop_back` hay `back()` trên vector rỗng là UB.
 
 ## 💻 Ví dụ code
 
@@ -442,7 +442,7 @@ size = 3, capacity >= size? 1
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "size và capacity của vector khác nhau thế nào?"
-    **size** là số phần tử đang chứa; **capacity** là số phần tử mảng bên trong chứa được mà chưa phải xin chỗ mới. Luôn có `capacity >= size`. Khi `push_back` mà size đã bằng capacity, vector xin mảng lớn hơn, chuyển phần tử sang và trả mảng cũ. Cách tăng capacity là tùy cài đặt (thường nhân lên một hệ số), chuẩn chỉ yêu cầu `push_back` rẻ trung bình.
+    **size** là số phần tử đang chứa; **capacity** là số phần tử mảng bên trong chứa được mà chưa phải xin chỗ mới. Luôn có `capacity >= size`. Khi `push_back` mà size đã bằng capacity, vector xin mảng lớn hơn, chuyển phần tử sang và trả mảng cũ. Cách tăng capacity là tùy cài đặt (thường nhân lên một hệ số), chuẩn chỉ yêu cầu `push_back` rẻ kiểu amortized (chia đều trên cả chuỗi thao tác).
 
 ??? question "Vì sao `push_back` có thể làm hỏng tham chiếu, con trỏ, iterator lấy từ trước?"
     Vì khi đầy, vector tái cấp phát: các phần tử được đưa sang một mảng mới ở địa chỉ khác và mảng cũ bị trả. Mọi tham chiếu, con trỏ, iterator đang trỏ vào mảng cũ trở thành "treo", dùng chúng là hành vi không xác định. Phòng tránh: đừng giữ chúng qua một lần thêm phần tử, hoặc `reserve` đủ chỗ trước, hoặc lưu **chỉ số** thay vì địa chỉ.
@@ -476,7 +476,7 @@ size = 3, capacity >= size? 1
 
 - Vector này luôn có đúng hai phần tử
 - Vector này chỉ gồm các số nguyên không dấu
-- Mọi phần tử của vector đều là `double`
+- Mọi phần tử của vector đều cùng kiểu `double`
 - Vector này nhận được mọi kiểu dữ liệu
 
 <p class="giai-thich" markdown>Phần trong `< >` là tham số khuôn mẫu: nó chọn loại phần tử mà vector chứa, và mọi phần tử đều cùng loại đó. Số lượng phần tử không nằm ở đây mà do `size` quyết định và thay đổi được. `double` là số thực, không phải số nguyên không dấu. Vector không lẫn lộn nhiều kiểu: muốn chứa kiểu khác phải khai báo một vector kiểu khác.</p>
@@ -573,7 +573,7 @@ std::cout << a.size();
 ## 🔑 Tóm tắt
 
 1. STL là bộ kiểu chứa và hàm có sẵn của C++; `std::vector<T>` (`#include <vector>`) là mảng co giãn mà mọi phần tử cùng kiểu `T`, giống slice của Go nhưng **sở hữu** mảng ở heap; `v(n)` là n phần tử, `v{n}` là danh sách một phần tử.
-2. size là số phần tử đang có, capacity là số chỗ đã xin (luôn ≥ size); `push_back` khi đầy làm vector tái cấp phát sang mảng lớn hơn, cách tăng là tùy cài đặt, nên tham chiếu, con trỏ, iterator lấy từ trước có thể hỏng (Bài 19 nói kỹ).
+2. size là số phần tử đang có, capacity là số chỗ đã xin (luôn ≥ size); `push_back` khi đầy làm vector tái cấp phát sang mảng lớn hơn, cách tăng là tùy cài đặt, nên tham chiếu, con trỏ, iterator lấy từ trước có thể hỏng ([Bài 19](19-iterator-vo-hieu.md) nói kỹ).
 3. `reserve(n)` xin sẵn chỗ để khỏi chuyển nhà nhưng không tạo phần tử; `[]` không kiểm tra biên (ngoài biên là UB), `at` kiểm tra và ném `std::out_of_range`; `size() - 1` trên vector rỗng quấn thành số rất lớn.
 4. Truyền theo giá trị và `b = a` đều sao chép sâu cả mảng; chỉ đọc thì nhận `const std::vector<T>&`, cần sửa bản gốc thì `std::vector<T>&`; khác slice của Go vốn chung mảng.
 5. `push_back(x)` nhận đối tượng đã tạo, `emplace_back(đối số...)` dựng ngay trong vector để bớt một lần move; `std::vector<bool>` là trường hợp đặc biệt (nén thành bit), nên tránh khi cần `bool` thường; `reserve` đổi capacity còn `resize` đổi size.

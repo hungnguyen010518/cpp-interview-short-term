@@ -5,10 +5,10 @@
     - Phác được **bảng băm kiểu chaining** (mỗi hộp là một danh sách): hàm băm, `% số hộp`, đụng độ, hệ số tải, rehash, và vì sao tìm là O(1) trung bình.
     - Hiểu **heap** lưu trong mảng (con của `i` là `2i+1`, `2i+2`), vì sao `top` O(1) còn `push`/`pop` O(log n), dùng `std::priority_queue` (max-heap, min-heap bằng `greater`) và giải **top-K**.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (khung hàm, đệ quy vô hạn làm tràn stack), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`, `nullptr`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (hàm `const`), [Bài 07](../nhom-1-nen-tang-bo-nho/07-new-delete.md) (`new`/`delete`, ASan báo rò rỉ), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`%`), [Bài 16](16-vector.md), [Bài 17](17-string-array-deque-list.md) và [Bài 18](18-map-set-unordered.md) (container), [Bài 20](20-algorithm-lambda.md) (`std::max`) và [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O, `Nut`, `std::queue`).
+**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (khung hàm, đệ quy vô hạn làm tràn stack), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (`->`, `nullptr`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (hàm `const`), [Bài 07](../nhom-1-nen-tang-bo-nho/07-new-delete.md) (`new`/`delete`, ASan báo rò rỉ), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`= delete`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`%`), [Bài 16](16-vector.md), [Bài 17](17-string-array-deque-list.md) và [Bài 18](18-map-set-unordered.md) (container) và [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O, `Nut`, `std::queue`).
 
 !!! note "Phạm vi bài này"
-    Ba cấu trúc này được tách từ Bài 21 cho đỡ dài. BST và bảng băm ở đây **chỉ để hiểu cách `map` và `unordered_map` hoạt động**: đi làm bạn dùng bản có sẵn của thư viện, còn đi phỏng vấn người ta có thể bắt bạn viết BST và nói về bảng băm. Xóa một nút khỏi BST và cây cân bằng đầy đủ nằm ngoài bài.
+    Ba cấu trúc này được tách từ [Bài 21](21-big-o-cau-truc-du-lieu.md) cho đỡ dài. BST và bảng băm ở đây **chỉ để hiểu cách `map` và `unordered_map` hoạt động**: đi làm bạn dùng bản có sẵn của thư viện, còn đi phỏng vấn người ta có thể bắt bạn viết BST và nói về bảng băm. Xóa một nút khỏi BST và cây cân bằng đầy đủ nằm ngoài bài.
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -61,11 +61,11 @@ Số khung chồng lên nhau là **độ sâu** đệ quy (ở đây 4, kể c�
 
 **Cây** là các **nút** nối nhau, mỗi nút có đúng một nút **cha** (trừ **gốc** ở trên cùng). **Cây nhị phân** là cây mà mỗi nút có tối đa hai nút **con**: con trái và con phải; nút không có con gọi là **lá**. **BST** (binary search tree) thêm một luật cho **mọi** nút: cả cây con bên trái chứa toàn giá trị **nhỏ hơn** nút, cả cây con bên phải toàn giá trị **lớn hơn**.
 
-Nút vẫn là `struct Nut` như Bài 21, chỉ khác là có hai mũi tên thay vì một. Luật trên cho ta cách tìm như trò đoán số: so `x` với nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải, bằng thì xong. Chèn cũng đi đường đó cho tới khi gặp chỗ trống (`nullptr`) và đặt nút mới vào chỗ ấy.
+Nút vẫn là `struct Nut` như [Bài 21](21-big-o-cau-truc-du-lieu.md), chỉ khác là có hai mũi tên thay vì một. Luật trên cho ta cách tìm như trò đoán số: so `x` với nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải, bằng thì xong. Chèn cũng đi đường đó cho tới khi gặp chỗ trống (`nullptr`) và đặt nút mới vào chỗ ấy.
 
 Ba điều cần biết trước khi đọc listing:
 
-- `std::max(a, b)` (`<algorithm>`, [Bài 20](20-algorithm-lambda.md)) trả số lớn hơn trong hai số.
+- `std::max(a, b)` (`<algorithm>`, gặp lần đầu ở bài này) trả số lớn hơn trong hai số.
 - `std::vector<int>{4, 2, 6}` dựng tạm một vector chỉ để duyệt.
 - `chenNut` **trả về con trỏ** tới gốc của cây con sau khi chèn, và ta gán lại `n->trai = chenNut(n->trai, x)`. Cây con rỗng thì lời gọi trả nút mới nên gán nút mới vào; cây con có nút thì lời gọi trả lại chính nút cũ nên gán lại cũng không đổi gì. Bảng "Chạy từng dòng" có một hàng cho bước quay về này.
 
@@ -179,7 +179,7 @@ Cây `a` cao 3 với 7 nút, và nói chung cây đầy đủ `n` nút chỉ cao
 
 `std::map`/`std::set` ([Bài 18](18-map-set-unordered.md)) thường được cài bằng cây cân bằng (chuẩn chỉ đòi O(log n)); bản g++ dùng loại tên "cây đỏ-đen", bài này không cài.
 
-**Thử thay đổi: đổi hàm hủy thành `~Cay() {}` (bỏ lời gọi `giai`).** Mình đã biên dịch với `-fsanitize=address` và chạy: chương trình vẫn in kết quả như cũ rồi LeakSanitizer báo `336 byte(s) leaked in 14 allocation(s)`. Đúng là hai cây, mỗi cây 7 nút, mỗi nút 24 byte (một `int` cộng đệm và hai con trỏ). Với `giai` thì ASan và UBSan đều sạch.
+**Thử thay đổi: đổi hàm hủy thành `~Cay() {}` (bỏ lời gọi `giai`).** Mình đã biên dịch với `-fsanitize=address` và chạy: chương trình vẫn in kết quả như cũ rồi LeakSanitizer báo `336 byte(s) leaked in 14 allocation(s)`. Đúng là hai cây, mỗi cây 7 nút, mỗi nút thường 24 byte trên máy 64 bit (một `int` cộng đệm và hai con trỏ). Với `giai` thì ASan và UBSan đều sạch.
 
 !!! info "Bạn biết Go?"
     Thư viện chuẩn của Go **không có** BST hay map có thứ tự: `map` của Go là bảng băm (mục 3), và khi duyệt `for range` thứ tự cố ý bị xáo ngẫu nhiên. Muốn có thứ tự thì bạn lấy khóa ra slice rồi `sort`, hoặc dùng thư viện ngoài. Chèn/tìm BST viết bằng Go gần như y nguyên: `type Nut struct { Gt int; Trai, Phai *Nut }`; khác biệt là Go không cần hàm hủy vì bộ gom rác dọn các nút không còn ai trỏ tới.
@@ -291,7 +291,7 @@ co Binh: 1, co Hoa: 0
 
 Mỗi cặp `[ ... ]` là một hộp, đếm từ hộp 0 bên trái. `co` trả `bool`, và `cout` in `true` là `1`, `false` là `0` (không phải chỉ số hộp). Số hộp và hàm băm ở đây là do mình chọn cho dễ đọc; `unordered_map` của thư viện dùng hàm băm khác và hệ số tải tối đa mặc định cũng là 1 (hàm `load_factor()` và `max_load_factor()` cho bạn xem). Chuẩn không quy định cụ thể số hộp hay cách chia, nên đừng dựa vào con số cụ thể.
 
-**Vì sao O(1) trung bình?** Một lần `them`/`co` làm hai việc: tính hộp (số bước cố định, không phụ thuộc số khóa) và lục trong hộp. Nhờ rehash giữ hệ số tải không quá khoảng 1, nếu hàm băm **tản đều** thì mỗi hộp chỉ có vài khóa, nên lục hộp là hằng số. Việc rehash thì tốn O(n) nhưng hiếm (mỗi lần số hộp gấp đôi), nên chia đều vẫn là O(1) amortized, đúng như `push_back` ở Bài 21.
+**Vì sao O(1) trung bình?** Một lần `them`/`co` làm hai việc: tính hộp (số bước cố định, không phụ thuộc số khóa) và lục trong hộp. Nhờ rehash giữ hệ số tải không quá khoảng 1, nếu hàm băm **tản đều** thì mỗi hộp chỉ có vài khóa, nên lục hộp là hằng số. Việc rehash thì tốn O(n) nhưng hiếm (mỗi lần số hộp gấp đôi), nên chia đều vẫn là O(1) amortized, đúng như `push_back` ở [Bài 21](21-big-o-cau-truc-du-lieu.md).
 
 **Xấu nhất O(n)** khi mọi khóa rơi vào cùng một hộp (hàm băm dở, hoặc kẻ xấu cố ý chọn khóa cùng hộp): bảng thành một danh sách dài và `co` lục cả `n` khóa.
 

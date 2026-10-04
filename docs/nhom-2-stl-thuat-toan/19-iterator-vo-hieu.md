@@ -1,4 +1,4 @@
-# Bài 19 — Iterator và iterator invalidation: duyệt container, và khi nào iterator hỏng
+# Bài 19 — Iterator và iterator invalidation
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Hiểu **iterator** là "con trỏ tổng quát" cho mọi container: `begin()`, `end()` (điểm **sau** phần tử cuối), `*it`, `++it`, `it->`, `const_iterator`/`cbegin`, và range-for thực chất chạy thế nào.
@@ -9,7 +9,7 @@
 
 ## 🧠 Câu chuyện mở đầu
 
-Quay lại **kệ sách** của Bài 16. Bạn cầm một **ngón tay** chỉ vào một cuốn sách: ngón tay ấy là **iterator**. Bạn đọc cuốn đang chỉ (`*it`), nhích sang cuốn kế (`++it`), và biết đã hết khi ngón tay chạm **chỗ ngay sau cuốn cuối** (đó là `end()`: chỗ ấy không có sách để đọc).
+Quay lại **kệ sách** của [Bài 16](16-vector.md). Bạn cầm một **ngón tay** chỉ vào một cuốn sách: ngón tay ấy là **iterator**. Bạn đọc cuốn đang chỉ (`*it`), nhích sang cuốn kế (`++it`), và biết đã hết khi ngón tay chạm **chỗ ngay sau cuốn cuối** (đó là `end()`: chỗ ấy không có sách để đọc).
 
 Điểm hay: dù là kệ liền khối (`vector`), các tấm thẻ rời nối bằng dây (`list`) hay danh bạ (`map`), bạn vẫn dùng **cùng một cách** cầm ngón tay. Còn chuyện **ngón tay hỏng** là: bạn chỉ vào một cuốn rồi ai đó dọn kệ sang chỗ khác, hoặc rút cuốn đó ra. Ngón tay vẫn đứng nguyên nhưng chỉ vào chỗ không còn là cuốn sách ấy.
 
@@ -79,7 +79,7 @@ Hai điều cần nhớ. `vector<int>::iterator` đọc là "kiểu tên `iterat
 **Thử thay đổi: viết `int* it = v.begin();`.** Mình đã chạy: lỗi biên dịch `cannot convert 'std::vector<int>::iterator' to 'int*'`. Iterator **dùng giống** con trỏ nhưng là một kiểu riêng, không phải con trỏ.
 
 !!! info "Bạn biết Go?"
-    Go không có iterator: bạn viết `for i, x := range s` và ngôn ngữ lo phần duyệt. C++ cũng có range-for (mục 2), nhưng bên dưới nó dùng iterator, và iterator còn là thứ bạn **truyền cho hàm** của thư viện (Bài 20) và giữ lại để xóa/chèn giữa dãy (mục 5).
+    Go không có iterator: bạn viết `for i, x := range s` và ngôn ngữ lo phần duyệt. C++ cũng có range-for (mục 2), nhưng bên dưới nó dùng iterator, và iterator còn là thứ bạn **truyền cho hàm** của thư viện ([Bài 20](20-algorithm-lambda.md)) và giữ lại để xóa/chèn giữa dãy (mục 5).
 
 ### 2. Range-for thực chất chạy thế nào
 
@@ -129,7 +129,7 @@ Với mảng C, range-for dùng chính con trỏ `a` và `a + N` như mục 1. H
 
 ### 3. `it->`, `const_iterator` và các "hình dạng" iterator
 
-Iterator của `map` trỏ vào một `std::pair` (Bài 18), nên dùng `it->first` và `it->second`; `it->` là viết gọn của `(*it).`, giống con trỏ ở Bài 03. Iterator **chỉ-đọc** (`const_iterator`) cho đọc mà không cho sửa phần tử: lấy bằng `cbegin()`/`cend()`, hoặc bằng `begin()` trên container `const`.
+Iterator của `map` trỏ vào một `std::pair` ([Bài 18](18-map-set-unordered.md)), nên dùng `it->first` và `it->second`; `it->` là viết gọn của `(*it).`, giống con trỏ ở Bài 03. Iterator **chỉ-đọc** (`const_iterator`) cho đọc mà không cho sửa phần tử: lấy bằng `cbegin()`/`cend()`, hoặc bằng `begin()` trên container `const`.
 
 ```cpp
 #include <deque>
@@ -192,11 +192,11 @@ Từ đó rút ra: `vector`, `deque`, `std::array`, `std::string` (iterator **nh
 | `deque` | Chèn giữa: tất cả hỏng. `push_back`/`push_front`: **iterator** hỏng, nhưng **tham chiếu và con trỏ** tới phần tử còn sống | Xóa giữa: tất cả hỏng. Xóa ở hai đầu: chỉ cái bị xóa (và `end()` nếu xóa cuối) hỏng |
 | `list` | Không cái nào hỏng | Chỉ cái bị xóa hỏng |
 | `map`, `set` | Không cái nào hỏng | Chỉ cái bị xóa hỏng |
-| `unordered_*` | Không rehash: không cái nào hỏng. Có rehash (Bài 18): **iterator** hỏng, tham chiếu và con trỏ vẫn sống | Chỉ cái bị xóa hỏng |
+| `unordered_*` | Không rehash: không cái nào hỏng. Có rehash ([Bài 18](18-map-set-unordered.md)): **iterator** hỏng, tham chiếu và con trỏ vẫn sống | Chỉ cái bị xóa hỏng |
 
-Đọc bảng cho đúng: "còn sống" là điều chuẩn **bảo đảm**; "hỏng" nghĩa là chuẩn **không hứa gì**, có thể trông vẫn chạy. Một ví dụ: `reserve` đủ lớn trước khi thêm là cách để vector không tái cấp phát (Bài 16). Chương trình ở 💻 chạy thử mấy ô "còn sống".
+Đọc bảng cho đúng: "còn sống" là điều chuẩn **bảo đảm**; "hỏng" nghĩa là chuẩn **không hứa gì**, có thể trông vẫn chạy. Một ví dụ: `reserve` đủ lớn trước khi thêm là cách để vector không tái cấp phát ([Bài 16](16-vector.md)). Chương trình ở 💻 chạy thử mấy ô "còn sống".
 
-Ví dụ kinh điển nhất là vector đầy rồi `push_back` (đúng chuyện của Bài 16):
+Ví dụ kinh điển nhất là vector đầy rồi `push_back` (đúng chuyện của [Bài 16](16-vector.md)):
 
 ```cpp
 // bo-qua-kiem-tra
@@ -248,7 +248,7 @@ Build thường của mình in `1 2 -1310071373` rồi `4`: phần tử thứ ba
 Cách sửa thật: duyệt bằng chỉ số `for (std::size_t i = 0; i < v.size(); ++i)` (mình đã chạy: in `1 2 3 9`, `size` 4), hoặc gom việc cần thêm vào một vector khác rồi thêm sau vòng lặp.
 
 !!! info "Bạn biết Go?"
-    Go không có lớp lỗi này, nhưng có chuyện gần giống. `for _, x := range s { if x == 2 { s = append(s, 9) } }` thì **an toàn**: `range` tính `s` đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; `len(s)` thành 4) và slice cũ vẫn đọc được nhờ GC (Bài 16). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go thông thường không cho đọc rác kiểu này.
+    Go không có lớp lỗi này, nhưng có chuyện gần giống. `for _, x := range s { if x == 2 { s = append(s, 9) } }` thì **an toàn**: `range` tính `s` đúng một lần, vòng chạy đúng 3 lần (mình đã chạy; `len(s)` thành 4) và slice cũ vẫn đọc được nhờ GC ([Bài 16](16-vector.md)). Điều Go và C++ giống nhau là bẫy logic ở mục 5; khác là Go thông thường không cho đọc rác kiểu này.
 
 ### 5. Xóa khi đang duyệt: `erase` trả iterator kế tiếp
 
@@ -329,7 +329,7 @@ int main() {
 1=10 3=30 
 ```
 
-Vài điều cần nhớ. Với `vector` (và `deque`), `erase` làm `end()` cũ hỏng, nên phải gọi `v.end()` **mỗi vòng**, đừng lưu vào biến trước vòng lặp; với `list`/`map` lưu được, nhưng gọi lại mỗi vòng là thói quen an toàn cho mọi container. Không bao giờ `erase(c.end())`: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom (khuôn viết quen thuộc) **remove-erase** ở Bài 20 (C++20 còn có `std::erase_if`).
+Vài điều cần nhớ. Với `vector` (và `deque`), `erase` làm `end()` cũ hỏng, nên phải gọi `v.end()` **mỗi vòng**, đừng lưu vào biến trước vòng lặp; với `list`/`map` lưu được, nhưng gọi lại mỗi vòng là thói quen an toàn cho mọi container. Không bao giờ `erase(c.end())`: đó là UB. Xóa từng phần tử giữa vector tốn O(n) mỗi lần (dồn các phần tử sau), nên xóa nhiều phần tử theo điều kiện thì dùng idiom (khuôn viết quen thuộc) **remove-erase** ở [Bài 20](20-algorithm-lambda.md) (C++20 còn có `std::erase_if`).
 
 !!! info "Bạn biết Go?"
     Xóa khi `range` map trong Go là **hợp lệ**: `for k := range m { if k%2 == 0 { delete(m, k) } }` chạy đúng (mình đã chạy: còn `map[1:10 3:30]`), và đặc tả Go nói mục chưa duyệt tới mà bị xóa thì sẽ không được trả ra. C++ khác hẳn: an toàn khi bạn lấy iterator kế tiếp **trước** khi dùng lại `it` đã xóa, đơn giản nhất là `it = c.erase(it)`. Với slice Go, `t = append(t[:i], t[i+1:]...)` trong `range` không gây UB nhưng cũng **bỏ sót** phần tử y như ví dụ `1 2 3` ở trên (mình đã chạy: `[1 2 3]`).
@@ -371,11 +371,11 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Còn dùng được không |
 |---|---|---|
-| (1) | Xin chỗ trước: capacity ít nhất 100 chưa có iterator nào; `it` lấy ở dòng kế |
+| (1) | Xin chỗ trước: capacity ít nhất 100 | chưa có iterator nào; `it` lấy ở dòng kế |
 | (2) | `push_back` không cần tái cấp phát | `it` (phía trước điểm thêm) còn sống theo chuẩn |
 | (3) | `list` thêm cuối | `a`, `b` đều còn sống |
 | (4) | Xóa `b` | chỉ `b` hỏng; `a` còn sống |
-| (5) | Giữ tham chiếu tới giá trị khóa 1; `bucket_count()` cho biết số hộp hiện có của bảng (Bài 18) | `r` là biệt danh của giá trị 10 |
+| (5) | Giữ tham chiếu tới giá trị khóa 1; `bucket_count()` cho biết số hộp hiện có của bảng ([Bài 18](18-map-set-unordered.md)) | `r` là biệt danh của giá trị 10 |
 | (6) | Thêm 99 khóa nữa: bảng rehash (`bucket_count` đổi) | iterator cũ sẽ hỏng, nhưng tham chiếu `r` còn sống theo chuẩn |
 
 **Kết quả khi chạy:**
@@ -394,7 +394,7 @@ Dòng cuối cho thấy `r` vẫn đọc ra `10` và số hộp đã đổi (`1`
     Là khi một thao tác trên container làm iterator (và có thể tham chiếu, con trỏ) lấy từ trước không còn hợp lệ; dùng nó là hành vi không xác định. Ví dụ: giữ `auto it = v.begin();` rồi `v.push_back(x)` làm vector tái cấp phát, `it` trỏ vào mảng đã trả. Ví dụ thứ hai: `erase(it)` làm hỏng `it` và mọi iterator từ đó trở đi của vector. Với `list` và `map`, thêm không làm hỏng iterator nào và xóa chỉ làm hỏng iterator của phần tử bị xóa.
 
 ??? question "Xóa các phần tử thỏa điều kiện khi đang duyệt thì viết thế nào?"
-    Dùng iterator mà `erase` trả về: `for (auto it = c.begin(); it != c.end();) { if (cd(*it)) it = c.erase(it); else ++it; }`, gọi lại `c.end()` mỗi vòng. Sai là `c.erase(it); ++it;` (dùng `it` đã hỏng). Với `vector`, nếu xóa nhiều phần tử thì dùng remove-erase (Bài 20) vì mỗi lần `erase` giữa vector là O(n).
+    Dùng iterator mà `erase` trả về: `for (auto it = c.begin(); it != c.end();) { if (cd(*it)) it = c.erase(it); else ++it; }`, gọi lại `c.end()` mỗi vòng. Sai là `c.erase(it); ++it;` (dùng `it` đã hỏng). Với `vector`, nếu xóa nhiều phần tử thì dùng remove-erase ([Bài 20](20-algorithm-lambda.md)) vì mỗi lần `erase` giữa vector là O(n).
 
 ??? question "Vì sao `end()` trỏ sau phần tử cuối? Và range-for chạy thế nào?"
     Để dãy rỗng biểu diễn được (`begin() == end()`), vòng lặp chỉ cần `!=`, và `end() - begin()` là số phần tử. Range-for lấy `begin()` và `end()` **một lần**, rồi lặp `++` đến khi bằng `end()`; vì thế thêm/xóa phần tử của chính container đang duyệt có thể làm `end()` đã lấy bị hỏng.
@@ -422,7 +422,7 @@ Dòng cuối cho thấy `r` vẫn đọc ra `10` và số hộp đã đổi (`1`
 - Phần tử đầu tiên, giống hệt `v.begin()`
 - Ô nhớ cuối cùng mà vector đã xin, kể cả ô chưa dùng
 
-<p class="giai-thich" markdown>`end()` là vị trí ngay sau phần tử cuối: nó có thể so sánh nhưng không được `*`, giống `a + 3` của mảng ba phần tử ở Bài 05. Nếu nó chỉ vào phần tử cuối thì không biểu diễn được dãy rỗng. Chỉ vào phần tử đầu là việc của `begin()`; hai iterator này bằng nhau chỉ khi vector rỗng. Còn "con trỏ rỗng dùng chung" sai vì mỗi `end()` thuộc về đúng container của nó.</p>
+<p class="giai-thich" markdown>`end()` là vị trí ngay sau phần tử cuối: nó có thể so sánh nhưng không được `*`, giống `a + 3` của mảng ba phần tử ở Bài 05. Nếu nó chỉ vào phần tử cuối thì không biểu diễn được dãy rỗng. Chỉ vào phần tử đầu là việc của `begin()`; hai iterator này bằng nhau chỉ khi vector rỗng. Còn `end()` không liên quan tới capacity: nó ở ngay sau phần tử cuối (theo size), không phải sau ô cuối mà vector đã xin.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -438,7 +438,7 @@ std::cout << v[1] << " " << (it - v.begin());
 
 - `6 1`, vì `*it = 60` chỉ sửa một bản chép tạm
 - `60 2`, vì chỉ số của iterator đếm từ 1, không từ 0
-- `60 1`, vì `*it` sửa thẳng phần tử thứ hai
+- `60 1`, vì `*it` sửa thẳng phần tử thật, tức phần tử thứ hai
 - `5 60`, vì `it` vẫn trỏ vào phần tử đầu tiên
 
 <p class="giai-thich" markdown>`++it` nhích từ phần tử 0 sang phần tử 1, `*it = 60` sửa chính phần tử đó trong vector nên `v[1]` là 60, và `it - v.begin()` là 1. Iterator không phải bản chép: qua nó sửa được phần tử thật. Chỉ số vẫn đếm từ 0 nên không thể là 2. Việc `it` còn ở phần tử đầu chỉ đúng trước khi gọi `++it`.</p>
@@ -538,4 +538,4 @@ auto it = v.begin();
 2. Range-for lấy `begin()`/`end()` một lần rồi lặp `++`; `cbegin()`/`const_iterator` cho đọc mà không sửa, và `auto` giúp khỏi gõ kiểu dài.
 3. Iterator invalidation: thao tác làm iterator cũ hết hợp lệ, dùng tiếp là UB; theo chuẩn, `vector` tái cấp phát hỏng tất cả, `deque` giữa hỏng tất cả, `list`/`map` chỉ hỏng cái bị xóa, `unordered_*` rehash hỏng iterator (tham chiếu vẫn sống).
 4. g++ bản thường không kiểm tra (đọc rác, hoặc "chạy ra đúng" một cách tình cờ); ASan hoặc `-D_GLIBCXX_DEBUG` giúp bắt lỗi khi chạy thử.
-5. Xóa khi duyệt: `it = c.erase(it)` và chỉ `++it` khi không xóa, gọi lại `c.end()` mỗi vòng; Go cho phép xóa khi `range` map, C++ thì không; xóa nhiều phần tử của vector dùng remove-erase (Bài 20).
+5. Xóa khi duyệt: `it = c.erase(it)` và chỉ `++it` khi không xóa, gọi lại `c.end()` mỗi vòng; Go cho phép xóa khi `range` map, còn C++ chỉ an toàn khi lấy iterator kế tiếp trước (`it = c.erase(it)`); xóa nhiều phần tử của vector dùng remove-erase ([Bài 20](20-algorithm-lambda.md)).

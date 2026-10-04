@@ -24,7 +24,7 @@ Có hai cách tổ chức. **`std::map`** xếp các dòng **theo thứ tự tê
 
 `std::map<K, V>` (`#include <map>`) là bảng từ khóa kiểu `K` sang giá trị kiểu `V`, mỗi khóa **chỉ xuất hiện một lần**, và các khóa luôn được giữ theo thứ tự `<`. Chuẩn bảo đảm tìm, chèn, xóa theo khóa tốn **O(log n)**: mỗi lần n gấp đôi chỉ thêm một bước (một triệu phần tử cỡ hai chục bước). Chương trình dưới là danh bạ điểm; `K` là `std::string`, nên thứ tự là thứ tự từ điển của [Bài 17](17-string-array-deque-list.md).
 
-`find(khoa)` trả về một **iterator**: một "ngón tay chỉ" vào phần tử tìm thấy, dùng giống con trỏ (`->`, `*`; chi tiết ở Bài 19). Không thấy thì nó trả `m.end()`, "ngón tay chỉ ra ngoài cuối". Phần tử của map là một `std::pair` ([Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md)): `it->first` là khóa, `it->second` là giá trị.
+`find(khoa)` trả về một **iterator**: một "ngón tay chỉ" vào phần tử tìm thấy, dùng giống con trỏ (`->`, `*`; chi tiết ở [Bài 19](19-iterator-vo-hieu.md)). Không thấy thì nó trả `m.end()`, "ngón tay chỉ ra ngoài cuối". Phần tử của map là một `std::pair` ([Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md)): `it->first` là khóa, `it->second` là giá trị.
 
 ```cpp
 #include <iostream>
@@ -159,7 +159,7 @@ int main() {
 | (1) | `"cam"` chưa có: map **chèn** `cam` với giá trị 0 rồi trả 0 | `{cam:0, tao:5}` |
 | (2) | Trước đó chỉ có `tao` (1 dòng); `cam` vừa được chèn nên giờ là 2 dòng | in `size = 2` |
 | (3) | `count` chỉ **hỏi**, không chèn | size vẫn 2 |
-| (4) | `at` ném `std::out_of_range` khi không có khóa (Bài 16), cũng không chèn | in `at: khong co xoai` |
+| (4) | `at` ném `std::out_of_range` khi không có khóa ([Bài 16](16-vector.md)), cũng không chèn | in `at: khong co xoai` |
 | (5) | `tao` đã có: tăng 5 lên 6 | `tao:6` |
 | (6) | `le` chưa có: chèn với 0 rồi `++` thành 1; đây là cách **đếm** quen thuộc | `{cam:0, le:1, tao:6}` |
 
@@ -243,7 +243,7 @@ size = 2
 
 - Tìm/chèn/xóa **O(1) trung bình**, nhưng **xấu nhất O(n)**: nếu mọi khóa dồn vào cùng một hộp thì phải lục cả hộp.
 - **Không có thứ tự**: thứ tự duyệt không xác định, tùy bản thư viện và có thể đổi khi thêm phần tử. Đừng dựa vào nó.
-- Khi hộp quá đầy, bảng tự **rehash** (xây lại với nhiều hộp hơn): thứ tự duyệt có thể đổi và iterator cũ bị vô hiệu (Bài 19 nói kỹ).
+- Khi hộp quá đầy, bảng tự **rehash** (xây lại với nhiều hộp hơn): thứ tự duyệt có thể đổi và iterator cũ bị vô hiệu ([Bài 19](19-iterator-vo-hieu.md) nói kỹ).
 
 ```cpp
 #include <iostream>
@@ -437,7 +437,7 @@ nhieu nhat: go (3 lan)
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Dựa vào thứ tự duyệt của `unordered_map`"
-    Bài kiểm tra so sánh chuỗi in ra, hoặc code giả định "phần tử thêm trước thì duyệt trước", có thể chạy đúng trên máy bạn và sai trên máy khác (mục 5). Cần thứ tự thì dùng `map`, hoặc lấy ra `vector` rồi sắp xếp (Bài 20).
+    Bài kiểm tra so sánh chuỗi in ra, hoặc code giả định "phần tử thêm trước thì duyệt trước", có thể chạy đúng trên máy bạn và sai trên máy khác (mục 5). Cần thứ tự thì dùng `map`, hoặc lấy ra `vector` rồi sắp xếp ([Bài 20](20-algorithm-lambda.md)).
 
 !!! warning "Lỗi 2: `operator<` viết sai cho khóa tự định nghĩa"
     Quên so các trường sau khi trường đầu bằng nhau, hoặc dùng `<=`, làm hai khóa khác nhau bị coi là trùng (mất dòng) hoặc vi phạm yêu cầu của chuẩn (hành vi không xác định). Hãy so từng trường theo thứ tự như `Toa` ở mục 6.
@@ -478,7 +478,7 @@ std::cout << m.size();
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 3.** Về `m[k]` khi `k` chưa có và giá trị là `int`, điều nào đúng khi so Go với C++?
 
-- Cả hai cho 0, nhưng chỉ `std::map` thêm khóa
+- Cả hai cho 0, nhưng chỉ `std::map` mới thêm khóa
 - Go ném lỗi khi thiếu khóa, còn `std::map` trả 0
 - Cả hai cho 0 và đều giữ nguyên số khóa của bảng
 - Go thêm khóa vào bảng, còn `std::map` thì không thêm
@@ -520,7 +520,7 @@ std::cout << m["a"] << " " << m["b"];
 - Chỉ `operator==`, vì set phải biết hai phần tử bằng nhau
 - Hàm băm cho `Toa`, vì set tra theo giá trị băm
 - Không cần gì, vì set tự so từng byte
-- `operator<` để so thứ tự hai `Toa`
+- `operator<`, vì set giữ phần tử theo thứ tự
 
 <p class="giai-thich" markdown>`std::set` giữ phần tử theo thứ tự nên cần `operator<`; hai phần tử mà không cái nào nhỏ hơn cái kia được coi là trùng, nên `set` không dùng `==`. Hàm băm là yêu cầu của `std::unordered_set`, không phải của `std::set`. Còn "tự so từng byte" không có: thiếu `operator<` thì g++ báo lỗi biên dịch (mình đã chạy).</p>
 </div>
@@ -550,7 +550,7 @@ std::cout << m[1] << " " << m[2] << " " << m.size();
 ## 🔑 Tóm tắt
 
 1. `std::map<K, V>` (`<map>`) và `std::set<K>` (`<set>`) giữ khóa không trùng theo thứ tự `<` (thường cài bằng cây cân bằng), tìm/chèn/xóa O(log n); phần tử của map là `std::pair<const K, V>` nên khóa là `const`, duyệt bằng `for (const auto& [khoa, giaTri] : m)`.
-2. `std::unordered_map`/`unordered_set` là bảng băm: tìm/chèn/xóa O(1) trung bình, xấu nhất O(n), **không có thứ tự duyệt** (khác nhau giữa các thư viện), rehash làm iterator cũ hỏng (Bài 19); `map[K]V` của Go tương đương nó, và Go cố ý xáo thứ tự duyệt.
+2. `std::unordered_map`/`unordered_set` là bảng băm: tìm/chèn/xóa O(1) trung bình, xấu nhất O(n), **không có thứ tự duyệt** (khác nhau giữa các thư viện), rehash làm iterator cũ hỏng ([Bài 19](19-iterator-vo-hieu.md)); `map[K]V` của Go tương đương nó, và Go cố ý xáo thứ tự duyệt.
 3. `m[k]` với khóa chưa có **chèn** giá trị mặc định (Go thì không chèn); `m.at(k)` ném `std::out_of_range`; `find(k)` / `count(k)` chỉ hỏi (`v, ok := m[k]` của Go ↔ `find`); `contains` chỉ có từ C++20.
 4. `insert` và `try_emplace` không ghi đè khi khóa đã có (`insert` trả `pair<iterator, bool>`), `m[k] = v` thì ghi đè; `try_emplace` được chuẩn bảo đảm không đụng đối số khi trùng khóa, `emplace` thì không hứa.
 5. Chọn `unordered_map` khi chỉ tra theo khóa, `map` khi cần thứ tự hoặc truy vấn khoảng; khóa tự định nghĩa cần `operator<` cho `map`/`set`, còn `unordered_*` cần hàm băm và `==`.

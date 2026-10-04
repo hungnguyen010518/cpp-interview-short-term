@@ -7,7 +7,7 @@
     - Thấy vì sao Fibonacci đệ quy ngây thơ bùng nổ, rồi sửa bằng **ghi nhớ (memoization)** và **quy hoạch động** (bảng), lập và tính tay được bảng cho bài đổi tiền rút gọn.
     - Có quy trình giải đề ở bảng trắng: làm rõ đề, ví dụ nhỏ, nói to cách nghĩ, nêu độ phức tạp, kiểm tra biên.
 
-**Bạn cần biết trước:** [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) (`&&`, `long long`, `static_cast`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến toàn cục, khung hàm), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `int&` để trả kết quả ra), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (tràn số có dấu là UB, ASan/UBSan), [Bài 16](16-vector.md) (`vector`, `size() - 1` khi rỗng), [Bài 18](18-map-set-unordered.md) (`unordered_map`, `find`), [Bài 19](19-iterator-vo-hieu.md) (iterator), [Bài 20](20-algorithm-lambda.md) (`sort`, `%`), [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O), [Bài 22](22-bst-bang-bam-heap.md) (đệ quy tại chỗ, `std::max`).
+**Bạn cần biết trước:** [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) (`long long`, `static_cast`), [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (biến toàn cục, khung hàm), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `int&` để trả kết quả ra), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (tràn số có dấu là UB, ASan/UBSan), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`%`), [Bài 16](16-vector.md) (`vector`, `size() - 1` khi rỗng), [Bài 18](18-map-set-unordered.md) (`unordered_map`, `find`), [Bài 19](19-iterator-vo-hieu.md) (iterator), [Bài 20](20-algorithm-lambda.md) (`sort`), [Bài 21](21-big-o-cau-truc-du-lieu.md) (Big-O, `&&` là "và" logic), [Bài 22](22-bst-bang-bam-heap.md) (đệ quy tại chỗ).
 
 !!! note "Phạm vi bài này"
     Mức nhập môn: mỗi thuật toán có một bản nhỏ chạy được, để bạn hiểu ý tưởng và nói trôi chảy. Quick sort chỉ ở mức khái niệm; đồ thị, quy hoạch động nhiều chiều và chứng minh đúng nằm ngoài bài.
@@ -206,7 +206,7 @@ Ba thuật toán bạn cần nói được, từ chậm đến nhanh. **Sắp x�
 
 ### 4. Đệ quy nâng cao: giai thừa, Fibonacci và vì sao chậm
 
-[Bài 22](22-bst-bang-bam-heap.md) đã dạy đệ quy với điểm dừng và bước đệ quy (hình ảnh: giao việc nhỏ hơn cho một người y hệt mình). **Giai thừa**: `n! = n * (n-1)!`, điểm dừng `0! = 1`. Mỗi lần gọi chỉ sinh **một** lần gọi con nên số bước là n, ổn.
+[Bài 22](22-bst-bang-bam-heap.md) đã dạy đệ quy với điểm dừng và bước đệ quy (hình ảnh mới: giao việc nhỏ hơn cho một người y hệt mình). **Giai thừa**: `n! = n * (n-1)!`, điểm dừng `0! = 1`. Mỗi lần gọi chỉ sinh **một** lần gọi con nên số bước là n, ổn.
 
 **Fibonacci**: `F(0) = 0`, `F(1) = 1`, `F(n) = F(n-1) + F(n-2)`. Viết thẳng thành đệ quy thì mỗi lần gọi sinh **hai** lần gọi con, và các lần gọi con **tính lại** cùng một giá trị rất nhiều lần: `F(5)` gọi `F(4)` và `F(3)`, mà `F(4)` lại gọi `F(3)` lần nữa. Số lần gọi gần như nhân lên mỗi khi `n` tăng một bước, nên người ta nói gọn **O(2^n)** (chính xác hơn: cỡ 1,6^n; cả hai đều là "mũ").
 
@@ -330,7 +330,7 @@ Nói to trong lúc nghĩ là chủ ý: người phỏng vấn có thể gợi ý
 
 ### Sắp xếp chèn và sắp xếp trộn: đếm số lần so sánh
 
-Hai hàm, mỗi hàm cộng vào biến toàn cục `soSoSanh` ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)) mỗi lần so sánh hai phần tử. Mấy cú pháp mới: `&&` nghĩa "và" (cả hai vế cùng đúng, như trong Go); `break` thoát khỏi vòng lặp ngay (như Go); `std::vector<int>(đầu, cuối)` dựng một vector mới chép các phần tử của đoạn `[đầu, cuối)`.
+Hai hàm, mỗi hàm cộng vào biến toàn cục `soSoSanh` ([Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)) mỗi lần so sánh hai phần tử. Mấy cú pháp mới: `break` thoát khỏi vòng lặp ngay (như Go); `std::vector<int>(đầu, cuối)` dựng một vector mới chép các phần tử của đoạn `[đầu, cuối)`; còn `&&` là "và" logic đã gặp ở [Bài 21](21-big-o-cau-truc-du-lieu.md).
 
 ```cpp
 #include <algorithm>
@@ -462,7 +462,7 @@ Nhìn từ `n = 1000` lên `2000`: số lần so sánh của sắp xếp chèn g
 <div class="quiz" data-bai="23" markdown>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
-**Câu 1.** Đọc đoạn sau. `timNhiPhan` là hàm ở mục 1. Nó trả về gì khi tìm `12`?
+**Câu 1.** Đọc đoạn sau. `timNhiPhan` là hàm ở mục 1. Nó trả về gì khi tìm `12`, và sau mấy vòng lặp?
 
 ```text
 v = {2, 4, 6, 8, 10, 12, 14}
@@ -474,7 +474,7 @@ timNhiPhan(v, 12)
 - `-1`, vì `12` nằm ở nửa phải nên hàm bỏ qua nó
 - `6`, vì `12` là phần tử thứ 6 khi đếm từ 1
 
-<p class="giai-thich" markdown>Vòng một: `lo = 0`, `hi = 6`, `mid = 3`, `v[3] = 8 < 12` nên `lo = 4`. Vòng hai: `mid = 4 + (6 - 4) / 2 = 5`, `v[5] = 12` trúng nên trả `5`, không còn vòng ba. Không có chuyện bỏ qua nửa phải: nửa phải mới là nơi chứa `12`. Hàm trả chỉ số (đếm từ 0) chứ không phải thứ tự đếm từ 1, nên `6` sai; chỉ số `6` còn chứa `14`.</p>
+<p class="giai-thich" markdown>Vòng một: `lo = 0`, `hi = 6`, `mid = 3`, `v[3] = 8 < 12` nên `lo = 4`. Vòng hai: `mid = 4 + (6 - 4) / 2 = 5`, `v[5] = 12` trúng nên trả `5`, không còn vòng ba (nên "ba vòng" sai dù cũng ra `5`). Không có chuyện bỏ qua nửa phải: nửa phải mới là nơi chứa `12`. Hàm trả chỉ số (đếm từ 0) chứ không phải thứ tự đếm từ 1, nên `6` sai; chỉ số `6` còn chứa `14`.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -483,7 +483,7 @@ timNhiPhan(v, 12)
 - Vì phép chia chạy trước phép cộng sẽ nhanh hơn rõ rệt
 - Vì `(lo + hi) / 2` luôn làm tròn lên nên bỏ sót phần tử đầu
 - Vì `lo + hi` luôn là số âm khi dãy rỗng
-- Vì `lo + hi` có thể tràn `int`, còn `hi - lo` thì không
+- Vì `lo + hi` có thể tràn `int`, còn hiệu `hi - lo` thì không tràn
 
 <p class="giai-thich" markdown>Khi `lo` và `hi` đều lớn, tổng của chúng có thể tràn `int`, và số có dấu tràn là hành vi không xác định; hiệu `hi - lo` luôn nằm trong khoảng an toàn. Tốc độ không phải lý do vì hai cách tốn số phép tính như nhau. Cả hai cách đều làm tròn xuống (phép chia nguyên cắt phần lẻ), và với dãy rỗng không có vòng lặp nào để tính giữa.</p>
 </div>
