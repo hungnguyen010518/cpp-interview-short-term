@@ -1,12 +1,12 @@
-# Bài 30 — Thread pool và hiệu năng: tái dùng luồng, false sharing, Amdahl
+# Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Giải thích vì sao "mỗi việc một luồng" tệ khi việc nhỏ, và tự cài một **thread pool** (nhóm luồng dùng lại) từ `std::queue`, `std::mutex`, `std::condition_variable`: worker lấy việc, chạy **ngoài khóa**, và hàm hủy dừng sạch (đặt cờ dưới khóa, `notify_all`, `join`).
-    - Biết `submit` trả `std::future` bằng `std::packaged_task`, chọn số worker theo `hardware_concurrency()` cho việc nặng CPU, và vì sao việc chờ I/O thì khác.
+    - Biết dùng `std::packaged_task` để lấy `future` từ việc nộp vào pool, chọn số worker theo `hardware_concurrency()` (số luồng phần cứng) cho việc nặng CPU, và vì sao việc chờ I/O thì khác.
     - Đo thật ba cách (tuần tự, mỗi việc một luồng, pool): việc nhỏ thì pool cũng không thắng được tuần tự; việc đủ lớn mới có lợi.
-    - Hiểu **false sharing** (đo thật với `alignas(64)`) và **định luật Amdahl**; có bảng chọn công cụ đa luồng và danh sách câu hỏi phỏng vấn nối về Bài 24 đến 29; so với worker pool của Go.
+    - Hiểu **false sharing** (đo thật với `alignas(64)`) và **định luật Amdahl**; có bảng chọn công cụ đa luồng và danh sách câu hỏi phỏng vấn nối về [Bài 24](24-thread-co-ban.md) đến 29; so với worker pool của Go.
 
-**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `hardware_concurrency`, `steady_clock`, ngoại lệ trong luồng gọi `std::terminate`), [Bài 25](25-data-race-mutex.md) (`mutex`, `lock_guard`, class có `private:`), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (con trỏ), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (lambda `[&]`), [Bài 27](27-condition-variable.md) (`condition_variable`, `wait` với predicate, dừng sạch, hàng đợi), [Bài 28](28-atomic.md) (`std::atomic`, `fetch_add`), [Bài 29](29-async-future.md) (`future`, `get`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 10](../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (`make_shared`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `std::function<bool(int)>`).
+**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `hardware_concurrency`, `steady_clock`, ngoại lệ trong luồng gọi `std::terminate`), [Bài 25](25-data-race-mutex.md) (`mutex`, `lock_guard`, class có `private:`), [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md) (con trỏ), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`this`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) (lambda `[&]`), [Bài 27](27-condition-variable.md) (`condition_variable`, `wait` với predicate, dừng sạch, hàng đợi), [Bài 28](28-atomic.md) (`std::atomic`, `fetch_add`), [Bài 29](29-async-future.md) (`future`, `get`), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`std::move`), [Bài 10](../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (`make_shared`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `std::function<bool(int)>`).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -51,7 +51,7 @@ Mình làm đúng như vậy ở ví dụ phần 💻, không sửa lớp pool. 
 
 ### 4. Bao nhiêu worker?
 
-Với việc **nặng CPU** (tính toán thuần), mỗi worker giữ một lõi bận suốt, nên số worker hợp lý xấp xỉ số lõi: `std::thread::hardware_concurrency()` ([Bài 24](24-thread-co-ban.md); chuẩn chỉ gọi nó là gợi ý và cho phép trả `0`, nên cần kiểm). Nhiều hơn số lõi thì các worker tranh nhau lõi, chỉ buộc hệ điều hành luân phiên nhiều luồng trên cùng một lõi.
+Với việc **nặng CPU** (tính toán thuần), mỗi worker giữ một lõi bận suốt, nên số worker hợp lý xấp xỉ số lõi, mà mốc dễ lấy là `std::thread::hardware_concurrency()` ([Bài 24](24-thread-co-ban.md); chuẩn chỉ gọi nó là gợi ý và cho phép trả `0`, nên cần kiểm). Hàm này đếm **luồng phần cứng**, không đếm lõi: CPU có siêu phân luồng (mỗi lõi chạy hai luồng) thì con số gấp đôi số lõi thật (máy mình: 4 lõi, trả 8), và nó đổi theo máy; vẫn dùng làm mốc được. Nhiều hơn số lõi thì các worker tranh nhau lõi, chỉ buộc hệ điều hành luân phiên nhiều luồng trên cùng một lõi.
 
 Với việc **chờ I/O** (đọc mạng, đọc đĩa, ngủ), worker đang chờ **không dùng CPU**, nên có thể nhiều worker hơn số lõi: lúc một worker chờ, lõi đó chạy worker khác. Mình thử đúng điều đó ở "Thử thay đổi" của ví dụ 1.
 
@@ -87,7 +87,7 @@ Thêm lõi tới đâu cũng không vượt `1/(1-p)`. Trong thực tế còn k�
 
 Chương trình tạo pool 4 worker, nộp 1000 việc "cộng `i` vào `tong`" (một `std::atomic<long long>`), rồi nộp thêm một việc có kết quả bằng `packaged_task`. Việc nào chạy trên worker nào đổi theo lần chạy, nên **không in thứ tự**; chương trình chỉ in sau khi pool đã hủy (dừng sạch).
 
-Về cú pháp mới: `[this]` cho lambda trong hàm thành viên dùng được các thành viên của đối tượng (`this` là con trỏ tới chính đối tượng, như con trỏ ở [Bài 03](../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban.md)); đuôi `_` trong `khoa_`, `hang_` chỉ là thói quen đặt tên cho thành viên.
+Về cú pháp mới: `[this]` cho lambda trong hàm thành viên dùng được các thành viên của đối tượng (`this` là con trỏ tới chính đối tượng, như đã học ở [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)); đuôi `_` trong `khoa_`, `hang_` chỉ là thói quen đặt tên cho thành viên.
 
 ```cpp
 #include <atomic>
@@ -186,13 +186,13 @@ int main() {
 - Chương trình trên, chạy 20 lần một đợt, ba đợt mỗi mức `-O`. Không tối ưu: 5, 4, 3 lần ra bình thường, còn lại treo (`timeout 3` mã **124**). `-O2`: 19, 16, 18 lần ra bình thường, chỉ 1 đến 4 lần treo. Treo hay không tùy lúc hủy worker còn bận hay đã ngủ, nên tỉ lệ đổi mạnh theo máy, mức `-O` và lần chạy.
 - Chỉ tạo pool 4 worker, ngủ 200 ms rồi hủy (cả bốn chắc chắn đang ngủ trong `wait`): 3 lần đều treo.
 
-Lý do: không ai đánh thức worker đang ngủ, nên `join` chờ mãi. "Ra bình thường" là may; chuẩn chỉ nói `notify_one` đánh thức nhiều nhất một luồng và `wait` cần được đánh thức.
+Lý do: không ai đánh thức worker đang ngủ, nên `join` chờ mãi (trên máy mình; chuẩn cho phép đánh thức giả nên không hứa). "Ra bình thường" là may; chuẩn chỉ nói `notify_one` đánh thức nhiều nhất một luồng và `wait` cần được đánh thức.
 
 **Thử thay đổi 2: cho một việc ném ngoại lệ**, ví dụ việc `i == 500` thực hiện `throw std::runtime_error("loi")`. Với bản pool **bỏ** `try`/`catch` ở dòng (10) (chỉ còn `viec();`), mình chạy: chương trình dừng với `terminate called after throwing an instance of 'std::runtime_error'` và mã **134**. Việc chạy trên luồng của worker, ngoại lệ không ai bắt thoát khỏi hàm luồng, đúng như [Bài 24](24-thread-co-ban.md). Với bản có `try`/`catch` như listing, mình chạy: in `tong = 500000` (thiếu đúng việc 500) và `kq = 42`, mã 0, TSan sạch. Ngoại lệ bị **nuốt im lặng**; muốn biết lỗi thì ghi lại nó, hoặc dùng `packaged_task` để ngoại lệ đi vào `future` ([Bài 29](29-async-future.md)).
 
 Bài này không xử lý chuyện `submit` sau khi pool đã bị hủy hay đặt cờ dừng (việc nộp muộn có thể không bao giờ chạy), nên đây là bản học, chưa đủ cho sản phẩm.
 
-**Thử thay đổi 3: việc chờ I/O.** Mình đổi mỗi việc thành `std::this_thread::sleep_for(std::chrono::milliseconds(10))` (giả vờ chờ mạng), nộp 100 việc, rồi đo thời gian từ lúc tạo pool tới lúc hủy xong. Máy mình (8 lõi): pool 4 worker mất khoảng 252 ms (ba lần chạy: 252, 252, 253), pool 32 worker khoảng 43 ms (ba lần: 43, 43, 43). Việc chờ không tốn CPU nên nhiều worker hơn số lõi vẫn nhanh hơn; con số đổi theo máy.
+**Thử thay đổi 3: việc chờ I/O.** Mình đổi mỗi việc thành `std::this_thread::sleep_for(std::chrono::milliseconds(10))` (giả vờ chờ mạng), nộp 100 việc, rồi đo thời gian từ lúc tạo pool tới lúc hủy xong. Máy mình (4 lõi, 8 luồng phần cứng): pool 4 worker mất khoảng 252 ms (ba lần chạy: 252, 252, 253), pool 32 worker khoảng 43 ms (ba lần: 43, 43, 43). Việc chờ không tốn CPU nên nhiều worker hơn số lõi vẫn nhanh hơn; con số đổi theo máy.
 
 ### Ví dụ 2: đo pool, mỗi việc một luồng, và tuần tự
 
@@ -249,7 +249,7 @@ int main() {
 | (3) | Cách hai (`std::ref` như [Bài 24](24-thread-co-ban.md)): mỗi việc một `std::thread`, nên tạo và hủy 20000 luồng ở lô nhỏ |
 | (4) | Cách ba: dựng 4 worker, nộp mọi việc, hủy (chờ hết việc) rồi mới có thời gian |
 
-**Kết quả khi chạy** (g++ 11.4, 8 lõi; ba lần ở mỗi mức `-O`, đổi theo máy, lần chạy, và mức `-O`):
+**Kết quả khi chạy** (g++ 11.4, máy 4 lõi 8 luồng phần cứng; ba lần ở mỗi mức `-O`, đổi theo máy, lần chạy, và mức `-O`):
 
 | Lô | Mức `-O` | Tuần tự | Mỗi việc một luồng | Pool 4 worker |
 |---|---|---|---|---|
@@ -260,8 +260,8 @@ int main() {
 
 Mẫu đáng nhớ có ba ý:
 
-- Việc nhỏ thì **tuần tự thắng cả pool** (1 ms so với 6 đến 33 ms): một việc chỉ vài chục phép cộng, nhẹ hơn việc khóa mutex, đẩy hàng và đánh thức một worker. Pool vẫn rẻ hơn tạo luồng cho từng việc rất nhiều.
-- Việc vừa thì pool thường nhanh nhất, nhưng **không nhanh gấp 4 lần** tuần tự dù có 4 worker: còn chi phí đồng bộ và phần tuần tự (mục 5).
+- Việc nhỏ thì **tuần tự thắng cả pool** (ở `-O2`: 0 ms so với 6 đến 8 ms): một việc chỉ vài chục phép cộng, nhẹ hơn việc khóa mutex, đẩy hàng và đánh thức một worker. Pool vẫn rẻ hơn tạo luồng cho từng việc rất nhiều.
+- Việc vừa thì pool thường nhanh nhất, nhưng **không nhanh gấp 4 lần** tuần tự dù có 4 worker: còn chi phí đồng bộ, phần tuần tự (mục 5), và máy này chỉ có 4 lõi thật.
 - Luồng dùng một lần, mỗi việc một luồng, tốn nhất khi việc nhỏ (khoảng 650 ms chia cho 20000 luồng ra cỡ 30 micro-giây mỗi luồng, trên máy này).
 
 ### Ví dụ 3: false sharing, đo thật
@@ -349,7 +349,7 @@ int main() {
     Tạo và hủy luồng có chi phí cố định (hệ điều hành dựng stack và đăng ký lập lịch), nên với nhiều việc nhỏ chi phí đó lớn hơn việc, và quá nhiều luồng sống cùng lúc tốn bộ nhớ. Pool tạo N luồng một lần và tái sử dụng. Cài: một hàng đợi `std::queue<std::function<void()>>` dưới `std::mutex`, một `std::condition_variable`; worker `wait` tới khi có việc hoặc đã dừng, lấy việc, **nhả khóa rồi chạy**; hàm hủy đặt cờ dừng dưới khóa, `notify_all`, `join` (RAII). Muốn kết quả thì `std::packaged_task` + `std::future`.
 
 ??? question "Số luồng trong pool nên là bao nhiêu?"
-    Việc nặng CPU: xấp xỉ `std::thread::hardware_concurrency()` (chỉ là gợi ý, có thể trả 0), vì nhiều hơn chỉ tranh lõi. Việc chờ I/O: có thể nhiều hơn số lõi, vì luồng đang chờ không dùng CPU. Cần đo, không đoán; số tối ưu còn tùy tranh chấp khóa.
+    Việc nặng CPU: xấp xỉ số lõi, lấy mốc từ `std::thread::hardware_concurrency()` (chỉ là gợi ý, có thể trả 0, và đếm luồng phần cứng nên có thể gấp đôi số lõi), vì nhiều hơn chỉ tranh lõi. Việc chờ I/O: có thể nhiều hơn số lõi, vì luồng đang chờ không dùng CPU. Cần đo, không đoán; số tối ưu còn tùy tranh chấp khóa.
 
 ??? question "False sharing là gì và Amdahl nói gì?"
     False sharing: hai luồng ghi hai biến khác nhau nhưng cùng một dòng cache (thường 64 byte), nên các lõi phải chuyền dòng đó qua lại và chương trình chậm đi dù không có data race; gỡ bằng đệm hoặc `alignas(64)`. Amdahl: nếu phần song song được là `p` thì tăng tốc với `n` lõi tối đa `1 / ((1 - p) + p / n)`, không bao giờ vượt `1 / (1 - p)`; phần tuần tự (kể cả vùng găng của mutex) và chi phí đồng bộ giới hạn hiệu quả của việc thêm luồng.
@@ -384,7 +384,7 @@ int main() {
     Chạy `viec()` khi còn giữ `lk` thì mọi worker chờ nhau, pool thành tuần tự. Ngoại lệ không bắt trong việc làm cả chương trình `terminate` (mình chạy: mã 134); listing đã bọc `try`/`catch`, hoặc dùng `packaged_task`.
 
 !!! warning "Lỗi 3: Dùng pool (hoặc nhiều luồng) cho việc quá nhỏ, và đo khi bật TSan"
-    Mình đo: 20000 việc cỡ vài chục phép cộng, tuần tự chỉ vài mili giây còn pool mất hàng chục. Hãy đo trước khi song song hóa; và đừng đo tốc độ với `-fsanitize=thread` vì nó chậm hơn nhiều lần.
+    Mình đo: 20000 việc cỡ vài chục phép cộng, tuần tự 0 đến 1 ms còn pool 6 đến 33 ms. Hãy đo trước khi song song hóa; và đừng đo tốc độ với `-fsanitize=thread` vì nó chậm hơn nhiều lần.
 
 ## ✍️ Trắc nghiệm
 
@@ -417,7 +417,7 @@ int main() {
 - Hủy êm, vì `join` tự đánh thức worker đang ngủ rồi chờ chúng thoát
 - Treo ở `join`, vì worker đang ngủ mà không ai gọi dậy để thấy `dung_`
 
-<p class="giai-thich" markdown>Worker chỉ kiểm lại predicate khi được đánh thức; đổi `dung_` không đánh thức ai, nên cả bốn ngủ tiếp và `join` chờ mãi (mình chạy: mã 124). Chúng không tự nhận ra thay đổi vì `wait` không theo dõi biến. `join` chỉ chờ luồng kết thúc, không gọi ai dậy. Còn `std::terminate` xảy ra khi hủy `std::thread` chưa `join`, mà ở đây `join` được gọi.</p>
+<p class="giai-thich" markdown>Worker chỉ kiểm lại predicate khi được đánh thức; đổi `dung_` không đánh thức ai, nên cả bốn ngủ tiếp và `join` chờ mãi (mình chạy: mã 124; chuẩn cho phép đánh thức giả nên không hứa chắc). Chúng không tự nhận ra thay đổi vì `wait` không theo dõi biến. `join` chỉ chờ luồng kết thúc, không gọi ai dậy. Còn `std::terminate` xảy ra khi hủy `std::thread` chưa `join`, mà ở đây `join` được gọi.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
@@ -425,10 +425,10 @@ int main() {
 
 - Nhiều hơn 8, vì worker đang chờ mạng thì không chiếm CPU
 - Ít hơn 8, vì nhiều worker thì tranh khóa hàng đợi rất nặng
-- Đúng 100, vì mỗi việc cần một worker riêng cho chắc ăn
+- Đúng 1, vì chờ mạng thì một worker làm lần lượt là đủ
 - Đúng 8, vì `hardware_concurrency` là số worker được khuyên dùng
 
-<p class="giai-thich" markdown>Việc chờ mạng không dùng CPU, nên khi một worker chờ thì lõi đó chạy worker khác; vì vậy nhiều worker hơn số lõi vẫn làm xong nhiều việc hơn (mình thử với việc ngủ 10 ms: 4 worker mất khoảng 252 ms, 32 worker khoảng 43 ms). Quy tắc "bằng số lõi" chỉ hợp việc nặng CPU, và `hardware_concurrency` chỉ là gợi ý về phần cứng. Tranh khóa hàng đợi có thật nhưng nhỏ so với 10 ms chờ mỗi việc, nên ít worker hơn chỉ làm chậm thêm. Mở 100 worker cho 100 việc phí stack và tạo luồng, không cần để các việc chờ chạy gối nhau.</p>
+<p class="giai-thich" markdown>Việc chờ mạng không dùng CPU, nên khi một worker chờ thì lõi đó chạy worker khác; vì vậy nhiều worker hơn số lõi vẫn làm xong nhiều việc hơn (mình thử với việc ngủ 10 ms: 4 worker mất khoảng 252 ms, 32 worker khoảng 43 ms). Quy tắc "bằng số lõi" chỉ hợp việc nặng CPU, và `hardware_concurrency` chỉ là gợi ý về phần cứng. Tranh khóa hàng đợi có thật nhưng nhỏ so với 10 ms chờ mỗi việc, nên ít worker hơn chỉ làm chậm thêm. Chỉ một worker thì 100 việc nối đuôi nhau mất cỡ 100 lần 10 ms, trong khi chờ mạng không cần chiếm lõi nào.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -498,7 +498,7 @@ nhom.submit([&tong, i] {
 ## 🔑 Tóm tắt
 
 1. Mỗi việc một luồng tốn chi phí tạo và hủy luồng, lớn hơn chính việc nhỏ (mình đo: 20000 việc nhỏ mất hơn 600 ms nếu mỗi việc một luồng); thread pool tạo N luồng một lần rồi tái sử dụng.
-2. Pool tự cài là ba mảnh của Bài 27: `std::queue<std::function<void()>>` dưới mutex, `condition_variable`, N worker; worker lấy việc, nhả khóa, **chạy ngoài khóa**; hàm hủy (RAII) đặt cờ dưới khóa + `notify_all` + `join`, làm hết việc còn lại rồi thoát (quên `notify_all` thì treo hay không tùy mức `-O` và lần chạy, mình chạy). `packaged_task` trong `shared_ptr` cho `submit` trả `future`; ngoại lệ không bắt trong việc là `terminate` (listing bọc `try`/`catch (...)` thì nuốt nó).
+2. Pool tự cài là ba mảnh của [Bài 27](27-condition-variable.md): `std::queue<std::function<void()>>` dưới mutex, `condition_variable`, N worker; worker lấy việc, nhả khóa, **chạy ngoài khóa**; hàm hủy (RAII) đặt cờ dưới khóa + `notify_all` + `join`, làm hết việc còn lại rồi thoát (quên `notify_all` thì treo hay không tùy mức `-O` và lần chạy, mình chạy). `packaged_task` trong `shared_ptr` cho `submit` trả `future`; ngoại lệ không bắt trong việc là `terminate` (listing bọc `try`/`catch (...)` thì nuốt nó).
 3. Số worker ≈ `hardware_concurrency()` cho việc nặng CPU; việc chờ I/O thì nhiều hơn số lõi vẫn có lợi. Việc quá nhỏ thì tuần tự thắng cả pool (số đo đổi theo máy và `-O`, mẫu thì ổn định).
 4. False sharing: hai biến khác nhau chung dòng cache (thường 64 byte) làm chậm dù không có data race (mình đo: khoảng 3 đến 4 lần); gỡ bằng `alignas(64)` hoặc đệm. Amdahl: tăng tốc tối đa `1 / ((1 - p) + p / n)`, không vượt `1 / (1 - p)`; vùng găng và đồng bộ tính vào phần tuần tự.
 5. Chọn công cụ: `thread` cho việc dài, `async`/`future` khi cần kết quả, `mutex` cho dữ liệu chung, `atomic` cho một bộ đếm hay cờ, `condition_variable` để chờ điều kiện, pool cho nhiều việc nhỏ. Go không cần tự cài pool vì goroutine rẻ; khi cần giới hạn thì `for job := range jobs` + `WaitGroup`.

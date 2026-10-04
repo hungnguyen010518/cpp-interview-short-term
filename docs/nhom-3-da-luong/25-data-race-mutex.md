@@ -21,7 +21,7 @@ Nếu hai người thái cùng lúc, họ đụng dao, món bị thái dở, m�
 
 ### 1. Data race: khi hai luồng cùng đụng một ô nhớ
 
-Chuẩn C++ định nghĩa: hai thao tác **xung đột** nếu cùng truy cập một ô nhớ và ít nhất một bên là **ghi**. Nếu hai thao tác xung đột đó đến từ hai luồng khác nhau mà **không có thứ tự nào được chuẩn bảo đảm** giữa chúng, ta có một **data race** (tranh chấp dữ liệu). Thứ tự được bảo đảm thì đến từ các công cụ **đồng bộ** như `mutex`, `join`, hay `std::atomic` (Bài 28); đồng bộ nghĩa là ép hai luồng xếp hàng theo một thứ tự rõ ràng.
+Chuẩn C++ định nghĩa: hai thao tác **xung đột** nếu cùng truy cập một ô nhớ và ít nhất một bên là **ghi**. Nếu hai thao tác xung đột đó đến từ hai luồng khác nhau mà **không có thứ tự nào được chuẩn bảo đảm** giữa chúng, ta có một **data race** (tranh chấp dữ liệu). Thứ tự được bảo đảm thì đến từ các công cụ **đồng bộ** như `mutex`, `join`, hay `std::atomic` ([Bài 28](28-atomic.md)); đồng bộ nghĩa là ép hai luồng xếp hàng theo một thứ tự rõ ràng.
 
 Điểm quan trọng nhất: chuẩn nói chương trình có data race là **hành vi không xác định** ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)). Nghĩa là không chỉ "con số có thể sai": chuẩn không hứa gì về **cả chương trình**. Hai luồng cùng **đọc** thì không sao, vì không ai ghi.
 
@@ -137,7 +137,7 @@ int main() {
 
 Mình biên dịch (sạch cảnh báo) và chạy với `timeout 3` (lệnh giết chương trình sau 3 giây): chương trình **không bao giờ in gì**, và `timeout` thoát với mã **124**, mã nó dùng khi hết giờ. Luồng chính giữ khóa từ (4) mà không trả, luồng `t` đứng chờ ở (5) mãi mãi, và `join` ở (6) chờ `t`.
 
-Mình cũng thử thay `return` bằng `throw x;` (bắt ở `main` bằng `try`/`catch`): vẫn treo, mã 124. Đây không phải deadlock cổ điển (Bài 26), nhưng cùng một hậu quả: treo.
+Mình cũng thử thay `return` bằng `throw x;` (bắt ở `main` bằng `try`/`catch`): vẫn treo, mã 124. Đây không phải deadlock cổ điển ([Bài 26](26-deadlock.md)), nhưng cùng một hậu quả: treo.
 
 ### 4. `std::lock_guard`: RAII cho mutex
 
@@ -195,7 +195,7 @@ Mình chạy với `-fsanitize=thread`: không có cảnh báo, mã thoát 0. K�
 
 `std::unique_lock<std::mutex>` cũng là RAII (xin khóa khi tạo, trả khi hủy), nhưng có thêm `unlock()` và `lock()` để bạn **nhả sớm và xin lại** giữa chừng. Hàm hủy của nó chỉ trả khóa nếu lúc đó nó đang giữ. Đổi lại nó nặng hơn `lock_guard` một chút (phải nhớ trạng thái "đang giữ hay không").
 
-Bài 27 sẽ dùng nó vì `std::condition_variable` bắt buộc phải có `unique_lock`. Ở đây ta dùng trường hợp đơn giản hơn: ba luồng chia nhau một hàng việc chung, lấy một số ra **trong** khóa, tính bình phương **ngoài** khóa, rồi xin lại khóa để cộng kết quả.
+[Bài 27](27-condition-variable.md) sẽ dùng nó vì `std::condition_variable` bắt buộc phải có `unique_lock`. Ở đây ta dùng trường hợp đơn giản hơn: ba luồng chia nhau một hàng việc chung, lấy một số ra **trong** khóa, tính bình phương **ngoài** khóa, rồi xin lại khóa để cộng kết quả.
 
 ```cpp
 #include <iostream>
@@ -407,10 +407,10 @@ Cách sửa, chọn một:
     Data race là khái niệm của chuẩn C++: hai luồng truy cập cùng một ô nhớ, ít nhất một bên ghi, không có đồng bộ giữa hai truy cập; hậu quả là hành vi không xác định. Race condition là lỗi logic: kết quả đúng hay sai phụ thuộc thứ tự các luồng chạy, và nó có thể xảy ra **dù không có data race**. Ví dụ: `if (b.doc() == 0) b.tang();`, mỗi hàm tự khóa nhưng giữa hai lệnh khóa bị nhả, hai luồng cùng thấy 0 rồi cùng tăng. Sửa data race bằng đồng bộ, còn race condition phải sửa bằng thiết kế (giữ khóa quanh cả chuỗi kiểm-rồi-làm).
 
 ??? question "Mutex và atomic khác nhau thế nào, khi nào dùng cái nào?"
-    Mutex bảo vệ một **đoạn code** nhiều lệnh (có thể đụng nhiều biến, một bất biến phải giữ nguyên); luồng không có khóa phải chờ. `std::atomic` (Bài 28) làm **một** thao tác trên **một** biến thành nguyên tử, thường không cần khóa. Biến đếm đơn giản hợp với atomic; hễ cần giữ nhất quán giữa nhiều biến hay cả một cấu trúc thì dùng mutex. Cả hai đều là cách đồng bộ hợp lệ để tránh data race.
+    Mutex bảo vệ một **đoạn code** nhiều lệnh (có thể đụng nhiều biến, một bất biến phải giữ nguyên); luồng không có khóa phải chờ. `std::atomic` ([Bài 28](28-atomic.md)) làm **một** thao tác trên **một** biến thành nguyên tử, thường không cần khóa. Biến đếm đơn giản hợp với atomic; hễ cần giữ nhất quán giữa nhiều biến hay cả một cấu trúc thì dùng mutex. Cả hai đều là cách đồng bộ hợp lệ để tránh data race.
 
 ??? question "`lock_guard` khác `unique_lock` thế nào?"
-    Cả hai là RAII: xin khóa lúc tạo, trả lúc hủy. `lock_guard` đơn giản và nhẹ, không nhả sớm được. `unique_lock` cho `unlock()` rồi `lock()` lại giữa chừng, có kiểu tạo không khóa ngay (không đi sâu ở đây), và là thứ `condition_variable` đòi (Bài 27); đổi lại nặng hơn một chút. Mặc định dùng `lock_guard`.
+    Cả hai là RAII: xin khóa lúc tạo, trả lúc hủy. `lock_guard` đơn giản và nhẹ, không nhả sớm được. `unique_lock` cho `unlock()` rồi `lock()` lại giữa chừng, có kiểu tạo không khóa ngay (không đi sâu ở đây), và là thứ `condition_variable` đòi ([Bài 27](27-condition-variable.md)); đổi lại nặng hơn một chút. Mặc định dùng `lock_guard`.
 
 ??? question "Tại sao nên dùng RAII cho mutex thay vì gọi `lock()`/`unlock()` tay?"
     Vì hàm có nhiều lối thoát: `return` sớm, ngoại lệ (kể cả từ chỗ ta không để ý, như cấp phát bộ nhớ). Gọi tay thì chỉ cần một lối thoát bỏ qua `unlock()` là khóa bị giữ mãi và các luồng khác treo, như ví dụ mục 3 mà mình đã chạy ra mã 124. Hàm hủy của biến cục bộ chạy trên mọi lối thoát bình thường và khi ngoại lệ được bắt, nên `lock_guard` trả khóa không phụ thuộc trí nhớ của lập trình viên. Đó cũng là cùng ý với `defer mu.Unlock()` của Go.
@@ -446,12 +446,12 @@ void tang() { for (int i = 0; i < 100000; ++i) ++dem; }
 // main: tạo 4 luồng chạy tang, join cả bốn, rồi in dem
 ```
 
-- `dem` chắc chắn nhỏ hơn 400000, vì các lần tăng bị mất
-- `dem` chắc chắn bằng 400000, vì mỗi luồng cộng đúng 100000
+- `dem` có thể nhỏ hơn 400000 nhưng không thể vượt, vì lần tăng chỉ bị mất
+- `dem` bằng 400000, vì mỗi luồng cộng đúng 100000 lần
 - Chuẩn không hứa gì, vì chương trình có data race
 - Chuẩn bảo đảm `dem` nằm giữa 100000 và 400000, vì mỗi luồng cộng phần mình
 
-<p class="giai-thich" markdown>Có data race thì chương trình là hành vi không xác định, nên chuẩn không bảo đảm con số nào. Nói "chắc chắn nhỏ hơn" là sai ngay cả trên thực tế: với `-O2` mình chạy 20 lần đều ra đúng 400000. Nói "chắc chắn bằng 400000" thì sai vì không có đồng bộ nào bảo đảm. Còn khoảng 100000 đến 400000 là suy đoán dựa trên cách máy hay hỏng, không phải điều chuẩn cho phép tin.</p>
+<p class="giai-thich" markdown>Có data race thì chương trình là hành vi không xác định, nên chuẩn không bảo đảm con số nào. Nói "có thể nhỏ hơn nhưng không thể vượt" là coi lỗi chỉ có một kiểu (mất lần tăng); hành vi không xác định không giới hạn kết quả như thế, và với `-O2` mình chạy 20 lần đều ra đúng 400000. Nói "bằng 400000" thì sai vì không có đồng bộ nào bảo đảm, dù có thể ra đúng như vậy. Còn khoảng 100000 đến 400000 là suy đoán dựa trên cách máy hay hỏng, không phải điều chuẩn cho phép tin.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -555,6 +555,6 @@ thread_local int dem = 0;
 
 1. **Data race** (chuẩn C++): hai luồng cùng truy cập một ô nhớ, ít nhất một bên ghi, không có đồng bộ giữa chúng; hậu quả là **hành vi không xác định**, không chỉ là kết quả sai. `++dem` là đọc-sửa-ghi không nguyên tử: mình chạy ra số nhỏ hơn mong đợi, khác mỗi lần; TSan chỉ ra dòng xung đột.
 2. `std::mutex` (`lock`/`unlock`) cho các luồng xếp hàng qua một vùng găng và tạo thứ tự đồng bộ; gọi `lock`/`unlock` tay nguy hiểm vì `return` sớm hay ngoại lệ làm khóa không được trả (mình chạy: treo, mã 124).
-3. Dùng `std::lock_guard` (RAII, nối [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md); Go dùng `defer mu.Unlock()`); `std::unique_lock` khi cần nhả/xin lại giữa chừng hoặc dùng với `condition_variable` (Bài 27). Giữ vùng găng nhỏ nhất, không giữ khóa lúc ngủ/I/O/tính nặng.
+3. Dùng `std::lock_guard` (RAII, nối [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md); Go dùng `defer mu.Unlock()`); `std::unique_lock` khi cần nhả/xin lại giữa chừng hoặc dùng với `condition_variable` ([Bài 27](27-condition-variable.md)). Giữ vùng găng nhỏ nhất, không giữ khóa lúc ngủ/I/O/tính nặng.
 4. Khóa đi theo dữ liệu: đóng gói dữ liệu `private` cùng mutex trong một lớp (như `BoDem`), mọi hàm đụng dữ liệu đều khóa và trả **bản sao**; trả tham chiếu hay con trỏ tới dữ liệu được bảo vệ phá vỡ bảo vệ.
 5. Race condition là lỗi logic theo thứ tự chạy, còn được dù hết data race (kiểm-rồi-làm giữa hai lần khóa); `thread_local` và `std::shared_mutex` (C++17) chỉ cần nhận ra tên; `-race` của Go ứng với TSan.

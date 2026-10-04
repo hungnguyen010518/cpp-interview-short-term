@@ -37,7 +37,7 @@ Mình chạy một luồng với `n{10}`: `store(20)`, rồi `fetch_add(5)` tr�
 
 ### 2. Nối lại ví dụ đếm chung của Bài 25
 
-Đây là chương trình của [Bài 25](25-data-race-mutex.md): bốn luồng, mỗi luồng tăng biến chung 100000 lần. Bài 25 cho kết quả sai (và TSan báo data race) vì biến là `int` thường. Lần này **chỉ đổi kiểu** của `dem`.
+Đây là chương trình của [Bài 25](25-data-race-mutex.md): bốn luồng, mỗi luồng tăng biến chung 100000 lần. [Bài 25](25-data-race-mutex.md) cho kết quả sai (và TSan báo data race) vì biến là `int` thường. Lần này **chỉ đổi kiểu** của `dem`.
 
 ```cpp
 #include <atomic>
@@ -67,7 +67,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | `dem` lúc này |
 |---|---|---|
 | (2) | Bốn luồng cùng `++dem`; mỗi lần là một khối, xếp thành từng lần tăng riêng | tăng đúng 1 mỗi lần |
-| `join` | Luồng chính chờ cả bốn xong (đồng bộ như Bài 25) | 400000 |
+| `join` | Luồng chính chờ cả bốn xong (đồng bộ như [Bài 25](25-data-race-mutex.md)) | 400000 |
 | (3) | Đưa `dem` cho `cout`: một lần `load()` ngầm (atomic tự đổi sang `int` khi bạn dùng nó như số) | 400000 |
 
 **Kết quả khi chạy** (năm lần liền đều như nhau; không tối ưu và `-O2` đều vậy):
@@ -76,7 +76,7 @@ int main() {
 mong doi 400000, thuc te 400000
 ```
 
-Mình chạy với `-fsanitize=thread` (cả không tối ưu và `-O2`, qua `setarch $(uname -m) -R` như Bài 25): không cảnh báo, mã thoát 0. Khác với `int` thường ở `-O2` (có lúc ra đúng nhờ may mà TSan vẫn báo), ở đây đúng theo chuẩn.
+Mình chạy với `-fsanitize=thread` (cả không tối ưu và `-O2`, qua `setarch $(uname -m) -R` như [Bài 25](25-data-race-mutex.md)): không cảnh báo, mã thoát 0. Khác với `int` thường ở `-O2` (mình chạy 20 lần đều ra đúng nhờ may, mà TSan vẫn báo), ở đây đúng theo chuẩn.
 
 **Thử thay đổi: đổi `++dem;` thành `dem = dem + 1;`.** Mình đã chạy:
 
@@ -87,14 +87,12 @@ Mình chạy với `-fsanitize=thread` (cả không tối ưu và `-O2`, qua `se
 !!! info "Bạn biết Go?"
     `sync/atomic` của Go làm đúng việc này: `atomic.AddInt64(&n, 1)` (hàm nhận con trỏ, cách cũ) hoặc kiểu `atomic.Int64` với `n.Add(1)`, `n.Load()`, `n.Store(v)`, `n.Swap(v)` (kiểu này có từ Go 1.19). Mình chạy bốn goroutine, mỗi cái tăng 100000 lần: cả hai cách ra `400000`, `go run -race` không báo gì; một biến `int64` thường cùng `thuong++` thì `-race` báo `WARNING: DATA RACE`.
 
-    Khác chỗ:
-
-    - `Add` của Go trả giá trị **mới** (mình chạy: `Store(10)` rồi `Add(5)` ra `15`), còn `fetch_add` của C++ trả giá trị **cũ**.
+    - Khác chỗ: `Add` của Go trả giá trị **mới** (mình chạy: `Store(10)` rồi `Add(5)` ra `15`), còn `fetch_add` của C++ trả giá trị **cũ**.
     - Go không có tham số `memory_order` để chọn. Tài liệu của Go (`go doc sync/atomic`) nói mọi thao tác atomic hành xử như thể chạy theo một thứ tự tuần tự chung, cùng ngữ nghĩa với atomic `seq_cst` của C++ và với `volatile` của Java.
 
 ### 3. Atomic và mutex: đo chi phí
 
-Cùng một việc đếm, hai cách: `lock_guard` quanh `++` ([Bài 25](25-data-race-mutex.md)) hay atomic. Mỗi luồng tăng một triệu lần, bốn luồng; `chay` nhận một con trỏ hàm và đo bằng `std::chrono`, như Bài 25.
+Cùng một việc đếm, hai cách: `lock_guard` quanh `++` ([Bài 25](25-data-race-mutex.md)) hay atomic. Mỗi luồng tăng một triệu lần, bốn luồng; `chay` nhận một con trỏ hàm và đo bằng `std::chrono`, như [Bài 25](25-data-race-mutex.md).
 
 ```cpp
 #include <atomic>
@@ -135,14 +133,7 @@ int main() {
 }
 ```
 
-**Chạy từng dòng**
-
-| Dòng | Chuyện gì xảy ra | Việc đang làm |
-|---|---|---|
-| `chay(bangMutex)` | Bốn luồng xếp hàng xin thẻ cho từng lần `++` | 4 triệu lần xin và trả khóa |
-| `chay(bangAtomic)` | Bốn luồng cùng `++` một biến atomic, không thẻ | 4 triệu thao tác nguyên tử |
-
-**Kết quả khi chạy** (g++ 11, máy 8 lõi, CPU x86-64, không tối ưu; dòng đầu luôn như nhau):
+**Kết quả khi chạy** (g++ 11, máy 4 lõi 8 luồng phần cứng, CPU x86-64, không tối ưu; dòng đầu luôn như nhau):
 
 ```text
 tong: 4000000 4000000
@@ -155,9 +146,7 @@ Mẫu đáng nhớ: trên máy mình atomic nhanh hơn mutex khoảng 4 lần �
 
 Bài toán: tăng `dem` thêm 1 **chỉ khi** nó còn nhỏ hơn một giới hạn (250000), từ bốn luồng, mỗi luồng cố tăng 100000 lần. Cách "kiểm rồi tăng" bằng hai lệnh atomic rời nhau (`if (dem.load() < GIOI_HAN) dem.fetch_add(1);`) là sai: giữa kiểm và tăng, luồng khác chen vào được.
 
-Mình chạy đúng cách làm đó 20 lần ở mỗi mức tối ưu (không tối ưu và `-O2`): lần này `dem` lần nào cũng vượt giới hạn (`250002` hoặc `250003`). Kết quả đổi theo mức tối ưu, theo lần chạy và độ bận của máy; có lúc ra đúng `250000` do may, nên "ra đúng" không chứng minh cách này đúng, và chuẩn không hứa kết quả cụ thể nào. TSan (chạy một lần) không báo gì, mã thoát 0.
-
-Đây là **race condition** ([Bài 25](25-data-race-mutex.md)), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.
+Mình chạy đúng cách làm đó 20 lần ở mỗi mức tối ưu (không tối ưu và `-O2`): lần này `dem` lần nào cũng vượt giới hạn (`250002` hoặc `250003`). Kết quả đổi theo mức tối ưu, theo lần chạy và độ bận của máy; có lúc ra đúng `250000` do may, nên "ra đúng" không chứng minh cách này đúng, và chuẩn không hứa kết quả cụ thể nào. TSan (chạy một lần) không báo gì, mã thoát 0. Đây là **race condition** ([Bài 25](25-data-race-mutex.md)), không phải data race: từng lệnh đều nguyên tử, cái sai là kiểm và tăng thành hai bước.
 
 Cách đúng là **`compare_exchange`**: "nếu `dem` **vẫn đang bằng** giá trị `cu` tôi đã thấy thì đổi thành `cu + 1` và báo `true`; nếu không thì **không đổi** và báo `false`". Cả việc so sánh lẫn việc đổi là **một nhịp** nguyên tử, không ai chen vào giữa. Khi thất bại, hàm còn **ghi giá trị hiện tại vào `cu`** (nên `cu` được truyền như tham chiếu) để bạn thử lại ngay.
 
@@ -217,9 +206,7 @@ Tổng 400000 lần thử, đúng 250000 lần thành công, `dem` dừng đúng
 
 **`weak` hay `strong`?** Chuẩn C++ nói `compare_exchange_weak` **được phép thất bại giả** (spurious failure): trả `false` dù giá trị đang đúng bằng `cu`; `compare_exchange_strong` thì chỉ thất bại khi giá trị thật sự khác. Vì thế `weak` hợp với **vòng lặp thử lại** như trên.
 
-Mình chạy một luồng, 100 triệu lần `weak` với giá trị đúng: **0** lần thất bại giả trên máy này, và đổi `weak` thành `strong` ở chương trình trên ra cùng kết quả. Đừng suy ra "`weak` không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa.
-
-**Quy tắc dễ nhớ:** trong vòng lặp dùng `weak`; một lần duy nhất không lặp thì dùng `strong`.
+Mình chạy một luồng, 100 triệu lần `weak` với giá trị đúng: **0** lần thất bại giả trên máy này, và đổi `weak` thành `strong` ở chương trình trên ra cùng kết quả. Đừng suy ra "`weak` không bao giờ giả": đó là chuyện của máy mình, chuẩn không hứa. **Quy tắc dễ nhớ:** trong vòng lặp dùng `weak`; một lần duy nhất không lặp thì dùng `strong`.
 
 !!! info "Bạn biết Go?"
     `CompareAndSwap(old, new)` của Go (cả `atomic.CompareAndSwapInt64(&n, old, new)` lẫn `n.CompareAndSwap(old, new)`) chỉ trả `bool`; nó **không** cập nhật `old` như C++, nên vòng lặp của Go phải tự `Load()` lại ở đầu mỗi vòng. Mình chạy bản Go của bài toán trên: `250000 250000`, `go run -race` sạch. Go chỉ có một loại CAS, không có `weak`/`strong` để chọn.
@@ -310,15 +297,11 @@ Mã hợp ngữ của `-O2` cho thấy lý do trên máy mình: hàm `luongNen` 
 
 Các hàm thành viên như `load`, `store`, `fetch_add`, `exchange` nhận thêm một tham số tùy chọn **`std::memory_order`** (thứ tự bộ nhớ): nó nói thao tác đó ràng buộc thứ tự với các lần đọc ghi **khác** quanh nó mạnh đến đâu. Các toán tử như `++n` hay `n = v` không có chỗ truyền tham số này và luôn dùng mức mặc định. Mặc định là **`std::memory_order_seq_cst`**, mạnh nhất và dễ suy luận nhất: mọi luồng thấy mọi thao tác atomic theo cùng một thứ tự chung.
 
-Bài này **không** dạy các mức giữa (`acquire`/`release`); đó là chủ đề riêng và dễ sai. **Người mới dùng mặc định `seq_cst`**: đừng ghi tham số thứ tự, như ở mọi ví dụ trong bài.
-
-Mức duy nhất bài nhắc là **`std::memory_order_relaxed`**, ví dụ `n.fetch_add(1, std::memory_order_relaxed)`: nó chỉ bảo đảm thao tác **nguyên tử**, không ràng buộc thứ tự với việc khác. Nó hợp với **bộ đếm thống kê** (mọi luồng chỉ cộng, bạn chỉ đọc kết quả sau `join`). Đừng dùng `relaxed` cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Mình thử đổi bộ đếm ở mục 3 sang `relaxed`: g++ `-O2` sinh cùng lệnh `lock addq $1, ...` cho cả hai, và thời gian không khác rõ rệt (atomic 40 đến 50 ms, relaxed 44 đến 47 ms trong ba lần chạy). Đó là chuyện của máy x86-64 mình; trên CPU khác `relaxed` có thể rẻ hơn.
+Bài này **không** dạy các mức giữa (`acquire`/`release`); đó là chủ đề riêng và dễ sai. **Người mới dùng mặc định `seq_cst`**: đừng ghi tham số thứ tự, như ở mọi ví dụ trong bài. Mức duy nhất bài nhắc là **`std::memory_order_relaxed`**, ví dụ `n.fetch_add(1, std::memory_order_relaxed)`: nó chỉ bảo đảm thao tác **nguyên tử**, không ràng buộc thứ tự với việc khác. Nó hợp với **bộ đếm thống kê** (mọi luồng chỉ cộng, bạn chỉ đọc kết quả sau `join`). Đừng dùng `relaxed` cho cờ báo hiệu "dữ liệu đã sẵn sàng", vì đọc cờ không kéo theo việc thấy dữ liệu kia. Mình thử đổi bộ đếm ở mục 3 sang `relaxed`: g++ `-O2` sinh cùng lệnh `lock addq $1, ...` cho cả hai, và thời gian không khác rõ rệt (atomic 40 đến 50 ms, relaxed 44 đến 47 ms trong ba lần chạy). Đó là chuyện của máy x86-64 mình; trên CPU khác `relaxed` có thể rẻ hơn.
 
 **`volatile` không phải atomic.** Từ khóa `volatile` của C++ dặn trình biên dịch đừng bỏ các lần đọc ghi biến (dùng cho thanh ghi phần cứng); nó **không** làm `++` nguyên tử và **không** tạo đồng bộ giữa luồng, nên data race trên biến `volatile` vẫn là hành vi không xác định.
 
-Mình thử `volatile int dem` trong chương trình đếm của [Bài 25](25-data-race-mutex.md), `-O2`: ba lần ra `163455`, `131218`, `163086` (mong 400000), và TSan báo `data race`. Ở C++, thứ dùng chung giữa luồng là `std::atomic` (hoặc mutex).
-
-Trái với Java, nơi `volatile` là công cụ đồng bộ luồng (dù `++` vẫn không nguyên tử); Go thì gọi thẳng `sync/atomic`.
+Mình thử `volatile int dem` trong chương trình đếm của [Bài 25](25-data-race-mutex.md), `-O2`: ba lần ra `163455`, `131218`, `163086` (mong 400000), và TSan báo `data race`. Ở C++, thứ dùng chung giữa luồng là `std::atomic` (hoặc mutex). Trái với Java, nơi `volatile` là công cụ đồng bộ luồng (dù `++` vẫn không nguyên tử); Go thì gọi thẳng `sync/atomic`.
 
 ### 7. Lock-free, `atomic_flag` và ABA
 
@@ -516,12 +499,12 @@ bool dung = false;
 // luồng chính: ngủ 50 ms; dung = true; join
 ```
 
-- Luôn dừng sau cỡ 50 ms, vì luồng chính đã ghi `true` vào `dung`
+- Thường dừng sau cỡ 50 ms, vì luồng chính đã ghi `true` vào `dung`
 - Có data race nên chuẩn không hứa gì: có thể dừng, có thể treo mãi
 - Luôn treo mãi, vì luồng nền không bao giờ thấy giá trị mới của `dung`
-- Luôn dừng đúng, chỉ riêng giá trị `vong` có thể sai vì thiếu đồng bộ
+- Dừng đúng sau 50 ms, chỉ riêng giá trị `vong` có thể sai vì thiếu đồng bộ
 
-<p class="giai-thich" markdown>Một luồng đọc, luồng kia ghi cùng ô `dung` mà không có đồng bộ: đó là data race, hành vi không xác định, nên chuẩn không bảo đảm cách nào cả. Mình chạy cả hai kết quả: không tối ưu thì dừng, còn `-O2` thì treo. Vì thế "luôn dừng" và "luôn treo" đều quá chắc. Còn nói chỉ riêng `vong` sai thì sai ở chỗ coi phần còn lại của chương trình vẫn được bảo đảm, trong khi hành vi không xác định chạm cả chương trình.</p>
+<p class="giai-thich" markdown>Một luồng đọc, luồng kia ghi cùng ô `dung` mà không có đồng bộ: đó là data race, hành vi không xác định, nên chuẩn không bảo đảm cách nào cả. Mình chạy cả hai kết quả: không tối ưu thì dừng, còn `-O2` thì treo. Vì thế "thường dừng" (đúng ở bản không tối ưu) và "luôn treo" đều quá chắc. Còn nói chỉ riêng `vong` sai thì sai ở chỗ coi phần còn lại của chương trình vẫn được bảo đảm, trong khi hành vi không xác định chạm cả chương trình.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -558,12 +541,12 @@ bool dung = false;
 dem = dem + 1;
 ```
 
-- Luôn đúng 400000, vì phép gán `=` của atomic là một thao tác nguyên tử
+- Đúng 400000, vì phép gán `=` của atomic là một thao tác nguyên tử
 - Là hành vi không xác định, vì bốn luồng cùng ghi một biến mà không khóa
-- Không có data race, nhưng có thể thiếu, vì đọc và ghi là hai thao tác rời
-- Luôn nhỏ hơn 400000, vì mỗi luồng ghi đè hết kết quả của luồng khác
+- Không có data race, nhưng có thể thiếu, vì đọc và ghi là hai bước rời
+- Nhỏ hơn 400000 mỗi lần chạy, vì mỗi luồng ghi đè hết kết quả của luồng khác
 
-<p class="giai-thich" markdown>`dem + 1` là một lần `load()`, rồi `=` là một lần `store()`; mỗi lần đều nguyên tử nên không có data race, nhưng giữa hai lần luồng khác chen vào được, nên có thể mất lần tăng. Mình chạy thật: kết quả thiếu và đổi mỗi lần, TSan vẫn sạch. Nói "luôn đúng" nhầm giữa từng thao tác và cả câu lệnh. Nói hành vi không xác định nhầm vì mọi truy cập đều qua atomic. Còn "luôn nhỏ hơn" quá chắc: chuẩn không hứa kết quả cụ thể nào, chỉ là có thể thiếu.</p>
+<p class="giai-thich" markdown>`dem + 1` là một lần `load()`, rồi `=` là một lần `store()`; mỗi lần đều nguyên tử nên không có data race, nhưng giữa hai lần luồng khác chen vào được, nên có thể mất lần tăng. Mình chạy thật: kết quả thiếu và đổi mỗi lần, TSan vẫn sạch. Nói "đúng 400000" nhầm giữa từng thao tác và cả câu lệnh. Nói hành vi không xác định nhầm vì mọi truy cập đều qua atomic. Còn "nhỏ hơn mỗi lần chạy" quá chắc: chuẩn không hứa kết quả cụ thể nào, chỉ là có thể thiếu.</p>
 </div>
 
 </div>

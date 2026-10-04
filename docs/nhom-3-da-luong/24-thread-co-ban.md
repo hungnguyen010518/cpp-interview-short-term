@@ -9,16 +9,16 @@
 **Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (stack, heap, biến toàn cục), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy, `throw`/`catch`, `std::terminate`), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) và [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`unique_ptr`, `= delete`, `std::move`), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, ASan), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `[&x]`, `[=]`), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`vector`, `emplace_back`).
 
 !!! note "Phạm vi bài này"
-    Bài này chỉ dạy cách **bắt đầu và kết thúc** một luồng. Mọi chương trình ở đây được thiết kế để các luồng không cùng sửa một biến; chuyện nhiều luồng cùng sửa một biến (data race, `std::mutex`) là Bài 25.
+    Bài này chỉ dạy cách **bắt đầu và kết thúc** một luồng. Mọi chương trình ở đây được thiết kế để các luồng không cùng sửa một biến; chuyện nhiều luồng cùng sửa một biến (data race, `std::mutex`) là [Bài 25](25-data-race-mutex.md).
 
 ## 🧠 Câu chuyện mở đầu
 
-Hãy tưởng tượng một **nhà bếp**. Mỗi chương trình đang chạy là một nhà bếp riêng, có **kho** ở sân sau (heap của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)) và **bảng treo tường** (biến toàn cục). Mỗi **đầu bếp** là một luồng. Từ Bài 01 tới giờ, nhà bếp của bạn chỉ có đúng một đầu bếp: luồng chính, chạy hàm `main`.
+Hãy tưởng tượng một **nhà bếp**. Mỗi chương trình đang chạy là một nhà bếp riêng, có **kho** ở sân sau (heap của [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md)) và **bảng treo tường** (biến toàn cục). Mỗi **đầu bếp** là một luồng. Từ [Bài 01](../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi.md) tới giờ, nhà bếp của bạn chỉ có đúng một đầu bếp: luồng chính, chạy hàm `main`.
 
-Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có **bàn học riêng** để đặt đồ đang cầm trên tay (stack riêng). Cả bếp **dùng chung kho và bảng treo tường**, nên người này thấy ngay món người kia để vào kho. Và đầu bếp chính có thể **đứng chờ** một đầu bếp phụ làm xong món (`join`), hoặc **để họ tự làm** mà không hỏi nữa (`detach`).
+Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có một **góc bàn riêng** để đặt đồ đang cầm trên tay (như bàn học ở Nhóm 1: stack riêng). Cả bếp **dùng chung kho và bảng treo tường**, nên người này thấy ngay món người kia để vào kho. Và đầu bếp chính có thể **đứng chờ** một đầu bếp phụ làm xong món (`join`), hoặc **để họ tự làm** mà không hỏi nữa (`detach`).
 
 !!! info "Chỗ nào ví von nhà bếp không còn đúng?"
-    Đầu bếp thật đứng song song. Luồng chỉ chạy song song thật khi máy có đủ lõi CPU; nếu có nhiều luồng hơn lõi, hệ điều hành cho các luồng thay phiên nhau rất nhanh. Ngoài ra "kho chung" là cả một chuyện lớn (hai người cùng sửa một món); bài này tránh nó, Bài 25 mới tới.
+    Đầu bếp thật đứng song song. Luồng chỉ chạy song song thật khi máy có đủ lõi CPU; nếu có nhiều luồng hơn lõi, hệ điều hành cho các luồng thay phiên nhau rất nhanh. Ngoài ra "kho chung" là cả một chuyện lớn (hai người cùng sửa một món); bài này tránh nó, [Bài 25](25-data-race-mutex.md) mới tới.
 
 ## 📖 Giải thích
 
@@ -29,7 +29,7 @@ Khi thêm đầu bếp, ba chuyện xảy ra. Mỗi người có **bàn học ri
 | | Tiến trình | Luồng (cùng tiến trình) |
 |---|---|---|
 | Bộ nhớ | Riêng: tiến trình này không đọc được bộ nhớ của tiến trình kia | Chung heap và biến toàn cục; stack riêng |
-| Nói chuyện với nhau | Phải nhờ hệ điều hành (ống là kênh một chiều giữa hai tiến trình, socket, bộ nhớ chia sẻ) | Đọc ghi thẳng vào biến chung (nên phải cẩn thận, Bài 25) |
+| Nói chuyện với nhau | Phải nhờ hệ điều hành (ống là kênh một chiều giữa hai tiến trình, socket, bộ nhớ chia sẻ) | Đọc ghi thẳng vào biến chung (nên phải cẩn thận, [Bài 25](25-data-race-mutex.md)) |
 | Một luồng gặp lỗi nặng (truy cập bộ nhớ sai) | Thường chỉ tiến trình đó sập | Thường cả tiến trình sập, mọi luồng chết theo |
 
 !!! info "Bạn biết Go?"
@@ -77,10 +77,10 @@ int main() {
 tong = 5050
 ```
 
-Mình cũng chạy chương trình này với `-fsanitize=thread` (công cụ bắt lỗi luồng, Bài 25 sẽ dạy): không có cảnh báo nào.
+Mình cũng chạy chương trình này với `-fsanitize=thread` (công cụ bắt lỗi luồng, [Bài 25](25-data-race-mutex.md) sẽ dạy): không có cảnh báo nào.
 
 !!! info "Bạn biết Go?"
-    `go f(x)` ↔ `std::thread t(f, x)`, nhưng C++ bắt bạn nói rõ chuyện chờ: `wg.Wait()` của `sync.WaitGroup` ứng với `t.join()` (mỗi `thread` tự `join`, không có bộ đếm chung). Go còn khác ở chỗ quên chờ không sao cả: khi `main` kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên `join`/`detach` thì chương trình bị `std::terminate` (mục 5). Thư viện chuẩn C++ cũng **không có channel**; Bài 27 dùng hàng đợi và `condition_variable` thay thế.
+    `go f(x)` ↔ `std::thread t(f, x)`, nhưng C++ bắt bạn nói rõ chuyện chờ: `wg.Wait()` của `sync.WaitGroup` ứng với `t.join()` (mỗi `thread` tự `join`, không có bộ đếm chung). Go còn khác ở chỗ quên chờ không sao cả: khi `main` kết thúc, Go thoát và bỏ goroutine còn lại một cách êm ái (mình đã chạy kiểm). C++ quên `join`/`detach` thì chương trình bị `std::terminate` (mục 5). Thư viện chuẩn C++ cũng **không có channel**; [Bài 27](27-condition-variable.md) dùng hàng đợi và `condition_variable` thay thế.
 
 ### 3. Truyền tham số: mặc định là sao chép
 
@@ -196,7 +196,7 @@ luong nen: nhan so 42
 main ket thuc
 ```
 
-Thứ tự dòng thứ ba và thứ tư chỉ **dựa vào giấc ngủ**, không phải bảo đảm của chuẩn: nếu máy bận, luồng nền có thể chậm hơn 0,3 giây. Đó là lý do `detach` khó dùng: bạn không có cách chắc chắn biết việc nền xong (Bài 27 và Bài 29 có cách).
+Thứ tự dòng thứ ba và thứ tư chỉ **dựa vào giấc ngủ**, không phải bảo đảm của chuẩn: nếu máy bận, luồng nền có thể chậm hơn 0,3 giây. Đó là lý do `detach` khó dùng: bạn không có cách chắc chắn biết việc nền xong ([Bài 27](27-condition-variable.md) và [Bài 29](29-async-future.md) có cách).
 
 **Thử thay đổi: ở dòng (5) đổi 400 thành 10.** Mình đã chạy ba lần: dòng `luong nen: ...` không bao giờ hiện, chỉ có `main ket thuc`. `main` kết thúc thì cả chương trình dừng, kể cả luồng nền đang dở; không ai chờ nó.
 
@@ -249,7 +249,7 @@ Mình đã chạy: lần thường in một số rác khác nhau mỗi lần (ba
 
 Cách sửa: bản sao (`[so]`), hoặc `join` trước khi hàm kết thúc.
 
-**Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.** Ngoại lệ không được `catch` bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi `std::terminate` và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có `throw 1;`: g++ in `terminate called after throwing an instance of 'int'` và thoát với mã 134, y như ngoại lệ không bắt ở `main` ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)). Muốn xử lý, `try`/`catch` ngay trong hàm của luồng; Bài 29 có cách chuyển ngoại lệ sang luồng khác. (Go: goroutine `panic` mà không `recover` cũng làm cả chương trình chết, mình đã chạy: mã thoát 2.)
+**Lỗi 3: ngoại lệ thoát khỏi hàm của luồng.** Ngoại lệ không được `catch` bên trong hàm của luồng không bay về luồng tạo ra nó; nó gọi `std::terminate` và dừng cả chương trình. Mình đã chạy một luồng mà hàm của nó chỉ có `throw 1;`: g++ in `terminate called after throwing an instance of 'int'` và thoát với mã 134, y như ngoại lệ không bắt ở `main` ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)). Muốn xử lý, `try`/`catch` ngay trong hàm của luồng; [Bài 29](29-async-future.md) có cách chuyển ngoại lệ sang luồng khác. (Go: goroutine `panic` mà không `recover` cũng làm cả chương trình chết, mình đã chạy: mã thoát 2.)
 
 ### 6. RAII bọc `thread`: luôn được `join`
 
@@ -314,9 +314,9 @@ tong = 5050
 
 **Thử thay đổi: bỏ `LuongTuJoin g(std::move(t));` và để `t` trần, gọi `t.join()` sau `throw`.** Mình đã chạy: `throw` thoát hàm trước khi tới `t.join()`, nên `t` bị hủy khi còn joinable; chương trình in `terminate called without an active exception` (mã 134) và không bao giờ tới `catch` để in `bat duoc ma`. Lớp bọc cứu đúng chỗ này.
 
-### 7. Vài tiện ích: số lõi và `sleep_for`
+### 7. Vài tiện ích: số luồng phần cứng và `sleep_for`
 
-- `std::thread::hardware_concurrency()` trả một `unsigned` là **gợi ý** về số luồng phần cứng chạy cùng lúc (chuẩn cho phép trả `0` nếu không biết).
+- `std::thread::hardware_concurrency()` trả một `unsigned` là **gợi ý** về số luồng phần cứng chạy cùng lúc (chuẩn cho phép trả `0` nếu không biết). Đó là số **luồng** phần cứng, không phải số lõi: CPU có siêu phân luồng cho mỗi lõi chạy hai luồng thì con số gấp đôi số lõi.
 - `std::this_thread::sleep_for(d)` làm luồng này ngủ **ít nhất** khoảng `d`.
 - `std::chrono::steady_clock::now()` là thời điểm hiện tại của đồng hồ chạy đều (không nhảy khi ai đó chỉnh giờ).
 
@@ -347,7 +347,7 @@ hardware_concurrency = 8
 ngu it nhat 50 ms? 1
 ```
 
-Dòng đầu là của máy mình (8 luồng phần cứng); máy bạn in số khác.
+Dòng đầu là của máy mình (4 lõi, mỗi lõi hai luồng, nên 8 luồng phần cứng); máy bạn in số khác.
 
 ## 💻 Ví dụ code
 
@@ -540,7 +540,7 @@ void f() {
 - Luồng bị bỏ lại chạy nền, vì hàm thoát sớm nên không ai `join` nó
 - Luồng bị dừng ngay mà không chờ, vì ngoại lệ hủy mọi luồng của hàm
 
-<p class="giai-thich" markdown>Biến cục bộ `g` vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở Bài 08. Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự `detach` nó. `terminate` chỉ gọi nếu `std::thread` bị hủy lúc còn joinable, mà ở đây `g` đã `join` trước đó. Ngoại lệ được `catch` ở nơi gọi nên không rơi vào trường hợp không ai bắt.</p>
+<p class="giai-thich" markdown>Biến cục bộ `g` vẫn được hủy khi hàm thoát bằng ngoại lệ, và hàm hủy của nó chờ luồng xong; đây đúng là lợi ích của RAII ở [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md). Không có điều nào khác tự xảy ra: ngoại lệ không tự dừng luồng, cũng không tự `detach` nó. `terminate` chỉ gọi nếu `std::thread` bị hủy lúc còn joinable, mà ở đây `g` đã `join` trước đó. Ngoại lệ được `catch` ở nơi gọi nên không rơi vào trường hợp không ai bắt.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -551,7 +551,7 @@ void f() {
 - Chương trình gọi `std::terminate` và dừng cả chương trình
 - Ngoại lệ được cất lại và `join` sẽ ném lại ở luồng chính
 
-<p class="giai-thich" markdown>Ngoại lệ không được bắt ngay trong hàm của luồng thì thoát khỏi hàm đó và `std::terminate` được gọi, dừng mọi luồng. Ngăn xếp của mỗi luồng riêng, nên `catch` ở luồng chính không thể bắt thứ ném ở luồng khác. Cũng không có nơi nào âm thầm nuốt hay cất ngoại lệ; việc chuyển ngoại lệ sang luồng khác cần cơ chế riêng mà Bài 29 mới dạy.</p>
+<p class="giai-thich" markdown>Ngoại lệ không được bắt ngay trong hàm của luồng thì thoát khỏi hàm đó và `std::terminate` được gọi, dừng mọi luồng. Ngăn xếp của mỗi luồng riêng, nên `catch` ở luồng chính không thể bắt thứ ném ở luồng khác. Cũng không có nơi nào âm thầm nuốt hay cất ngoại lệ; việc chuyển ngoại lệ sang luồng khác cần cơ chế riêng mà [Bài 29](29-async-future.md) mới dạy.</p>
 </div>
 
 </div>

@@ -6,7 +6,7 @@
     - Nhận ra **tự deadlock** (một luồng xin lại khóa mình đang giữ), và phân biệt deadlock với **livelock** và **starvation** (chỉ định nghĩa ngắn).
     - Tìm deadlock trong chương trình đang treo bằng `gdb` (`info threads`, `thread apply all bt`) và bằng ThreadSanitizer; so với Go, nơi runtime chỉ báo deadlock khi **mọi** goroutine đều ngủ.
 
-**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `std::ref`, lambda làm hàm luồng, `sleep_for`), [Bài 25](25-data-race-mutex.md) (`std::mutex`, `lock_guard`, vùng găng, TSan, khóa hai lần trong một luồng là hành vi không xác định), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `&`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`{...}` điền các trường của struct, `điều kiện ? A : B`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda `[&]`, con trỏ hàm), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer).
+**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `std::ref`, lambda làm hàm luồng, `sleep_for`), [Bài 25](25-data-race-mutex.md) (`std::mutex`, `lock_guard`, vùng găng, TSan), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `&`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`{...}` điền các trường của struct, `điều kiện ? A : B`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda `[&]`, con trỏ hàm), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -82,7 +82,7 @@ Luồng chính ở `t1.join()` chờ `t1`, nên cả chương trình đứng.
 Nhưng chương trình **vẫn có lỗi thiết kế**, và ThreadSanitizer vẫn báo nó (mục 3).
 
 !!! info "Bạn biết Go?"
-    Go có đúng loại lỗi này: hai goroutine khóa hai `sync.Mutex` ngược thứ tự thì kẹt nhau. Điểm khác là **ai báo**, ở mục 4.
+    Go có đúng loại lỗi này: hai goroutine khóa hai `sync.Mutex` ngược thứ tự thì kẹt nhau. Điểm khác là **ai báo**, ở phần Go cuối bài.
 
 ### 2. Bốn điều kiện của deadlock
 
@@ -213,7 +213,7 @@ int main() {
 
 Mình biên dịch sạch và chạy `timeout 3`: không in gì, mã **124**.
 
-[Bài 25](25-data-race-mutex.md) đã nói xin lại `std::mutex` đang giữ là hành vi không xác định: chuẩn không hứa gì, còn **trên máy mình** nó treo. Ta gọi đó là **tự deadlock** (self-deadlock): một luồng là đủ.
+Chuẩn nói: một luồng xin lại `std::mutex` mà chính nó đang giữ là hành vi không xác định ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)); chuẩn không hứa gì, còn **trên máy mình** nó treo. Ta gọi đó là **tự deadlock** (self-deadlock): một luồng là đủ.
 
 Một biến thể hay gặp khác: giữ khóa rồi `join` một luồng cần đúng khóa đó (luồng chờ khóa, `join` chờ luồng), như ví dụ treo ở [Bài 25](25-data-race-mutex.md).
 
@@ -340,7 +340,7 @@ std::lock_guard<std::mutex> g2(den.khoa, std::adopt_lock);
 Từ C++17 cứ dùng `scoped_lock` cho gọn.
 
 !!! warning "Hay nhầm"
-    `scoped_lock` không cứu được trường hợp hai mutex **là một**. Mình thử `chuyen(a, a, 3)` (gửi cho chính mình) với `scoped_lock giu(tu.khoa, den.khoa)`: treo (`timeout 3` mã 124). Chuẩn không hứa gì ở đây: xin lại `std::mutex` đang giữ là hành vi không xác định ([Bài 25](25-data-race-mutex.md)), mình chỉ biết trên máy mình (g++ 11) nó treo. Cách 1 theo `id` cũng hỏng nếu hai `id` trùng, vì `dau` và `sau` khi đó là cùng một tài khoản. Cách tránh: `if (&tu == &den) return;` ở đầu hàm.
+    `scoped_lock` không cứu được trường hợp hai mutex **là một**. Mình thử `chuyen(a, a, 3)` (gửi cho chính mình) với `scoped_lock giu(tu.khoa, den.khoa)`: treo (`timeout 3` mã 124). Chuẩn không hứa gì ở đây: xin lại `std::mutex` đang giữ là hành vi không xác định (mục 5 ở trên), mình chỉ biết trên máy mình (g++ 11) nó treo. Cách 1 theo `id` cũng hỏng nếu hai `id` trùng, vì `dau` và `sau` khi đó là cùng một tài khoản. Cách tránh: `if (&tu == &den) return;` ở đầu hàm.
 
 ### `try_lock_for`: có hạn chờ thay vì chờ mãi
 
@@ -501,12 +501,12 @@ void duyet(void (*cb)()) { std::lock_guard<std::mutex> g(m); cb(); }
 void ghi() { std::lock_guard<std::mutex> g(m); /* sửa dữ liệu chung */ }
 ```
 
-- Chạy xong bình thường, vì cùng một luồng thì `std::mutex` cho xin lại
+- Thường chạy xong bình thường, vì cùng một luồng `std::mutex` cho xin lại
 - Chuẩn bắt buộc `lock()` ném ngoại lệ để báo lỗi khi xin lại
-- Không thể treo, vì deadlock luôn cần ít nhất hai luồng và hai khóa
+- Thường không treo, vì deadlock cần ít nhất hai luồng và hai khóa
 - Hành vi không xác định, vì luồng xin lại `std::mutex` mình đang giữ
 
-<p class="giai-thich" markdown>Chuẩn nói luồng xin lại một `std::mutex` mà nó đang giữ là hành vi không xác định; trên máy mình kết quả là treo. `std::mutex` không cho cùng luồng xin lại, đó là việc của `std::recursive_mutex`. Chuẩn cũng không bắt buộc ném ngoại lệ trong trường hợp này. Còn một luồng tự chờ chính mình vẫn là kẹt, nên "deadlock cần hai luồng" chỉ đúng với cách hiểu hẹp của ví dụ chuyển tiền.</p>
+<p class="giai-thich" markdown>Chuẩn nói luồng xin lại một `std::mutex` mà nó đang giữ là hành vi không xác định; trên máy mình kết quả là treo. `std::mutex` không cho cùng luồng xin lại, đó là việc của `std::recursive_mutex`. Chuẩn cũng không bắt buộc ném ngoại lệ trong trường hợp này. Cũng không có gì bảo đảm chạy xong hay không treo: chuẩn không hứa gì ở đây, nên "thường" chỉ là chuyện của một máy. Còn một luồng tự chờ chính mình vẫn là kẹt, nên "deadlock cần hai luồng" chỉ đúng với cách hiểu hẹp của ví dụ chuyển tiền.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>

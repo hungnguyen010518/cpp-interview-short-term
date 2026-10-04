@@ -12,7 +12,7 @@
 
 Quay lại **nhà bếp** của [Bài 25](25-data-race-mutex.md), với một thớt chung và một thẻ vào thớt. Giờ có hai người phụ thuộc nhau: đầu bếp chính cần hành đã sơ chế, mà hành do đầu bếp phụ chuẩn bị, mất một lúc. Chính chưa thể thái cho tới khi phụ xong.
 
-Có hai cách chờ tồi. Cách một: chính đứng ngay cạnh tủ và mở ra nhìn **không ngừng**, mệt và chẳng làm được việc gì khác. Cách hai: cứ vài phút chính ghé nhìn một lần rồi đi ngủ; đỡ mệt, nhưng hành xong từ lâu mà chính vẫn chưa hay.
+Có hai cách chờ tồi. Cách một: chính đứng ngay cạnh thớt và nhìn **không ngừng**, mệt và chẳng làm được việc gì khác. Cách hai: cứ vài phút chính ghé nhìn một lần rồi đi ngủ; đỡ mệt, nhưng hành xong từ lâu mà chính vẫn chưa hay.
 
 Cách tốt: chính **để thẻ thớt lại** (để phụ còn có thẻ mà đặt hành lên thớt), ngồi xuống ghế và ngủ. Phụ chuẩn bị xong thì **bấm chuông**. Chuông reo, chính dậy, xin lại thẻ thớt rồi làm. Cái chuông chính là `std::condition_variable`.
 
@@ -189,7 +189,7 @@ int main() {
 
 **Kết quả khi chạy:** mình biên dịch sạch cảnh báo; chạy `timeout 3 ./chuongtrinh` thì **không in gì**, `timeout` thoát mã **124**. Tiếng chuông ở (1) đã mất, nên (3) ngủ không ai gọi. Khối đặt `// bo-qua-kiem-tra` vì nó treo. Chuẩn không hứa là nó treo (spurious wakeup có thể làm nó dậy), mình chỉ nói điều mình thấy trên máy này.
 
-**Thử thay đổi: lấy chương trình ở mục 2, bỏ dòng ngủ 1 giây của luồng phụ, và cho luồng chính ngủ 300 ms trước khi xin khóa.** Vậy `notify_one` gần như chắc chắn đến **trước** `wait`, nhưng `wait` vẫn có predicate. Mình đã chạy: in `xong`, không treo (TSan sạch). Predicate được kiểm **trước khi ngủ** (như vòng `while` ở trên): `xong` đã `true` nên `wait` không ngủ. Trạng thái nằm trong biến, không nằm trong tiếng chuông.
+**Thử thay đổi: lấy chương trình ở mục 3, thêm `bool xong` đặt thành `true` dưới khóa trước `notify_one`, và đổi `wait` thành `wait(lk, [] { return xong; })`.** Vậy `notify_one` vẫn đến **trước** `wait` (luồng chính còn ngủ 300 ms), nhưng `wait` giờ có predicate. Mình đã chạy: in `xong`, không treo (TSan sạch). Predicate được kiểm **trước khi ngủ** (như vòng `while` ở trên): `xong` đã `true` nên `wait` không ngủ. Trạng thái nằm trong biến, không nằm trong tiếng chuông.
 
 !!! warning "Hay nhầm"
     Biến điều kiện phải được đổi **dưới cùng mutex** mà luồng chờ dùng, kể cả khi nó chỉ là một `bool`. Đổi ngoài khóa thì có thể rơi đúng vào khe giữa lúc luồng chờ kiểm `xong` (thấy `false`) và lúc nó ngủ: tin đến mà không ai nhận, lost wakeup trá hình, và còn là data race ([Bài 25](25-data-race-mutex.md)) vì hai luồng đụng cùng một biến không đồng bộ. Hàng đợi ở mục 💻 cũng thế: mọi `push`/`pop` đều dưới khóa.
@@ -199,7 +199,7 @@ int main() {
 - `notify_one()` đánh thức **nhiều nhất một** luồng đang chờ trên `cv` đó (chuẩn không nói là luồng nào).
 - `notify_all()` đánh thức **tất cả** luồng đang chờ; chúng dậy lần lượt vì phải xin lại cùng một khóa.
 
-Quy tắc dễ nhớ: **một món mới, chỉ một người dùng được** thì `notify_one`; **một thay đổi mà mọi người đều phải biết** (như "hết việc, dừng") thì `notify_all`. Lỡ dùng `notify_one` để báo dừng khi có hai consumer cùng đang chờ, thì một luồng thoát, luồng kia ngủ mãi (mục 💻 có thử thật).
+Quy tắc dễ nhớ: **một món mới, chỉ một người dùng được** thì `notify_one`; **một thay đổi mà mọi người đều phải biết** (như "hết việc, dừng") thì `notify_all`. Lỡ dùng `notify_one` để báo dừng khi có hai consumer cùng đang chờ, thì một luồng thoát, luồng kia ngủ tiếp không ai gọi (trên máy mình là mãi; chuẩn cho phép đánh thức giả; mục 💻 có thử thật).
 
 **Notify trong khi giữ khóa hay sau khi nhả?** Cả hai đều đúng theo chuẩn: `notify` không đòi bạn giữ khóa. Nhả trước rồi mới notify (như dòng (3)-(4) ở mục 2) thường **được khuyên dùng**: luồng vừa được đánh thức khỏi phải ngay lập tức bị chặn lại vì khóa vẫn nằm trong tay người báo tin. Một số cài đặt tự tối ưu chuyện này nên chênh lệch tùy thư viện và máy; mình không đo, nên đừng coi đó là luật. Giữ khóa lúc notify đôi khi lại cần, ví dụ khi luồng chờ sẽ hủy chính `cv` ngay lúc dậy.
 
@@ -387,7 +387,7 @@ int main() {
 | (1) | Consumer lấy một việc ra thì hàng có chỗ trống: báo `conCho` cho producer |
 | (2) | Producer chờ tới khi `hang.size() < TOI_DA`; sau mỗi `push`, nó báo `conViec` cho consumer |
 
-**Kết quả khi chạy:** `tong = 500500, dinh <= 4: dung`. Mình chạy 100 lần, cả 100 lần giống nhau, và TSan không báo gì. `dinh` là số phần tử nhiều nhất từng thấy trong hàng (ghi dưới khóa); nó không bao giờ vượt 4. Dùng một `cv` chung cho cả hai điều kiện cũng được nếu luôn `notify_all`, nhưng hai `cv` đánh thức đúng người hơn. Đây là nền cho thread pool ở Bài 30.
+**Kết quả khi chạy:** `tong = 500500, dinh <= 4: dung`. Mình chạy 100 lần, cả 100 lần giống nhau, và TSan không báo gì. `dinh` là số phần tử nhiều nhất từng thấy trong hàng (ghi dưới khóa); nó không bao giờ vượt 4. Dùng một `cv` chung cho cả hai điều kiện cũng được nếu luôn `notify_all`, nhưng hai `cv` đánh thức đúng người hơn. Đây là nền cho thread pool ở [Bài 30](30-thread-pool-hieu-nang.md).
 
 ## Go: channel làm sẵn hàng đợi và chờ
 
@@ -520,9 +520,9 @@ bool xong = false;
 // luồng chính: std::unique_lock<std::mutex> lk(m);  cv.wait(lk, [] { return xong; });
 ```
 
-- Luồng chính dậy khi `xong` đổi, vì `wait` luôn theo dõi biến trong predicate
-- Luồng chính dậy khi luồng phụ nhả khóa, vì `wait` đang chờ chính khóa đó
-- Không có gì đánh thức luồng chính, nên nó ngủ mãi trên máy mình
+- Luồng chính dậy khi `xong` đổi, vì `wait` theo dõi biến trong predicate
+- Luồng chính thường dậy khi luồng phụ nhả khóa, vì `wait` chờ chính khóa đó
+- Không có gì đánh thức luồng chính, nên nó ngủ tiếp chứ không dậy
 - Luồng chính dậy sau lần kiểm kế tiếp, vì `wait` tự kiểm predicate mỗi giây
 
 <p class="giai-thich" markdown>Không ai gọi `notify`, nên không có gì đánh thức luồng chính; đây là lỗi quên `notify`, và mình đã chạy ra treo mã 124. Chuẩn cho phép đánh thức giả nên không thể hứa chắc là mãi mãi, và bạn không được dựa vào nó; trên máy mình thì treo. `wait` không theo dõi biến nào: predicate chỉ được gọi khi luồng chính dậy vì lý do khác. Nó cũng không chờ khóa (lúc đó luồng chính đã nhả khóa và ngủ trên `cv`), và không có đồng hồ kiểm mỗi giây nào.</p>
