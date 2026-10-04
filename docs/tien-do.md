@@ -27,3 +27,4 @@
 | [Bài 21 — Big-O, danh sách liên kết, stack và queue](nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu.md) | <span class="diem" data-bai="21"></span> |
 | [Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap](nhom-2-stl-thuat-toan/22-bst-bang-bam-heap.md) | <span class="diem" data-bai="22"></span> |
 | [Bài 23 — Thuật toán hay hỏi ở phỏng vấn](nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi.md) | <span class="diem" data-bai="23"></span> |
+| [Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số](nhom-3-da-luong/24-thread-co-ban.md) | <span class="diem" data-bai="24"></span> |
