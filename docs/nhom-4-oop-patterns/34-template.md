@@ -39,7 +39,7 @@ Chỗ trống không chỉ là kiểu. **Tham số không phải kiểu** (non-t
 
 Đôi khi một kiểu cần cách làm riêng. **Chuyên biệt hóa** là viết thêm một bản **dành riêng** cho kiểu đó, bằng `template <>` rồi tên lớp có kiểu cụ thể (`Nhan<bool>`); khi dùng đúng kiểu đó, trình biên dịch chọn bản riêng thay vì bản chung. Ví dụ 3 làm với `bool`. Chuẩn còn có **chuyên biệt hóa từng phần** (cho một nhóm kiểu, như mọi con trỏ), mình chỉ nêu tên.
 
-Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản chuyên biệt hóa mà g++ cài bằng cách lưu mỗi phần tử một bit (chuẩn chỉ cho phép dạng gọn). Vì vậy `&v[0]` không cho `bool*` (mình đã thử: g++ báo `cannot convert ‘std::vector<bool>::reference*’ to ‘bool*’`); đây là lý do nhiều người tránh `vector<bool>`.
+Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản chuyên biệt hóa do chuẩn quy định, với phần tử trả ra là một đối tượng đại diện chứ không phải `bool&`, và khuyến nghị lưu gọn; g++ lưu mỗi phần tử một bit. Vì vậy `&v[0]` không cho `bool*` (mình đã thử: g++ báo `cannot convert ‘std::vector<bool>::reference*’ to ‘bool*’`); đây là lý do nhiều người tránh `vector<bool>`.
 
 ### 5. Template hay hàm ảo? Hai kiểu đa hình
 
@@ -50,7 +50,7 @@ Ví dụ nổi tiếng trong thư viện chuẩn: `std::vector<bool>` là bản 
 | Chọn hàm khi nào | Lúc chạy, theo món thật | Lúc biên dịch, theo kiểu |
 | Cần lớp cha chung | Có | Không, chỉ cần kiểu có đúng hàm cần gọi |
 | Trộn nhiều kiểu trong một dãy | Được (`vector<unique_ptr<Hinh>>`) | Không: `vector<H>` chỉ một kiểu `H` |
-| Chi phí gọi | Qua bảng hàm ảo, khó inline (Bài 33) | Gọi thẳng, thường inline được |
+| Chi phí gọi | Qua bảng hàm ảo, khó inline ([Bài 33](33-da-hinh-virtual.md)) | Gọi thẳng, thường inline được |
 | Mã nhị phân | Một bản hàm duyệt (như `tongAo`) cho mọi lớp con; mỗi lớp con vẫn có hàm ghi đè riêng | Một bản hàm duyệt cho **mỗi kiểu** dùng, sinh lúc biên dịch |
 | Lỗi báo | Thường ngắn, đúng chỗ gọi | Có thể dài (mục 6) |
 
@@ -171,7 +171,7 @@ t auto main::{lambda(auto:1)#1}::operator()<std::__cxx11::basic_string<...> >(..
 
 Ba bản `lonHon` và hai bản của hàm gọi trong lambda, đúng số kiểu đã dùng. (Chữ `W` ở đầu là ký hiệu "yếu": nhiều file cùng sinh một bản vẫn ghép được; ta chỉ đọc phần tên.) Các **Thử thay đổi** (đã chạy):
 
-- **Viết `lonHon(3, 4.5)`**: `error: no match for call to ‘lonHon(int, double)’`, ghi chú `deduced conflicting types for parameter ‘T’ (‘int’ and ‘double’)`. `std::max(3, 4.5)` cho lỗi cùng kiểu (`no matching function for call to ‘max(int, double)’`).
+- **Viết `lonHon(3, 4.5)`**: `error: no matching function for call to ‘lonHon(int, double)’`, ghi chú `deduced conflicting types for parameter ‘T’ (‘int’ and ‘double’)`. `std::max(3, 4.5)` cho lỗi cùng kiểu (`no matching function for call to ‘max(int, double)’`).
 - **Đổi `typename` thành `class`** ở dòng template: kết quả y hệt, từng chữ.
 
 ### Ví dụ 2: `Ngan<T, N>`, template lớp với tham số kiểu và không phải kiểu
@@ -297,7 +297,7 @@ Mình chạy với ASan + UBSan: sạch. **Thử thay đổi: xóa khối `templ
 
 ### Ví dụ 4: cùng việc "cộng diện tích", làm bằng hàm ảo và bằng template
 
-`Tron`, `Vuong` kế thừa `Hinh` giống ý của Bài 33 (tên lớp ngắn lại); `Luoi` **không** kế thừa gì, chỉ có hàm `dienTich` cùng tên. `tongAo` dùng hàm ảo, `tongMau` dùng template.
+`Tron`, `Vuong` kế thừa `Hinh` giống ý của [Bài 33](33-da-hinh-virtual.md) (tên lớp ngắn lại); `Luoi` **không** kế thừa gì, chỉ có hàm `dienTich` cùng tên. `tongAo` dùng hàm ảo, `tongMau` dùng template.
 
 ```cpp
 #include <iostream>
@@ -313,7 +313,7 @@ public:
 class Tron : public Hinh {
 public:
     explicit Tron(double r) : r_(r) {}
-    double dienTich() const override { return 3 * r_ * r_; }
+    double dienTich() const override { return 3 * r_ * r_; }   // lấy pi = 3 cho số tròn
 private:
     double r_;
 };
@@ -539,7 +539,7 @@ int main() { }
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 7.** Điều nào đúng khi so generics của Go (`func Max[T cmp.Ordered](a, b T) T`) với template C++?
 
-- Go kiểm thân hàm theo constraint ngay khi định nghĩa; C++ không concepts kiểm khi sinh bản
+- Go kiểm thân hàm theo constraint ngay khi định nghĩa; C++ (không dùng concepts) chỉ kiểm khi sinh bản
 - Go sinh một bản riêng cho từng kiểu như C++, và cũng cho chuyên biệt hóa từng kiểu
 - Go kiểm ràng buộc lúc chạy, nên sai kiểu chỉ lộ ở lần chạy đầu tiên
 - C++ kiểm ràng buộc bằng interface lúc biên dịch, còn Go chỉ kiểm khi gọi hàm
@@ -551,7 +551,7 @@ int main() { }
 
 ## 🔑 Tóm tắt
 
-1. **Template** là bản vẽ có chỗ trống cho kiểu (hoặc số): `template <typename T>` (`class` cũng được, giống hệt); mỗi kiểu được dùng sinh **một bản riêng** lúc biên dịch (mình chạy: 3 kiểu, 3 bản `lonHon`, thấy bằng `nm` và `__PRETTY_FUNCTION__`). `max(3, 4.5)` lỗi vì suy ra hai `T`; ghi `max<double>(3, 4.5)`.
+1. **Template** là khuôn có chỗ trống cho kiểu (hoặc số), điền xong mới ra một hàm hay lớp thật: `template <typename T>` (`class` cũng được, giống hệt); mỗi kiểu được dùng sinh **một bản riêng** lúc biên dịch (mình chạy: 3 kiểu, 3 bản `lonHon`, thấy bằng `nm` và `__PRETTY_FUNCTION__`). `max(3, 4.5)` lỗi vì suy ra hai `T`; ghi `max<double>(3, 4.5)`.
 2. **Template lớp** (`vector<int>`, `Ngan<T, N>`): mỗi bộ tham số là một lớp riêng; tham số không phải kiểu như `N` nằm trong kiểu (`array<int, 3>` khác `array<int, 5>`), có giá trị mặc định; chỉ hàm thành viên được gọi mới sinh; **chuyên biệt hóa** là bản riêng cho một kiểu (`Nhan<bool>`).
 3. **Template vs hàm ảo**: lúc biên dịch (không cần lớp cha chung, gọi thẳng, một bản mỗi kiểu, một dãy một kiểu) so với lúc chạy (trộn loại, một hàm duyệt chung, mỗi lớp con vẫn có hàm ghi đè riêng, gọi gián tiếp). Không bên nào luôn tốt hơn; mình không đo thời gian.
 4. **Giá cả**: lỗi dài (114 dòng cho một `sort` thiếu `operator<`, đọc từ dòng `error:` và `required from here`), code bloat (mình đo: `.text` tăng 11818 lên 89528 byte khi 1 lên 8 kiểu ở `-O0`, đổi theo máy và cờ), và thân template phải ở header (tách `.cpp` thì `undefined reference`).

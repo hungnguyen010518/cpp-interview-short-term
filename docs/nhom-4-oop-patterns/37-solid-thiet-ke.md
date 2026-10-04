@@ -1,10 +1,10 @@
 # Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
-    - Nói được từng chữ cái của **SOLID** (S, O, L, I, D) bằng một ví dụ C++ nhỏ chạy thật: tách lớp làm ba việc (S), thêm kiểu mới không sửa mã cũ (O, nối registry ở Bài 35 và Strategy ở Bài 36), hình vuông/hình chữ nhật vỡ **hợp đồng** (L, đã hẹn ở Bài 32), interface nhỏ (I), lớp cấp cao nhận interface và test bằng đối tượng giả `MayChuGia` (D).
+    - Nói được từng chữ cái của **SOLID** (S, O, L, I, D) bằng một ví dụ C++ nhỏ chạy thật: tách lớp làm ba việc (S), thêm kiểu mới không sửa mã cũ (O, nối registry ở [Bài 35](35-pattern-singleton-factory.md) và Strategy ở [Bài 36](36-pattern-observer-strategy.md)), hình vuông/hình chữ nhật vỡ **hợp đồng** (L, đã hẹn ở [Bài 32](32-ke-thua.md)), interface nhỏ (I), lớp cấp cao nhận interface và test bằng đối tượng giả `MayChuGia` (D).
     - Phân biệt **Dependency Inversion** (nguyên tắc) với **Dependency Injection** (kỹ thuật); chọn **composition** (has-a) thay vì kế thừa khi chỉ muốn dùng lại; dùng **Rule of 0** khi thiết kế lớp (chạy thật, kể cả khi thêm `unique_ptr`).
     - Chọn giữa lớp trừu tượng, template và `std::function` bằng một bảng; biết lúc nào SOLID thành over-engineering (KISS, YAGNI).
-    - Có danh sách ~16 câu hỏi phỏng vấn OOP nối Bài 31–36; so với Go (không có kế thừa, interface nhỏ nhận ở nơi dùng; đã chạy Go 1.27.1).
+    - Có danh sách 14 câu hỏi phỏng vấn OOP nối Bài 31–36; so với Go (không có kế thừa, interface nhỏ nhận ở nơi dùng; đã chạy Go 1.27.1).
 
 **Bạn cần biết trước:** [Bài 31](31-lop-dong-goi.md) (lớp, bất biến), [Bài 32](32-ke-thua.md) (kế thừa, is-a/has-a, hình vuông/chữ nhật), [Bài 33](33-da-hinh-virtual.md) (hàm thuần ảo, hàm hủy ảo, `unique_ptr<Hinh>`), [Bài 34](34-template.md) (template), [Bài 35](35-pattern-singleton-factory.md) (registry factory, truyền phụ thuộc vào), [Bài 36](36-pattern-observer-strategy.md) (Strategy, `std::function`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (`unique_ptr`), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) và [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (Rule of 3/5/0).
 
@@ -53,7 +53,7 @@ Cách sửa: **bỏ kế thừa**, dùng interface chung `Hinh` với `dienTich(
 
 Một interface `MayVanPhong` có `in`, `quet`, `fax` buộc mọi lớp cài đặt phải viết cả ba, kể cả máy chỉ biết in. Tách thành `MayIn` và `MayQuet`: máy in đơn chỉ cài `MayIn`; máy đa năng cài cả hai bằng kế thừa nhiều interface.
 
-Kế thừa nhiều interface ở đây không dính bài toán kim cương của [Bài 32](32-ke-thua.md), vì `MayIn` và `MayQuet` **không có cha chung** (mình chạy thử: hai interface cùng kế thừa một interface gốc rồi gộp vào một lớp thì vẫn lỗi `'G' is an ambiguous base of 'C'`, dù gốc không có dữ liệu). Hàm `inBienLai(MayIn&)` nhận đúng thứ nó cần (Ví dụ 3).
+Kế thừa nhiều interface ở đây không dính bài toán kim cương của [Bài 32](32-ke-thua.md), vì `MayIn` và `MayQuet` **không có cha chung** (mình chạy thử với g++ 11: hai interface cùng kế thừa một interface gốc `G` rồi gộp vào một lớp `C` thì vẫn biên dịch được, nhưng chuyển `C&` sang `G&` (hay `C*` sang `G*`) báo `‘G’ is an ambiguous base of ‘C’`, dù gốc không có dữ liệu). Hàm `inBienLai(MayIn&)` nhận đúng thứ nó cần (Ví dụ 3).
 
 ### 6. D: phụ thuộc interface; Dependency Inversion khác Dependency Injection
 
@@ -304,7 +304,7 @@ luu anh-giay-A4
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đã chạy):
 
-- **Gộp** thành một interface `MayVanPhong` có cả `in` và `quet` thuần ảo, cho `MayInDon` kế thừa nó và chỉ viết `in`. Biên dịch lỗi: `cannot declare variable 'don' to be of abstract type 'MayInDon'`, vì `quet` vẫn thuần ảo. Muốn qua, máy in đơn phải viết một hàm `quet` giả: đó là dấu hiệu của interface quá to.
+- **Gộp** thành một interface `MayVanPhong` có cả `in` và `quet` thuần ảo, cho `MayInDon` kế thừa nó và chỉ viết `in`. Biên dịch lỗi: `cannot declare variable ‘don’ to be of abstract type ‘MayInDon’`, vì `quet` vẫn thuần ảo. Muốn qua, máy in đơn phải viết một hàm `quet` giả: đó là dấu hiệu của interface quá to.
 
 ### Ví dụ 4 (D): `MayChuThat` và `MayChuGia`, test không gửi gì thật
 
@@ -380,7 +380,7 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. Hai dòng cuối là mộ
 
 ### Ví dụ 5 (composition và Rule of 0): `Xe` có `DongCo`
 
-**Chủ đề đổi sang xe** (như Bài 32). `Xe` giữ `ten_`, `dongCo_`, `nhatKy_` làm thành viên (4) và **không viết hàm đặc biệt nào** (5), nên không có hàm hủy hay hàm sao chép/di chuyển do ta viết. `dongCo_{congSuat}` (2) khởi tạo `DongCo` bằng ngoặc nhọn. `Xe b = a;` (6) sao chép, `std::move(a)` (7) di chuyển.
+**Chủ đề đổi sang xe** (như [Bài 32](32-ke-thua.md)). `Xe` giữ `ten_`, `dongCo_`, `nhatKy_` làm thành viên (4) và **không viết hàm đặc biệt nào** (5), nên không có hàm hủy hay hàm sao chép/di chuyển do ta viết. `dongCo_{congSuat}` (2) khởi tạo `DongCo` bằng ngoặc nhọn. `Xe b = a;` (6) sao chép, `std::move(a)` (7) di chuyển.
 
 ```cpp
 #include <iostream>
@@ -436,7 +436,7 @@ b: 2, c: 1
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đã chạy):
 
-- **Đổi `dongCo_` thành `std::unique_ptr<DongCo>`** (tạo bằng `std::make_unique<DongCo>(congSuat)`, gọi `dongCo_->no()`, thêm `#include <memory>`). Lớp vẫn **không viết hàm đặc biệt nào**, nhưng `Xe b = a;` thành lỗi `use of deleted function 'Xe::Xe(const Xe&)'`: `unique_ptr` không sao chép được nên `Xe` cũng không. Bỏ dòng sao chép (chỉ giữ di chuyển) thì chạy tốt, in `c: 1`. Rule of 0 nghĩa là "để thành viên quyết định", không phải "mọi lớp đều chép được".
+- **Đổi `dongCo_` thành `std::unique_ptr<DongCo>`** (tạo bằng `std::make_unique<DongCo>(congSuat)`, gọi `dongCo_->no()`, thêm `#include <memory>`). Lớp vẫn **không viết hàm đặc biệt nào**, nhưng `Xe b = a;` thành lỗi `use of deleted function ‘Xe::Xe(const Xe&)’`: `unique_ptr` không sao chép được nên `Xe` cũng không. Bỏ dòng sao chép (chỉ giữ di chuyển) thì chạy tốt, in `c: 1`. Rule of 0 nghĩa là "để thành viên quyết định", không phải "mọi lớp đều chép được".
 
 ## Go: không có kế thừa nên composition và interface nhỏ là mặc định
 
@@ -450,10 +450,10 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "SOLID là gì? (nói từng chữ cái với ví dụ)"
-    S: một lớp một lý do để đổi (tách `BaoCao` thành tính, in, lưu). O: thêm hành vi bằng thêm mã, không sửa mã cũ (thêm `HinhTamGiac` mà `tongDienTich` không đổi; registry factory, Strategy). L: lớp con dùng được ở mọi chỗ lớp cha dùng mà không phá hợp đồng (hình vuông không thay được hình chữ nhật có `datRong`). I: nhiều interface nhỏ (`MayIn`, `MayQuet` thay cho `MayVanPhong`). D: lớp cấp cao phụ thuộc interface (`DichVuBaoDong` nhận `MayChu&`, test bằng `MayChuGia`). Thêm: đây là nguyên tắc, áp cứng nhắc thì thành thiết kế thừa.
+    S: một lớp một lý do để đổi (tách `BaoCao` thành tính, in, lưu). O: thêm hành vi bằng thêm mã, không sửa mã cũ (thêm `TamGiac` mà `tong` không đổi; registry factory, Strategy). L: lớp con dùng được ở mọi chỗ lớp cha dùng mà không phá hợp đồng (hình vuông không thay được hình chữ nhật có `datRong`). I: nhiều interface nhỏ (`MayIn`, `MayQuet` thay cho `MayVanPhong`). D: lớp cấp cao phụ thuộc interface (`DichVuBaoDong` nhận `MayChu&`, test bằng `MayChuGia`). Thêm: đây là nguyên tắc, áp cứng nhắc thì thành thiết kế thừa.
 
 ??? question "Liskov là gì? Cho ví dụ vi phạm."
-    Ở đâu dùng đối tượng lớp cha thì thay bằng lớp con vẫn đúng: lớp con giữ hợp đồng của cha (điều kiện người dùng được trông đợi) và các bất biến. Ví dụ vi phạm: `VuongSua` kế thừa `ChuNhatSua` có `datRong` (Bài 32 gọi là `HinhVuong`, `HinhChuNhat`); hàm viết cho chữ nhật kỳ vọng "đổi rộng thì cao giữ nguyên", vuông phải đổi cả cao nên vỡ (mình chạy). Cách sửa: bỏ kế thừa, dùng interface `Hinh` chung, hoặc cho lớp bất biến không có hàm sửa cạnh.
+    Ở đâu dùng đối tượng lớp cha thì thay bằng lớp con vẫn đúng: lớp con giữ hợp đồng của cha (điều kiện người dùng được trông đợi) và các bất biến. Ví dụ vi phạm: `VuongSua` kế thừa `ChuNhatSua` có `datRong` ([Bài 32](32-ke-thua.md) gọi là `HinhVuong`, `HinhChuNhat`); hàm viết cho chữ nhật kỳ vọng "đổi rộng thì cao giữ nguyên", vuông phải đổi cả cao nên vỡ (mình chạy). Cách sửa: bỏ kế thừa, dùng interface `Hinh` chung, hoặc cho lớp bất biến không có hàm sửa cạnh.
 
 ??? question "Dependency Inversion khác Dependency Injection thế nào?"
     Inversion là **nguyên tắc**: lớp cấp cao và cấp thấp cùng phụ thuộc một interface, interface do bên cấp cao định ra. Injection là **kỹ thuật**: đưa thứ cần dùng vào qua hàm tạo hay tham số, không tự tạo bên trong. Injection là cách phổ biến để thực hiện inversion, và cho phép thay bằng đối tượng giả khi test; nhưng có thể inject một lớp cụ thể (vẫn là Injection mà không có Inversion).
@@ -468,8 +468,6 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
     - **Vì sao hàm hủy phải `virtual`?** Xóa qua `Cha*` mà hàm hủy cha không ảo là hành vi không xác định: [Bài 33](33-da-hinh-virtual.md).
     - **Object slicing?** Gán cả đối tượng con vào biến cha chỉ chép phần cha; dùng tham chiếu/con trỏ: [Bài 33](33-da-hinh-virtual.md).
     - **Abstract class và interface?** Lớp có hàm thuần ảo là lớp trừu tượng; C++ không có từ khóa `interface`, lớp chỉ gồm hàm thuần ảo và hàm hủy ảo đóng vai đó: [Bài 33](33-da-hinh-virtual.md).
-    - **`override` và `final`?** `override` nhờ g++ kiểm chữ ký; `final` cấm ghi đè hoặc kế thừa tiếp: [Bài 32](32-ke-thua.md), [Bài 33](33-da-hinh-virtual.md).
-    - **Kế thừa hay composition?** Is-a hay has-a, nghiêng về composition: [Bài 32](32-ke-thua.md), bài này.
     - **Đa kế thừa và kim cương?** Hai bản cha chung nên mơ hồ; kế thừa `virtual` hoặc tránh: [Bài 32](32-ke-thua.md).
     - **Template hay đa hình?** Lúc biên dịch với lúc chạy, bảng so sánh: [Bài 34](34-template.md), mục 8 bài này.
     - **Singleton?** Một thể hiện, `static` cục bộ an toàn luồng từ C++11; bị chê vì trạng thái toàn cục, khó test: [Bài 35](35-pattern-singleton-factory.md).
@@ -478,7 +476,6 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
     - **Strategy?** Tách cách làm thay được: giao diện, `std::function` hoặc template: [Bài 36](36-pattern-observer-strategy.md).
     - **Gọi hàm ảo trong hàm tạo/hàm hủy?** Không đa hình ở đó, chạy bản của lớp đang dựng/hủy: [Bài 33](33-da-hinh-virtual.md).
     - **Rule of 3/5/0?** Tự quản lý tài nguyên thì quyết định cả 3/5 hàm; thành viên tự quản lý thì Rule of 0: [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md).
-    - **Khi nào dùng pattern?** Khi vấn đề có thật và pattern làm code đơn giản hơn; không dùng để "cho đủ bộ": [Bài 35](35-pattern-singleton-factory.md), mục 9 bài này.
 
 ## ⚠️ Lỗi thường gặp
 
@@ -492,7 +489,7 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. **Thử thay đổi** (đ
 
 <div class="quiz" data-bai="37" markdown>
 
-<div class="cau-hoi" data-dap-an="3" markdown>
+<div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 1.** Đọc đoạn sau (hai lớp như ở Ví dụ 2). Gọi `f` với một `VuongSua`, chuyện gì đúng?
 
 ```text
@@ -504,9 +501,9 @@ void f(ChuNhatSua& h) {
 }
 ```
 
-- `f` vẫn đúng, vì `VuongSua` ghi đè bằng `override` nên khớp hợp đồng của lớp cha
-- Lỗi biên dịch, vì `VuongSua` ghi đè một hàm mà làm đổi hai thành viên cùng lúc
 - Trông đợi của `f` bị vỡ, vì `VuongSua` đổi cả cao khi đặt rộng
+- Lỗi biên dịch, vì `VuongSua` ghi đè một hàm mà làm đổi hai thành viên cùng lúc
+- `f` vẫn đúng, vì `VuongSua` ghi đè bằng `override` nên khớp hợp đồng của lớp cha
 - `f` vẫn đúng, vì tham chiếu `ChuNhatSua&` chỉ cho `datRong` chạm phần của lớp cha
 
 <p class="giai-thich" markdown>`VuongSua` đổi `c_` cùng lúc với `r_`, nên sau `datRong(5)` thì `cao()` không còn bằng `caoCu`: trông đợi của hàm `f` viết cho chữ nhật bị phá, dù chương trình biên dịch và chạy bình thường (mình chạy ở Ví dụ 2). `override` chỉ bảo đảm chữ ký khớp, không bảo đảm hợp đồng được giữ. Không có quy tắc nào của C++ cấm ghi đè đổi nhiều thành viên, nên không có lỗi biên dịch. Và tham chiếu `ChuNhatSua&` vẫn trỏ tới một món `VuongSua`, nên hàm ảo chạy bản của vuông chứ không chỉ "phần của cha".</p>
@@ -523,9 +520,9 @@ B:  class Xe { DongCo dongCo_; ... };    // gọi dongCo_.no() bên trong
 - Nên chọn A: kế thừa cho phép đổi động cơ lúc chạy dễ hơn thành viên
 - Nên chọn B: ở A, `Xe` nhận được ở mọi chỗ cần `DongCo` và lộ hết hàm của nó
 - Hai cách như nhau, vì cả hai đều chứa một phần `DongCo` trong đối tượng `Xe`
-- Nên chọn A: kế thừa là cách duy nhất để `Xe` gọi được hàm `public` của `DongCo`
+- Nên chọn B, vì thành viên làm `Xe` nhỏ hơn trong bộ nhớ
 
-<p class="giai-thich" markdown>Thiết kế A nói "xe là một động cơ": hàm nhận `const DongCo&` nhận cả `Xe`, và mọi hàm `public` của động cơ lộ ra ngoài `Xe` ([Bài 32](32-ke-thua.md)). Thành viên (B) chỉ lộ những gì `Xe` chọn và đổi được sau này. Kế thừa không giúp đổi động cơ lúc chạy, và thành viên cũng gọi được hàm `public` của `DongCo`. Hai cách giống nhau ở chỗ cùng chứa một phần động cơ trong bộ nhớ, nhưng khác ở quan hệ kiểu (is-a và has-a), nên không "như nhau".</p>
+<p class="giai-thich" markdown>Thiết kế A nói "xe là một động cơ": hàm nhận `const DongCo&` nhận cả `Xe`, và mọi hàm `public` của động cơ lộ ra ngoài `Xe` ([Bài 32](32-ke-thua.md)). Thành viên (B) chỉ lộ những gì `Xe` chọn và đổi được sau này. Kế thừa không giúp đổi động cơ lúc chạy. Thành viên cũng không làm `Xe` nhỏ hơn: cả hai cách cùng chứa đúng một phần động cơ trong bộ nhớ. Hai cách khác nhau ở quan hệ kiểu (is-a và has-a), nên không "như nhau".</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -548,7 +545,7 @@ Xe b = a;
 <p class="giai-thich" markdown>Hàm tạo sao chép do trình biên dịch sinh ra chép **từng thành viên** bằng hàm sao chép của chính thành viên đó; `std::string` và `std::vector` tự sao chép sâu, nên `b` có bản riêng (Rule of 0, Ví dụ 5). Không phải viết tay: lớp không giữ tài nguyên thô thì hàm sinh sẵn đủ dùng. Dùng chung vùng nhớ chỉ xảy ra khi thành viên là con trỏ thô bị chép nông ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), không phải `vector`. Và `std::string` được chép bình thường khi lớp chứa nó được chép, nên `ten_` không rỗng.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 4.** Đọc đoạn sau. Chuyện gì xảy ra khi biên dịch `main`?
 
 ```text
@@ -565,12 +562,12 @@ public:
 int main() { MayInDon don; }
 ```
 
-- Lỗi biên dịch: `MayInDon` vẫn trừu tượng vì chưa viết `quet`
+- Biên dịch được, và `don.quet()` sau này trả về chuỗi rỗng
 - Lỗi biên dịch: `in` thiếu chữ `virtual` nên `override` không khớp
 - Lỗi liên kết: `quet` được khai báo mà chưa có định nghĩa nào
-- Biên dịch được, và `don.quet()` sau này trả về chuỗi rỗng
+- Lỗi biên dịch: `MayInDon` vẫn trừu tượng vì chưa viết `quet`
 
-<p class="giai-thich" markdown>Lớp con chưa viết hết hàm thuần ảo thì vẫn là lớp trừu tượng và không tạo được đối tượng, nên lỗi hiện ngay lúc biên dịch (mình chạy: `cannot declare variable 'don' to be of abstract type`). `override` ở `in` khớp chữ ký của hàm ảo cha, nên không có lỗi ở đó. Chương trình không qua được biên dịch, nên cũng không tới bước liên kết, và không có bản `quet` mặc định nào trả chuỗi rỗng. Đây chính là lý do Interface Segregation: tách `MayIn` và `MayQuet` để máy in đơn không bị ép viết hàm nó không có.</p>
+<p class="giai-thich" markdown>Lớp con chưa viết hết hàm thuần ảo thì vẫn là lớp trừu tượng và không tạo được đối tượng, nên lỗi hiện ngay lúc biên dịch (mình chạy: `cannot declare variable ‘don’ to be of abstract type`). `override` ở `in` khớp chữ ký của hàm ảo cha, nên không có lỗi ở đó. Chương trình không qua được biên dịch, nên cũng không tới bước liên kết, và không có bản `quet` mặc định nào trả chuỗi rỗng. Đây chính là lý do Interface Segregation: tách `MayIn` và `MayQuet` để máy in đơn không bị ép viết hàm nó không có.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>

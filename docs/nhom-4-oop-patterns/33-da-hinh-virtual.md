@@ -12,7 +12,7 @@
 
 Ở cuối [Bài 32](32-ke-thua.md), một hàm nhận `const DoChoi&` nhận được mọi món con, nhưng gọi `gioiThieu()` thì luôn ra bản của `DoChoi`. Giờ đặt cửa hàng đồ chơi: một **hộp** chứa lẫn xe chạy, gấu bông, robot, và nhân viên chỉ cần bấm nút "chơi" trên từng món. Ta muốn mỗi món **tự chơi theo cách của nó**, không phải theo cách của bản vẽ gốc.
 
-Đó là **đa hình (polymorphism)**: cùng một lời gọi `d.choi()`, hàm chạy là hàm của **món thật** đang nằm trong hộp. Bài này dạy cách xin điều đó (`virtual`), cách nó thường được cài đặt, và những cái bẫy đi kèm. Đa hình ở đây là **lúc chạy**: món thật được xác định khi chương trình chạy. Còn `overload` (Bài 32) và `template` (Bài 34) là **lúc biên dịch**: trình biên dịch chọn xong trước khi chạy.
+Đó là **đa hình (polymorphism)**: cùng một lời gọi `d.choi()`, hàm chạy là hàm của **món thật** đang nằm trong hộp. Bài này dạy cách xin điều đó (`virtual`), cách nó thường được cài đặt, và những cái bẫy đi kèm. Đa hình ở đây là **lúc chạy**: món thật được xác định khi chương trình chạy. Còn `overload` ([Bài 32](32-ke-thua.md)) và `template` ([Bài 34](34-template.md)) là **lúc biên dịch**: trình biên dịch chọn xong trước khi chạy.
 
 !!! info "Chỗ nào ví von xưởng đồ chơi không còn đúng?"
     Mục 2 nói "mỗi món dính một nhãn chỉ vào bảng cách chơi của bản vẽ": đó là cách **hay được cài đặt**, không phải điều chuẩn C++ quy định. Ví von cũng không có chỗ cho chi phí: một món có hàm ảo tốn thêm chỗ cho cái nhãn (mục 2 đo thật).
@@ -21,7 +21,7 @@
 
 ### 1. `virtual` và `override`: chạy theo món thật
 
-Không có `virtual`, hàm chạy do **kiểu khai báo** của tham chiếu/con trỏ quyết định (đã thấy ở [Bài 32](32-ke-thua.md)). Thêm `virtual` trước hàm của cha: khi gọi hàm đó qua `Cha&` hay `Cha*`, chương trình nhìn **món thật** lúc chạy và gọi bản của lớp con nếu lớp con có viết lại. Viết lại như vậy gọi là **ghi đè (override)**, khác với **che hàm** của Bài 32 (che chỉ xảy ra theo tên, lúc biên dịch).
+Không có `virtual`, hàm chạy do **kiểu khai báo** của tham chiếu/con trỏ quyết định (đã thấy ở [Bài 32](32-ke-thua.md)). Thêm `virtual` trước hàm của cha: khi gọi hàm đó qua `Cha&` hay `Cha*`, chương trình nhìn **món thật** lúc chạy và gọi bản của lớp con nếu lớp con có viết lại. Viết lại như vậy gọi là **ghi đè (override)**, khác với **che hàm** của [Bài 32](32-ke-thua.md) (che chỉ xảy ra theo tên, lúc biên dịch).
 
 Ở lớp con, hàm ghi đè phải **cùng tên, cùng tham số, cùng `const`, cùng kiểu trả về** với hàm ảo của cha (kiểu trả về có ngoại lệ hiếm, bỏ qua). Hàm ghi đè tự thành ảo dù không viết lại `virtual`; `override` chỉ để g++ kiểm. Hãy luôn viết `override` sau hàm: nếu chữ ký lệch dù chỉ thiếu một chữ `const`, g++ báo lỗi ngay. Không có `override`, hàm lệch kia lặng lẽ thành một hàm mới (Ví dụ 1, Thử thay đổi).
 
@@ -43,7 +43,7 @@ Có hai chứng cứ gián tiếp: thêm hàm ảo đầu tiên làm `sizeof` đ
 
 Nếu bạn xóa món `XeChay` qua con trỏ `DoChoi*` mà hàm hủy của `DoChoi` **không** `virtual`, chuẩn nói đây là **hành vi không xác định** ([Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md)). Chuẩn không hứa gì; trên máy mình, hàm hủy của `XeChay` đơn giản **không chạy** (Ví dụ 3 chạy thật). Phần `XeChay` cấp phát (như `new int`) không được trả lại.
 
-Cách chữa: đặt `virtual ~DoChoi() {...}` hoặc `virtual ~DoChoi() = default;` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) đã dạy `= default`) ở lớp cha. Quy tắc nhớ: **lớp nào định làm lớp cha đa hình thì có hàm hủy `virtual`**. `unique_ptr<DoChoi>` giữ món `XeChay` cũng xóa qua `DoChoi*`, nên cũng cần quy tắc này.
+Cách chữa: đặt `virtual ~DoChoi() {...}` hoặc `virtual ~DoChoi() = default;` ([Bài 31](31-lop-dong-goi.md) mục 7 đã dạy `= default`) ở lớp cha. Quy tắc nhớ: **lớp nào định làm lớp cha đa hình thì có hàm hủy `virtual`**. `unique_ptr<DoChoi>` giữ món `XeChay` cũng xóa qua `DoChoi*`, nên cũng cần quy tắc này.
 
 ### 4. Hàm thuần ảo `= 0`, lớp trừu tượng và interface
 
@@ -67,7 +67,7 @@ Slicing xảy ra ở hàm nhận tham số theo giá trị (`void f(DoChoi d)`),
 
 ### 7. Chỉ nhắc: `dynamic_cast`, `typeid`, `final`
 
-**`dynamic_cast<Con*>(conTroCha)`** hỏi lúc chạy "món thật có phải `Con` không?": đúng thì cho con trỏ `Con*`, sai thì cho `nullptr` (Ví dụ 4). Nó chỉ dùng được với lớp có ít nhất một hàm ảo. 
+**`dynamic_cast<Con*>(conTroCha)`** hỏi lúc chạy "món thật có phải `Con` không?": đúng thì cho con trỏ `Con*`, sai thì cho `nullptr` (Ví dụ 4). Nó chỉ dùng được với lớp có ít nhất một hàm ảo. Đây là phép ép con trỏ cha xuống con trỏ con, tức **downcast** đã hẹn ở [Bài 32](32-ke-thua.md). 
 
 `typeid(*p)` (trong `<typeinfo>`) với lớp có hàm ảo cho thông tin kiểu thật, và tên in ra do trình biên dịch tự chọn. Cả hai thuộc nhóm "biết kiểu thật lúc chạy"; cần đến chúng nhiều thì thường là dấu hiệu nên thêm một hàm ảo thay vì hỏi kiểu.
 
@@ -77,7 +77,7 @@ Slicing xảy ra ở hàm nhận tham số theo giá trị (`void f(DoChoi d)`),
 
 ### Ví dụ 1: `ten()` không ảo, `choi()` ảo
 
-`DoChoi` mới, gọn hơn Bài 32. Cả hai hàm đều có bản riêng ở `XeChay`; chỉ `choi` là `virtual`. Hàm `thu` nhận `const DoChoi&` rồi gọi cả hai.
+`DoChoi` mới, gọn hơn [Bài 32](32-ke-thua.md). Cả hai hàm đều có bản riêng ở `XeChay`; chỉ `choi` là `virtual`. Hàm `thu` nhận `const DoChoi&` rồi gọi cả hai.
 
 ```cpp
 #include <iostream>
@@ -204,7 +204,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (3) | Dựng cha rồi con (Bài 32); `p` kiểu `DoChoi*` trỏ vào món `XeChay` | kho: món `XeChay` + `pin_` trỏ tới một `int` 100 |
+| (3) | Dựng cha rồi con ([Bài 32](32-ke-thua.md)); `p` kiểu `DoChoi*` trỏ vào món `XeChay` | kho: món `XeChay` + `pin_` trỏ tới một `int` 100 |
 | (4) | Có `virtual` ở (1): `delete` nhìn món thật, gọi `~XeChay` (2) trước, rồi `~DoChoi` | hai khối ở kho đều được trả |
 
 **Kết quả khi chạy:**
@@ -424,7 +424,7 @@ Mình chạy với ASan + UBSan: sạch. Chỉ chỗ (5), dùng tham chiếu, gi
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
 ??? question "Đa hình là gì? Compile-time khác runtime thế nào?"
-    Đa hình là một lời gọi chạy hàm khác nhau tùy kiểu. Compile-time: trình biên dịch chọn hàm trước khi chạy, qua overload và template. Runtime: chọn theo kiểu thật của đối tượng lúc chạy, qua hàm `virtual` gọi bằng con trỏ/tham chiếu lớp cha. Runtime linh hoạt hơn (chứa nhiều loại trong một dãy), compile-time thì không tốn gián tiếp lúc chạy; Bài 34 nói tiếp.
+    Đa hình là một lời gọi chạy hàm khác nhau tùy kiểu. Compile-time: trình biên dịch chọn hàm trước khi chạy, qua overload và template. Runtime: chọn theo kiểu thật của đối tượng lúc chạy, qua hàm `virtual` gọi bằng con trỏ/tham chiếu lớp cha. Runtime linh hoạt hơn (chứa nhiều loại trong một dãy), compile-time thì không tốn gián tiếp lúc chạy; [Bài 34](34-template.md) nói tiếp.
 
 ??? question "vtable hoạt động thế nào?"
     Cách cài đặt thông dụng (chuẩn không bắt buộc): mỗi lớp có hàm ảo có một bảng chứa con trỏ tới các hàm ảo của nó (vtable), mỗi đối tượng có thêm một con trỏ ẩn (vptr) trỏ tới bảng của lớp thật. Gọi hàm ảo là đọc vptr, tra ô tương ứng, nhảy gián tiếp. Chứng cứ gián tiếp: `sizeof` tăng một con trỏ khi thêm hàm ảo đầu tiên. Vì gián tiếp nên khó inline.
@@ -515,9 +515,9 @@ int main() { Con c; c.chao(); }
 - `concon`, vì `chao` là hàm ảo nên lấy bản của món thật
 - `chacon`, vì khi hàm tạo của `Cha` chạy thì phần `Con` chưa có
 - `chacha`, vì hàm ảo chỉ có tác dụng khi gọi qua con trỏ
-- Không biên dịch được, vì không gọi hàm ảo trong hàm tạo được
+- Hành vi không xác định, vì gọi hàm ảo trong hàm tạo khi phần `Con` chưa có
 
-<p class="giai-thich" markdown>Trong hàm tạo của `Cha`, lời gọi `chao()` chỉ thấy bản của `Cha` (in `cha`); sau khi `c` dựng xong, `c.chao()` mới ra bản của `Con` (in `con`). Hàm ảo chỉ đa hình khi món thật đã dựng đủ, nên "lấy bản của món thật" không đúng ở hàm tạo. Gọi trực tiếp trên `c` cũng cho bản của `Con`, không liên quan đến con trỏ. Còn gọi hàm ảo trong hàm tạo vẫn hợp lệ, chỉ là không đa hình.</p>
+<p class="giai-thich" markdown>Trong hàm tạo của `Cha`, lời gọi `chao()` chỉ thấy bản của `Cha` (in `cha`); sau khi `c` dựng xong, `c.chao()` mới ra bản của `Con` (in `con`). Hàm ảo chỉ đa hình khi món thật đã dựng đủ, nên "lấy bản của món thật" không đúng ở hàm tạo. Gọi trực tiếp trên `c` cũng cho bản của `Con`, không liên quan đến con trỏ. Gọi hàm ảo trong hàm tạo cũng không phải hành vi không xác định: chuẩn quy định rõ nó chạy bản của lớp đang dựng, nên vẫn hợp lệ, chỉ là không đa hình. Chỉ gọi hàm *thuần ảo* (chưa có thân) từ hàm tạo mới là hành vi không xác định.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
@@ -526,18 +526,18 @@ int main() { Con c; c.chao(); }
 - Khai báo hàm tạo sao chép của `DoChoi` là `virtual` để bản sao nhớ kiểu thật
 - Viết `static_cast<DoChoi>(x)` khi truyền, vì ép kiểu giữ lại phần con
 - Nhận tham số là `const DoChoi&` thay vì `DoChoi` theo giá trị
-- Thêm `override` vào hàm `choi` của `XeChay` là bản sao sẽ nhớ kiểu thật
+- Thêm `override` vào hàm `choi` của `XeChay` thì bản sao sẽ nhớ kiểu thật
 
 <p class="giai-thich" markdown>Tham chiếu không tạo món mới nên vẫn là chính chiếc `XeChay`, và hàm ảo chạy theo món thật. Hàm tạo không thể là `virtual`, và dù sao một bản sao `DoChoi` thì chỉ chứa phần cha. `static_cast<DoChoi>(x)` tạo luôn một `DoChoi` cắt lát. `override` chỉ giúp g++ kiểm chữ ký, không đổi chuyện tham số theo giá trị là một `DoChoi` mới.</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 6.** Câu nào về vtable/vptr đúng?
 
-- Cách cài đặt thông dụng, chuẩn không bắt buộc; hàm ảo đầu tiên thường thêm một con trỏ vào `sizeof`
+- Mỗi đối tượng giữ một bản sao riêng của vtable, nên tốn bộ nhớ theo số hàm ảo của lớp
 - Chuẩn quy định mỗi đối tượng có một vptr trỏ vào vtable của lớp thật của nó
 - Mỗi hàm ảo thêm một con trỏ vào từng đối tượng, nên ba hàm ảo làm `sizeof` tăng thêm 24 byte
-- Mỗi đối tượng giữ một bản sao riêng của vtable, nên tốn bộ nhớ theo số hàm ảo của lớp
+- Cách cài đặt thông dụng, chuẩn không bắt buộc; hàm ảo đầu tiên thường thêm một con trỏ vào `sizeof`
 
 <p class="giai-thich" markdown>Chuẩn chỉ nói hàm ảo chọn theo kiểu thật; vtable/vptr là cách làm của các trình biên dịch phổ biến, và ví dụ `sizeof` trong bài cho thấy hàm ảo đầu tiên thêm 8 byte còn hàm thứ hai không thêm. Nó không phải điều chuẩn quy định. Nhãn trong đối tượng chỉ có một cái, thêm hàm ảo chỉ thêm ô vào bảng. Và bảng thuộc về lớp, dùng chung cho mọi đối tượng, không sao chép theo từng đối tượng.</p>
 </div>

@@ -24,7 +24,9 @@ Sau đó học **Nhóm 2 — STL và thuật toán** từ [Bài 16](nhom-2-stl-t
 
 Tiếp theo là **Nhóm 3 — Đa luồng** từ [Bài 24](nhom-3-da-luong/24-thread-co-ban.md) đến [Bài 30](nhom-3-da-luong/30-thread-pool-hieu-nang.md): thread, mutex, deadlock, condition_variable, atomic, async/future và thread pool.
 
-Các nhóm sau (OOP, hệ thống) sẽ được thêm dần.
+Rồi đến **Nhóm 4 — OOP, template và Design Patterns** từ [Bài 31](nhom-4-oop-patterns/31-lop-dong-goi.md) đến [Bài 37](nhom-4-oop-patterns/37-solid-thiet-ke.md): lớp và đóng gói, kế thừa, đa hình/virtual, template, Singleton/Factory, Observer/Strategy, SOLID.
+
+Nhóm sau (hệ thống) sẽ được thêm dần.
 
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).

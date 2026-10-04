@@ -44,7 +44,7 @@ Hàm của cha viết thành `Cha::ham()` gọi được từ con (nếu hàm đ
 
 Lớp con khai báo một hàm **cùng tên** với hàm của cha thì hàm đó **che** (hide) hàm của cha. Quy tắc che là theo **tên**, không theo danh sách kiểu tham số: tìm tên `in` trong lớp con trước, thấy là dừng, **không** nhìn lên cha nữa.
 
-Đây chưa phải "ghi đè" (override) của **đa hình** (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần `virtual` ở Bài 33.
+Đây chưa phải "ghi đè" (override) của **đa hình** (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần `virtual` ở [Bài 33](33-da-hinh-virtual.md).
 
 Hệ quả bất ngờ: giả sử cha có hai hàm cùng tên `in(int)` và `in(const std::string&)`. Hai hàm như vậy gọi là hai bản **quá tải** (overload): cùng tên, khác kiểu tham số, trình biên dịch chọn bản theo đối số. Nếu con chỉ thêm `in(double)` thì cả hai bản của cha bị che, và `con.in("abc")` là lỗi biên dịch dù cha có bản nhận chuỗi (Ví dụ 3 chạy thật).
 
@@ -54,9 +54,9 @@ Có hai cách gỡ. Gọi rõ `con.Cha::in(...)`, hoặc viết `using Cha::in;`
 
 Vì `XeChay` là một `DoChoi`, bạn gán **con trỏ hoặc tham chiếu** `XeChay` cho `DoChoi*`, `DoChoi&` được, không cần ép kiểu: đó là **upcast** (nâng lên lớp cha). Hàm nhận `const DoChoi&` nhận được mọi loại đồ chơi con. Chiều ngược lại (`DoChoi` sang `XeChay`) không tự chuyển được, vì một `DoChoi` thường chưa chắc là xe. Ép kiểu tường minh vẫn biên dịch được nhưng dễ sai (gọi là downcast, nói ở bài sau).
 
-Qua `DoChoi&` bạn chỉ **thấy** phần `DoChoi`. Hàm nào được gọi lúc này do **kiểu khai báo** (`DoChoi&`) quyết định, nên hàm `gioiThieu` của cha chạy dù đối tượng thật là xe (Ví dụ 4). Đó **chưa phải đa hình**: Bài 33 sẽ thêm `virtual` để đổi đúng chuyện này.
+Qua `DoChoi&` bạn chỉ **thấy** phần `DoChoi`. Hàm nào được gọi lúc này do **kiểu khai báo** (`DoChoi&`) quyết định, nên hàm `gioiThieu` của cha chạy dù đối tượng thật là xe (Ví dụ 4). Đó **chưa phải đa hình**: [Bài 33](33-da-hinh-virtual.md) sẽ thêm `virtual` để đổi đúng chuyện này.
 
-Gán **cả đối tượng** `XeChay` vào một biến kiểu `DoChoi` (không phải tham chiếu) thì chỉ phần cha được chép, phần xe bị cắt mất: gọi là **slicing** (cắt lát). Bài 33 dạy kỹ; ở đây chỉ cần nhớ bẫy là có thật, và Ví dụ 4 có một dòng làm vậy.
+Gán **cả đối tượng** `XeChay` vào một biến kiểu `DoChoi` (không phải tham chiếu) thì chỉ phần cha được chép, phần xe bị cắt mất: gọi là **slicing** (cắt lát). [Bài 33](33-da-hinh-virtual.md) dạy kỹ; ở đây chỉ cần nhớ bẫy là có thật, và Ví dụ 4 có một dòng làm vậy.
 
 Cuối cùng, `sizeof(Con)` không nhỏ hơn `sizeof(Cha)` vì món con chứa cả phần cha; thường là lớn hơn. Con số cụ thể tùy máy và trình biên dịch (có **căn lề**: máy chèn byte đệm để mỗi thành viên nằm ở địa chỉ thuận tiện), nên chỉ nên tin con số mình đo trên máy mình.
 
@@ -68,7 +68,7 @@ Quy tắc: **chỉ kế thừa công khai khi đúng là is-a**, nghĩa là mọ
 
 Mình đã chạy hai bản của xe. Bản đúng: `XeHoi` giữ `DongCo dongCo_;` là thành viên `private` và chỉ đưa ra hàm `chay()`. Bản sai: `class XeXau : public DongCo {};` chỉ để dùng lại `khoiDong()`; khi đó hàm `lapVaoMayBom(const DongCo&)` nhận được cả xe (upcast hợp lệ), và ai cũng gọi được hàm của động cơ trên xe.
 
-Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật, nhưng trong code thì sao? Ví dụ 5 cho thấy nó vỡ ở đâu. Ý tổng quát (**nguyên lý thay thế Liskov**) sẽ dạy đủ ở Bài 37; bài này chỉ cần biết câu hỏi để tự hỏi.
+Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật, nhưng trong code thì sao? Ví dụ 5 cho thấy nó vỡ ở đâu. Ý tổng quát (**nguyên lý thay thế Liskov**) sẽ dạy đủ ở [Bài 37](37-solid-thiet-ke.md); bài này chỉ cần biết câu hỏi để tự hỏi.
 
 ### 7. Chỉ nhắc: kế thừa `private`/`protected`, `final`, kế thừa đa
 
@@ -389,7 +389,7 @@ chu nhat: 6 x 3
 hinh vuong: 6 x 3
 ```
 
-Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng **"hình vuông" 6 x 3 không còn vuông**: bất biến "hai cạnh bằng nhau" ([Bài 31](31-lop-dong-goi.md)) bị vỡ qua hàm của cha. Cha có một **hợp đồng** ngầm: "đổi chiều rộng thì chiều cao giữ nguyên", và `HinhVuong` không giữ được hợp đồng đó. Vì vậy `HinhVuong` **không thay được** `HinhChuNhat`, và "vuông là chữ nhật" trong toán không thành is-a trong code. Đây là lỗi thiết kế chứ không phải thiếu tính năng của C++; cách sửa (như thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở Bài 37.
+Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng **"hình vuông" 6 x 3 không còn vuông**: bất biến "hai cạnh bằng nhau" ([Bài 31](31-lop-dong-goi.md)) bị vỡ qua hàm của cha. Cha có một **hợp đồng** ngầm: "đổi chiều rộng thì chiều cao giữ nguyên", và `HinhVuong` không giữ được hợp đồng đó. Vì vậy `HinhVuong` **không thay được** `HinhChuNhat`, và "vuông là chữ nhật" trong toán không thành is-a trong code. Đây là lỗi thiết kế chứ không phải thiếu tính năng của C++; cách sửa (như thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở [Bài 37](37-solid-thiet-ke.md).
 
 ## Go: embedding giống ở một chỗ, khác ở ba chỗ
 
@@ -399,7 +399,7 @@ Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy
     - **Khác 1, không có upcast**: `var d dochoi.DoChoi = x` lỗi `cannot use x (variable of struct type XeChay) as dochoi.DoChoi value in variable declaration`; phải viết `x.DoChoi` lấy phần nhúng ra (một bản sao).
     - **Khác 2, receiver vẫn là phần cha**: bên trong hàm của `DoChoi`, `d` có kiểu `dochoi.DoChoi` (mình in `%T`); khi nó gọi `d.Ten2()` thì chạy bản của `DoChoi`, không phải bản che của `XeChay`. Với struct nhúng, Go không có thứ như `this` trỏ về "con".
     - **Khác 3, không có `protected`**: Go có hai mức: viết hoa (thấy từ package khác) và viết thường (chỉ trong package). Mình chạy: `x.ma` ở package khác lỗi `cannot refer to unexported field ma`.
-    - **Đa hình** của Go là **interface**: `XeChay` thỏa interface `GioiThieuer` nhờ hàm được nâng lên, mà không cần khai báo gì (mình chạy). Bài 33 sẽ so với `virtual` của C++.
+    - **Đa hình** của Go là **interface**: `XeChay` thỏa interface `GioiThieuer` nhờ hàm được nâng lên, mà không cần khai báo gì (mình chạy). [Bài 33](33-da-hinh-virtual.md) sẽ so với `virtual` của C++.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -416,7 +416,7 @@ Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy
     Lớp `D` kế thừa đa từ `B` và `C`, cả hai cùng kế thừa `A`. Mặc định `D` chứa hai bản `A`, nên gọi thành viên của `A` qua `D` là mơ hồ (lỗi biên dịch). Cách chữa là kế thừa `virtual` (`: virtual A`) để chỉ có một bản `A`, đổi lại thêm chi phí và độ phức tạp (cách cài đặt tùy trình biên dịch); cách tránh gọn hơn là thiết kế sao cho không có kim cương.
 
 ??? question "Name hiding (che hàm) là gì?"
-    Hàm ở lớp con cùng **tên** với hàm của cha thì che toàn bộ hàm cùng tên của cha, kể cả các bản quá tải khác kiểu tham số, vì tìm tên dừng ở lớp con. Gọi bản bị che phải viết `Cha::ham()` hoặc kéo tên về bằng `using Cha::ham;`. Đây chưa phải ghi đè đa hình (cần `virtual`, Bài 33).
+    Hàm ở lớp con cùng **tên** với hàm của cha thì che toàn bộ hàm cùng tên của cha, kể cả các bản quá tải khác kiểu tham số, vì tìm tên dừng ở lớp con. Gọi bản bị che phải viết `Cha::ham()` hoặc kéo tên về bằng `using Cha::ham;`. Đây chưa phải ghi đè đa hình (cần `virtual`, [Bài 33](33-da-hinh-virtual.md)).
 
 ## ⚠️ Lỗi thường gặp
 
@@ -449,7 +449,7 @@ int main() { Con o; }
 
 - `pcnNCP`, vì thành viên của con dựng trước cả phần cha
 - `cpnCPN`, vì hủy theo đúng thứ tự đã dựng ra
-- `cpnNPC`, vì cha dựng trước, hủy sau cùng
+- `cpnNPC`, vì cha dựng trước tiên và bị hủy sau cùng
 - `ncpPCN`, vì thân hàm con chạy trước phần cha
 
 <p class="giai-thich" markdown>Cha dựng trước (`c`), rồi thành viên của con (`p`), rồi thân hàm tạo con (`n`); hủy thì ngược lại: thân hàm hủy con (`N`), thành viên (`P`), cuối cùng cha (`C`). Thành viên của con không vượt lên trước cha. Hủy không theo thứ tự đã dựng mà theo thứ tự ngược. Thân hàm tạo con chạy sau khi cha và thành viên đã xong.</p>
@@ -504,7 +504,7 @@ int main() {
 - `chacon`, vì hàm nào chạy tùy kiểu của biến dùng để gọi
 - `chacha`, vì mọi lời gọi qua đối tượng `Con` đều dùng hàm của cha
 
-<p class="giai-thich" markdown>`r` có kiểu khai báo `Cha&` nên `r.noi()` gọi `Cha::noi` (in `cha`), còn `c` có kiểu `Con` nên in `con`; không có `virtual` thì kiểu biến quyết định (Bài 33 đổi điều này). Đối tượng thật là `Con` không làm hàm của con chạy khi gọi qua `Cha&`. Gán `Con` cho `Cha&` hợp lệ (upcast), nên chương trình biên dịch được. Và `c.noi()` có kiểu `Con` nên dùng hàm của con, không phải của cha.</p>
+<p class="giai-thich" markdown>`r` có kiểu khai báo `Cha&` nên `r.noi()` gọi `Cha::noi` (in `cha`), còn `c` có kiểu `Con` nên in `con`; không có `virtual` thì kiểu biến quyết định ([Bài 33](33-da-hinh-virtual.md) đổi điều này). Đối tượng thật là `Con` không làm hàm của con chạy khi gọi qua `Cha&`. Gán `Con` cho `Cha&` hợp lệ (upcast), nên chương trình biên dịch được. Và `c.noi()` có kiểu `Con` nên dùng hàm của con, không phải của cha.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -531,7 +531,7 @@ d.B::x = 1;    // dòng 2
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 6.** `HinhVuong` kế thừa `public` từ `HinhChuNhat` (có `datRong` và `datCao` đổi riêng từng cạnh). Vấn đề thiết kế nào là thật?
 
-- Hàm của cha đổi một cạnh làm hình vuông hết vuông, nên con không thay được cha
+- Hàm của cha đổi một cạnh làm hình vuông hết vuông, nên con không thay được cha mọi nơi
 - `HinhVuong` không biên dịch được, vì con phải tự viết lại mọi hàm đổi cạnh của cha
 - Mỗi `HinhVuong` tốn gấp đôi bộ nhớ, vì trong đối tượng có hai bản của `HinhChuNhat`
 - `datRong` của cha tự đổi luôn cạnh còn lại ở con nên hình vuông vẫn vuông, chỉ tốn thêm lệnh
@@ -545,6 +545,6 @@ d.B::x = 1;    // dòng 2
 
 1. `class Con : public Cha` làm món con chứa một phần cha; thứ tự **cha dựng trước, con hủy trước** (cha, thành viên con theo khai báo, thân hàm tạo con; hủy ngược lại), muốn dùng hàm tạo nào của cha thì gọi nó trong danh sách khởi tạo (mình in ra thứ tự thật).
 2. `protected` cho code của lớp và lớp con, không cho bên ngoài; hàm của cha gọi bằng `Cha::ham()`; hàm cùng **tên** ở con **che** mọi hàm cùng tên của cha kể cả các bản quá tải (name hiding, mình chạy ra lỗi thật), gỡ bằng `using Cha::ham;`.
-3. Upcast con trỏ/tham chiếu Con sang Cha hợp lệ, nhưng qua kiểu Cha chỉ thấy hàm của Cha (chưa phải đa hình, Bài 33); gán cả đối tượng Con vào biến Cha làm cắt mất phần con (slicing); `sizeof(Con)` thường lớn hơn `sizeof(Cha)` (không nhỏ hơn trong mọi lần mình đo), số cụ thể tùy máy và căn lề.
-4. Chỉ kế thừa công khai khi đúng "là một": mọi nơi dùng Cha thay bằng Con vẫn đúng; muốn dùng lại cài đặt thì dùng thành viên ("có một"); hình vuông kế thừa hình chữ nhật vỡ bất biến (Liskov, Bài 37).
+3. Upcast con trỏ/tham chiếu Con sang Cha hợp lệ, nhưng qua kiểu Cha chỉ thấy hàm của Cha (chưa phải đa hình, [Bài 33](33-da-hinh-virtual.md)); gán cả đối tượng Con vào biến Cha làm cắt mất phần con (slicing); `sizeof(Con)` thường lớn hơn `sizeof(Cha)` (không nhỏ hơn trong mọi lần mình đo), số cụ thể tùy máy và căn lề.
+4. Chỉ kế thừa công khai khi đúng "là một": mọi nơi dùng Cha thay bằng Con vẫn đúng; muốn dùng lại cài đặt thì dùng thành viên ("có một"); hình vuông kế thừa hình chữ nhật vỡ bất biến (Liskov, [Bài 37](37-solid-thiet-ke.md)).
 5. `class Con : Cha` mặc định kế thừa `private`; `final` cấm kế thừa lớp; kế thừa đa dựng cha theo thứ tự liệt kê, bài toán kim cương cho hai bản của ông (gỡ bằng kế thừa `virtual`). Go: embedding gọi được hàm của "cha", nhưng không có upcast, receiver vẫn là phần nhúng, không có `protected`; đa hình bằng interface.

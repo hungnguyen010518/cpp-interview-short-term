@@ -21,7 +21,7 @@ Một **xưởng đồ chơi** có tập **bản vẽ**. Mỗi bản vẽ mô t�
 
 ### 1. `class` và `struct`: một khác biệt duy nhất
 
-[Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct` ("khác nhau nhỏ sẽ nói ở bài sau"). Khác nhau nhỏ đó là **mức truy cập mặc định**: thành viên của `struct` mặc định `public` (ai cũng đụng được), của `class` mặc định `private` (chỉ code của chính lớp đụng được). Chuẩn C++ còn dùng đúng quy tắc này cho kế thừa (Bài 32 sẽ nói). Thử 3 ở Ví dụ 1 chạy thật điều này.
+[Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct` ("khác nhau nhỏ sẽ nói ở bài sau"). Khác nhau nhỏ đó là **mức truy cập mặc định**: thành viên của `struct` mặc định `public` (ai cũng đụng được), của `class` mặc định `private` (chỉ code của chính lớp đụng được). Chuẩn C++ còn dùng đúng quy tắc này cho kế thừa ([Bài 32](32-ke-thua.md) sẽ nói). Thử 3 ở Ví dụ 1 chạy thật điều này.
 
 Ngoài ra hai từ khóa **hoàn toàn như nhau**: đều có hàm tạo, hàm hủy, hàm thành viên, đều đặt ở stack hay heap được. Thói quen thường gặp là `struct` cho gói dữ liệu đơn giản, `class` khi lớp có quy tắc cần giữ; đó chỉ là quy ước đặt tên, không phải luật.
 
@@ -286,14 +286,14 @@ public:
         return *this;                                // (4)
     }
     const std::string& ten() const { return ten_; }
-    static int dem() { return soLuong_; }            // (6)
+    static int dem() { return soLuong_; }            // (5)
 
 private:
     std::string ten_;
-    static int soLuong_;                             // (7) khai báo: chung cho cả lớp
+    static int soLuong_;                             // (6) khai báo: chung cho cả lớp
 };
 
-int DoChoi::soLuong_ = 0;                            // (8) định nghĩa ngoài lớp
+int DoChoi::soLuong_ = 0;                            // (7) định nghĩa ngoài lớp
 
 int main() {
     std::cout << "luc dau: " << DoChoi::dem() << "\n";
@@ -301,22 +301,22 @@ int main() {
     {
         DoChoi b("xe lua");
         std::cout << "trong khoi: " << DoChoi::dem() << "\n";
-        b.datTen("tau hoa").datTen("tau thuy");      // (9)
+        b.datTen("tau hoa").datTen("tau thuy");      // (8)
         std::cout << "b ten: " << b.ten() << "\n";
     }
-    std::cout << "sau khoi: " << a.dem() << "\n";    // (10)
+    std::cout << "sau khoi: " << a.dem() << "\n";    // (9)
     return 0;
 }
 ```
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| `DoChoi::dem()` đầu | (6) hàm `static`, gọi bằng tên lớp; chưa có món nào | `soLuong_` (một bản, vùng tĩnh) = 0 |
+| `DoChoi::dem()` đầu | (5) hàm `static`, gọi bằng tên lớp; chưa có món nào | `soLuong_` (một bản, vùng tĩnh) = 0 |
 | `DoChoi a("robot")` | (1) tăng | `soLuong_` = 1 |
 | `DoChoi b("xe lua")` | (1) tăng, in `trong khoi: 2` | `soLuong_` = 2; `a`, `b` mỗi cái một `ten_` |
-| (9) | `datTen` đổi tên rồi trả `*this` (chính `b`), nên nối `datTen` tiếp được | `b.ten_` = "tau thuy" |
+| (8) | `datTen` đổi tên rồi trả `*this` (chính `b`), nên nối `datTen` tiếp được | `b.ten_` = "tau thuy" |
 | `}` hết khối | `b` chết, (2) giảm | `soLuong_` = 1 |
-| (10) | `a.dem()` cũng được, cùng một bản `soLuong_` | in `sau khoi: 1` |
+| (9) | `a.dem()` cũng được, cùng một bản `soLuong_` | in `sau khoi: 1` |
 
 **Kết quả khi chạy:**
 
@@ -329,8 +329,8 @@ sau khoi: 1
 
 Ba **Thử thay đổi** (mình đã chạy cả ba):
 
-- **Xóa dòng (8):** g++ dịch xong nhưng bước liên kết báo `undefined reference to ‘DoChoi::soLuong_’`.
-- **C++17:** thay dòng (7) bằng `inline static int soLuong_ = 0;` rồi bỏ (8): cùng kết quả. Với `-std=c++14`, g++ cảnh báo `inline variables are only available with ‘-std=c++17’`.
+- **Xóa dòng (7):** g++ dịch xong nhưng bước liên kết báo `undefined reference to ‘DoChoi::soLuong_’`.
+- **C++17:** thay dòng (6) bằng `inline static int soLuong_ = 0;` rồi bỏ (7): cùng kết quả. Với `-std=c++14`, g++ cảnh báo `inline variables are only available with ‘-std=c++17’`.
 - **Thêm `void xem(DoChoi d) {}` và gọi `xem(a);` trước dòng in `sau khoi`:** `d` là bản sao tạo bằng hàm tạo sao chép **tự sinh**, nó không chạy (1), nên trong `xem` bộ đếm vẫn là 1; khi `d` chết (2) giảm, và `sau khoi` in **0** dù `a` vẫn sống. Đó là lý do của [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md): lớp có trạng thái ngoài như bộ đếm phải tự viết hàm sao chép hoặc cấm bằng `= delete`.
 
 ### Ví dụ 5: `explicit`
@@ -394,11 +394,8 @@ int main() {
 }
 ```
 
-| Dòng | Chuyện gì xảy ra | Kết quả |
-|---|---|---|
-| (3) | Cần `Khoa()` nhưng có (1) và (2) nên không có bản tự sinh | `error: no matching function for call to ‘Khoa::Khoa()’` |
-| `Khoa b(42);` | Dùng (1) | hợp lệ |
-| (4) | Sao chép gọi hàm tạo sao chép đã `= delete` ở (2) | `error: use of deleted function ‘Khoa::Khoa(const Khoa&)’` |
+- (3) cần `Khoa()` nhưng đã có (1) và (2) nên không có bản tự sinh: `error: no matching function for call to ‘Khoa::Khoa()’`.
+- (4) sao chép gọi hàm tạo sao chép đã `= delete` ở (2): `error: use of deleted function ‘Khoa::Khoa(const Khoa&)’`. (`Khoa b(42);` dùng (1) nên hợp lệ.)
 
 Sửa (3): thêm `Khoa() = default;` (xin lại hàm tạo mặc định), bỏ dòng (4): mình chạy ra thoát mã 0, sạch ASan + UBSan. Muốn cấm cả phép gán sao chép thì thêm `Khoa& operator=(const Khoa&) = delete;` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)). Mọi chương trình chạy được ở bài này đều sạch với `-fsanitize=address,undefined`.
 

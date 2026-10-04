@@ -3,7 +3,7 @@
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
     - Viết **Observer** bằng giao diện `Quansat` (hàm thuần ảo `capNhat`) và `Chude` giữ danh sách; chạy thật hai cái bẫy: observer bị hủy mà chủ đề còn gọi (ASan báo `heap-use-after-free`), và observer tự hủy đăng ký ngay lúc chủ đề đang duyệt danh sách.
     - Dùng `std::weak_ptr` để chủ đề **không giữ observer sống** (`lock()` kiểm còn sống), duyệt trên bản sao danh sách, và viết bản gọn bằng `std::function`; biết khi nào chọn giao diện, khi nào chọn function; nhắc thứ tự gọi và thread-safety.
-    - Viết **Strategy** ba cách (giao diện + `unique_ptr`, `std::function`/lambda, template), có bảng so sánh nói đúng và hedge; thấy `std::sort` với comparator chính là Strategy; nêu đúng chi phí của `std::function` (có chương trình đếm lần cấp phát).
+    - Viết **Strategy** ba cách (giao diện + `unique_ptr`, `std::function`/lambda, template), có bảng so sánh, nói rõ chỗ nào chỉ là xu hướng; thấy `std::sort` với comparator chính là Strategy; nêu đúng chi phí của `std::function` (có chương trình đếm lần cấp phát).
     - So với Go (channel, interface một hàm, hàm là giá trị hạng nhất; đã chạy Go 1.27.1); nhắc Decorator và RAII trong một đoạn.
 
 **Bạn cần biết trước:** [Bài 33](33-da-hinh-virtual.md) (hàm thuần ảo, lớp trừu tượng, hàm hủy ảo), [Bài 34](34-template.md) (template lớp), [Bài 10](../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md) (`shared_ptr`, `weak_ptr`, `lock()`), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md) (`unique_ptr`), [Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md) (iterator bị vô hiệu, `erase`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda, `std::function`, `sort`, remove-erase), [Bài 25](../nhom-3-da-luong/25-data-race-mutex.md) (`mutex`), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (ASan, UB).
@@ -47,7 +47,7 @@ Cách chữa phổ biến: **duyệt trên bản sao** của danh sách (Ví d�
 
 ### 5. Bản gọn: `std::function` callback
 
-**Callback (hàm gọi lại)** là một hàm bạn đưa cho nơi khác, để nơi đó gọi khi có việc. Ở [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) `std::function<void(double)>` là cái hộp chứa mọi thứ gọi được nhận `double`. Ví dụ 3 cho `CamBien` giữ danh sách các hộp ấy; nơi nhận chỉ là lambda, không cần viết lớp con. `dangKy` trả một **mã số** để sau `huyDangKy(ma)`, vì hai `std::function` không so sánh bằng nhau được để tìm "cái nào cần xóa".
+**Callback (hàm gọi lại)** là một hàm bạn đưa cho nơi khác, để nơi đó gọi khi có việc (đã gặp ở [Bài 26](../nhom-3-da-luong/26-deadlock.md)). Ở [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) `std::function<void(double)>` là cái hộp chứa mọi thứ gọi được nhận `double`. Ví dụ 3 cho `CamBien` giữ danh sách các hộp ấy; nơi nhận chỉ là lambda, không cần viết lớp con. `dangKy` trả một **mã số** để sau `huyDangKy(ma)`, vì hai `std::function` không so sánh bằng nhau được để tìm "cái nào cần xóa".
 
 Khi nào dùng cái nào: **giao diện** khi nơi nhận có "danh tính", nhiều thao tác hoặc trạng thái riêng (nhưng cần `weak_ptr` cho vòng đời, mục 3); **`std::function`** khi nơi nhận chỉ là một hành động nhỏ viết tại chỗ (nhưng lambda `[&x]` giữ tham chiếu nên có cùng bẫy treo; chữa bằng hủy đăng ký bằng mã số, hoặc bắt `weak_ptr`, cách này bài không chạy). Không bên nào tốt hơn tuyệt đối.
 
@@ -66,6 +66,8 @@ Vấn đề: một lớp cần một "cách làm" thay được (tính phí vậ
 | Chi phí gọi | Gián tiếp qua bảng hàm ảo ([Bài 33](33-da-hinh-virtual.md)) | Gián tiếp qua `std::function`; lúc tạo có thể cấp phát (mục 7) | Gọi thẳng, thường inline được |
 | Chiến lược có nhiều hàm hoặc trạng thái | Hợp | Gượng (một hộp một hàm) | Hợp |
 | Khi nào dùng | Nhiều thao tác, cần cất lẫn nhiều loại | Chiến lược là một hàm, viết tại chỗ | Kiểu biết lúc viết, chỗ gọi rất nóng và **đã đo** thấy cần |
+
+Strategy hay bị nhầm với **State**: cấu trúc giống nhau, nhưng ở Strategy bên ngoài chọn cách làm, còn ở State chính đối tượng tự đổi cách làm khi trạng thái chuyển (bài này không viết State).
 
 Cột "chi phí" chỉ là xu hướng thường được nói; chi phí thật phụ thuộc trình biên dịch và phải đo, còn bài này không đo thời gian. Một ví dụ bạn đã dùng: **`std::sort` với comparator chính là Strategy**. Thuật toán sắp xếp là phần chung; lambda so sánh `x < y` hay `x > y` ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) là cách thay được, sắp tăng hay giảm mà `sort` không đổi một dòng.
 
@@ -232,7 +234,7 @@ Mình chạy với ASan + UBSan và ở `-O2`: sạch, mã thoát 0, cùng kết
 
 ### Ví dụ 3: Observer gọn bằng `std::function`, hủy đăng ký ngay trong callback
 
-`using HamNhan = std::function<void(double)>;` (1) là **bí danh kiểu**: `HamNhan` là tên ngắn của kiểu dài đó. `dangKy` (2) cất hàm kèm mã số và trả mã số; `huyDangKy(ma)` (3) bỏ mục mang mã đó. `datNhietDo` duyệt **bản sao** (4). Lambda đầu tiên (6) tự `huyDangKy` bằng mã của chính nó (7). `maMotLan` phải khai báo **trước** vì lambda cần dùng tên đó, mà mã chỉ có sau khi `dangKy` trả về. `[&]` cầm tham chiếu nên lúc lambda chạy nó thấy mã thật (1); bắt bản chép thì chỉ thấy 0, giá trị lúc tạo lambda.
+`using HamNhan = std::function<void(double)>;` (1) là **bí danh kiểu**: `HamNhan` là tên ngắn của kiểu dài đó. `dangKy` (2) cất hàm kèm mã số và trả mã số; `huyDangKy(ma)` (3) bỏ mục mang mã đó. `datNhietDo` duyệt **bản sao** (4). Lambda đầu tiên (6) tự `huyDangKy` bằng mã của chính nó (7). `maMotLan` phải khai báo **trước** vì lambda cần dùng tên đó, mà mã chỉ có sau khi `dangKy` trả về. `[&]` cầm tham chiếu nên lúc lambda chạy nó thấy mã thật (bằng 1); bắt bản chép thì chỉ thấy 0, giá trị lúc tạo lambda.
 
 ```cpp
 #include <algorithm>
@@ -300,7 +302,6 @@ Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi*
 
 - **Đổi (5) sang duyệt thẳng `ds_`** (`for (const Muc& m : ds_)`): chương trình dừng bằng `terminate called after throwing an instance of 'std::bad_function_call'` (ASan không báo lỗi bộ nhớ nào); `-D_GLIBCXX_DEBUG` thì báo `attempt to compare a dereferenceable iterator to a singular iterator`. Lambda tự xóa mình khỏi danh sách **đang chạy chính nó**: hành vi không xác định, chuẩn không hứa kết quả nào.
 - **Đổi `[&]` ở (6) thành `[=, &camBien]`** (chép `maMotLan`, vẫn tham chiếu `camBien`): lambda 1 thấy `maMotLan` bằng 0, `huyDangKy(0)` không xóa gì, nên nó không tự hủy: ra `mot lan: 25`, `in: 25`, `mot lan: 26`, `in: 26`.
-- **Lambda giữ tham chiếu tới biến đã chết.** Trước (9) thêm khối `{ int tam = 0; camBien.dangKy([&tam](double) { ++tam; }); }`: lượt `datNhietDo(25)` đầu tiên đã gọi lambda đó, và ASan báo lỗi truy cập vùng nhớ hết đời (trên bản của mình tên là `stack-use-after-scope`, ra cả ở -O0 và -O2; tên loại lỗi có thể khác theo bản g++ và mức tối ưu). Cùng bẫy với con trỏ thô ở Ví dụ 1: `std::function` không giữ giùm đồ nó tham chiếu.
 
 ### Ví dụ 4: Strategy ba cách cho phí vận chuyển
 
@@ -400,13 +401,11 @@ C theo kg: 30, C co dinh: 20
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi** (đã chạy):
 
-- **Thêm `c = d;`** sau khi tạo `d`: lỗi biên dịch `no match for 'operator=' (operand types are 'DonHangC<TheoKgT>' and 'DonHangC<CoDinhT>')`. Hai kiểu khác nhau: kiểu chiến lược nằm trong kiểu đơn hàng.
+- **Thêm `c = d;`** sau khi tạo `d`: lỗi biên dịch `no match for ‘operator=’ (operand types are ‘DonHangC<TheoKgT>’ and ‘DonHangC<CoDinhT>’)`. Hai kiểu khác nhau: kiểu chiến lược nằm trong kiểu đơn hàng.
 
 ### Ví dụ 5: `std::function` tốn gì? Đếm lần `new`
 
-Để đếm, chương trình thay hàm `operator new` toàn cục (2): đó là hàm C++ gọi mỗi khi `new` xin bộ nhớ, kể cả thư viện xin giùm, và C++ cho phép bạn viết bản của mình. Bản này tăng biến đếm (1) rồi xin bằng `malloc`; đây chỉ là bản minh họa, không xử lý hết bộ nhớ.
-
-Hai hàm `operator delete` trả lại bằng `free`; `noexcept` là lời hứa "hàm này không ném ngoại lệ", chữ ký của `operator delete` đòi có, và bản có `std::size_t` chỉ để trình biên dịch khỏi cảnh báo. Hai `std::function` chứa hai lambda cỡ khác nhau.
+Để đếm, chương trình thay hàm `operator new` toàn cục (2): C++ gọi hàm này mỗi khi `new` xin bộ nhớ (kể cả thư viện xin giùm) và cho bạn viết bản của mình. Bản này tăng biến đếm (1) rồi xin bằng `malloc` (chỉ để minh họa). Hai hàm `operator delete` trả lại bằng `free`; `noexcept` là lời hứa "không ném ngoại lệ" mà chữ ký của `operator delete` đòi có, và bản có `std::size_t` chỉ để khỏi cảnh báo. Hai `std::function` chứa hai lambda cỡ khác nhau.
 
 ```cpp
 #include <cstdlib>
@@ -506,7 +505,7 @@ camBien.datNhietDo(25);                 // gọi capNhat trên từng phần t�
 
 - Biên dịch được và `capNhat` bị bỏ qua, vì `m` đã rỗng nên danh sách coi mục đó là trống
 - Ném một ngoại lệ bắt được, vì địa chỉ trong danh sách không còn hợp lệ
-- Hành vi không xác định, vì danh sách còn địa chỉ của món đã bị xóa
+- Biên dịch được, nhưng `capNhat` chạy trên món đã xóa (vùng nhớ đã trả lại)
 - Chạy bình thường và in một dòng, vì `Chude` đã sao chép món vào danh sách
 
 <p class="giai-thich" markdown>`m.get()` chỉ đưa **địa chỉ** vào danh sách; `m.reset()` xóa món, còn địa chỉ trong danh sách vẫn nguyên (con trỏ thô không biết món đã chết). Gọi `capNhat` qua địa chỉ đó là hành vi không xác định (mình chạy: ASan báo `heap-use-after-free`; không sanitizer thì sập). Danh sách không sao chép món, nó chỉ cầm địa chỉ nên "tự giữ bản sao" sai. Con trỏ thô cũng không biến thành rỗng khi món chết, nên không có ngoại lệ hay chuyện "tự bỏ qua".</p>
@@ -525,10 +524,10 @@ void datNhietDo(double t) {
 
 - Không: `erase` trên `ds_` đang được duyệt làm iterator hỏng, là hành vi không xác định
 - Có: `erase` chỉ bỏ phần tử khỏi danh sách nên vòng range-for tự đi tiếp đúng
-- Có, vì range-for duyệt theo chỉ số 0, 1, 2 chứ không dùng iterator
+- Không, vì `erase` làm vector cấp phát lại nên con trỏ `q` bị treo
 - Có, vì range-for sao chép `ds_` trước khi duyệt rồi mới chạy thân vòng
 
-<p class="giai-thich" markdown>Range-for duyệt trực tiếp trên `ds_` (không sao chép), và `erase` làm hỏng iterator của vòng đang chạy ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn `-D_GLIBCXX_DEBUG` thì dừng chương trình. Range-for không tự sao chép (bản sao phải do bạn viết) và cũng không duyệt theo chỉ số: nó dùng iterator ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)), nên cái hỏng chính là cái nó đang cầm.</p>
+<p class="giai-thich" markdown>Range-for duyệt trực tiếp trên `ds_` (không sao chép), và `erase` làm hỏng iterator của vòng đang chạy ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn `-D_GLIBCXX_DEBUG` thì dừng chương trình. Range-for không tự sao chép (bản sao phải do bạn viết). Chuyện `erase` cấp phát lại vector cũng không đúng: nó dời các phần tử và giữ nguyên vùng nhớ, còn con trỏ `q` chỉ là một bản sao của phần tử. Cái hỏng là iterator mà vòng for đang cầm ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)).</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -556,7 +555,7 @@ c = d;
 - Lỗi biên dịch: hai đối tượng là hai kiểu khác nhau vì tham số template khác nhau
 - Lỗi liên kết, vì lớp `DonHangC` bị định nghĩa hai lần với hai tham số khác nhau
 
-<p class="giai-thich" markdown>Mỗi bộ tham số template tạo một kiểu riêng: `DonHangC<TheoKgT>` và `DonHangC<CoDinhT>` không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: `no match for 'operator='`). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Mỗi bộ tham số sinh một lớp riêng chứ không "định nghĩa hai lần", nên không có lỗi liên kết.</p>
+<p class="giai-thich" markdown>Mỗi bộ tham số template tạo một kiểu riêng: `DonHangC<TheoKgT>` và `DonHangC<CoDinhT>` không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: `no match for ‘operator=’`). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Mỗi bộ tham số sinh một lớp riêng chứ không "định nghĩa hai lần", nên không có lỗi liên kết.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>

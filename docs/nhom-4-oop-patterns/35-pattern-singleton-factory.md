@@ -57,9 +57,9 @@ Hai cách hay dùng: nhận **tham chiếu** (`const BangThue&`) khi chỉ mư�
 
 **Từ đây ví dụ đổi sang `Hinh`** của [Bài 33](33-da-hinh-virtual.md) (ví von quầy nhận đơn vẫn dùng được: khách nói "tron", quầy trao một hình tròn). **Simple Factory** là một hàm nhận một "tên loại" và trả đúng loại đối tượng, ví dụ `taoHinh(const std::string& loai)`. Người gọi chỉ biết `Hinh`, không cần biết `HinhTron` hay `HinhChuNhat`, và việc chọn lớp con nằm gọn trong một hàm.
 
-Kiểu trả về là `std::unique_ptr<Hinh>` vì hai lý do: hình khác loại có cỡ khác nhau nên phải đi qua con trỏ (Bài 33), và `unique_ptr` **chuyển quyền sở hữu** ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)) cho người gọi: món do factory `new` ra, người gọi giữ nó, hết đời thì tự xóa. Loại không biết thì trả `nullptr` (Ví dụ 4 dùng cách này; ném ngoại lệ cũng là một lựa chọn).
+Kiểu trả về là `std::unique_ptr<Hinh>` vì hai lý do: hình khác loại có cỡ khác nhau nên phải đi qua con trỏ ([Bài 33](33-da-hinh-virtual.md)), và `unique_ptr` **chuyển quyền sở hữu** ([Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)) cho người gọi: món do factory `new` ra, người gọi giữ nó, hết đời thì tự xóa. Loại không biết thì trả `nullptr` (Ví dụ 4 dùng cách này; ném ngoại lệ cũng là một lựa chọn).
 
-Hạn chế của `taoHinh` là chuỗi `if`: thêm một loại hình là phải **sửa hàm**. **Registry factory** (factory có sổ đăng ký) đảo lại chuyện đó: một `std::map<std::string, std::function<std::unique_ptr<Hinh>()>>` ([Bài 18](../nhom-2-stl-thuat-toan/18-map-set-unordered.md), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) ghi "tên loại -> hàm làm ra nó". Muốn thêm loại mới, chỉ **đăng ký** thêm một dòng, không sửa lớp factory: ý "mở để mở rộng, đóng với sửa đổi" mà Bài 37 gọi là Open/Closed.
+Hạn chế của `taoHinh` là chuỗi `if`: thêm một loại hình là phải **sửa hàm**. **Registry factory** (factory có sổ đăng ký) đảo lại chuyện đó: một `std::map<std::string, std::function<std::unique_ptr<Hinh>()>>` ([Bài 18](../nhom-2-stl-thuat-toan/18-map-set-unordered.md), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) ghi "tên loại -> hàm làm ra nó". Muốn thêm loại mới, chỉ **đăng ký** thêm một dòng, không sửa lớp factory: ý "mở để mở rộng, đóng với sửa đổi" mà [Bài 37](37-solid-thiet-ke.md) gọi là Open/Closed.
 
 **Factory Method** là biến thể dùng kế thừa: lớp cha có hàm ảo trả sản phẩm, **lớp con quyết định tạo gì**, còn code ở lớp cha dùng sản phẩm mà không biết kiểu thật. Phác thảo (không phải chương trình đầy đủ, mình không chạy):
 
@@ -532,13 +532,13 @@ auto h = it->second();
 <p class="giai-thich" markdown>`find` không thấy khóa thì trả `end()`, một vị trí không trỏ tới phần tử nào, nên đọc `it->second` là hành vi không xác định: phải kiểm `it != kho.end()` trước (Ví dụ 4, dòng (5)). `second()` không tự trả `nullptr`. Chuyện ném `out_of_range` là của `at()`, không phải của `find`. Còn lambda trả `unique_ptr<HinhTron>` thì biên dịch được, vì kết quả đổi được sang `unique_ptr<Hinh>` (đúng như ba lambda ở Ví dụ 4).</p>
 </div>
 
-<div class="cau-hoi" data-dap-an="1" markdown>
+<div class="cau-hoi" data-dap-an="4" markdown>
 **Câu 6.** Tám goroutine cùng gọi `once.Do(f)` (`once` là `sync.Once`). Điều nào đúng?
 
-- `f` chạy đúng một lần, và mọi lời gọi `Do` chỉ trả về sau khi `f` đã chạy xong
+- Phải tự bọc `once.Do` bằng `sync.Mutex`, nếu không `f` có thể chạy nhiều lần
 - `f` chạy đúng một lần, nhưng goroutine đến sau trả về ngay mà không chờ `f` xong
 - `f` chạy đúng một lần, nhưng có thể chạy trên một goroutine không gọi `Do`
-- Phải tự bọc `once.Do` bằng `sync.Mutex`, nếu không `f` có thể chạy nhiều lần
+- `f` chạy đúng một lần, và mọi lời gọi `Do` chỉ trả về sau khi `f` đã chạy xong
 
 <p class="giai-thich" markdown>Mình đã chạy tám goroutine với `f` ngủ 100 ms: `f` chạy 1 lần và không goroutine nào thấy `f` chưa xong khi `Do` trả về. Việc chờ đó chính là điều khiến `once.Do` dùng được cho khởi tạo Singleton. `Do` tự an toàn khi nhiều goroutine gọi, nên không cần mutex bọc ngoài. Và `f` chạy ngay trong goroutine đầu tiên gọi `Do`, không đi nơi khác.</p>
 </div>
