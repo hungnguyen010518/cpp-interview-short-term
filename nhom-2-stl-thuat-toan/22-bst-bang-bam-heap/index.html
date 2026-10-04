@@ -1,0 +1,1900 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-2-stl-thuat-toan/22-bst-bang-bam-heap/">
+      
+      
+        <link rel="prev" href="../21-big-o-cau-truc-du-lieu/">
+      
+      
+        <link rel="next" href="../23-thuat-toan-hay-hoi/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-22-cay-nhi-phan-tim-kiem-bang-bam-va-heap" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 2 — STL và thuật toán
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 2 — STL và thuật toán
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 16 — std::vector: mảng co giãn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-string-array-deque-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 17 — string, string_view, array, deque, list
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-map-set-unordered/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 18 — map, set, unordered_map: tra cứu theo khóa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-iterator-vo-hieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 19 — Iterator và iterator invalidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-algorithm-lambda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 20 — <algorithm> và lambda: sort, find, transform, remove-erase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-big-o-cau-truc-du-lieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 21 — Big-O, danh sách liên kết, stack và queue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-e-quy-vua-u-e-oc-cay" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Đệ quy, vừa đủ để đọc cây
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-cay-nhi-phan-tim-kiem-bst" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Cây nhị phân tìm kiếm (BST)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-bang-bam-kieu-chaining" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Bảng băm kiểu chaining
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-heap-va-stdpriority_queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Heap và std::priority_queue
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-thuat-toan-hay-hoi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-e-quy-vua-u-e-oc-cay" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Đệ quy, vừa đủ để đọc cây
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-cay-nhi-phan-tim-kiem-bst" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Cây nhị phân tìm kiếm (BST)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-bang-bam-kieu-chaining" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Bảng băm kiểu chaining
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-heap-va-stdpriority_queue" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Heap và std::priority_queue
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-22-cay-nhi-phan-tim-kiem-bang-bam-va-heap">Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap<a class="headerlink" href="#bai-22-cay-nhi-phan-tim-kiem-bang-bam-va-heap" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Hiểu <strong>đệ quy</strong> (hàm gọi lại chính nó) và dùng nó để tự cài <strong>cây nhị phân tìm kiếm (BST)</strong>: chèn, tìm, duyệt trung tự ra dãy tăng dần, đo độ cao, hủy cây không rò rỉ; nói được vì sao xấu nhất là O(n) và "cây cân bằng" của <code>map</code> giải quyết điều đó thế nào.</li>
+<li>Phác được <strong>bảng băm kiểu chaining</strong> (mỗi hộp là một danh sách): hàm băm, <code>% số hộp</code>, đụng độ, hệ số tải, rehash, và vì sao tìm là O(1) trung bình.</li>
+<li>Hiểu <strong>heap</strong> lưu trong mảng (con của <code>i</code> là <code>2i+1</code>, <code>2i+2</code>), vì sao <code>top</code> O(1) còn <code>push</code>/<code>pop</code> O(log n), dùng <code>std::priority_queue</code> (max-heap, min-heap bằng <code>greater</code>) và giải <strong>top-K</strong>.</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a> (khung hàm, đệ quy vô hạn làm tràn stack), <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/">Bài 03</a> (<code>-&gt;</code>, <code>nullptr</code>), <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a> (hàm <code>const</code>), <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/">Bài 07</a> (<code>new</code>/<code>delete</code>, ASan báo rò rỉ), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (hàm hủy), <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/">Bài 11</a> (<code>= delete</code>), <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a> (<code>std::move</code>), <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a> (<code>%</code>), <a href="../16-vector/">Bài 16</a>, <a href="../17-string-array-deque-list/">Bài 17</a> và <a href="../18-map-set-unordered/">Bài 18</a> (container), <a href="../20-algorithm-lambda/">Bài 20</a> (<code>std::max</code>) và <a href="../21-big-o-cau-truc-du-lieu/">Bài 21</a> (Big-O, <code>Nut</code>, <code>std::queue</code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Phạm vi bài này</p>
+<p>Ba cấu trúc này được tách từ Bài 21 cho đỡ dài. BST và bảng băm ở đây <strong>chỉ để hiểu cách <code>map</code> và <code>unordered_map</code> hoạt động</strong>: đi làm bạn dùng bản có sẵn của thư viện, còn đi phỏng vấn người ta có thể bắt bạn viết BST và nói về bảng băm. Xóa một nút khỏi BST và cây cân bằng đầy đủ nằm ngoài bài.</p>
+</div>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Ba hình ảnh cho ba cấu trúc. <strong>BST</strong> là trò đoán số từ 1 đến 100: mỗi câu "lớn hơn hay nhỏ hơn 50?" loại bỏ một nửa. <strong>Bảng băm</strong> là phòng thư nhiều hộp của <a href="../18-map-set-unordered/">Bài 18</a>: người gác tính từ tên ra số hộp rồi chỉ lục trong hộp đó. <strong>Heap</strong> là phòng cấp cứu: ai nặng nhất được khám trước, và lúc nào cũng biết ngay ai đang nặng nhất.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào các hình ảnh này không còn đúng?</p>
+<p>Trò đoán số chỉ nhanh nếu mỗi câu hỏi chia đôi được khoảng còn lại. Nếu bạn hỏi "có phải 1 không? có phải 2 không?..." thì mỗi câu chỉ loại một số và có thể phải hỏi tới 100 lần. BST xấu đi đúng như vậy (mục 2). Phòng cấp cứu thì khác heap ở chỗ: heap chỉ biết rõ <strong>người đứng đầu</strong>, không biết thứ tự những người còn lại; nó không phải một dãy đã xếp.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Hay nhầm: hai nghĩa của chữ heap</p>
+<p>"Heap" ở <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a> là <strong>vùng nhớ</strong> để <code>new</code> xin chỗ. "Heap" trong bài này là một <strong>cách sắp phần tử</strong> trong mảng. Hai thứ chỉ trùng tên. Một <code>std::priority_queue</code> khai báo trong <code>main</code> là biến cục bộ nằm trên stack, dù dữ liệu trong <code>vector</code> bên trong nó nằm ở vùng heap.</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-e-quy-vua-u-e-oc-cay">1. Đệ quy, vừa đủ để đọc cây<a class="headerlink" href="#1-e-quy-vua-u-e-oc-cay" title="Permanent link">&para;</a></h3>
+<p><strong>Đệ quy</strong> là hàm gọi lại <strong>chính nó</strong> với một bài toán nhỏ hơn. <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a> đã cho thấy mặt xấu của nó (tự gọi mãi thì tràn stack); mặt tốt là cái cây vốn dĩ "cây con của cây con", nên hàm đệ quy trông giống hệt hình cây. Một hàm đệ quy đúng luôn có hai phần: <strong>điểm dừng</strong> (trường hợp nhỏ nhất, trả luôn không gọi tiếp) và <strong>bước đệ quy</strong> (gọi lại chính nó với đầu vào nhỏ hơn, tiến dần tới điểm dừng).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kt">int</span><span class="w"> </span><span class="nf">tongDen</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">              </span><span class="c1">// (1) điểm dừng: hết đường lùi</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tongDen</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">         </span><span class="c1">// (2) gọi lại chính nó với bài nhỏ hơn</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">}</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"tongDen(3) = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tongDen</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(2), <code>n</code>=3</td>
+<td>Chưa tính được <code>3 + ?</code>, phải biết <code>tongDen(2)</code> trước nên gọi nó</td>
+<td>stack: khung <code>main</code>, khung <code>tongDen(3)</code></td>
+</tr>
+<tr>
+<td>(2), <code>n</code>=2 và <code>n</code>=1</td>
+<td>Mỗi lần lại chồng thêm một khung chờ kết quả của khung trên</td>
+<td>thêm khung <code>tongDen(2)</code>, <code>tongDen(1)</code></td>
+</tr>
+<tr>
+<td>(1), <code>n</code>=0</td>
+<td>Chạm điểm dừng: trả <code>0</code>, không gọi tiếp</td>
+<td>đỉnh stack: khung <code>tongDen(0)</code></td>
+</tr>
+<tr>
+<td>(2) lúc quay về</td>
+<td>Gỡ khung từ đỉnh xuống: <code>1 + 0 = 1</code>, rồi <code>2 + 1 = 3</code>, rồi <code>3 + 3 = 6</code></td>
+<td>các khung gỡ dần</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>tongDen(3) = 6
+</code></pre></div>
+<p>Số khung chồng lên nhau là <strong>độ sâu</strong> đệ quy (ở đây 4, kể cả <code>n</code>=0); quá sâu thì tràn stack. Với cây, độ sâu cỡ độ cao của cây (cộng thêm một lần gọi tới <code>nullptr</code>).</p>
+<h3 id="2-cay-nhi-phan-tim-kiem-bst">2. Cây nhị phân tìm kiếm (BST)<a class="headerlink" href="#2-cay-nhi-phan-tim-kiem-bst" title="Permanent link">&para;</a></h3>
+<p><strong>Cây</strong> là các <strong>nút</strong> nối nhau, mỗi nút có đúng một nút <strong>cha</strong> (trừ <strong>gốc</strong> ở trên cùng). <strong>Cây nhị phân</strong> là cây mà mỗi nút có tối đa hai nút <strong>con</strong>: con trái và con phải; nút không có con gọi là <strong>lá</strong>. <strong>BST</strong> (binary search tree) thêm một luật cho <strong>mọi</strong> nút: cả cây con bên trái chứa toàn giá trị <strong>nhỏ hơn</strong> nút, cả cây con bên phải toàn giá trị <strong>lớn hơn</strong>.</p>
+<p>Nút vẫn là <code>struct Nut</code> như Bài 21, chỉ khác là có hai mũi tên thay vì một. Luật trên cho ta cách tìm như trò đoán số: so <code>x</code> với nút, nhỏ hơn thì rẽ trái, lớn hơn thì rẽ phải, bằng thì xong. Chèn cũng đi đường đó cho tới khi gặp chỗ trống (<code>nullptr</code>) và đặt nút mới vào chỗ ấy.</p>
+<p>Ba điều cần biết trước khi đọc listing:</p>
+<ul>
+<li><code>std::max(a, b)</code> (<code>&lt;algorithm&gt;</code>, <a href="../20-algorithm-lambda/">Bài 20</a>) trả số lớn hơn trong hai số.</li>
+<li><code>std::vector&lt;int&gt;{4, 2, 6}</code> dựng tạm một vector chỉ để duyệt.</li>
+<li><code>chenNut</code> <strong>trả về con trỏ</strong> tới gốc của cây con sau khi chèn, và ta gán lại <code>n-&gt;trai = chenNut(n-&gt;trai, x)</code>. Cây con rỗng thì lời gọi trả nút mới nên gán nút mới vào; cây con có nút thì lời gọi trả lại chính nút cũ nên gán lại cũng không đổi gì. Bảng "Chạy từng dòng" có một hàng cho bước quay về này.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;algorithm&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Nut</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">gt</span><span class="p">;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">trai</span><span class="p">;</span><span class="w">                         </span><span class="c1">// (1) nút con bên trái: toàn giá trị nhỏ hơn gt</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">phai</span><span class="p">;</span><span class="w">                         </span><span class="c1">// (2) nút con bên phải: toàn giá trị lớn hơn gt</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">};</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="nf">chenNut</span><span class="p">(</span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">          </span><span class="c1">// trả về gốc (mới) của cây con n</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Nut</span><span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">,</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">};</span><span class="w">   </span><span class="c1">// (3) chỗ trống: đặt nút mới</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">gt</span><span class="p">)</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">trai</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chenNut</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">trai</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">            </span><span class="c1">// (4)</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">gt</span><span class="p">)</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">phai</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chenNut</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">phai</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">       </span><span class="c1">// (5)</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w">                          </span><span class="c1">// (6) x == gt: đã có, không làm gì</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">}</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="kt">void</span><span class="w"> </span><span class="nf">trungTu</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">           </span><span class="c1">// trái, rồi chính nó, rồi phải</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="n">trungTu</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">trai</span><span class="p">);</span><span class="w">                                        </span><span class="c1">// (7)</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">n</span><span class="o">-&gt;</span><span class="n">gt</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="p">;</span><span class="w">                               </span><span class="c1">// (8)</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="n">trungTu</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">phai</span><span class="p">);</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">}</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="kt">int</span><span class="w"> </span><span class="nf">doCao</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// số nút trên đường dài nhất từ n xuống lá</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">doCao</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">trai</span><span class="p">),</span><span class="w"> </span><span class="n">doCao</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">phai</span><span class="p">));</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="kt">void</span><span class="w"> </span><span class="nf">giai</span><span class="p">(</span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">                    </span><span class="c1">// trả cả cây: con trước, rồi mới tới nút</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">    </span><span class="n">giai</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">trai</span><span class="p">);</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">    </span><span class="n">giai</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">phai</span><span class="p">);</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">    </span><span class="k">delete</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w">                                                </span><span class="c1">// (9)</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="p">}</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Cay</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">    </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">goc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span><span class="w">                </span><span class="c1">// nullptr = cây rỗng</span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="n">Cay</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">default</span><span class="p">;</span><span class="w">                   </span><span class="c1">// ba dòng này giống DanhSach (Bài 21)</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">    </span><span class="n">Cay</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Cay</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">    </span><span class="n">Cay</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Cay</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">delete</span><span class="p">;</span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">    </span><span class="o">~</span><span class="n">Cay</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">giai</span><span class="p">(</span><span class="n">goc</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">chen</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">goc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chenNut</span><span class="p">(</span><span class="n">goc</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tim</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w">             </span><span class="c1">// trả số nút đã ghé; âm nếu không có</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a><span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">ghe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a><span class="w">        </span><span class="k">const</span><span class="w"> </span><span class="n">Nut</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">goc</span><span class="p">;</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a><span class="w">            </span><span class="o">++</span><span class="n">ghe</span><span class="p">;</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">gt</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">ghe</span><span class="p">;</span>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="w">            </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">gt</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">trai</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p</span><span class="o">-&gt;</span><span class="n">phai</span><span class="p">;</span><span class="w">             </span><span class="c1">// (10)</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">-</span><span class="n">ghe</span><span class="p">;</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a><span class="p">};</span>
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">                             </span><span class="c1">// chèn theo thứ tự "giữa trước"</span>
+<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">})</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">chen</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a><span class="w">    </span><span class="n">Cay</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">                             </span><span class="c1">// chèn theo thứ tự tăng dần</span>
+<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">chen</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>
+<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a trung tu: "</span><span class="p">;</span><span class="w"> </span><span class="n">trungTu</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">goc</span><span class="p">);</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"b trung tu: "</span><span class="p">;</span><span class="w"> </span><span class="n">trungTu</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">goc</span><span class="p">);</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"do cao a = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">doCao</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">goc</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", do cao b = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">doCao</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">goc</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"tim 7 trong a: ghe "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">tim</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" nut, trong b: ghe "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">tim</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" nut</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"tim 9 trong a: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">tim</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-2-71" name="__codelineno-2-71" href="#__codelineno-2-71"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong> (cây <code>a</code>; chèn <code>4, 2, 6</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(3) chèn 4</td>
+<td>Cây rỗng nên tạo nút <code>4</code> làm gốc</td>
+<td><code>goc</code> → [4]</td>
+</tr>
+<tr>
+<td>(4) chèn 2</td>
+<td><code>2 &lt; 4</code> nên đi trái; con trái của 4 là <code>nullptr</code>: (3) tạo nút <code>2</code> ở đó</td>
+<td>[4] có trái → [2]</td>
+</tr>
+<tr>
+<td>(4) lúc quay về</td>
+<td><code>chenNut(n-&gt;trai, 2)</code> trả con trỏ nút <code>2</code>, được gán vào <code>n-&gt;trai</code> của <code>4</code>; rồi <code>return n</code> trả lại chính <code>4</code> cho <code>goc</code></td>
+<td><code>goc</code> vẫn → [4]</td>
+</tr>
+<tr>
+<td>(5) chèn 6</td>
+<td><code>6 &gt; 4</code> nên đi phải: tạo nút <code>6</code></td>
+<td>[4] có trái [2], phải [6]</td>
+</tr>
+<tr>
+<td>(7)-(8)</td>
+<td>Trung tự: đi hết cây con trái, <strong>rồi</strong> in nút, <strong>rồi</strong> đi cây con phải</td>
+<td>in <code>1 2 3 4 5 6 7</code></td>
+</tr>
+<tr>
+<td>(9)</td>
+<td>Hủy: đi xuống tận lá, <code>delete</code> lá trước, rồi lên <code>delete</code> cha; xóa cha trước thì mất đường tới con</td>
+<td></td>
+</tr>
+<tr>
+<td>(10)</td>
+<td><code>tim</code> rẽ theo luật: <code>7 &gt; 4</code> rẽ phải, <code>7 &gt; 6</code> rẽ phải, gặp <code>7</code>: ghé 3 nút</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>a trung tu: 1 2 3 4 5 6 7 
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>b trung tu: 1 2 3 4 5 6 7 
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>do cao a = 3, do cao b = 7
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>tim 7 trong a: ghe 3 nut, trong b: ghe 7 nut
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>tim 9 trong a: -3
+</code></pre></div>
+<p>Cây <code>a</code> có hình <code>4</code> ở gốc, <code>2</code> và <code>6</code> ở tầng hai, <code>1 3 5 7</code> là lá. Cây <code>b</code> chèn <code>1</code> rồi <code>2</code>, <code>3</code>... mỗi số lớn hơn mọi số trước nên <strong>luôn rẽ phải</strong>: nó thành một dây dài 7 nút chỉ có con phải, y như danh sách liên kết. <code>tim 9</code> ghé 3 nút rồi hết đường nên in <code>-3</code>.</p>
+<p><strong>Duyệt trung tự</strong> (in-order) là "trái, giữa, phải". Vì luật BST, mọi giá trị bên trái nhỏ hơn nút và bên phải lớn hơn, nên in theo thứ tự này <strong>luôn ra dãy tăng dần</strong>, dù cây hình gì (cả hai cây trên cùng in ra <code>1 2 3 4 5 6 7</code>). Đó cũng là cách <code>map</code> (<a href="../18-map-set-unordered/">Bài 18</a>) duyệt ra khóa đã xếp.</p>
+<p><strong>Độ cao</strong> là số nút trên đường dài nhất từ gốc xuống lá (cây rỗng cao 0): <code>1 + max(cao trái, cao phải)</code>. Chi phí <code>chen</code> và <code>tim</code> đều <strong>bằng độ cao</strong>, vì mỗi bước đi xuống một tầng.</p>
+<p>Cây <code>a</code> cao 3 với 7 nút, và nói chung cây đầy đủ <code>n</code> nút chỉ cao cỡ log n: số nút gấp đôi thì cao thêm một tầng. Còn cây <code>b</code> cao 7 với 7 nút nên <code>tim</code> mất O(n).</p>
+<p><strong>Vì sao xấu nhất là O(n)?</strong> Hình cây chỉ phụ thuộc <strong>thứ tự chèn</strong>. Dữ liệu đã sắp xếp (tăng hoặc giảm dần, như mã số tăng dần) làm cây thành dây, và dữ liệu như vậy rất hay gặp trong đời thật. Với dữ liệu ngẫu nhiên cây thường thấp cỡ log n, nhưng BST "trần" (không tự cân bằng) có <strong>xấu nhất O(n)</strong>.</p>
+<p><strong>Cây cân bằng</strong> sửa điều đó bằng cách tự sắp xếp lại. Sau mỗi lần chèn hay xóa, nếu một nhánh quá dài so với nhánh kia thì nó <strong>xoay</strong> vài nút cho cây thấp xuống, mà vẫn giữ luật "trái nhỏ hơn, phải lớn hơn". Nhờ vậy độ cao luôn cỡ log n bất kể thứ tự chèn.</p>
+<p><code>std::map</code>/<code>std::set</code> (<a href="../18-map-set-unordered/">Bài 18</a>) thường được cài bằng cây cân bằng (chuẩn chỉ đòi O(log n)); bản g++ dùng loại tên "cây đỏ-đen", bài này không cài.</p>
+<p><strong>Thử thay đổi: đổi hàm hủy thành <code>~Cay() {}</code> (bỏ lời gọi <code>giai</code>).</strong> Mình đã biên dịch với <code>-fsanitize=address</code> và chạy: chương trình vẫn in kết quả như cũ rồi LeakSanitizer báo <code>336 byte(s) leaked in 14 allocation(s)</code>. Đúng là hai cây, mỗi cây 7 nút, mỗi nút 24 byte (một <code>int</code> cộng đệm và hai con trỏ). Với <code>giai</code> thì ASan và UBSan đều sạch.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Thư viện chuẩn của Go <strong>không có</strong> BST hay map có thứ tự: <code>map</code> của Go là bảng băm (mục 3), và khi duyệt <code>for range</code> thứ tự cố ý bị xáo ngẫu nhiên. Muốn có thứ tự thì bạn lấy khóa ra slice rồi <code>sort</code>, hoặc dùng thư viện ngoài. Chèn/tìm BST viết bằng Go gần như y nguyên: <code>type Nut struct { Gt int; Trai, Phai *Nut }</code>; khác biệt là Go không cần hàm hủy vì bộ gom rác dọn các nút không còn ai trỏ tới.</p>
+</div>
+<h3 id="3-bang-bam-kieu-chaining">3. Bảng băm kiểu chaining<a class="headerlink" href="#3-bang-bam-kieu-chaining" title="Permanent link">&para;</a></h3>
+<p>Mục tiêu: nhận khóa (ví dụ một cái tên) và đi <strong>thẳng</strong> tới chỗ cất nó, không so từng cái một. Cách làm có ba bước. Bước 1: <strong>hàm băm</strong> (hash function) biến khóa thành một con số lớn. Bước 2: phép <code>% số hộp</code> (chia lấy dư, <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/">Bài 14</a>) đưa con số đó vào đoạn <code>0 .. số hộp - 1</code>, chính là <strong>chỉ số hộp</strong>. Bước 3: cất khóa vào hộp ấy.</p>
+<p>Hai khóa khác nhau có thể rơi cùng một hộp: gọi là <strong>đụng độ</strong> (collision), và không tránh hết được (13 người vào 12 hộp thì chắc chắn có hộp chứa hai người). <strong>Chaining</strong> (nối chuỗi) xử lý bằng cách cho mỗi hộp là <strong>một danh sách</strong> các khóa rơi vào nó. Tìm khóa nghĩa là tính hộp, rồi chỉ lục <strong>trong hộp ấy</strong>.</p>
+<p>Hộp mà dài thì chậm, nên ta theo dõi <strong>hệ số tải</strong> (load factor) = số khóa / số hộp: trung bình mỗi hộp chứa bao nhiêu khóa. Khi hệ số tải vượt ngưỡng, bảng <strong>rehash</strong>: xin gấp đôi số hộp, rồi tính lại hộp cho <strong>từng</strong> khóa (vì <code>% số hộp</code> đã đổi).</p>
+<p>Mình dùng <code>std::vector&lt;std::list&lt;std::string&gt;&gt;</code>: một vector các hộp, mỗi hộp là một <code>std::list</code> (<a href="../17-string-array-deque-list/">Bài 17</a>) chứa chuỗi. Vì cả vector lẫn list tự dọn khi chết (RAII, <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a>), bảng này không cần hàm hủy.</p>
+<p>Ba cú pháp mới trong listing:</p>
+<ul>
+<li><code>BangBam() : hop(4) {}</code> có <strong>danh sách khởi tạo</strong>: sau dấu <code>:</code> ta dựng thành viên <code>hop</code> bằng <code>hop(4)</code> (vector có 4 danh sách rỗng) ngay lúc đối tượng ra đời, trước khi vào thân <code>{}</code>.</li>
+<li><code>static_cast&lt;unsigned char&gt;(c)</code> đổi mỗi ký tự thành số từ 0 đến 255, để hàm băm không phụ thuộc <code>char</code> có dấu hay không trên máy.</li>
+<li><code>hop = std::move(moi)</code> (<a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a>) chuyển cả vector <code>moi</code> vào <code>hop</code> mà không chép từng danh sách.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;list&gt;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;utility&gt;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="nf">bam</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">        </span><span class="c1">// (1) hàm băm: chuỗi -&gt; một con số</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">31</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">h</span><span class="p">;</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="k">struct</span><span class="w"> </span><span class="nc">BangBam</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">hop</span><span class="p">;</span><span class="w">   </span><span class="c1">// (2) mỗi hộp là một danh sách các khóa</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">soKhoa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="n">BangBam</span><span class="p">()</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hop</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w">                      </span><span class="c1">// bắt đầu với 4 hộp rỗng</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">chon</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">bam</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">hop</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w">            </span><span class="c1">// (3) con số -&gt; chỉ số hộp</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">co</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hop</span><span class="p">[</span><span class="n">chon</span><span class="p">(</span><span class="n">k</span><span class="p">)])</span><span class="w">      </span><span class="c1">// (4) chỉ lục trong MỘT hộp</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">them</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">co</span><span class="p">(</span><span class="n">k</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">        </span><span class="n">hop</span><span class="p">[</span><span class="n">chon</span><span class="p">(</span><span class="n">k</span><span class="p">)].</span><span class="n">push_back</span><span class="p">(</span><span class="n">k</span><span class="p">);</span><span class="w">             </span><span class="c1">// (5) đụng độ thì hộp có thêm một khóa</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">        </span><span class="o">++</span><span class="n">soKhoa</span><span class="p">;</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">soKhoa</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">hop</span><span class="p">.</span><span class="n">size</span><span class="p">())</span><span class="w"> </span><span class="n">rehash</span><span class="p">();</span><span class="w">     </span><span class="c1">// (6) hệ số tải &gt; 1 thì nới ra</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">rehash</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">                            </span><span class="c1">// (7) xây lại với gấp đôi số hộp</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">moi</span><span class="p">(</span><span class="n">hop</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hop</span><span class="p">)</span>
+<a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">h</span><span class="p">)</span>
+<a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="w">                </span><span class="n">moi</span><span class="p">[</span><span class="n">bam</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">moi</span><span class="p">.</span><span class="n">size</span><span class="p">()].</span><span class="n">push_back</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+<a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="w">        </span><span class="n">hop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">moi</span><span class="p">);</span>
+<a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>
+<a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">in</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"  "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">soKhoa</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" khoa, "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">hop</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" hop (he so tai "</span>
+<a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">                  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="n">soKhoa</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">hop</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"):"</span><span class="p">;</span>
+<a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hop</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" ["</span><span class="p">;</span>
+<a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">k</span><span class="p">;</span>
+<a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" ]"</span><span class="p">;</span>
+<a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a><span class="p">};</span>
+<a id="__codelineno-4-55" name="__codelineno-4-55" href="#__codelineno-4-55"></a>
+<a id="__codelineno-4-56" name="__codelineno-4-56" href="#__codelineno-4-56"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-57" name="__codelineno-4-57" href="#__codelineno-4-57"></a><span class="w">    </span><span class="n">BangBam</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<a id="__codelineno-4-58" name="__codelineno-4-58" href="#__codelineno-4-58"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ten</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">{</span><span class="s">"An"</span><span class="p">,</span><span class="w"> </span><span class="s">"Binh"</span><span class="p">,</span><span class="w"> </span><span class="s">"Cuong"</span><span class="p">,</span><span class="w"> </span><span class="s">"Dung"</span><span class="p">})</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="n">ten</span><span class="p">);</span>
+<a id="__codelineno-4-59" name="__codelineno-4-59" href="#__codelineno-4-59"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sau 4 khoa:</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-60" name="__codelineno-4-60" href="#__codelineno-4-60"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">in</span><span class="p">();</span>
+<a id="__codelineno-4-61" name="__codelineno-4-61" href="#__codelineno-4-61"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">them</span><span class="p">(</span><span class="s">"Em"</span><span class="p">);</span>
+<a id="__codelineno-4-62" name="__codelineno-4-62" href="#__codelineno-4-62"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sau khoa thu 5:</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-63" name="__codelineno-4-63" href="#__codelineno-4-63"></a><span class="w">    </span><span class="n">b</span><span class="p">.</span><span class="n">in</span><span class="p">();</span>
+<a id="__codelineno-4-64" name="__codelineno-4-64" href="#__codelineno-4-64"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"co Binh: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">co</span><span class="p">(</span><span class="s">"Binh"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", co Hoa: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">co</span><span class="p">(</span><span class="s">"Hoa"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-4-65" name="__codelineno-4-65" href="#__codelineno-4-65"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-4-66" name="__codelineno-4-66" href="#__codelineno-4-66"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+<th>Bộ nhớ lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>bam("An")</code>: <code>'A'</code> là 65, <code>'n'</code> là 110, nên <code>65 * 31 + 110 = 2125</code></td>
+<td></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>2125 % 4 = 1</code>: "An" vào hộp 1. "Binh" cũng ra hộp 1, "Cuong" và "Dung" cùng ra hộp 2</td>
+<td>đụng độ: hộp 1 = An, Binh; hộp 2 = Cuong, Dung</td>
+</tr>
+<tr>
+<td>(6)</td>
+<td>Sau 4 khóa: 4 &gt; 4 sai nên chưa rehash. Khóa thứ 5: 5 &gt; 4 nên rehash</td>
+<td>hệ số tải từ 1.25 sẽ về 0.625</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td>Gấp đôi thành 8 hộp, tính lại từng khóa: <code>2125 % 8 = 5</code> nên "An" dời sang hộp 5</td>
+<td>các khóa tản ra</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>co("Binh")</code> tính hộp, chỉ duyệt hộp đó</td>
+<td><code>co("Hoa")</code> duyệt một hộp rồi trả sai</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sau 4 khoa:
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  4 khoa, 4 hop (he so tai 1): [ ] [ An Binh ] [ Cuong Dung ] [ ]
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>sau khoa thu 5:
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  5 khoa, 8 hop (he so tai 0.625): [ Em ] [ Binh ] [ Dung ] [ ] [ ] [ An ] [ Cuong ] [ ]
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>co Binh: 1, co Hoa: 0
+</code></pre></div>
+<p>Mỗi cặp <code>[ ... ]</code> là một hộp, đếm từ hộp 0 bên trái. <code>co</code> trả <code>bool</code>, và <code>cout</code> in <code>true</code> là <code>1</code>, <code>false</code> là <code>0</code> (không phải chỉ số hộp). Số hộp và hàm băm ở đây là do mình chọn cho dễ đọc; <code>unordered_map</code> của thư viện dùng hàm băm khác và hệ số tải tối đa mặc định cũng là 1 (hàm <code>load_factor()</code> và <code>max_load_factor()</code> cho bạn xem). Chuẩn không quy định cụ thể số hộp hay cách chia, nên đừng dựa vào con số cụ thể.</p>
+<p><strong>Vì sao O(1) trung bình?</strong> Một lần <code>them</code>/<code>co</code> làm hai việc: tính hộp (số bước cố định, không phụ thuộc số khóa) và lục trong hộp. Nhờ rehash giữ hệ số tải không quá khoảng 1, nếu hàm băm <strong>tản đều</strong> thì mỗi hộp chỉ có vài khóa, nên lục hộp là hằng số. Việc rehash thì tốn O(n) nhưng hiếm (mỗi lần số hộp gấp đôi), nên chia đều vẫn là O(1) amortized, đúng như <code>push_back</code> ở Bài 21.</p>
+<p><strong>Xấu nhất O(n)</strong> khi mọi khóa rơi vào cùng một hộp (hàm băm dở, hoặc kẻ xấu cố ý chọn khóa cùng hộp): bảng thành một danh sách dài và <code>co</code> lục cả <code>n</code> khóa.</p>
+<p><strong>Thử thay đổi: cho hàm băm luôn trả <code>0</code></strong> (đổi <code>return h;</code> thành <code>return 0;</code>). Mình đã chạy: cả 4 khóa vào hộp 0 (<code>[ An Binh Cuong Dung ]</code>), sau rehash 5 khóa vẫn cùng hộp 0 và bảy hộp kia trống. Bảng vẫn <strong>đúng</strong> nhưng mỗi truy vấn phải lục cả danh sách: O(n).</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p><code>map</code> của Go cũng là bảng băm (tra O(1) trung bình) và tự nới khi đầy, nhưng bạn không chỉnh được hệ số tải như <code>max_load_factor</code> của C++. Khóa của map Go phải so sánh <code>==</code> được, tương tự khóa của <code>unordered_map</code> cần hàm băm và <code>==</code> (<a href="../18-map-set-unordered/">Bài 18</a>).</p>
+</div>
+<h3 id="4-heap-va-stdpriority_queue">4. Heap và <code>std::priority_queue</code><a class="headerlink" href="#4-heap-va-stdpriority_queue" title="Permanent link">&para;</a></h3>
+<p><strong>Heap</strong> (đống) ở đây là cây nhị phân <strong>gần đầy</strong>: mọi tầng đầy đủ trừ tầng cuối, và tầng cuối được lấp từ trái sang phải. Với <strong>max-heap</strong>, mỗi nút <strong>lớn hơn hoặc bằng</strong> hai con của nó (<strong>min-heap</strong> thì ngược lại, nhỏ hơn hoặc bằng). Hệ quả: phần tử lớn nhất luôn ở gốc. Luật chỉ so cha với con, anh em không có luật.</p>
+<p>Vì cây gần đầy, ta không cần nút và con trỏ: xếp các nút <strong>theo từng tầng</strong> vào một mảng (<code>vector</code>). Nút ở chỉ số <code>i</code> có con trái ở <code>2i + 1</code>, con phải ở <code>2i + 2</code>, và cha ở <code>(i - 1) / 2</code> (chia nguyên). Ví dụ mảng <code>[90, 70, 80, 30, 60, 20, 50]</code> là cây:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>            90            chỉ số 0
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>         /      \
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>       70        80       chỉ số 1, 2
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>      /  \      /  \
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    30   60   20   50     chỉ số 3, 4, 5, 6
+</code></pre></div>
+<p>Chỉ số 2 (<code>80</code>) có con ở <code>2*2+1 = 5</code> (<code>20</code>) và <code>2*2+2 = 6</code> (<code>50</code>). Bộ nhớ liền như <code>vector</code> nên heap cũng thân thiện với CPU.</p>
+<p>Hai thao tác chính đều giữ luật "cha ≥ con" và chỉ đi dọc <strong>một nhánh</strong>, dài nhất bằng độ cao cây, cỡ <strong>log n</strong>:</p>
+<ul>
+<li><strong><code>push(x)</code></strong>: đặt <code>x</code> ở <strong>ô cuối</strong>, rồi <strong>lọc lên</strong> (sift up): nếu <code>x</code> lớn hơn cha thì đổi chỗ với cha, lặp lại cho tới khi hết lớn hơn cha hoặc lên tới gốc.</li>
+<li><strong><code>pop()</code></strong> (bỏ phần tử lớn nhất): đưa phần tử ở <strong>ô cuối</strong> lên gốc (ghi đè gốc), bỏ ô cuối, rồi <strong>lọc xuống</strong> (sift down): đổi chỗ với con <strong>lớn hơn</strong> trong hai con chừng nào còn có con lớn hơn nó.</li>
+</ul>
+<p>Còn <strong><code>top()</code></strong> chỉ đọc ô 0 nên O(1). Bảng dưới theo dõi mảng khi <code>push</code> lần lượt <code>50, 30, 20, 70</code> rồi <code>pop</code> một lần. Mình đã viết một bản tự cài tối giản (một <code>vector&lt;int&gt;</code> cùng vòng <code>while</code> đổi chỗ với cha/con) và chạy: nó in đúng các mảng này.</p>
+<table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Chuyện gì xảy ra</th>
+<th>Mảng lúc này</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>push 50</code>, <code>30</code>, <code>20</code></td>
+<td><code>50</code> vào trước nên là gốc; <code>30</code> và <code>20</code> đặt ở ô cuối, cha của chúng là <code>50</code> lớn hơn nên không đổi chỗ</td>
+<td><code>[50 30 20]</code></td>
+</tr>
+<tr>
+<td><code>push 70</code></td>
+<td><code>70</code> ở chỉ số 3, cha ở chỉ số <code>(3-1)/2 = 1</code> (30) nhỏ hơn: đổi chỗ</td>
+<td><code>[50 70 20 30]</code></td>
+</tr>
+<tr>
+<td>(lọc lên tiếp)</td>
+<td><code>70</code> giờ ở chỉ số 1, cha ở chỉ số 0 (50) cũng nhỏ hơn: đổi chỗ, tới gốc thì dừng</td>
+<td><code>[70 50 20 30]</code></td>
+</tr>
+<tr>
+<td><code>pop</code></td>
+<td>Lấy <code>30</code> (ô cuối) ghi đè gốc rồi bỏ ô cuối: <code>70</code> biến mất</td>
+<td><code>[30 50 20]</code></td>
+</tr>
+<tr>
+<td>(lọc xuống)</td>
+<td>Hai con của gốc là <code>50</code> và <code>20</code>; con lớn hơn (<code>50</code>) lớn hơn <code>30</code>: đổi chỗ, xuống chỉ số 1, hết con</td>
+<td><code>[50 30 20]</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>push</code> và <code>pop</code> mỗi lần đi dọc một nhánh tối đa độ cao cây, mà cây gần đầy <code>n</code> nút cao cỡ log n nên cả hai là <strong>O(log n)</strong>. Hai điều cần nhớ: <code>pop</code>/<code>top</code> lúc rỗng là hành vi không xác định, và mảng heap <strong>không</strong> xếp theo thứ tự (<code>[70 50 20 30]</code> không phải dãy tăng hay giảm).</p>
+<p><strong><code>std::priority_queue</code></strong> (<code>#include &lt;queue&gt;</code>) là heap có sẵn, thuộc nhóm container adaptor như <code>stack</code>/<code>queue</code> (<a href="../21-big-o-cau-truc-du-lieu/">Bài 21</a>): bên trong là một <code>vector</code>. Mặc định nó là <strong>max-heap</strong>: <code>top()</code> là phần tử <strong>lớn nhất</strong>. Muốn <strong>min-heap</strong> thì khai báo ba tham số: kiểu phần tử, container bên trong, và cách so sánh <code>std::greater&lt;int&gt;</code> (<code>#include &lt;functional&gt;</code>). <code>std::greater&lt;int&gt;</code> là một kiểu so sánh nhận hai số và trả <code>a &gt; b</code>; <code>std::less&lt;int&gt;</code> trả <code>a &lt; b</code> và là <strong>mặc định</strong>. <code>priority_queue</code> đưa lên <code>top</code> phần tử mà phép so sánh xếp ở cuối cùng: với <code>less</code> đó là số lớn nhất, với <code>greater</code> là số nhỏ nhất. Các thao tác: <code>push</code>, <code>top</code> O(1), <code>pop</code> (trả <code>void</code> như <code>stack</code>), <code>empty</code>, <code>size</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;queue&gt;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">priority_queue</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mx</span><span class="p">;</span><span class="w">                                        </span><span class="c1">// (1)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">priority_queue</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">greater</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">mn</span><span class="p">;</span><span class="w">   </span><span class="c1">// (2)</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">{</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">        </span><span class="n">mx</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="n">mn</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"max-heap top = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mx</span><span class="p">.</span><span class="n">top</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", min-heap top = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mn</span><span class="p">.</span><span class="n">top</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="n">mx</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span><span class="w">                                                           </span><span class="c1">// (3)</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="n">mn</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sau pop: max-heap top = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mx</span><span class="p">.</span><span class="n">top</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", min-heap top = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mn</span><span class="p">.</span><span class="n">top</span><span class="p">()</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">              </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", con "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mx</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" phan tu</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="p">}</span>
+</code></pre></div>
+<p>Dòng (1) là max-heap mặc định. Dòng (2) có ba tham số: kiểu <code>int</code>, container nền <code>vector&lt;int&gt;</code>, và cách so sánh <code>greater&lt;int&gt;</code>: vì nó xếp số nhỏ ở cuối, <code>top()</code> là số <strong>nhỏ</strong> nhất. Dòng (3) <code>pop</code> bỏ phần tử ở <code>top</code> (<code>8</code> của max-heap, <code>1</code> của min-heap), rồi <code>top</code> mới là số kế tiếp.</p>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>max-heap top = 8, min-heap top = 1
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sau pop: max-heap top = 5, min-heap top = 3, con 3 phan tu
+</code></pre></div>
+<p>Lấy hết phần tử ra từng cái thì được dãy xếp, mỗi <code>pop</code> O(log n) nên cả dãy O(n log n): đó là <strong>heap sort</strong>. Thứ tự so sánh của <code>priority_queue</code> <strong>ngược trực giác</strong> so với <code>sort</code>: <code>sort</code> mặc định cho dãy tăng dần, còn <code>priority_queue</code> mặc định cho <code>top</code> lớn nhất, phải thêm <code>greater</code> mới ra nhỏ nhất.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Go không có <code>priority_queue</code> dựng sẵn: gói <code>container/heap</code> bắt bạn tự định nghĩa một kiểu (thường là slice) có <strong>năm</strong> hàm của <code>heap.Interface</code>: <code>Len</code>, <code>Less</code>, <code>Swap</code>, <code>Push</code>, <code>Pop</code>, rồi gọi <code>heap.Init</code>, <code>heap.Push(h, x)</code>, <code>heap.Pop(h)</code>. Nó là <strong>min-heap</strong> theo <code>Less</code> bạn viết (<code>h[i] &lt; h[j]</code> cho phần tử nhỏ nhất ở <code>h[0]</code>); muốn max-heap thì đổi dấu. Mình đã chạy bản Go với <code>{5, 1, 8}</code> rồi push <code>3</code>: lấy ra <code>1 3 5 8</code>. Cách làm trong ruột vẫn là sift up/down trên mảng như trên.</p>
+</div>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<p><strong>Top-K phần tử lớn nhất</strong> là câu hỏi phỏng vấn kinh điển: có dòng số dài <code>n</code>, lấy ra <code>K</code> số lớn nhất. Cách đơn giản là sắp xếp hết rồi lấy <code>K</code> số cuối (O(n log n)). Cách dùng heap: giữ một <strong>min-heap</strong> có tối đa <code>K</code> phần tử, thêm số mới, nếu vượt <code>K</code> thì bỏ <strong>số nhỏ nhất</strong> (chính là <code>top</code>); cuối cùng heap giữ đúng <code>K</code> số lớn nhất.</p>
+<p>Mỗi số tốn O(log K), tổng O(n log K), và chỉ tốn O(K) bộ nhớ nên làm được với dữ liệu không nạp hết vào bộ nhớ.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;queue&gt;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">topK</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">dong</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">priority_queue</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">greater</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">nho</span><span class="p">;</span><span class="w">   </span><span class="c1">// (1) min-heap, giữ tối đa k số</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">dong</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="n">nho</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">x</span><span class="p">);</span><span class="w">                                                     </span><span class="c1">// (2)</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nho</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="n">nho</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span><span class="w">                                   </span><span class="c1">// (3) bỏ số nhỏ nhất</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kq</span><span class="p">;</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">nho</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="n">kq</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nho</span><span class="p">.</span><span class="n">top</span><span class="p">());</span><span class="w">                                         </span><span class="c1">// (4) nhỏ -&gt; lớn</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="n">nho</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">kq</span><span class="p">;</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="p">}</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dong</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">topK</span><span class="p">(</span><span class="n">dong</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"3 so lon nhat (nho -&gt; lon):"</span><span class="p">;</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">kq</span><span class="p">)</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>Min-heap: <code>top()</code> là số nhỏ nhất trong những số đang giữ, tức "ứng viên yếu nhất"</td>
+</tr>
+<tr>
+<td>(2)-(3)</td>
+<td>Thêm số mới; nếu đang giữ quá <code>k</code> số thì bỏ số nhỏ nhất, đảm bảo chỉ còn <code>k</code> số lớn nhất từng thấy</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Lấy ra từ heap theo thứ tự nhỏ → lớn nên <code>kq</code> tăng dần</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>3 so lon nhat (nho -&gt; lon): 8 9 11
+</code></pre></div>
+<p><strong>Thử thay đổi: đổi <code>std::greater&lt;int&gt;</code> thành <code>std::less&lt;int&gt;</code></strong> (max-heap, <code>less</code> là mặc định). Mình đã chạy: in <code>4 2 1</code>. Giờ <code>top</code> là số <strong>lớn</strong> nhất nên mỗi lần vượt <code>k</code> ta bỏ số lớn: heap giữ ba số <strong>nhỏ</strong> nhất và in từ lớn xuống nhỏ. Chọn nhầm chiều heap là một lỗi top-K hay gặp. Mình đã chạy mọi chương trình ở mục 1–4 và mục này với <code>-fsanitize=address,undefined</code>: không có báo cáo nào.</p>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>BST so với hash map (<code>map</code> và <code>unordered_map</code>) khác nhau thế nào? Khi nào chọn cái nào?</summary>
+<p>Cây cân bằng (<code>std::map</code>) giữ khóa <strong>có thứ tự</strong>: O(log n) <strong>bảo đảm</strong>, duyệt ra khóa tăng dần, hỏi được khoảng hay "khóa nhỏ nhất lớn hơn x". Bảng băm O(1) <strong>trung bình</strong>, xấu nhất O(n), không thứ tự, khóa phải có hàm băm. Cần thứ tự, khoảng hoặc bảo đảm xấu nhất thì chọn cây; chỉ tra theo khóa thì chọn bảng băm.</p>
+</details>
+<details class="question">
+<summary>Vì sao bảng băm O(1) trung bình? Khi nào nó thành O(n)?</summary>
+<p>Hàm băm cho ra chỉ số hộp trong số bước không phụ thuộc số khóa, và rehash giữ hệ số tải (số khóa / số hộp) không quá cỡ 1. Hàm băm tản đều thì mỗi hộp có vài khóa nên lục hộp là hằng số; rehash đắt nhưng hiếm nên amortized vẫn O(1). Nhiều khóa cùng hộp (hàm băm dở hoặc bị tấn công) thì hộp thành danh sách dài, tìm là O(n).</p>
+</details>
+<details class="question">
+<summary>Tự cài hàm chèn của BST.</summary>
+<p>Đệ quy trả về gốc cây con: nút rỗng thì tạo nút mới và trả về; <code>x &lt; n-&gt;gt</code> thì <code>n-&gt;trai = chen(n-&gt;trai, x)</code>; <code>x &gt; n-&gt;gt</code> thì <code>n-&gt;phai = chen(n-&gt;phai, x)</code>; bằng nhau thì bỏ qua; cuối cùng <code>return n</code>. Chi phí O(độ cao): O(log n) nếu cây cân bằng, O(n) nếu dữ liệu đã sắp thành dây. Nhắc luôn việc hủy cây (<code>delete</code> đệ quy, con trước nút sau) để không rò rỉ.</p>
+</details>
+<details class="question">
+<summary>Heap là gì? Vì sao <code>top</code> là O(1) còn <code>push</code>/<code>pop</code> là O(log n)?</summary>
+<p>Heap là cây nhị phân gần đầy mà cha luôn lớn hơn hoặc bằng con (max-heap), lưu trong mảng với con của <code>i</code> ở <code>2i+1</code>, <code>2i+2</code>. Phần tử lớn nhất ở ô 0 nên <code>top</code> O(1). <code>push</code> đặt ở ô cuối rồi lọc lên, <code>pop</code> đưa ô cuối lên gốc rồi lọc xuống; mỗi lần đi tối đa một nhánh, cỡ log n. Heap không phải dãy đã sắp nên không tìm phần tử bất kỳ nhanh được.</p>
+</details>
+<details class="question">
+<summary>Tìm K phần tử lớn nhất trong dãy <code>n</code> số bằng <code>priority_queue</code>.</summary>
+<p>Min-heap <code>std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt;</code> giữ tối đa <code>K</code> số: mỗi số mới <code>push</code>, nếu <code>size() &gt; K</code> thì <code>pop</code> (bỏ số nhỏ nhất). Duyệt hết thì heap giữ đúng <code>K</code> số lớn nhất. Thời gian O(n log K), bộ nhớ O(K), tốt hơn sắp xếp hết (O(n log n)) khi <code>K</code> nhỏ.</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Tưởng BST lúc nào cũng O(log n)</p>
+<p>BST trần chèn dữ liệu đã sắp xếp thì thành một dây nút, và <code>tim</code>, <code>chen</code> thành O(n). Các hàm đệ quy (<code>chenNut</code>, <code>giai</code>) sâu bằng độ cao, nên dây đủ dài có thể làm tràn stack (ngưỡng cụ thể tùy giới hạn stack của máy, thường vài MB). Viết con trỏ con bằng <code>unique_ptr</code> cũng đệ quy y như vậy (<a href="../21-big-o-cau-truc-du-lieu/">Bài 21</a>). Muốn bảo đảm O(log n) dùng <code>std::map</code>/<code>std::set</code> (cây cân bằng). Khi phỏng vấn, nhớ nói luôn "xấu nhất O(n) nếu cây lệch".</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Nhầm chiều của <code>priority_queue</code>, hoặc <code>pop()</code> rỗng</p>
+<p>Mặc định <code>priority_queue&lt;int&gt;</code> cho số <strong>lớn</strong> nhất ở <code>top</code>; muốn nhỏ nhất phải khai báo <code>std::vector&lt;int&gt;, std::greater&lt;int&gt;</code>. <code>pop()</code> trả <code>void</code> (lấy <code>top()</code> trước), và <code>top()</code>/<code>pop()</code> lúc rỗng là hành vi không xác định, nên kiểm <code>empty()</code> trước.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="22">
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 1.</strong> Đọc đoạn sau. Chèn lần lượt <code>5, 3, 8, 1</code> vào một BST rỗng (trái nhỏ hơn, phải lớn hơn). Nút <code>1</code> nằm ở đâu?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>chen(5); chen(3); chen(8); chen(1);
+</code></pre></div>
+<ul>
+<li>Là con phải của nút <code>3</code>, vì <code>1</code> được chèn sau <code>3</code> trong dãy chèn</li>
+<li>Là con trái của nút <code>5</code>, vì <code>1</code> nhỏ hơn gốc nên chỉ cần rẽ trái một lần</li>
+<li>Là con trái của nút <code>3</code>, vì <code>1 &lt; 5</code> rẽ trái rồi <code>1 &lt; 3</code> rẽ trái nữa</li>
+<li>Là con trái của nút <code>8</code>, vì <code>8</code> là nút được chèn ngay trước nút <code>1</code></li>
+</ul>
+<p class="giai-thich">Từ gốc <code>5</code>, số <code>1</code> nhỏ hơn nên đi trái tới nút <code>3</code>; tại đó <code>1</code> vẫn nhỏ hơn nên đi trái nữa, gặp chỗ trống và đặt ở đó. Vị trí trong BST do so sánh giá trị quyết định, không do thứ tự chèn gần hay xa. Dừng ngay con trái của gốc là bỏ dở một bước vì chỗ đó đã có nút <code>3</code>, và nút <code>8</code> nằm bên phải gốc nên không liên quan tới <code>1</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 2.</strong> Heap lưu trong mảng <code>a = [90, 70, 80, 30, 60, 20, 50]</code>. Con trái của phần tử ở chỉ số <code>2</code> là phần tử nào?</p>
+<ul>
+<li><code>20</code>, vì con trái nằm ở chỉ số <code>2*2 + 1 = 5</code></li>
+<li><code>60</code>, vì ở chỉ số <code>2*2 = 4</code>, tức nhân đôi chỉ số</li>
+<li><code>50</code>, vì ở chỉ số <code>2*2 + 2 = 6</code></li>
+<li><code>30</code>, vì ở chỉ số <code>2 + 1 = 3</code>, ngay kế bên</li>
+</ul>
+<p class="giai-thich">Con trái của chỉ số <code>i</code> luôn ở <code>2i + 1</code>, nên của chỉ số 2 là chỉ số 5, giá trị <code>20</code>. Chỉ số <code>2i + 2</code> mới là con <strong>phải</strong> (ở đây là <code>50</code>), còn <code>2i</code> hay <code>i + 1</code> không phải công thức nào của heap. Cách đếm "con trái là chỉ số <code>2i</code>" chỉ đúng khi mảng đánh số từ 1, còn mảng của C++ đánh số từ 0.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 3.</strong> Đọc đoạn sau. Nó in ra gì?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt; q;
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>q.push(4); q.push(9); q.push(2);
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>q.pop();
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>std::cout &lt;&lt; q.top();
+</code></pre></div>
+<ul>
+<li><code>9</code>, vì <code>pop</code> bỏ số nhỏ nhất và còn lại số lớn nhất ở đỉnh</li>
+<li><code>4</code>, vì <code>pop</code> bỏ <code>2</code> nhỏ nhất, nên số nhỏ nhất kế là <code>4</code></li>
+<li><code>2</code>, vì <code>greater</code> làm <code>pop</code> bỏ số lớn nhất là <code>9</code></li>
+<li><code>2</code>, vì <code>pop</code> bỏ số được cất vào trước nhất là <code>4</code></li>
+</ul>
+<p class="giai-thich">Với <code>greater</code>, đỉnh là số nhỏ nhất nên <code>pop</code> bỏ <code>2</code>, rồi đỉnh mới là <code>4</code>. Số <code>9</code> chỉ là đỉnh nếu đây là max-heap mặc định. <code>greater</code> đặt số nhỏ nhất ở đỉnh nên thứ bị bỏ là <code>2</code> chứ không phải <code>9</code>, và <code>priority_queue</code> bỏ theo độ ưu tiên chứ không theo thứ tự cất vào như <code>queue</code>, nên <code>4</code> không bị bỏ.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 4.</strong> Vì sao một BST "trần" (không tự cân bằng) có thể tốn O(n) cho một lần tìm?</p>
+<ul>
+<li>Vì mỗi lần rẽ nó phải so sánh với mọi nút khác trước đó</li>
+<li>Vì hàm tìm đệ quy luôn phải duyệt trung tự cả cây trước</li>
+<li>Vì con trỏ trái và phải làm mỗi bước đi chậm cỡ O(n)</li>
+<li>Vì dữ liệu đã sắp xếp làm cây thành một dây nút cao bằng <code>n</code></li>
+</ul>
+<p class="giai-thich">Chi phí tìm bằng độ cao của cây, và chèn theo thứ tự tăng hoặc giảm dần làm mỗi nút mới luôn rẽ cùng một phía, nên độ cao bằng số nút. Mỗi bước chỉ so với một nút trên đường đi chứ không với mọi nút, và <code>tim</code> rẽ theo luật chứ không duyệt trung tự cả cây. Bộ nhớ rời rạc làm mỗi bước chậm hơn một hằng số, nhưng không biến O(log n) thành O(n).</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 5.</strong> Vì sao tìm trong bảng băm là O(1) <strong>trung bình</strong>?</p>
+<ul>
+<li>Hàm băm chọn thẳng một hộp, mà hộp thường chỉ vài khóa</li>
+<li>Các khóa trong hộp thường được giữ theo thứ tự để tra nhị phân</li>
+<li>Hàm băm giữ mỗi hộp đúng một khóa nên khỏi phải lục hộp</li>
+<li>Các khóa thường nằm liền nhau trong một mảng nên CPU đọc nhanh hơn</li>
+</ul>
+<p class="giai-thich">Tính hộp tốn số bước cố định, rồi chỉ lục trong hộp đó; nếu hàm băm tản đều và hệ số tải được giữ nhỏ thì mỗi hộp có vài khóa nên cả lần tìm là hằng số. Đụng độ là chuyện <strong>có thật</strong> (nhiều khóa vào một hộp), nên đáp án nói mỗi hộp đúng một khóa là sai; khi mọi khóa cùng hộp thì xấu nhất là O(n). Hàm băm không xếp thứ tự trong hộp, và các hộp là danh sách rời rạc chứ không phải một mảng liền các khóa.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 6.</strong> Đọc đoạn sau. Bảng băm bắt đầu với 4 hộp, và sau đó rehash lên 8 hộp. Khóa <code>k</code> có <code>bam(k) = 13</code>. Nó nằm ở hộp nào trước và sau khi rehash?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>chỉ số hộp = bam(k) % số hộp
+</code></pre></div>
+<ul>
+<li>Hộp 3 rồi hộp 5, vì <code>13 / 4</code> là 3 và <code>13 % 8</code> cho 5</li>
+<li>Hộp 1 rồi hộp 5, vì <code>13 % 4</code> dư 1 và <code>13 % 8</code> còn dư 5</li>
+<li>Hộp 1 rồi vẫn hộp 1, vì hàm băm không hề đổi khi rehash</li>
+<li>Hộp 2 rồi hộp 6, vì rehash dời mỗi khóa lên thêm một hộp</li>
+</ul>
+<p class="giai-thich"><code>13 % 4</code> là 1 (13 = 3·4 + 1) và <code>13 % 8</code> là 5 (13 = 1·8 + 5). Hàm băm không đổi, nhưng chỉ số hộp thì đổi vì số hộp đổi, và đó là lý do phải tính lại cho từng khóa. Thương <code>13 / 4</code> là 3 chỉ là phép chia nguyên, không phải số dư dùng để chọn hộp, và rehash không dời đều mỗi khóa một hộp.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 7.</strong> Cần lấy <code>K</code> số lớn nhất trong dòng <code>n</code> số bằng <code>std::priority_queue</code>, và muốn tiết kiệm bộ nhớ nhất. Cách nào đúng?</p>
+<ul>
+<li>Max-heap chứa cả <code>n</code> số, rồi <code>pop</code> <code>K</code> lần</li>
+<li>Max-heap giữ <code>K</code> số, quá <code>K</code> thì bỏ <code>top</code> đi</li>
+<li>Min-heap chứa cả <code>n</code> số, rồi bỏ <code>K</code> số đầu tiên</li>
+<li>Min-heap giữ <code>K</code> số, quá <code>K</code> thì bỏ <code>top</code> đi</li>
+</ul>
+<p class="giai-thich">Muốn giữ các số lớn nhất, ta phải bỏ số nhỏ nhất mỗi khi vượt <code>K</code>, mà <code>top</code> của min-heap chính là số nhỏ nhất, nên min-heap giữ <code>K</code> số cho O(n log K). Max-heap giữ <code>K</code> số sẽ bỏ số lớn nhất, ra <code>K</code> số nhỏ nhất. Hai cách chứa cả <code>n</code> số đều tốn O(n) bộ nhớ; riêng cách min-heap bỏ <code>K</code> số nhỏ nhất thì chỉ còn <code>n - K</code> số, sai luôn kết quả.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Đệ quy</strong> là hàm gọi lại chính nó với bài nhỏ hơn, gồm điểm dừng và bước đệ quy; mỗi lần gọi chồng một khung stack, nên độ sâu quá lớn sẽ tràn stack.</li>
+<li><strong>BST</strong>: nút trái nhỏ hơn, nút phải lớn hơn; chèn/tìm đi từ gốc xuống nên tốn bằng độ cao; duyệt trung tự (trái, giữa, phải) ra dãy tăng dần; hủy cây bằng <code>delete</code> đệ quy (con trước, nút sau, ASan sạch); xấu nhất O(n) khi dữ liệu chèn đã sắp xếp làm cây thành dây, còn <code>map</code>/<code>set</code> dùng cây cân bằng tự xoay để độ cao luôn cỡ log n.</li>
+<li><strong>Bảng băm chaining</strong>: hàm băm cho số, <code>% số hộp</code> cho chỉ số hộp, mỗi hộp là một danh sách (<code>vector&lt;list&lt;...&gt;&gt;</code>); đụng độ là bình thường, hệ số tải = số khóa / số hộp, vượt ngưỡng thì rehash gấp đôi số hộp và tính lại từng khóa; O(1) trung bình nhờ hộp ngắn, xấu nhất O(n) khi mọi khóa cùng hộp; Go <code>map</code> cũng là bảng băm.</li>
+<li><strong>Heap</strong> là cây gần đầy lưu trong mảng (con của <code>i</code> là <code>2i+1</code>, <code>2i+2</code>, cha là <code>(i-1)/2</code>), max-heap có cha ≥ con; <code>top</code> O(1), <code>push</code> (lọc lên) và <code>pop</code> (lọc xuống) O(log n); heap không phải dãy đã sắp và không trùng nghĩa với "heap" vùng nhớ.</li>
+<li><code>std::priority_queue</code> là max-heap mặc định, min-heap bằng <code>std::vector&lt;int&gt;, std::greater&lt;int&gt;</code>, <code>pop()</code> trả <code>void</code>; top-K lớn nhất dùng min-heap giữ tối đa K số, O(n log K); Go dùng <code>container/heap</code> với năm hàm <code>Len</code>, <code>Less</code>, <code>Swap</code>, <code>Push</code>, <code>Pop</code> (min-heap theo <code>Less</code>).</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../21-big-o-cau-truc-du-lieu/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 21 — Big-O, danh sách liên kết, stack và queue">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 21 — Big-O, danh sách liên kết, stack và queue
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../23-thuat-toan-hay-hoi/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 23 — Thuật toán hay hỏi ở phỏng vấn">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>
