@@ -35,3 +35,4 @@
 | [Bài 29 — std::async và std::future: lấy kết quả từ luồng khác](nhom-3-da-luong/29-async-future.md) | <span class="diem" data-bai="29"></span> |
 | [Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl](nhom-3-da-luong/30-thread-pool-hieu-nang.md) | <span class="diem" data-bai="30"></span> |
 | [Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ](nhom-4-oop-patterns/31-lop-dong-goi.md) | <span class="diem" data-bai="31"></span> |
+| [Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên](nhom-4-oop-patterns/32-ke-thua.md) | <span class="diem" data-bai="32"></span> |
