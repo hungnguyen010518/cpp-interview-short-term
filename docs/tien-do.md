@@ -32,3 +32,4 @@
 | [Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi](nhom-3-da-luong/26-deadlock.md) | <span class="diem" data-bai="26"></span> |
 | [Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục](nhom-3-da-luong/27-condition-variable.md) | <span class="diem" data-bai="27"></span> |
 | [Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng](nhom-3-da-luong/28-atomic.md) | <span class="diem" data-bai="28"></span> |
+| [Bài 29 — std::async và std::future: lấy kết quả từ luồng khác](nhom-3-da-luong/29-async-future.md) | <span class="diem" data-bai="29"></span> |
