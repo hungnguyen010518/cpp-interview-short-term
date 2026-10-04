@@ -35,7 +35,7 @@ Hai cách chữa. Cách thủ công: observer luôn `huyDangKy` trước khi b�
 
 Nhớ [Bài 10](../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr.md): `weak_ptr` chỉ **nhìn**, không cộng bộ đếm mạnh, nên không giữ đối tượng sống; `lock()` trả `shared_ptr` thật nếu còn sống, rỗng nếu đã hủy. Danh sách của `Chude` đổi thành `vector<weak_ptr<Quansat>>`. Mỗi lần báo, `lock()` từng cái: rỗng thì bỏ qua và dọn khỏi danh sách, còn thì gọi `capNhat`.
 
-Observer do `shared_ptr` quản lý ở nơi khác; hết đời thì chúng tự rời danh sách mà không ai phải nhớ gì (Ví dụ 2).
+Observer do `shared_ptr` quản lý ở nơi khác; hết đời thì mục của chúng được dọn khỏi danh sách ở lần báo sau, không ai phải nhớ gì (Ví dụ 2). Ví dụ 2 vẫn duyệt thẳng danh sách, nên `weak_ptr` không chữa bẫy thứ hai dưới đây.
 
 **Bẫy thứ hai: observer tự hủy đăng ký ngay lúc `capNhat`.** Ví dụ: một observer "chỉ nhận một tin" gọi `huyDangKy(this)` trong `capNhat`. Lúc đó `Chude` đang duyệt chính danh sách mà `erase` làm iterator hỏng ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)): hành vi không xác định (chạy thật ở Ví dụ 1 và Ví dụ 3, Thử thay đổi).
 
@@ -43,13 +43,13 @@ Cách chữa phổ biến: **duyệt trên bản sao** của danh sách (Ví d�
 
 ### 4. Chỉ nhắc: thứ tự gọi và thread-safety
 
-**Thứ tự gọi**: với `vector` ở đây là thứ tự đăng ký, nhưng observer không nên dựa vào đó. **Thread-safety**: luồng A `dangKy` trong lúc luồng B đang báo tin là data race trên danh sách ([Bài 25](../nhom-3-da-luong/25-data-race-mutex.md)). Thường khóa `mutex` khi sửa hoặc sao chép danh sách, rồi **nhả khóa trước khi gọi `capNhat`**, kẻo observer gọi lại `dangKy` thì tự khóa mình. Bài không chạy phần này.
+**Thứ tự gọi**: với `vector` ở đây là thứ tự đăng ký, nhưng observer không nên dựa vào đó. **Thread-safety**: luồng A `dangKy` trong lúc luồng B đang báo tin là data race trên danh sách ([Bài 25](../nhom-3-da-luong/25-data-race-mutex.md)). Thường khóa `mutex` khi sửa hoặc sao chép danh sách, rồi **nhả khóa trước khi gọi `capNhat`**, kẻo observer gọi lại `dangKy` thì có thể tự treo (khóa lại `mutex` đang giữ là hành vi không xác định). Bài không chạy phần này.
 
 ### 5. Bản gọn: `std::function` callback
 
 **Callback (hàm gọi lại)** là một hàm bạn đưa cho nơi khác, để nơi đó gọi khi có việc. Ở [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) `std::function<void(double)>` là cái hộp chứa mọi thứ gọi được nhận `double`. Ví dụ 3 cho `CamBien` giữ danh sách các hộp ấy; nơi nhận chỉ là lambda, không cần viết lớp con. `dangKy` trả một **mã số** để sau `huyDangKy(ma)`, vì hai `std::function` không so sánh bằng nhau được để tìm "cái nào cần xóa".
 
-Khi nào dùng cái nào: **giao diện** khi nơi nhận có "danh tính", nhiều thao tác hoặc trạng thái riêng (nhưng cần `weak_ptr` cho vòng đời, mục 3); **`std::function`** khi nơi nhận chỉ là một hành động nhỏ viết tại chỗ (nhưng lambda `[&x]` giữ tham chiếu nên có cùng bẫy treo; chữa bằng hủy đăng ký bằng mã số, hoặc bắt `weak_ptr`). Không bên nào tốt hơn tuyệt đối.
+Khi nào dùng cái nào: **giao diện** khi nơi nhận có "danh tính", nhiều thao tác hoặc trạng thái riêng (nhưng cần `weak_ptr` cho vòng đời, mục 3); **`std::function`** khi nơi nhận chỉ là một hành động nhỏ viết tại chỗ (nhưng lambda `[&x]` giữ tham chiếu nên có cùng bẫy treo; chữa bằng hủy đăng ký bằng mã số, hoặc bắt `weak_ptr`, cách này bài không chạy). Không bên nào tốt hơn tuyệt đối.
 
 ### 6. Strategy: đổi thuật toán lúc chạy, không sửa lớp dùng nó
 
@@ -57,19 +57,17 @@ Vấn đề: một lớp cần một "cách làm" thay được (tính phí vậ
 
 1. **Giao diện đa hình + `unique_ptr`** ([Bài 33](33-da-hinh-virtual.md), [Bài 09](../nhom-1-nen-tang-bo-nho/09-unique-ptr.md)): `ChienLuoc` có hàm thuần ảo `tinh`; đơn hàng giữ `unique_ptr<ChienLuoc>`, đổi lúc chạy bằng cách gán cái mới.
 2. **`std::function` / lambda** ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)): đơn hàng giữ một `std::function<double(double)>`. Gọn nhất khi chiến lược chỉ là **một hàm**.
-3. **Tham số template** ([Bài 34](34-template.md)): `DonHangC<CL>` giữ một `CL` bằng giá trị; kiểu chiến lược **chốt lúc biên dịch**, không có vtable.
+3. **Tham số template** ([Bài 34](34-template.md)): `DonHangC<CL>` giữ một `CL` bằng giá trị; kiểu chiến lược **chốt lúc biên dịch**; với chiến lược không có hàm ảo như ở Ví dụ 4 thì không có vtable.
 
 | | Giao diện + `unique_ptr` | `std::function` / lambda | Tham số template |
 |---|---|---|---|
 | Chọn lúc nào | Lúc chạy | Lúc chạy | Lúc biên dịch |
 | Đổi trên **cùng một** đối tượng | Được (`doi`) | Được (`doi`) | Không: `DonHangC<A>` và `DonHangC<B>` là hai kiểu khác nhau (mình thử gán, lỗi) |
-| Chi phí gọi | Gián tiếp qua bảng hàm ảo ([Bài 33](33-da-hinh-virtual.md)) | Gián tiếp qua `std::function`, có thể cấp phát (mục 7) | Gọi thẳng, thường inline được |
+| Chi phí gọi | Gián tiếp qua bảng hàm ảo ([Bài 33](33-da-hinh-virtual.md)) | Gián tiếp qua `std::function`; lúc tạo có thể cấp phát (mục 7) | Gọi thẳng, thường inline được |
 | Chiến lược có nhiều hàm hoặc trạng thái | Hợp | Gượng (một hộp một hàm) | Hợp |
 | Khi nào dùng | Nhiều thao tác, cần cất lẫn nhiều loại | Chiến lược là một hàm, viết tại chỗ | Kiểu biết lúc viết, chỗ gọi rất nóng và **đã đo** thấy cần |
 
 Cột "chi phí" chỉ là xu hướng thường được nói; chi phí thật phụ thuộc trình biên dịch và phải đo, còn bài này không đo thời gian. Một ví dụ bạn đã dùng: **`std::sort` với comparator chính là Strategy**. Thuật toán sắp xếp là phần chung; lambda so sánh `x < y` hay `x > y` ([Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md)) là cách thay được, sắp tăng hay giảm mà `sort` không đổi một dòng.
-
-**Strategy vs State** (hay bị hỏi): cùng hình dạng (một đối tượng giao việc cho một đối tượng khác), khác ý. Strategy do **bên ngoài** chọn và thường ổn định; State do đối tượng **tự đổi** khi trạng thái chuyển (máy bán hàng "chờ tiền" rồi "đã nhận tiền").
 
 ### 7. `std::function` có chi phí gì
 
@@ -149,7 +147,7 @@ phong khach: 30 do C
 
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi** (đã chạy):
 
-- **Observer bị hủy mà còn trong danh sách.** Trong `main`, tạo `auto m = std::make_unique<ManHinh>("tam");` (cần `<memory>`), `camBien.dangKy(m.get());`, rồi `m.reset();` (màn hình bị hủy, `camBien` vẫn giữ địa chỉ cũ), rồi `camBien.datNhietDo(25);`. ASan báo `heap-use-after-free ... READ of size 8` ngay trong `Chude::datNhietDo` (đọc con trỏ bảng hàm ảo của món đã bị xóa). Không có sanitizer, bản mình thử **sập, mã thoát 139**. Chuẩn không hứa kết quả nào: đây là hành vi không xác định.
+- **Observer bị hủy mà còn trong danh sách.** Trong `main`, tạo `auto m = std::make_unique<ManHinh>("tam");` (cần `<memory>`), `camBien.dangKy(m.get());`, rồi `m.reset();` (màn hình bị hủy, `camBien` vẫn giữ địa chỉ cũ), rồi `camBien.datNhietDo(25);`. ASan báo `heap-use-after-free ... READ of size 8` ngay trong `Chude::datNhietDo` (nhiều khả năng là đọc con trỏ bảng hàm ảo của món đã bị xóa). Không có sanitizer, bản mình thử **sập, mã thoát 139**. Chuẩn không hứa kết quả nào: đây là hành vi không xác định.
 - **Observer tự hủy đăng ký trong `capNhat`.** Thêm lớp con `MotLan` có `capNhat` in `MotLan <id> nhan <nhiệt độ>` rồi gọi `c_.huyDangKy(this)` (`c_` là `Chude&` nó giữ); đăng ký ba cái `id` 1, 2, 3 rồi `datNhietDo(25)`. `erase` chạy ngay trong vòng range-for: ASan không báo gì, thoát 0, mà trên g++ 11 của mình in `MotLan 1 nhan 25`, `MotLan 3 nhan 25`, `MotLan 3 nhan 25`: số 2 bị **bỏ sót**, số 3 được gọi hai lần. Với `-D_GLIBCXX_DEBUG`, g++ dừng và báo `attempt to compare a dereferenceable iterator to a singular iterator`. Đây là hành vi không xác định, kết quả "1, 3, 3" không có gì được đảm bảo.
 
 ### Ví dụ 2: danh sách `weak_ptr`, observer hết đời thì tự rời danh sách
@@ -234,7 +232,7 @@ Mình chạy với ASan + UBSan và ở `-O2`: sạch, mã thoát 0, cùng kết
 
 ### Ví dụ 3: Observer gọn bằng `std::function`, hủy đăng ký ngay trong callback
 
-`using HamNhan = std::function<void(double)>;` (1) là **bí danh kiểu**: `HamNhan` là tên ngắn của kiểu dài đó. `dangKy` (2) cất hàm kèm mã số và trả mã số; `huyDangKy(ma)` (3) bỏ mục mang mã đó. `datNhietDo` duyệt **bản sao** (4). Lambda đầu tiên (6) tự `huyDangKy` bằng mã của chính nó (7).
+`using HamNhan = std::function<void(double)>;` (1) là **bí danh kiểu**: `HamNhan` là tên ngắn của kiểu dài đó. `dangKy` (2) cất hàm kèm mã số và trả mã số; `huyDangKy(ma)` (3) bỏ mục mang mã đó. `datNhietDo` duyệt **bản sao** (4). Lambda đầu tiên (6) tự `huyDangKy` bằng mã của chính nó (7). `maMotLan` phải khai báo **trước** vì lambda cần dùng tên đó, mà mã chỉ có sau khi `dangKy` trả về. `[&]` cầm tham chiếu nên lúc lambda chạy nó thấy mã thật (1); bắt bản chép thì chỉ thấy 0, giá trị lúc tạo lambda.
 
 ```cpp
 #include <algorithm>
@@ -284,7 +282,7 @@ int main() {
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (6), (8), (9) | Ba lambda đăng ký, nhận mã 1, 2, 3; lambda (9) cầm **tham chiếu** tới `soLan` | `ds_`: 3 mục |
+| (6), (8), (9) | Ba lambda đăng ký, nhận mã 1, 2, 3; lambda (9) cầm **tham chiếu** tới `soLan`. (`struct Muc` khai báo dưới hàm dùng nó: trong lớp, thân hàm thấy cả thành viên khai báo sau) | `ds_`: 3 mục |
 | (4), (5) | Lượt 25: sao chép danh sách (cả các hộp), gọi từng hộp theo thứ tự đăng ký | `banSao`: 3 mục |
 | (7) | Lambda 1 gọi `huyDangKy(1)`: `erase` trên `ds_` **gốc**, vòng đang chạy trên `banSao` nên không hỏng | `ds_`: 2 mục |
 | (4), (5) | Lượt 26: lambda 1 không còn; (8) và (9) chạy | `ds_`: 2 mục |
@@ -301,7 +299,8 @@ so lan dem: 2
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi** (đã chạy):
 
 - **Đổi (5) sang duyệt thẳng `ds_`** (`for (const Muc& m : ds_)`): chương trình dừng bằng `terminate called after throwing an instance of 'std::bad_function_call'` (ASan không báo lỗi bộ nhớ nào); `-D_GLIBCXX_DEBUG` thì báo `attempt to compare a dereferenceable iterator to a singular iterator`. Lambda tự xóa mình khỏi danh sách **đang chạy chính nó**: hành vi không xác định, chuẩn không hứa kết quả nào.
-- **Lambda giữ tham chiếu tới biến đã chết.** Trước (9) thêm khối `{ int tam = 0; camBien.dangKy([&tam](double) { ++tam; }); }`: lần `datNhietDo` sau, ASan báo `stack-use-after-scope`. Cùng bẫy với con trỏ thô ở Ví dụ 1: `std::function` không giữ giùm đồ nó tham chiếu.
+- **Đổi `[&]` ở (6) thành `[=, &camBien]`** (chép `maMotLan`, vẫn tham chiếu `camBien`): lambda 1 thấy `maMotLan` bằng 0, `huyDangKy(0)` không xóa gì, nên nó không tự hủy: ra `mot lan: 25`, `in: 25`, `mot lan: 26`, `in: 26`.
+- **Lambda giữ tham chiếu tới biến đã chết.** Trước (9) thêm khối `{ int tam = 0; camBien.dangKy([&tam](double) { ++tam; }); }`: lượt `datNhietDo(25)` đầu tiên đã gọi lambda đó, và ASan báo lỗi truy cập vùng nhớ hết đời (trên bản của mình tên là `stack-use-after-scope`, ra cả ở -O0 và -O2; tên loại lỗi có thể khác theo bản g++ và mức tối ưu). Cùng bẫy với con trỏ thô ở Ví dụ 1: `std::function` không giữ giùm đồ nó tham chiếu.
 
 ### Ví dụ 4: Strategy ba cách cho phí vận chuyển
 
@@ -327,8 +326,7 @@ private:
     double gia_;
 };
 class PhiCoDinh : public ChienLuoc {
-public:
-    double tinh(double) const override { return 20; }
+public: double tinh(double) const override { return 20; }
 };
 class DonHangA {
 public:
@@ -403,11 +401,12 @@ C theo kg: 30, C co dinh: 20
 Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các **Thử thay đổi** (đã chạy):
 
 - **Thêm `c = d;`** sau khi tạo `d`: lỗi biên dịch `no match for 'operator=' (operand types are 'DonHangC<TheoKgT>' and 'DonHangC<CoDinhT>')`. Hai kiểu khác nhau: kiểu chiến lược nằm trong kiểu đơn hàng.
-- **Truyền lambda vào `DonHangC<TheoKgT>`** thay cho `TheoKgT{12}`: lỗi `no matching function for call to 'DonHangC<TheoKgT>::DonHangC(double, main()::<lambda(double)>)'`: tham số template là một **kiểu** cụ thể, lambda không phải `TheoKgT`.
 
 ### Ví dụ 5: `std::function` tốn gì? Đếm lần `new`
 
-Để đếm, chương trình thay hàm `operator new` toàn cục: đó là hàm C++ gọi mỗi khi `new` xin bộ nhớ (kể cả thư viện xin giùm), và C++ cho phép bạn viết bản của mình (2). Bản này tăng biến đếm (1) rồi xin bằng `malloc`; hai hàm `operator delete` trả lại bằng `free` (`noexcept` là lời hứa "hàm này không ném ngoại lệ", chữ ký của `operator delete` đòi có). Đây chỉ là bản minh họa, không xử lý hết bộ nhớ. Ba `std::function` chứa ba lambda cỡ khác nhau.
+Để đếm, chương trình thay hàm `operator new` toàn cục (2): đó là hàm C++ gọi mỗi khi `new` xin bộ nhớ, kể cả thư viện xin giùm, và C++ cho phép bạn viết bản của mình. Bản này tăng biến đếm (1) rồi xin bằng `malloc`; đây chỉ là bản minh họa, không xử lý hết bộ nhớ.
+
+Hai hàm `operator delete` trả lại bằng `free`; `noexcept` là lời hứa "hàm này không ném ngoại lệ", chữ ký của `operator delete` đòi có, và bản có `std::size_t` chỉ để trình biên dịch khỏi cảnh báo. Hai `std::function` chứa hai lambda cỡ khác nhau.
 
 ```cpp
 #include <cstdlib>
@@ -427,12 +426,8 @@ void operator delete(void* p, std::size_t) noexcept { std::free(p); }
 int main() {
     std::cout << "sizeof(std::function<int(int)>) = " << sizeof(std::function<int(int)>) << "\n";
 
-    int truoc = soLanNew;
-    std::function<int(int)> f1 = [](int x) { return x + 1; };             // (3)
-    std::cout << "lambda khong bat: " << soLanNew - truoc << " lan new\n";
-
     int k = 5;
-    truoc = soLanNew;
+    int truoc = soLanNew;
     std::function<int(int)> f2 = [k](int x) { return x + k; };            // (4)
     std::cout << "lambda bat 1 int: " << soLanNew - truoc << " lan new\n";
 
@@ -440,26 +435,22 @@ int main() {
     truoc = soLanNew;
     std::function<int(int)> f3 = [mang](int x) { return x + mang[0]; };   // (5)
     std::cout << "lambda bat mang 64 byte: " << soLanNew - truoc << " lan new\n";
-
-    std::cout << f1(1) + f2(1) + f3(1) << "\n";
     return 0;
 }
 ```
 
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
-| (1), (2) | Mỗi lần ai đó dùng `new`, biến đếm tăng 1 | `soLanNew` ở bảng treo tường |
-| (3), (4) | Lambda không bắt gì, và lambda bắt một `int` (4 byte): nằm gọn trong chính hộp `std::function` trên máy mình | `f1`, `f2` tự chứa, đếm 0 |
+| (1), (2) | Mỗi lần ai đó dùng `new`, biến đếm tăng 1 | `soLanNew`: biến toàn cục |
+| (4) | Lambda bắt một `int` (4 byte): nằm gọn trong chính hộp `std::function` trên máy mình | `f2` tự chứa, đếm 0 |
 | (5) | Lambda bắt mảng 64 byte: không vừa chỗ sẵn có trong hộp, nên hộp xin heap | `f3` giữ con trỏ tới một khối heap, đếm 1 |
 
 **Kết quả khi chạy:**
 
 ```text
 sizeof(std::function<int(int)>) = 32
-lambda khong bat: 0 lan new
 lambda bat 1 int: 0 lan new
 lambda bat mang 64 byte: 1 lan new
-10
 ```
 
 Mình chạy với ASan + UBSan và ở `-O2`: cùng kết quả, thoát 0. Đây là kết quả của g++ 11.4, libstdc++, máy 64-bit này: chuẩn không nêu ngưỡng "nhỏ", nên thư viện khác có thể cấp phát sớm hơn hoặc muộn hơn. Bài chỉ đếm cấp phát, **không đo thời gian** gọi.
@@ -485,7 +476,7 @@ Mình chạy với ASan + UBSan và ở `-O2`: cùng kết quả, thoát 0. Đâ
     Cấu trúc giống nhau: đối tượng giao việc cho một đối tượng "cách làm". Strategy: bên ngoài chọn cách làm (cách tính phí), thường không tự đổi. State: đối tượng tự đổi cách làm khi trạng thái chuyển (máy bán hàng từ "chờ tiền" sang "đã nhận tiền"), các trạng thái thường biết nhau để chuyển. Chọn theo ý định, không theo hình dạng code.
 
 ??? question "Strategy bằng đa hình vs lambda vs template?"
-    Đa hình (giao diện + `unique_ptr`): chọn lúc chạy, hợp khi chiến lược có nhiều thao tác hoặc trạng thái, mỗi lời gọi gián tiếp qua bảng hàm ảo. `std::function`/lambda: cũng chọn lúc chạy, gọn nhất khi chiến lược chỉ là một hàm. Template: chọn lúc biên dịch, không vtable nên thường gọi thẳng được, nhưng không đổi được trên cùng một đối tượng và mỗi kiểu một bản mã. Đo trước khi chọn vì chi phí.
+    Đa hình (giao diện + `unique_ptr`): chọn lúc chạy, hợp khi chiến lược có nhiều thao tác hoặc trạng thái, mỗi lời gọi gián tiếp qua bảng hàm ảo. `std::function`/lambda: cũng chọn lúc chạy, gọn nhất khi chiến lược chỉ là một hàm. Template: chọn lúc biên dịch, không hàm ảo thì không vtable nên thường gọi thẳng được, nhưng không đổi được trên cùng một đối tượng và mỗi kiểu một bản mã. Đo trước khi chọn vì chi phí.
 
 ??? question "`std::function` có chi phí gì?"
     Nó xóa kiểu nên lời gọi đi gián tiếp, và nếu thứ chứa bên trong lớn thì có thể phải cấp phát heap (ngưỡng do thư viện quyết định; trên g++ 11.4 mình thấy lambda bắt mảng 64 byte tốn một lần `new`, lambda bắt một `int` thì không). Nó cũng khó inline hơn lambda gọi trực tiếp. Chỉ nói "có thể", và đo nếu nó nằm trong đường chạy nóng.
@@ -493,13 +484,10 @@ Mình chạy với ASan + UBSan và ở `-O2`: cùng kết quả, thoát 0. Đâ
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Danh sách observer giữ con trỏ thô"
-    Observer bị hủy mà chủ đề còn gọi là hành vi không xác định (Ví dụ 1, Thử thay đổi). Dùng `weak_ptr` + `lock()` (Ví dụ 2), hoặc bảo đảm `huyDangKy` trước khi hủy.
+    Observer bị hủy mà chủ đề còn gọi là hành vi không xác định (Ví dụ 1, Thử thay đổi). Dùng `weak_ptr` + `lock()` (Ví dụ 2), hoặc bảo đảm `huyDangKy` trước khi hủy. Lambda `[&x]` làm callback cũng treo khi `x` chết trước (Ví dụ 3).
 
 !!! warning "Lỗi 2: Hủy đăng ký giữa lúc đang duyệt danh sách"
     `erase` trong lúc range-for làm iterator hỏng: bỏ sót, gọi trùng, hoặc sập (Ví dụ 1). Duyệt trên bản sao (Ví dụ 3), và đừng tin vào lần chạy "ra đúng".
-
-!!! warning "Lỗi 3: Lambda `[&x]` làm callback sống lâu hơn `x`"
-    `std::function` không giữ `x` sống: callback gọi sau khi `x` chết là hành vi không xác định (Ví dụ 3, Thử thay đổi). Bắt bản chép, hoặc hủy đăng ký trước.
 
 ## ✍️ Trắc nghiệm
 
@@ -510,7 +498,7 @@ Mình chạy với ASan + UBSan và ở `-O2`: cùng kết quả, thoát 0. Đâ
 
 ```text
 Chude camBien;                          // giữ vector<Quansat*>
-auto m = std::make_unique<ManHinh>();
+auto m = std::make_unique<ManHinh>("tam");
 camBien.dangKy(m.get());
 m.reset();
 camBien.datNhietDo(25);                 // gọi capNhat trên từng phần tử
@@ -537,10 +525,10 @@ void datNhietDo(double t) {
 
 - Không: `erase` trên `ds_` đang được duyệt làm iterator hỏng, là hành vi không xác định
 - Có: `erase` chỉ bỏ phần tử khỏi danh sách nên vòng range-for tự đi tiếp đúng
+- Có, vì range-for duyệt theo chỉ số 0, 1, 2 chứ không dùng iterator
 - Có, vì range-for sao chép `ds_` trước khi duyệt rồi mới chạy thân vòng
-- Không, nhưng chỉ khi `capNhat` là hàm ảo; hàm thường thì `erase` trong vòng an toàn
 
-<p class="giai-thich" markdown>Range-for duyệt trực tiếp trên `ds_` (không sao chép), và `erase` làm hỏng iterator của vòng đang chạy ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn `-D_GLIBCXX_DEBUG` thì dừng chương trình. Range-for không tự sao chép: bản sao phải do bạn viết. Và chuyện hàm ảo hay hàm thường không liên quan, vì lỗi nằm ở việc sửa danh sách đang duyệt.</p>
+<p class="giai-thich" markdown>Range-for duyệt trực tiếp trên `ds_` (không sao chép), và `erase` làm hỏng iterator của vòng đang chạy ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn `-D_GLIBCXX_DEBUG` thì dừng chương trình. Range-for không tự sao chép (bản sao phải do bạn viết) và cũng không duyệt theo chỉ số: nó dùng iterator ([Bài 19](../nhom-2-stl-thuat-toan/19-iterator-vo-hieu.md)), nên cái hỏng chính là cái nó đang cầm.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="4" markdown>
@@ -566,20 +554,20 @@ c = d;
 - Chạy được: `c` nhận chiến lược của `d` lúc chạy, giống `doi` của cách giao diện
 - Chạy được nhưng `c` giữ lại chiến lược cũ, vì phép gán chỉ chép cân nặng
 - Lỗi biên dịch: hai đối tượng là hai kiểu khác nhau vì tham số template khác nhau
-- Lỗi liên kết `undefined reference`, vì thân template nằm trong header
+- Lỗi liên kết, vì lớp `DonHangC` bị định nghĩa hai lần với hai tham số khác nhau
 
-<p class="giai-thich" markdown>Mỗi bộ tham số template tạo một kiểu riêng: `DonHangC<TheoKgT>` và `DonHangC<CoDinhT>` không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: `no match for 'operator='`). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Lỗi `undefined reference` ([Bài 34](34-template.md)) là chuyện tách thân template sang `.cpp`, không có ở đây.</p>
+<p class="giai-thich" markdown>Mỗi bộ tham số template tạo một kiểu riêng: `DonHangC<TheoKgT>` và `DonHangC<CoDinhT>` không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: `no match for 'operator='`). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Mỗi bộ tham số sinh một lớp riêng chứ không "định nghĩa hai lần", nên không có lỗi liên kết.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="1" markdown>
 **Câu 5.** Câu nào về chi phí của `std::function` là đúng?
 
-- Có thể cấp phát heap khi thứ chứa bên trong quá lớn, và lời gọi đi gián tiếp
-- Cấp phát heap cho thứ chứa bên trong dù nhỏ, nên lời gọi chậm hơn hàm thường
-- Không có chi phí thêm, vì lambda cất vào `std::function` thành hàm thường
-- Chỉ tốn khi lambda có bắt biến, vì mỗi biến bắt bị cấp phát riêng
+- Lời gọi đi gián tiếp, và thứ chứa bên trong quá lớn thì được đặt trên heap
+- Lời gọi đi trực tiếp như hàm thường, nhưng thứ chứa bên trong được đặt trên heap
+- Lời gọi đi gián tiếp, nhưng thứ chứa bên trong được giữ trên stack dù lớn đến đâu
+- Lời gọi đi trực tiếp, và lambda có bắt biến thì bị đặt trên heap dù nhỏ
 
-<p class="giai-thich" markdown>`std::function` xóa kiểu nên gọi gián tiếp, và có thể xin heap khi thứ gọi được quá lớn so với bộ nhớ sẵn trong hộp (Ví dụ 5: lambda bắt một `int` không xin, lambda bắt mảng 64 byte xin một lần, trên g++ 11.4). Vì thế "cấp phát cả khi nhỏ" là sai, và "không có chi phí" cũng sai vì vẫn có lời gọi gián tiếp. Lambda không bắt gì là trường hợp rẻ nhất, không phải đắt nhất.</p>
+<p class="giai-thich" markdown>`std::function` xóa kiểu nên lời gọi đi gián tiếp, và thứ chứa bên trong quá lớn so với chỗ sẵn có trong hộp thì hộp xin heap (Ví dụ 5: lambda bắt một `int` không xin, lambda bắt mảng 64 byte xin một lần, trên g++ 11.4; ngưỡng đổi theo thư viện). Nên "đặt trên heap" cho mọi thứ chứa là sai, và "bắt biến là xin heap dù nhỏ" cũng sai vì lambda bắt `int` ở Ví dụ 5 không xin. "Giữ trên stack dù lớn đến đâu" cũng sai: hộp chỉ có chỗ nhỏ, quá cỡ thì phải xin heap. Còn "lời gọi trực tiếp" sai vì hộp phải gọi qua lớp trung gian.</p>
 </div>
 
 <div class="cau-hoi" data-dap-an="2" markdown>
@@ -588,9 +576,9 @@ c = d;
 - 20, vì channel gửi mỗi giá trị tới cả hai goroutine đang đọc, như Observer
 - 10, vì mỗi giá trị gửi vào channel chỉ do một goroutine nhận
 - 10 nhưng chỉ khi channel không đệm; channel có đệm thì mỗi nơi nhận đủ 10
-- Không xác định, vì hai goroutine tranh nhau nên có giá trị bị mất
+- Không xác định, vì không gì quyết định goroutine nào nhận giá trị nào
 
-<p class="giai-thich" markdown>Mỗi giá trị gửi vào channel chỉ được **một** người nhận lấy đi, nên tổng là 10, chia nhau theo lúc nào ai rảnh (mình chạy với `-race`: tổng 10). Channel không phát cho mọi người đọc như Observer; muốn vậy mỗi observer cần channel riêng. Đệm không đổi điều đó, và giá trị không bị mất: tổng luôn đủ 10, chỉ có **ai** nhận cái nào là thay đổi từ lần chạy này sang lần khác.</p>
+<p class="giai-thich" markdown>Mỗi giá trị gửi vào channel chỉ được **một** người nhận lấy đi, nên tổng là 10, chia nhau theo lúc nào ai rảnh (mình chạy với `-race`: tổng 10). Channel không phát cho mọi người đọc như Observer; muốn vậy mỗi observer cần channel riêng. Đệm không đổi điều đó, và tổng không đổi theo lần chạy: chỉ **ai** nhận cái nào là khác.</p>
 </div>
 
 </div>
