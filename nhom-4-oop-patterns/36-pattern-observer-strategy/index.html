@@ -16,7 +16,7 @@
         <link rel="prev" href="../35-pattern-singleton-factory/">
       
       
-        <link rel="next" href="../../glossary/">
+        <link rel="next" href="../37-solid-thiet-ke/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -1470,6 +1470,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1748,7 +1769,7 @@
 <ul>
 <li>Viết <strong>Observer</strong> bằng giao diện <code>Quansat</code> (hàm thuần ảo <code>capNhat</code>) và <code>Chude</code> giữ danh sách; chạy thật hai cái bẫy: observer bị hủy mà chủ đề còn gọi (ASan báo <code>heap-use-after-free</code>), và observer tự hủy đăng ký ngay lúc chủ đề đang duyệt danh sách.</li>
 <li>Dùng <code>std::weak_ptr</code> để chủ đề <strong>không giữ observer sống</strong> (<code>lock()</code> kiểm còn sống), duyệt trên bản sao danh sách, và viết bản gọn bằng <code>std::function</code>; biết khi nào chọn giao diện, khi nào chọn function; nhắc thứ tự gọi và thread-safety.</li>
-<li>Viết <strong>Strategy</strong> ba cách (giao diện + <code>unique_ptr</code>, <code>std::function</code>/lambda, template), có bảng so sánh nói đúng và hedge; thấy <code>std::sort</code> với comparator chính là Strategy; nêu đúng chi phí của <code>std::function</code> (có chương trình đếm lần cấp phát).</li>
+<li>Viết <strong>Strategy</strong> ba cách (giao diện + <code>unique_ptr</code>, <code>std::function</code>/lambda, template), có bảng so sánh, nói rõ chỗ nào chỉ là xu hướng; thấy <code>std::sort</code> với comparator chính là Strategy; nêu đúng chi phí của <code>std::function</code> (có chương trình đếm lần cấp phát).</li>
 <li>So với Go (channel, interface một hàm, hàm là giá trị hạng nhất; đã chạy Go 1.27.1); nhắc Decorator và RAII trong một đoạn.</li>
 </ul>
 </div>
@@ -1775,7 +1796,7 @@
 <h3 id="4-chi-nhac-thu-tu-goi-va-thread-safety">4. Chỉ nhắc: thứ tự gọi và thread-safety<a class="headerlink" href="#4-chi-nhac-thu-tu-goi-va-thread-safety" title="Permanent link">&para;</a></h3>
 <p><strong>Thứ tự gọi</strong>: với <code>vector</code> ở đây là thứ tự đăng ký, nhưng observer không nên dựa vào đó. <strong>Thread-safety</strong>: luồng A <code>dangKy</code> trong lúc luồng B đang báo tin là data race trên danh sách (<a href="../../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a>). Thường khóa <code>mutex</code> khi sửa hoặc sao chép danh sách, rồi <strong>nhả khóa trước khi gọi <code>capNhat</code></strong>, kẻo observer gọi lại <code>dangKy</code> thì có thể tự treo (khóa lại <code>mutex</code> đang giữ là hành vi không xác định). Bài không chạy phần này.</p>
 <h3 id="5-ban-gon-stdfunction-callback">5. Bản gọn: <code>std::function</code> callback<a class="headerlink" href="#5-ban-gon-stdfunction-callback" title="Permanent link">&para;</a></h3>
-<p><strong>Callback (hàm gọi lại)</strong> là một hàm bạn đưa cho nơi khác, để nơi đó gọi khi có việc. Ở <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> <code>std::function&lt;void(double)&gt;</code> là cái hộp chứa mọi thứ gọi được nhận <code>double</code>. Ví dụ 3 cho <code>CamBien</code> giữ danh sách các hộp ấy; nơi nhận chỉ là lambda, không cần viết lớp con. <code>dangKy</code> trả một <strong>mã số</strong> để sau <code>huyDangKy(ma)</code>, vì hai <code>std::function</code> không so sánh bằng nhau được để tìm "cái nào cần xóa".</p>
+<p><strong>Callback (hàm gọi lại)</strong> là một hàm bạn đưa cho nơi khác, để nơi đó gọi khi có việc (đã gặp ở <a href="../../nhom-3-da-luong/26-deadlock/">Bài 26</a>). Ở <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> <code>std::function&lt;void(double)&gt;</code> là cái hộp chứa mọi thứ gọi được nhận <code>double</code>. Ví dụ 3 cho <code>CamBien</code> giữ danh sách các hộp ấy; nơi nhận chỉ là lambda, không cần viết lớp con. <code>dangKy</code> trả một <strong>mã số</strong> để sau <code>huyDangKy(ma)</code>, vì hai <code>std::function</code> không so sánh bằng nhau được để tìm "cái nào cần xóa".</p>
 <p>Khi nào dùng cái nào: <strong>giao diện</strong> khi nơi nhận có "danh tính", nhiều thao tác hoặc trạng thái riêng (nhưng cần <code>weak_ptr</code> cho vòng đời, mục 3); <strong><code>std::function</code></strong> khi nơi nhận chỉ là một hành động nhỏ viết tại chỗ (nhưng lambda <code>[&amp;x]</code> giữ tham chiếu nên có cùng bẫy treo; chữa bằng hủy đăng ký bằng mã số, hoặc bắt <code>weak_ptr</code>, cách này bài không chạy). Không bên nào tốt hơn tuyệt đối.</p>
 <h3 id="6-strategy-oi-thuat-toan-luc-chay-khong-sua-lop-dung-no">6. Strategy: đổi thuật toán lúc chạy, không sửa lớp dùng nó<a class="headerlink" href="#6-strategy-oi-thuat-toan-luc-chay-khong-sua-lop-dung-no" title="Permanent link">&para;</a></h3>
 <p>Vấn đề: một lớp cần một "cách làm" thay được (tính phí vận chuyển, giảm giá, thứ tự sắp xếp), và ta không muốn sửa lớp mỗi khi có cách mới, cũng không muốn một chuỗi <code>if</code> dài. Strategy tách <strong>cách làm</strong> ra khỏi lớp dùng nó. Ví dụ 4 làm một việc (tính phí theo cân nặng) bằng ba cách:</p>
@@ -1826,6 +1847,7 @@
 </tr>
 </tbody>
 </table>
+<p>Strategy hay bị nhầm với <strong>State</strong>: cấu trúc giống nhau, nhưng ở Strategy bên ngoài chọn cách làm, còn ở State chính đối tượng tự đổi cách làm khi trạng thái chuyển (bài này không viết State).</p>
 <p>Cột "chi phí" chỉ là xu hướng thường được nói; chi phí thật phụ thuộc trình biên dịch và phải đo, còn bài này không đo thời gian. Một ví dụ bạn đã dùng: <strong><code>std::sort</code> với comparator chính là Strategy</strong>. Thuật toán sắp xếp là phần chung; lambda so sánh <code>x &lt; y</code> hay <code>x &gt; y</code> (<a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a>) là cách thay được, sắp tăng hay giảm mà <code>sort</code> không đổi một dòng.</p>
 <h3 id="7-stdfunction-co-chi-phi-gi">7. <code>std::function</code> có chi phí gì<a class="headerlink" href="#7-stdfunction-co-chi-phi-gi" title="Permanent link">&para;</a></h3>
 <p><code>std::function</code> <strong>xóa kiểu</strong> (một hộp chứa lambda, hàm hay đối tượng gọi được khác nhau, cùng chữ ký), nên lời gọi đi gián tiếp; và nếu thứ chứa bên trong <strong>lớn</strong> thì hộp có thể phải xin heap (ngưỡng do thư viện quyết định, chuẩn không nêu). Ví dụ 5 đếm thật số lần <code>new</code> trên g++ 11.4 (libstdc++); thư viện khác có thể khác.</p>
@@ -2017,7 +2039,7 @@
 </code></pre></div>
 <p>Mình chạy với ASan + UBSan và ở <code>-O2</code>: sạch, mã thoát 0, cùng kết quả. Dòng <code>huy phong</code> cuối cùng là lúc <code>main</code> kết thúc. <strong>Thử thay đổi</strong> (đã chạy): bỏ <code>bep.reset();</code>. Cả hai màn hình nhận ở lượt 26 và <code>dang ky: 2</code>: <code>weak_ptr</code> chỉ làm danh sách <strong>không giữ sống</strong>, còn việc bếp chết hay không là do chủ của nó.</p>
 <h3 id="vi-du-3-observer-gon-bang-stdfunction-huy-ang-ky-ngay-trong-callback">Ví dụ 3: Observer gọn bằng <code>std::function</code>, hủy đăng ký ngay trong callback<a class="headerlink" href="#vi-du-3-observer-gon-bang-stdfunction-huy-ang-ky-ngay-trong-callback" title="Permanent link">&para;</a></h3>
-<p><code>using HamNhan = std::function&lt;void(double)&gt;;</code> (1) là <strong>bí danh kiểu</strong>: <code>HamNhan</code> là tên ngắn của kiểu dài đó. <code>dangKy</code> (2) cất hàm kèm mã số và trả mã số; <code>huyDangKy(ma)</code> (3) bỏ mục mang mã đó. <code>datNhietDo</code> duyệt <strong>bản sao</strong> (4). Lambda đầu tiên (6) tự <code>huyDangKy</code> bằng mã của chính nó (7). <code>maMotLan</code> phải khai báo <strong>trước</strong> vì lambda cần dùng tên đó, mà mã chỉ có sau khi <code>dangKy</code> trả về. <code>[&amp;]</code> cầm tham chiếu nên lúc lambda chạy nó thấy mã thật (1); bắt bản chép thì chỉ thấy 0, giá trị lúc tạo lambda.</p>
+<p><code>using HamNhan = std::function&lt;void(double)&gt;;</code> (1) là <strong>bí danh kiểu</strong>: <code>HamNhan</code> là tên ngắn của kiểu dài đó. <code>dangKy</code> (2) cất hàm kèm mã số và trả mã số; <code>huyDangKy(ma)</code> (3) bỏ mục mang mã đó. <code>datNhietDo</code> duyệt <strong>bản sao</strong> (4). Lambda đầu tiên (6) tự <code>huyDangKy</code> bằng mã của chính nó (7). <code>maMotLan</code> phải khai báo <strong>trước</strong> vì lambda cần dùng tên đó, mà mã chỉ có sau khi <code>dangKy</code> trả về. <code>[&amp;]</code> cầm tham chiếu nên lúc lambda chạy nó thấy mã thật (bằng 1); bắt bản chép thì chỉ thấy 0, giá trị lúc tạo lambda.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;algorithm&gt;</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
@@ -2103,7 +2125,6 @@
 <ul>
 <li><strong>Đổi (5) sang duyệt thẳng <code>ds_</code></strong> (<code>for (const Muc&amp; m : ds_)</code>): chương trình dừng bằng <code>terminate called after throwing an instance of 'std::bad_function_call'</code> (ASan không báo lỗi bộ nhớ nào); <code>-D_GLIBCXX_DEBUG</code> thì báo <code>attempt to compare a dereferenceable iterator to a singular iterator</code>. Lambda tự xóa mình khỏi danh sách <strong>đang chạy chính nó</strong>: hành vi không xác định, chuẩn không hứa kết quả nào.</li>
 <li><strong>Đổi <code>[&amp;]</code> ở (6) thành <code>[=, &amp;camBien]</code></strong> (chép <code>maMotLan</code>, vẫn tham chiếu <code>camBien</code>): lambda 1 thấy <code>maMotLan</code> bằng 0, <code>huyDangKy(0)</code> không xóa gì, nên nó không tự hủy: ra <code>mot lan: 25</code>, <code>in: 25</code>, <code>mot lan: 26</code>, <code>in: 26</code>.</li>
-<li><strong>Lambda giữ tham chiếu tới biến đã chết.</strong> Trước (9) thêm khối <code>{ int tam = 0; camBien.dangKy([&amp;tam](double) { ++tam; }); }</code>: lượt <code>datNhietDo(25)</code> đầu tiên đã gọi lambda đó, và ASan báo lỗi truy cập vùng nhớ hết đời (trên bản của mình tên là <code>stack-use-after-scope</code>, ra cả ở -O0 và -O2; tên loại lỗi có thể khác theo bản g++ và mức tối ưu). Cùng bẫy với con trỏ thô ở Ví dụ 1: <code>std::function</code> không giữ giùm đồ nó tham chiếu.</li>
 </ul>
 <h3 id="vi-du-4-strategy-ba-cach-cho-phi-van-chuyen">Ví dụ 4: Strategy ba cách cho phí vận chuyển<a class="headerlink" href="#vi-du-4-strategy-ba-cach-cho-phi-van-chuyen" title="Permanent link">&para;</a></h3>
 <p>Cùng việc "phí vận chuyển của đơn nặng 2,5 kg". Cách 1: <code>DonHangA</code> + giao diện <code>ChienLuoc</code> (<code>PhiTheoKg</code> 12 một kg, <code>PhiCoDinh</code> 20). Cách 2: <code>DonHangB</code> giữ <code>std::function</code>. Cách 3: <code>DonHangC&lt;CL&gt;</code> là template; <code>TheoKgT</code> và <code>CoDinhT</code> là hai struct <strong>không có hàm ảo</strong>, chỉ có hàm <code>tinh</code>.</p>
@@ -2220,11 +2241,10 @@
 </code></pre></div>
 <p>Mình chạy với ASan + UBSan: sạch, mã thoát 0. Các <strong>Thử thay đổi</strong> (đã chạy):</p>
 <ul>
-<li><strong>Thêm <code>c = d;</code></strong> sau khi tạo <code>d</code>: lỗi biên dịch <code>no match for 'operator=' (operand types are 'DonHangC&lt;TheoKgT&gt;' and 'DonHangC&lt;CoDinhT&gt;')</code>. Hai kiểu khác nhau: kiểu chiến lược nằm trong kiểu đơn hàng.</li>
+<li><strong>Thêm <code>c = d;</code></strong> sau khi tạo <code>d</code>: lỗi biên dịch <code>no match for ‘operator=’ (operand types are ‘DonHangC&lt;TheoKgT&gt;’ and ‘DonHangC&lt;CoDinhT&gt;’)</code>. Hai kiểu khác nhau: kiểu chiến lược nằm trong kiểu đơn hàng.</li>
 </ul>
 <h3 id="vi-du-5-stdfunction-ton-gi-em-lan-new">Ví dụ 5: <code>std::function</code> tốn gì? Đếm lần <code>new</code><a class="headerlink" href="#vi-du-5-stdfunction-ton-gi-em-lan-new" title="Permanent link">&para;</a></h3>
-<p>Để đếm, chương trình thay hàm <code>operator new</code> toàn cục (2): đó là hàm C++ gọi mỗi khi <code>new</code> xin bộ nhớ, kể cả thư viện xin giùm, và C++ cho phép bạn viết bản của mình. Bản này tăng biến đếm (1) rồi xin bằng <code>malloc</code>; đây chỉ là bản minh họa, không xử lý hết bộ nhớ.</p>
-<p>Hai hàm <code>operator delete</code> trả lại bằng <code>free</code>; <code>noexcept</code> là lời hứa "hàm này không ném ngoại lệ", chữ ký của <code>operator delete</code> đòi có, và bản có <code>std::size_t</code> chỉ để trình biên dịch khỏi cảnh báo. Hai <code>std::function</code> chứa hai lambda cỡ khác nhau.</p>
+<p>Để đếm, chương trình thay hàm <code>operator new</code> toàn cục (2): C++ gọi hàm này mỗi khi <code>new</code> xin bộ nhớ (kể cả thư viện xin giùm) và cho bạn viết bản của mình. Bản này tăng biến đếm (1) rồi xin bằng <code>malloc</code> (chỉ để minh họa). Hai hàm <code>operator delete</code> trả lại bằng <code>free</code>; <code>noexcept</code> là lời hứa "không ném ngoại lệ" mà chữ ký của <code>operator delete</code> đòi có, và bản có <code>std::size_t</code> chỉ để khỏi cảnh báo. Hai <code>std::function</code> chứa hai lambda cỡ khác nhau.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdlib&gt;</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
@@ -2338,7 +2358,7 @@
 <ul>
 <li>Biên dịch được và <code>capNhat</code> bị bỏ qua, vì <code>m</code> đã rỗng nên danh sách coi mục đó là trống</li>
 <li>Ném một ngoại lệ bắt được, vì địa chỉ trong danh sách không còn hợp lệ</li>
-<li>Hành vi không xác định, vì danh sách còn địa chỉ của món đã bị xóa</li>
+<li>Biên dịch được, nhưng <code>capNhat</code> chạy trên món đã xóa (vùng nhớ đã trả lại)</li>
 <li>Chạy bình thường và in một dòng, vì <code>Chude</code> đã sao chép món vào danh sách</li>
 </ul>
 <p class="giai-thich"><code>m.get()</code> chỉ đưa <strong>địa chỉ</strong> vào danh sách; <code>m.reset()</code> xóa món, còn địa chỉ trong danh sách vẫn nguyên (con trỏ thô không biết món đã chết). Gọi <code>capNhat</code> qua địa chỉ đó là hành vi không xác định (mình chạy: ASan báo <code>heap-use-after-free</code>; không sanitizer thì sập). Danh sách không sao chép món, nó chỉ cầm địa chỉ nên "tự giữ bản sao" sai. Con trỏ thô cũng không biến thành rỗng khi món chết, nên không có ngoại lệ hay chuyện "tự bỏ qua".</p>
@@ -2354,10 +2374,10 @@
 <ul>
 <li>Không: <code>erase</code> trên <code>ds_</code> đang được duyệt làm iterator hỏng, là hành vi không xác định</li>
 <li>Có: <code>erase</code> chỉ bỏ phần tử khỏi danh sách nên vòng range-for tự đi tiếp đúng</li>
-<li>Có, vì range-for duyệt theo chỉ số 0, 1, 2 chứ không dùng iterator</li>
+<li>Không, vì <code>erase</code> làm vector cấp phát lại nên con trỏ <code>q</code> bị treo</li>
 <li>Có, vì range-for sao chép <code>ds_</code> trước khi duyệt rồi mới chạy thân vòng</li>
 </ul>
-<p class="giai-thich">Range-for duyệt trực tiếp trên <code>ds_</code> (không sao chép), và <code>erase</code> làm hỏng iterator của vòng đang chạy (<a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/">Bài 19</a>). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn <code>-D_GLIBCXX_DEBUG</code> thì dừng chương trình. Range-for không tự sao chép (bản sao phải do bạn viết) và cũng không duyệt theo chỉ số: nó dùng iterator (<a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/">Bài 19</a>), nên cái hỏng chính là cái nó đang cầm.</p>
+<p class="giai-thich">Range-for duyệt trực tiếp trên <code>ds_</code> (không sao chép), và <code>erase</code> làm hỏng iterator của vòng đang chạy (<a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/">Bài 19</a>). Đó là hành vi không xác định; mình chạy một bản tương tự thì bỏ sót một observer và gọi trùng một observer khác, còn <code>-D_GLIBCXX_DEBUG</code> thì dừng chương trình. Range-for không tự sao chép (bản sao phải do bạn viết). Chuyện <code>erase</code> cấp phát lại vector cũng không đúng: nó dời các phần tử và giữ nguyên vùng nhớ, còn con trỏ <code>q</code> chỉ là một bản sao của phần tử. Cái hỏng là iterator mà vòng for đang cầm (<a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/">Bài 19</a>).</p>
 </div>
 <div class="cau-hoi" data-dap-an="4">
 <p><strong>Câu 3.</strong> Danh sách của chủ đề giữ <code>std::weak_ptr&lt;Quansat&gt;</code>. Với một phần tử <code>w</code>, ý nào đúng?</p>
@@ -2381,7 +2401,7 @@
 <li>Lỗi biên dịch: hai đối tượng là hai kiểu khác nhau vì tham số template khác nhau</li>
 <li>Lỗi liên kết, vì lớp <code>DonHangC</code> bị định nghĩa hai lần với hai tham số khác nhau</li>
 </ul>
-<p class="giai-thich">Mỗi bộ tham số template tạo một kiểu riêng: <code>DonHangC&lt;TheoKgT&gt;</code> và <code>DonHangC&lt;CoDinhT&gt;</code> không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: <code>no match for 'operator='</code>). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Mỗi bộ tham số sinh một lớp riêng chứ không "định nghĩa hai lần", nên không có lỗi liên kết.</p>
+<p class="giai-thich">Mỗi bộ tham số template tạo một kiểu riêng: <code>DonHangC&lt;TheoKgT&gt;</code> và <code>DonHangC&lt;CoDinhT&gt;</code> không liên quan nhau, nên không có phép gán giữa chúng và g++ báo lỗi biên dịch (mình đã chạy: <code>no match for ‘operator=’</code>). Đó chính là điều template Strategy đánh đổi: chọn lúc biên dịch thì không đổi được lúc chạy. Phép gán không "chỉ chép cân nặng", vì nó không tồn tại. Mỗi bộ tham số sinh một lớp riêng chứ không "định nghĩa hai lần", nên không có lỗi liên kết.</p>
 </div>
 <div class="cau-hoi" data-dap-an="1">
 <p><strong>Câu 5.</strong> Câu nào về chi phí của <code>std::function</code> là đúng?</p>
@@ -2464,13 +2484,13 @@
         
         
           
-          <a href="../../glossary/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bảng thuật ngữ">
+          <a href="../37-solid-thiet-ke/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Sau
               </span>
               <div class="md-ellipsis">
-                Bảng thuật ngữ
+                Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
               </div>
             </div>
             <div class="md-footer__button md-icon">

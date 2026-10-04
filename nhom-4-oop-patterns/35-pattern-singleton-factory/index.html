@@ -1443,6 +1443,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1729,8 +1750,8 @@
 <p>Hai cách hay dùng: nhận <strong>tham chiếu</strong> (<code>const BangThue&amp;</code>) khi chỉ mượn dùng, hoặc nhận <code>std::unique_ptr</code> khi đối tượng <strong>trở thành chủ</strong> của thứ đó (<a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/">Bài 09</a>: truyền bằng <code>std::move</code>). Ví dụ 2 làm cả hai.</p>
 <h3 id="5-factory-quay-nhan-on-tra-ve-unique_ptrhinh">5. Factory: quầy nhận đơn, trả về <code>unique_ptr&lt;Hinh&gt;</code><a class="headerlink" href="#5-factory-quay-nhan-on-tra-ve-unique_ptrhinh" title="Permanent link">&para;</a></h3>
 <p><strong>Từ đây ví dụ đổi sang <code>Hinh</code></strong> của <a href="../33-da-hinh-virtual/">Bài 33</a> (ví von quầy nhận đơn vẫn dùng được: khách nói "tron", quầy trao một hình tròn). <strong>Simple Factory</strong> là một hàm nhận một "tên loại" và trả đúng loại đối tượng, ví dụ <code>taoHinh(const std::string&amp; loai)</code>. Người gọi chỉ biết <code>Hinh</code>, không cần biết <code>HinhTron</code> hay <code>HinhChuNhat</code>, và việc chọn lớp con nằm gọn trong một hàm.</p>
-<p>Kiểu trả về là <code>std::unique_ptr&lt;Hinh&gt;</code> vì hai lý do: hình khác loại có cỡ khác nhau nên phải đi qua con trỏ (Bài 33), và <code>unique_ptr</code> <strong>chuyển quyền sở hữu</strong> (<a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/">Bài 09</a>) cho người gọi: món do factory <code>new</code> ra, người gọi giữ nó, hết đời thì tự xóa. Loại không biết thì trả <code>nullptr</code> (Ví dụ 4 dùng cách này; ném ngoại lệ cũng là một lựa chọn).</p>
-<p>Hạn chế của <code>taoHinh</code> là chuỗi <code>if</code>: thêm một loại hình là phải <strong>sửa hàm</strong>. <strong>Registry factory</strong> (factory có sổ đăng ký) đảo lại chuyện đó: một <code>std::map&lt;std::string, std::function&lt;std::unique_ptr&lt;Hinh&gt;()&gt;&gt;</code> (<a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/">Bài 18</a>, <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a>) ghi "tên loại -&gt; hàm làm ra nó". Muốn thêm loại mới, chỉ <strong>đăng ký</strong> thêm một dòng, không sửa lớp factory: ý "mở để mở rộng, đóng với sửa đổi" mà Bài 37 gọi là Open/Closed.</p>
+<p>Kiểu trả về là <code>std::unique_ptr&lt;Hinh&gt;</code> vì hai lý do: hình khác loại có cỡ khác nhau nên phải đi qua con trỏ (<a href="../33-da-hinh-virtual/">Bài 33</a>), và <code>unique_ptr</code> <strong>chuyển quyền sở hữu</strong> (<a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/">Bài 09</a>) cho người gọi: món do factory <code>new</code> ra, người gọi giữ nó, hết đời thì tự xóa. Loại không biết thì trả <code>nullptr</code> (Ví dụ 4 dùng cách này; ném ngoại lệ cũng là một lựa chọn).</p>
+<p>Hạn chế của <code>taoHinh</code> là chuỗi <code>if</code>: thêm một loại hình là phải <strong>sửa hàm</strong>. <strong>Registry factory</strong> (factory có sổ đăng ký) đảo lại chuyện đó: một <code>std::map&lt;std::string, std::function&lt;std::unique_ptr&lt;Hinh&gt;()&gt;&gt;</code> (<a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/">Bài 18</a>, <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a>) ghi "tên loại -&gt; hàm làm ra nó". Muốn thêm loại mới, chỉ <strong>đăng ký</strong> thêm một dòng, không sửa lớp factory: ý "mở để mở rộng, đóng với sửa đổi" mà <a href="../37-solid-thiet-ke/">Bài 37</a> gọi là Open/Closed.</p>
 <p><strong>Factory Method</strong> là biến thể dùng kế thừa: lớp cha có hàm ảo trả sản phẩm, <strong>lớp con quyết định tạo gì</strong>, còn code ở lớp cha dùng sản phẩm mà không biết kiểu thật. Phác thảo (không phải chương trình đầy đủ, mình không chạy):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>class BanLamHinh {                       // lớp cha, có hàm ảo (Bài 33)
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>public:
@@ -2258,13 +2279,13 @@
 </ul>
 <p class="giai-thich"><code>find</code> không thấy khóa thì trả <code>end()</code>, một vị trí không trỏ tới phần tử nào, nên đọc <code>it-&gt;second</code> là hành vi không xác định: phải kiểm <code>it != kho.end()</code> trước (Ví dụ 4, dòng (5)). <code>second()</code> không tự trả <code>nullptr</code>. Chuyện ném <code>out_of_range</code> là của <code>at()</code>, không phải của <code>find</code>. Còn lambda trả <code>unique_ptr&lt;HinhTron&gt;</code> thì biên dịch được, vì kết quả đổi được sang <code>unique_ptr&lt;Hinh&gt;</code> (đúng như ba lambda ở Ví dụ 4).</p>
 </div>
-<div class="cau-hoi" data-dap-an="1">
+<div class="cau-hoi" data-dap-an="4">
 <p><strong>Câu 6.</strong> Tám goroutine cùng gọi <code>once.Do(f)</code> (<code>once</code> là <code>sync.Once</code>). Điều nào đúng?</p>
 <ul>
-<li><code>f</code> chạy đúng một lần, và mọi lời gọi <code>Do</code> chỉ trả về sau khi <code>f</code> đã chạy xong</li>
+<li>Phải tự bọc <code>once.Do</code> bằng <code>sync.Mutex</code>, nếu không <code>f</code> có thể chạy nhiều lần</li>
 <li><code>f</code> chạy đúng một lần, nhưng goroutine đến sau trả về ngay mà không chờ <code>f</code> xong</li>
 <li><code>f</code> chạy đúng một lần, nhưng có thể chạy trên một goroutine không gọi <code>Do</code></li>
-<li>Phải tự bọc <code>once.Do</code> bằng <code>sync.Mutex</code>, nếu không <code>f</code> có thể chạy nhiều lần</li>
+<li><code>f</code> chạy đúng một lần, và mọi lời gọi <code>Do</code> chỉ trả về sau khi <code>f</code> đã chạy xong</li>
 </ul>
 <p class="giai-thich">Mình đã chạy tám goroutine với <code>f</code> ngủ 100 ms: <code>f</code> chạy 1 lần và không goroutine nào thấy <code>f</code> chưa xong khi <code>Do</code> trả về. Việc chờ đó chính là điều khiến <code>once.Do</code> dùng được cho khởi tạo Singleton. <code>Do</code> tự an toàn khi nhiều goroutine gọi, nên không cần mutex bọc ngoài. Và <code>f</code> chạy ngay trong goroutine đầu tiên gọi <code>Do</code>, không đi nơi khác.</p>
 </div>

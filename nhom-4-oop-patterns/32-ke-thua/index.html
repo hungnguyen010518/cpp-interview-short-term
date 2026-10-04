@@ -1461,6 +1461,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1758,19 +1779,19 @@
 </div>
 <h3 id="4-che-ham-name-hiding">4. Che hàm (name hiding)<a class="headerlink" href="#4-che-ham-name-hiding" title="Permanent link">&para;</a></h3>
 <p>Lớp con khai báo một hàm <strong>cùng tên</strong> với hàm của cha thì hàm đó <strong>che</strong> (hide) hàm của cha. Quy tắc che là theo <strong>tên</strong>, không theo danh sách kiểu tham số: tìm tên <code>in</code> trong lớp con trước, thấy là dừng, <strong>không</strong> nhìn lên cha nữa.</p>
-<p>Đây chưa phải "ghi đè" (override) của <strong>đa hình</strong> (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần <code>virtual</code> ở Bài 33.</p>
+<p>Đây chưa phải "ghi đè" (override) của <strong>đa hình</strong> (polymorphism: một lời gọi tự chạy đúng hàm theo đối tượng thật), thứ cần <code>virtual</code> ở <a href="../33-da-hinh-virtual/">Bài 33</a>.</p>
 <p>Hệ quả bất ngờ: giả sử cha có hai hàm cùng tên <code>in(int)</code> và <code>in(const std::string&amp;)</code>. Hai hàm như vậy gọi là hai bản <strong>quá tải</strong> (overload): cùng tên, khác kiểu tham số, trình biên dịch chọn bản theo đối số. Nếu con chỉ thêm <code>in(double)</code> thì cả hai bản của cha bị che, và <code>con.in("abc")</code> là lỗi biên dịch dù cha có bản nhận chuỗi (Ví dụ 3 chạy thật).</p>
 <p>Có hai cách gỡ. Gọi rõ <code>con.Cha::in(...)</code>, hoặc viết <code>using Cha::in;</code> như một dòng bên trong thân lớp con (thuộc phần <code>public:</code>), nghĩa là "đưa các hàm <code>in</code> của <code>Cha</code> vào để cùng xét với <code>in</code> của con". Ví dụ 3 có thử cả hai.</p>
 <h3 id="5-upcast-slicing-va-kich-thuoc">5. Upcast, slicing và kích thước<a class="headerlink" href="#5-upcast-slicing-va-kich-thuoc" title="Permanent link">&para;</a></h3>
 <p>Vì <code>XeChay</code> là một <code>DoChoi</code>, bạn gán <strong>con trỏ hoặc tham chiếu</strong> <code>XeChay</code> cho <code>DoChoi*</code>, <code>DoChoi&amp;</code> được, không cần ép kiểu: đó là <strong>upcast</strong> (nâng lên lớp cha). Hàm nhận <code>const DoChoi&amp;</code> nhận được mọi loại đồ chơi con. Chiều ngược lại (<code>DoChoi</code> sang <code>XeChay</code>) không tự chuyển được, vì một <code>DoChoi</code> thường chưa chắc là xe. Ép kiểu tường minh vẫn biên dịch được nhưng dễ sai (gọi là downcast, nói ở bài sau).</p>
-<p>Qua <code>DoChoi&amp;</code> bạn chỉ <strong>thấy</strong> phần <code>DoChoi</code>. Hàm nào được gọi lúc này do <strong>kiểu khai báo</strong> (<code>DoChoi&amp;</code>) quyết định, nên hàm <code>gioiThieu</code> của cha chạy dù đối tượng thật là xe (Ví dụ 4). Đó <strong>chưa phải đa hình</strong>: Bài 33 sẽ thêm <code>virtual</code> để đổi đúng chuyện này.</p>
-<p>Gán <strong>cả đối tượng</strong> <code>XeChay</code> vào một biến kiểu <code>DoChoi</code> (không phải tham chiếu) thì chỉ phần cha được chép, phần xe bị cắt mất: gọi là <strong>slicing</strong> (cắt lát). Bài 33 dạy kỹ; ở đây chỉ cần nhớ bẫy là có thật, và Ví dụ 4 có một dòng làm vậy.</p>
+<p>Qua <code>DoChoi&amp;</code> bạn chỉ <strong>thấy</strong> phần <code>DoChoi</code>. Hàm nào được gọi lúc này do <strong>kiểu khai báo</strong> (<code>DoChoi&amp;</code>) quyết định, nên hàm <code>gioiThieu</code> của cha chạy dù đối tượng thật là xe (Ví dụ 4). Đó <strong>chưa phải đa hình</strong>: <a href="../33-da-hinh-virtual/">Bài 33</a> sẽ thêm <code>virtual</code> để đổi đúng chuyện này.</p>
+<p>Gán <strong>cả đối tượng</strong> <code>XeChay</code> vào một biến kiểu <code>DoChoi</code> (không phải tham chiếu) thì chỉ phần cha được chép, phần xe bị cắt mất: gọi là <strong>slicing</strong> (cắt lát). <a href="../33-da-hinh-virtual/">Bài 33</a> dạy kỹ; ở đây chỉ cần nhớ bẫy là có thật, và Ví dụ 4 có một dòng làm vậy.</p>
 <p>Cuối cùng, <code>sizeof(Con)</code> không nhỏ hơn <code>sizeof(Cha)</code> vì món con chứa cả phần cha; thường là lớn hơn. Con số cụ thể tùy máy và trình biên dịch (có <strong>căn lề</strong>: máy chèn byte đệm để mỗi thành viên nằm ở địa chỉ thuận tiện), nên chỉ nên tin con số mình đo trên máy mình.</p>
 <h3 id="6-la-mot-hay-co-mot">6. "Là một" hay "có một"<a class="headerlink" href="#6-la-mot-hay-co-mot" title="Permanent link">&para;</a></h3>
 <p>Hai cách dùng lại code: <strong>kế thừa</strong> nói "Con <strong>là một</strong> Cha" (is-a), còn <strong>thành viên</strong> nói "Con <strong>có một</strong> Cha" (has-a, hay <strong>composition</strong>, tạm dịch "ghép"). Xe hơi <strong>có một</strong> động cơ, không <strong>là một</strong> động cơ, nên động cơ là thành viên.</p>
 <p>Quy tắc: <strong>chỉ kế thừa công khai khi đúng là is-a</strong>, nghĩa là mọi nơi dùng <code>Cha</code> thì thay bằng <code>Con</code> vẫn đúng. "Muốn dùng lại hàm của cha" không phải lý do: dùng thành viên được mà không dính chặt hai lớp.</p>
 <p>Mình đã chạy hai bản của xe. Bản đúng: <code>XeHoi</code> giữ <code>DongCo dongCo_;</code> là thành viên <code>private</code> và chỉ đưa ra hàm <code>chay()</code>. Bản sai: <code>class XeXau : public DongCo {};</code> chỉ để dùng lại <code>khoiDong()</code>; khi đó hàm <code>lapVaoMayBom(const DongCo&amp;)</code> nhận được cả xe (upcast hợp lệ), và ai cũng gọi được hàm của động cơ trên xe.</p>
-<p>Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật, nhưng trong code thì sao? Ví dụ 5 cho thấy nó vỡ ở đâu. Ý tổng quát (<strong>nguyên lý thay thế Liskov</strong>) sẽ dạy đủ ở Bài 37; bài này chỉ cần biết câu hỏi để tự hỏi.</p>
+<p>Ví dụ kinh điển là hình vuông: toán học nói vuông là chữ nhật, nhưng trong code thì sao? Ví dụ 5 cho thấy nó vỡ ở đâu. Ý tổng quát (<strong>nguyên lý thay thế Liskov</strong>) sẽ dạy đủ ở <a href="../37-solid-thiet-ke/">Bài 37</a>; bài này chỉ cần biết câu hỏi để tự hỏi.</p>
 <h3 id="7-chi-nhac-ke-thua-privateprotected-final-ke-thua-a">7. Chỉ nhắc: kế thừa <code>private</code>/<code>protected</code>, <code>final</code>, kế thừa đa<a class="headerlink" href="#7-chi-nhac-ke-thua-privateprotected-final-ke-thua-a" title="Permanent link">&para;</a></h3>
 <p><strong>Kế thừa <code>private</code></strong> (<code>class Con : private Cha</code>, cũng là mặc định của <code>class</code>) nghĩa là "con dùng cha để làm việc bên trong", không còn là is-a với bên ngoài: hàm của cha thành <code>private</code> trong con và upcast từ ngoài bị cấm (mình đã chạy: <code>class Con1 : Cha {}</code> rồi <code>Con1 a; a.ham();</code> ra <code>‘void Cha::ham() const’ is inaccessible within this context</code>, còn <code>Cha&amp; r = a;</code> ra <code>‘Cha’ is an inaccessible base of ‘Con1’</code>). Kế thừa <code>protected</code> tương tự, nhưng lớp con của con vẫn thấy. Muốn "dùng lại để làm bên trong" thì thành viên thường gọn hơn.</p>
 <p><strong><code>final</code></strong> đặt sau tên lớp (<code>class Kin final {}</code>) cấm mọi lớp kế thừa nó (<a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> đã nhắc tên). Mình đã chạy: <code>class Con : public Kin {}</code> ra <code>error: cannot derive from ‘final’ base ‘Kin’ in derived type ‘Con’</code>.</p>
@@ -2156,7 +2177,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chu nhat: 6 x 3
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>hinh vuong: 6 x 3
 </code></pre></div>
-<p>Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng <strong>"hình vuông" 6 x 3 không còn vuông</strong>: bất biến "hai cạnh bằng nhau" (<a href="../31-lop-dong-goi/">Bài 31</a>) bị vỡ qua hàm của cha. Cha có một <strong>hợp đồng</strong> ngầm: "đổi chiều rộng thì chiều cao giữ nguyên", và <code>HinhVuong</code> không giữ được hợp đồng đó. Vì vậy <code>HinhVuong</code> <strong>không thay được</strong> <code>HinhChuNhat</code>, và "vuông là chữ nhật" trong toán không thành is-a trong code. Đây là lỗi thiết kế chứ không phải thiếu tính năng của C++; cách sửa (như thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở Bài 37.</p>
+<p>Mình chạy với ASan + UBSan: sạch. Chương trình biên dịch và chạy suôn sẻ, nhưng <strong>"hình vuông" 6 x 3 không còn vuông</strong>: bất biến "hai cạnh bằng nhau" (<a href="../31-lop-dong-goi/">Bài 31</a>) bị vỡ qua hàm của cha. Cha có một <strong>hợp đồng</strong> ngầm: "đổi chiều rộng thì chiều cao giữ nguyên", và <code>HinhVuong</code> không giữ được hợp đồng đó. Vì vậy <code>HinhVuong</code> <strong>không thay được</strong> <code>HinhChuNhat</code>, và "vuông là chữ nhật" trong toán không thành is-a trong code. Đây là lỗi thiết kế chứ không phải thiếu tính năng của C++; cách sửa (như thiết kế lại hai lớp không kế thừa nhau) sẽ bàn ở <a href="../37-solid-thiet-ke/">Bài 37</a>.</p>
 <h2 id="go-embedding-giong-o-mot-cho-khac-o-ba-cho">Go: embedding giống ở một chỗ, khác ở ba chỗ<a class="headerlink" href="#go-embedding-giong-o-mot-cho-khac-o-ba-cho" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Bạn biết Go?</p>
@@ -2165,7 +2186,7 @@
 - <strong>Khác 1, không có upcast</strong>: <code>var d dochoi.DoChoi = x</code> lỗi <code>cannot use x (variable of struct type XeChay) as dochoi.DoChoi value in variable declaration</code>; phải viết <code>x.DoChoi</code> lấy phần nhúng ra (một bản sao).
 - <strong>Khác 2, receiver vẫn là phần cha</strong>: bên trong hàm của <code>DoChoi</code>, <code>d</code> có kiểu <code>dochoi.DoChoi</code> (mình in <code>%T</code>); khi nó gọi <code>d.Ten2()</code> thì chạy bản của <code>DoChoi</code>, không phải bản che của <code>XeChay</code>. Với struct nhúng, Go không có thứ như <code>this</code> trỏ về "con".
 - <strong>Khác 3, không có <code>protected</code></strong>: Go có hai mức: viết hoa (thấy từ package khác) và viết thường (chỉ trong package). Mình chạy: <code>x.ma</code> ở package khác lỗi <code>cannot refer to unexported field ma</code>.
-- <strong>Đa hình</strong> của Go là <strong>interface</strong>: <code>XeChay</code> thỏa interface <code>GioiThieuer</code> nhờ hàm được nâng lên, mà không cần khai báo gì (mình chạy). Bài 33 sẽ so với <code>virtual</code> của C++.</p>
+- <strong>Đa hình</strong> của Go là <strong>interface</strong>: <code>XeChay</code> thỏa interface <code>GioiThieuer</code> nhờ hàm được nâng lên, mà không cần khai báo gì (mình chạy). <a href="../33-da-hinh-virtual/">Bài 33</a> sẽ so với <code>virtual</code> của C++.</p>
 </div>
 <h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
 <details class="question">
@@ -2186,7 +2207,7 @@
 </details>
 <details class="question">
 <summary>Name hiding (che hàm) là gì?</summary>
-<p>Hàm ở lớp con cùng <strong>tên</strong> với hàm của cha thì che toàn bộ hàm cùng tên của cha, kể cả các bản quá tải khác kiểu tham số, vì tìm tên dừng ở lớp con. Gọi bản bị che phải viết <code>Cha::ham()</code> hoặc kéo tên về bằng <code>using Cha::ham;</code>. Đây chưa phải ghi đè đa hình (cần <code>virtual</code>, Bài 33).</p>
+<p>Hàm ở lớp con cùng <strong>tên</strong> với hàm của cha thì che toàn bộ hàm cùng tên của cha, kể cả các bản quá tải khác kiểu tham số, vì tìm tên dừng ở lớp con. Gọi bản bị che phải viết <code>Cha::ham()</code> hoặc kéo tên về bằng <code>using Cha::ham;</code>. Đây chưa phải ghi đè đa hình (cần <code>virtual</code>, <a href="../33-da-hinh-virtual/">Bài 33</a>).</p>
 </details>
 <h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
@@ -2217,7 +2238,7 @@
 <ul>
 <li><code>pcnNCP</code>, vì thành viên của con dựng trước cả phần cha</li>
 <li><code>cpnCPN</code>, vì hủy theo đúng thứ tự đã dựng ra</li>
-<li><code>cpnNPC</code>, vì cha dựng trước, hủy sau cùng</li>
+<li><code>cpnNPC</code>, vì cha dựng trước tiên và bị hủy sau cùng</li>
 <li><code>ncpPCN</code>, vì thân hàm con chạy trước phần cha</li>
 </ul>
 <p class="giai-thich">Cha dựng trước (<code>c</code>), rồi thành viên của con (<code>p</code>), rồi thân hàm tạo con (<code>n</code>); hủy thì ngược lại: thân hàm hủy con (<code>N</code>), thành viên (<code>P</code>), cuối cùng cha (<code>C</code>). Thành viên của con không vượt lên trước cha. Hủy không theo thứ tự đã dựng mà theo thứ tự ngược. Thân hàm tạo con chạy sau khi cha và thành viên đã xong.</p>
@@ -2265,7 +2286,7 @@
 <li><code>chacon</code>, vì hàm nào chạy tùy kiểu của biến dùng để gọi</li>
 <li><code>chacha</code>, vì mọi lời gọi qua đối tượng <code>Con</code> đều dùng hàm của cha</li>
 </ul>
-<p class="giai-thich"><code>r</code> có kiểu khai báo <code>Cha&amp;</code> nên <code>r.noi()</code> gọi <code>Cha::noi</code> (in <code>cha</code>), còn <code>c</code> có kiểu <code>Con</code> nên in <code>con</code>; không có <code>virtual</code> thì kiểu biến quyết định (Bài 33 đổi điều này). Đối tượng thật là <code>Con</code> không làm hàm của con chạy khi gọi qua <code>Cha&amp;</code>. Gán <code>Con</code> cho <code>Cha&amp;</code> hợp lệ (upcast), nên chương trình biên dịch được. Và <code>c.noi()</code> có kiểu <code>Con</code> nên dùng hàm của con, không phải của cha.</p>
+<p class="giai-thich"><code>r</code> có kiểu khai báo <code>Cha&amp;</code> nên <code>r.noi()</code> gọi <code>Cha::noi</code> (in <code>cha</code>), còn <code>c</code> có kiểu <code>Con</code> nên in <code>con</code>; không có <code>virtual</code> thì kiểu biến quyết định (<a href="../33-da-hinh-virtual/">Bài 33</a> đổi điều này). Đối tượng thật là <code>Con</code> không làm hàm của con chạy khi gọi qua <code>Cha&amp;</code>. Gán <code>Con</code> cho <code>Cha&amp;</code> hợp lệ (upcast), nên chương trình biên dịch được. Và <code>c.noi()</code> có kiểu <code>Con</code> nên dùng hàm của con, không phải của cha.</p>
 </div>
 <div class="cau-hoi" data-dap-an="4">
 <p><strong>Câu 5.</strong> Đọc đoạn sau. Dòng nào lỗi biên dịch?</p>
@@ -2288,7 +2309,7 @@
 <div class="cau-hoi" data-dap-an="1">
 <p><strong>Câu 6.</strong> <code>HinhVuong</code> kế thừa <code>public</code> từ <code>HinhChuNhat</code> (có <code>datRong</code> và <code>datCao</code> đổi riêng từng cạnh). Vấn đề thiết kế nào là thật?</p>
 <ul>
-<li>Hàm của cha đổi một cạnh làm hình vuông hết vuông, nên con không thay được cha</li>
+<li>Hàm của cha đổi một cạnh làm hình vuông hết vuông, nên con không thay được cha mọi nơi</li>
 <li><code>HinhVuong</code> không biên dịch được, vì con phải tự viết lại mọi hàm đổi cạnh của cha</li>
 <li>Mỗi <code>HinhVuong</code> tốn gấp đôi bộ nhớ, vì trong đối tượng có hai bản của <code>HinhChuNhat</code></li>
 <li><code>datRong</code> của cha tự đổi luôn cạnh còn lại ở con nên hình vuông vẫn vuông, chỉ tốn thêm lệnh</li>
@@ -2300,8 +2321,8 @@
 <ol>
 <li><code>class Con : public Cha</code> làm món con chứa một phần cha; thứ tự <strong>cha dựng trước, con hủy trước</strong> (cha, thành viên con theo khai báo, thân hàm tạo con; hủy ngược lại), muốn dùng hàm tạo nào của cha thì gọi nó trong danh sách khởi tạo (mình in ra thứ tự thật).</li>
 <li><code>protected</code> cho code của lớp và lớp con, không cho bên ngoài; hàm của cha gọi bằng <code>Cha::ham()</code>; hàm cùng <strong>tên</strong> ở con <strong>che</strong> mọi hàm cùng tên của cha kể cả các bản quá tải (name hiding, mình chạy ra lỗi thật), gỡ bằng <code>using Cha::ham;</code>.</li>
-<li>Upcast con trỏ/tham chiếu Con sang Cha hợp lệ, nhưng qua kiểu Cha chỉ thấy hàm của Cha (chưa phải đa hình, Bài 33); gán cả đối tượng Con vào biến Cha làm cắt mất phần con (slicing); <code>sizeof(Con)</code> thường lớn hơn <code>sizeof(Cha)</code> (không nhỏ hơn trong mọi lần mình đo), số cụ thể tùy máy và căn lề.</li>
-<li>Chỉ kế thừa công khai khi đúng "là một": mọi nơi dùng Cha thay bằng Con vẫn đúng; muốn dùng lại cài đặt thì dùng thành viên ("có một"); hình vuông kế thừa hình chữ nhật vỡ bất biến (Liskov, Bài 37).</li>
+<li>Upcast con trỏ/tham chiếu Con sang Cha hợp lệ, nhưng qua kiểu Cha chỉ thấy hàm của Cha (chưa phải đa hình, <a href="../33-da-hinh-virtual/">Bài 33</a>); gán cả đối tượng Con vào biến Cha làm cắt mất phần con (slicing); <code>sizeof(Con)</code> thường lớn hơn <code>sizeof(Cha)</code> (không nhỏ hơn trong mọi lần mình đo), số cụ thể tùy máy và căn lề.</li>
+<li>Chỉ kế thừa công khai khi đúng "là một": mọi nơi dùng Cha thay bằng Con vẫn đúng; muốn dùng lại cài đặt thì dùng thành viên ("có một"); hình vuông kế thừa hình chữ nhật vỡ bất biến (Liskov, <a href="../37-solid-thiet-ke/">Bài 37</a>).</li>
 <li><code>class Con : Cha</code> mặc định kế thừa <code>private</code>; <code>final</code> cấm kế thừa lớp; kế thừa đa dựng cha theo thứ tự liệt kê, bài toán kim cương cho hai bản của ông (gỡ bằng kế thừa <code>virtual</code>). Go: embedding gọi được hàm của "cha", nhưng không có upcast, receiver vẫn là phần nhúng, không có <code>protected</code>; đa hình bằng interface.</li>
 </ol>
 
