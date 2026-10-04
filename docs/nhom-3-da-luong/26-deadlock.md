@@ -6,7 +6,7 @@
     - Nhận ra **tự deadlock** (một luồng xin lại khóa mình đang giữ), và phân biệt deadlock với **livelock** và **starvation** (chỉ định nghĩa ngắn).
     - Tìm deadlock trong chương trình đang treo bằng `gdb` (`info threads`, `thread apply all bt`) và bằng ThreadSanitizer; so với Go, nơi runtime chỉ báo deadlock khi **mọi** goroutine đều ngủ.
 
-**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `std::ref`, lambda làm hàm luồng, `sleep_for`), [Bài 25](25-data-race-mutex.md) (`std::mutex`, `lock_guard`, vùng găng, TSan, khóa hai lần trong một luồng là hành vi không xác định), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `&`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`{...}` điền các trường của struct, `điều kiện ? A : B`), [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (con trỏ hàm, lambda), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer).
+**Bạn cần biết trước:** [Bài 24](24-thread-co-ban.md) (`std::thread`, `join`, `std::ref`, lambda làm hàm luồng, `sleep_for`), [Bài 25](25-data-race-mutex.md) (`std::mutex`, `lock_guard`, vùng găng, TSan, khóa hai lần trong một luồng là hành vi không xác định), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (RAII, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (tham chiếu `&`), [Bài 14](../nhom-1-nen-tang-bo-nho/14-cpp14-17.md) (`{...}` điền các trường của struct, `điều kiện ? A : B`), [Bài 13](../nhom-1-nen-tang-bo-nho/13-cpp11-14-17.md) và [Bài 20](../nhom-2-stl-thuat-toan/20-algorithm-lambda.md) (lambda `[&]`, con trỏ hàm), [Bài 15](../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu.md) (hành vi không xác định, sanitizer).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -17,7 +17,7 @@ Nếu cả hai cùng lấy được thẻ đầu tiên của mình, An đứng c
 Đó là **deadlock** (khóa chết): các luồng chờ nhau theo vòng tròn nên không luồng nào chạy tiếp được.
 
 !!! info "Chỗ nào ví von hai thẻ không còn đúng?"
-    Đầu bếp thật nhìn thấy nhau, biết nhường nhau và biết xin lỗi trả thẻ. Luồng thì không: `lock()` chỉ biết đứng chờ, và C++ **không tự phát hiện** deadlock hay tự gỡ. Chương trình treo im lặng, không báo lỗi.
+    Đầu bếp thật nhìn thấy nhau, biết nhường nhau và biết xin lỗi trả thẻ. Luồng thì không: `lock()` chỉ biết đứng chờ, và g++ trên máy mình **không tự phát hiện** deadlock hay tự gỡ. Chương trình treo im lặng, không báo lỗi.
 
 ## 📖 Giải thích
 
@@ -99,9 +99,9 @@ Deadlock chỉ xảy ra khi **cả bốn** điều kiện dưới đây cùng đ
 
 **ThreadSanitizer** ([Bài 25](25-data-race-mutex.md)) cũng bắt được thứ tự khóa ngược nhau. Biên dịch kèm `-g -fsanitize=thread`.
 
-Một lưu ý: TSan báo khi các khóa **thực sự được xin xong** theo hai thứ tự ngược nhau. Bản treo ở mục 1 không bao giờ xin xong khóa thứ hai, nên mình chạy nó với TSan thì **không ra báo cáo nào** và vẫn timeout mã 124. Bản "thử thay đổi" (chạy lần lượt, không treo) thì TSan báo ngay.
+Một lưu ý (mình quan sát được, không phải điều chuẩn hứa): TSan báo khi các khóa **thực sự được xin xong** theo hai thứ tự ngược nhau. Bản treo ở mục 1 không bao giờ xin xong khóa thứ hai, nên mình chạy nó với TSan thì **không ra báo cáo nào** và vẫn timeout mã 124. Bản "thử thay đổi" (chạy lần lượt, không treo) thì TSan báo ngay.
 
-Báo cáo thật, mình rút gọn (bỏ các dòng ngăn xếp gọi của thư viện, đường dẫn tệp, số địa chỉ):
+Báo cáo thật, mình rút gọn (bỏ các dòng ngăn xếp gọi của thư viện, đường dẫn tệp, số địa chỉ). Số dòng `:14` tính khi bỏ dòng chú thích `// bo-qua-kiem-tra` đầu tệp; nếu bạn chép cả dòng đó, nó thành 15 (mình đã thử):
 
 ```text
 WARNING: ThreadSanitizer: lock-order-inversion (potential deadlock)
@@ -121,16 +121,16 @@ TSan trên máy mình phải chạy qua `setarch $(uname -m) -R ./chuongtrinh` (
 
 Khi chương trình **đang treo** và bạn không có bản biên dịch với TSan, dùng **gdb**: trình gỡ lỗi (debugger) cho dừng chương trình đang chạy và xem từng luồng đang đứng ở đâu. Biên dịch thêm `-g` để gdb thấy tên hàm và số dòng.
 
-Cách thông thường là gắn gdb vào tiến trình đang chạy bằng `gdb -p <số hiệu tiến trình>`. Máy mình chặn việc đó (`ptrace_scope` bằng 1, gdb báo `Could not attach to process`), nên mình chạy chương trình **ngay trong gdb** rồi bấm Ctrl+C. Ở lệnh dưới, mình gửi Ctrl+C từ ngoài sau 2 giây và dùng `-batch` để gdb chạy các lệnh rồi thoát.
+Cách thông thường là gắn gdb vào tiến trình đang chạy bằng `gdb -p <số hiệu tiến trình>`. Máy mình chặn việc đó (`ptrace_scope` bằng 1, gdb báo `Could not attach to process`), nên mình chạy chương trình **ngay trong gdb** rồi bấm Ctrl+C. Ở lệnh dưới, mình gửi Ctrl+C từ ngoài sau 2 giây. `-batch` bảo gdb chạy các lệnh rồi thoát, và mỗi `-ex "lệnh"` bảo gdb chạy đúng lệnh đó (`run` là chạy chương trình).
 
 ```text
 gdb -batch -ex run -ex "info threads" -ex "thread apply all bt 8" ./treo
 ```
 
-- `info threads` liệt kê các luồng và chỗ mỗi luồng đang đứng.
+- `info threads` liệt kê các luồng và chỗ mỗi luồng đang đứng; cột `Id` là số thứ tự gdb gán (1, 2, 3), dấu `*` đánh dấu luồng đang được chọn.
 - `thread apply all bt` chạy `bt` (backtrace: chuỗi hàm đang gọi, từ trong ra ngoài) cho **mọi** luồng. Phần `8` chỉ lấy tám khung đầu.
 
-Kết quả thật, rút gọn (cắt bớt cột; `LWP` là số hiệu luồng do hệ điều hành cấp, mỗi lần chạy một khác):
+Kết quả thật, rút gọn (cắt bớt cột; số dòng `treo.cpp:14`, `:24` cũng tính khi bỏ dòng chú thích đầu tệp, chép cả dòng đó thì thành 15 và 25; `LWP` là số hiệu luồng do hệ điều hành cấp, mỗi lần chạy một khác):
 
 ```text
 Thread 1 "treo" received signal SIGINT, Interrupt.
@@ -154,7 +154,13 @@ Thread 1 (Thread 0x7ffff7ea13c0 (LWP 2755456) "treo"):
 
 Ý nghĩa: hai luồng phụ cùng đứng trong `std::mutex::lock`, ở **cùng một dòng** của `chuyen` (dòng khóa tài khoản nhận) nhưng trên **hai mutex khác nhau** (địa chỉ `...d3b0` và `...d380`); luồng chính đứng ở `join`.
 
-Để chắc rằng mỗi luồng chờ mutex do luồng kia giữ, mình đọc tên người giữ ngay trong gdb: `thread 2`, `frame 7`, rồi `print den.khoa._M_mutex.__data.__owner` ra `2755460`, đúng `LWP` của luồng 3; làm tương tự ở luồng 3 ra `2755459`, đúng `LWP` của luồng 2.
+Để chắc rằng mỗi luồng chờ mutex do luồng kia giữ, mình hỏi gdb ai đang giữ mutex mà mỗi luồng chờ, bằng ba lệnh:
+
+- `thread 2` chọn luồng có `Id` 2 trong `info threads`;
+- `frame 7` nhảy tới khung `#7` trong `bt` của luồng đó, chính là hàm `chuyen` của ta (nhờ vậy mới dùng được tên `den`);
+- `print den.khoa._M_mutex.__data.__owner` in giá trị biểu thức đó trong khung này, tức số hiệu luồng đang giữ `den.khoa`.
+
+Ở luồng 2 nó ra `2755460`, đúng `LWP` của luồng 3; làm tương tự ở luồng 3 ra `2755459`, đúng `LWP` của luồng 2. `futex_wait` trong kết quả là lời gọi hệ điều hành để ngủ chờ; bạn chỉ cần tìm chữ `lock` và tên hàm của mình.
 
 Tên trường `_M_mutex.__data.__owner` là chi tiết của g++ 11 và glibc trên máy mình, không phải chuẩn C++.
 
@@ -197,9 +203,19 @@ int main() {
 }
 ```
 
+**Chạy từng dòng** (theo thứ tự thực thi, không theo thứ tự trong tệp)
+
+| Dòng | Chuyện gì xảy ra | `khoa` lúc này |
+|---|---|---|
+| (1) | `duyet` xin `khoa`: được | luồng này giữ |
+| (2) | `duyet` gọi `callback`, tức `ghi` | luồng này giữ |
+| (3) | `ghi` xin `khoa` lần hai, cũng từ luồng này: chờ chính mình | luồng này giữ, không ai trả |
+
 Mình biên dịch sạch và chạy `timeout 3`: không in gì, mã **124**.
 
 [Bài 25](25-data-race-mutex.md) đã nói xin lại `std::mutex` đang giữ là hành vi không xác định: chuẩn không hứa gì, còn **trên máy mình** nó treo. Ta gọi đó là **tự deadlock** (self-deadlock): một luồng là đủ.
+
+Một biến thể hay gặp khác: giữ khóa rồi `join` một luồng cần đúng khóa đó (luồng chờ khóa, `join` chờ luồng), như ví dụ treo ở [Bài 25](25-data-race-mutex.md).
 
 Quy tắc: không gọi hàm mà bạn không kiểm soát (callback, hàm của thư viện khác) khi đang giữ khóa; lấy dữ liệu ra, nhả khóa, rồi mới gọi.
 
@@ -302,9 +318,18 @@ int main() {
 a = 4000, b = 6000, tong = 10000
 ```
 
+**Chạy từng dòng**
+
+| Dòng | Chuyện gì xảy ra |
+|---|---|
+| (1) | `scoped_lock` xin cả `tu.khoa` và `den.khoa` cùng lúc; luồng nào tới sau thì chờ, không giữ một khóa rồi chờ khóa kia |
+| sau (1) | Trừ và cộng tiền; cuối hàm hủy `giu` trả cả hai khóa |
+
 Hai luồng truyền hai mutex theo thứ tự ngược nhau (`a, b` và `b, a`) mà không treo, vì chuẩn bảo đảm `scoped_lock` tránh deadlock bất kể thứ tự đối số. Chuẩn không quy định thuật toán bên trong; bạn chỉ dựa vào lời bảo đảm đó.
 
-**`std::lock`** (C++11) làm đúng việc khóa nhiều mutex một lần nhưng **không** tự trả khóa; muốn RAII bạn phải bọc từng mutex bằng `std::lock_guard` với tham số thứ hai `std::adopt_lock` ("mutex này đã bị khóa rồi, chỉ nhận trách nhiệm trả"). Mình đã biên dịch ở `-std=c++11`:
+**`std::lock`** (C++11) làm đúng việc khóa nhiều mutex một lần nhưng **không** tự trả khóa; muốn RAII bạn phải bọc từng mutex bằng `std::lock_guard` với tham số thứ hai `std::adopt_lock` ("mutex này đã bị khóa rồi, chỉ nhận trách nhiệm trả"; coi nó như một thẻ đánh dấu, không cần hiểu sâu).
+
+Mình ghép ba dòng dưới vào hàm `chuyen` của cách 2 và biên dịch ở `-std=c++11`: ra `a = 4000, b = 6000, tong = 10000`, TSan sạch.
 
 ```text
 std::lock(tu.khoa, den.khoa);
@@ -315,7 +340,7 @@ std::lock_guard<std::mutex> g2(den.khoa, std::adopt_lock);
 Từ C++17 cứ dùng `scoped_lock` cho gọn.
 
 !!! warning "Hay nhầm"
-    `scoped_lock` không cứu được trường hợp hai mutex **là một**. Mình thử `chuyen(a, a, 3)` (gửi cho chính mình) với `scoped_lock giu(tu.khoa, den.khoa)`: treo, `timeout 3` mã 124, vì cùng một mutex bị xin hai lần. Cách tránh: `if (&tu == &den) return;` ở đầu hàm.
+    `scoped_lock` không cứu được trường hợp hai mutex **là một**. Mình thử `chuyen(a, a, 3)` (gửi cho chính mình) với `scoped_lock giu(tu.khoa, den.khoa)`: treo (`timeout 3` mã 124). Chuẩn không hứa gì ở đây: xin lại `std::mutex` đang giữ là hành vi không xác định ([Bài 25](25-data-race-mutex.md)), mình chỉ biết trên máy mình (g++ 11) nó treo. Cách 1 theo `id` cũng hỏng nếu hai `id` trùng, vì `dau` và `sau` khi đó là cùng một tài khoản. Cách tránh: `if (&tu == &den) return;` ở đầu hàm.
 
 ### `try_lock_for`: có hạn chờ thay vì chờ mãi
 
@@ -351,6 +376,14 @@ int main() {
 luong phu: het gio, bo cuoc
 ```
 
+**Chạy từng dòng**
+
+| Dòng | Chuyện gì xảy ra |
+|---|---|
+| (1) | Luồng chính khóa `khoa` và không trả trong lúc `t` chạy |
+| (2) | `t` chờ tối đa 50 ms; luồng chính vẫn giữ nên hết giờ, `try_lock_for` trả `false` |
+| (3) | `t` in lời bỏ cuộc rồi kết thúc; `join` xong thì luồng chính mới trả khóa |
+
 Có hạn chờ không tự giải quyết deadlock: nó chỉ cho luồng **cơ hội bỏ cuộc**, và bạn phải viết thêm cách xử lý (nhả khóa đang giữ, thử lại sau, báo lỗi). Thử lại ngay lập tức ở cả hai luồng chính là cách rơi vào livelock. Ở mức bài này, chỉ cần biết `try_lock`/`try_lock_for` tồn tại.
 
 ## Go: ai phát hiện deadlock?
@@ -360,9 +393,11 @@ Có hạn chờ không tự giải quyết deadlock: nó chỉ cho luồng **cơ
 
     - `mu.Lock()` hai lần liền trong `main`, không còn goroutine nào khác: runtime in `fatal error: all goroutines are asleep - deadlock!` rồi thoát mã 2. (Mutex của Go không tái nhập, nên đây là deadlock **có định nghĩa rõ**, không phải hành vi không xác định như C++.)
     - Bản Go của ví dụ chuyển tiền (hai goroutine khóa ngược thứ tự, `main` đứng ở `wg.Wait()`): cũng bị bắt với đúng thông báo trên, kèm danh sách ba goroutine đang ngủ. Lý do: lúc đó **mọi** goroutine đều đang chờ.
-    - Cùng ví dụ nhưng có **một goroutine khác còn sống** (vòng lặp in một dòng mỗi 200 ms): **không có báo cáo nào**. Mình cho `main` chờ vô hạn bằng `select {}` thì chương trình chạy tới khi `timeout 3` giết (mã 124); khi để `main` ngủ 1 giây rồi thoát, chương trình thoát bình thường và số dư vẫn `100 100`: hai việc chuyển tiền không bao giờ xong, im lặng.
+    - Cùng ví dụ nhưng có **một goroutine khác còn sống** (vòng lặp in một dòng mỗi 200 ms): **không có báo cáo nào**. Hai thử nghiệm:
+        - cho `main` chờ vô hạn bằng `select {}`: chương trình chạy tới khi `timeout 3` giết (mã 124);
+        - để `main` ngủ 1 giây rồi thoát: chương trình thoát bình thường và số dư vẫn `100 100`, tức hai việc chuyển tiền không bao giờ xong, im lặng.
 
-    Vậy runtime Go chỉ báo khi **mọi** goroutine không thể chạy tiếp; còn kẹt cục bộ trong khi chỗ khác vẫn sống thì không. C++ thì không tự phát hiện cả hai trường hợp. Cách phòng ở cả hai ngôn ngữ giống nhau: thứ tự khóa cố định. Go không có hàm kiểu `scoped_lock`.
+    Vậy runtime Go chỉ báo khi **mọi** goroutine không thể chạy tiếp; còn kẹt cục bộ trong khi chỗ khác vẫn sống thì không. g++ mặc định thì không tự phát hiện cả hai trường hợp. Cách phòng ở cả hai ngôn ngữ giống nhau: thứ tự khóa cố định. Go không có hàm kiểu `scoped_lock`.
 
 ## 🎤 Câu hỏi phỏng vấn hay gặp
 
@@ -384,7 +419,7 @@ Có hạn chờ không tự giải quyết deadlock: nó chỉ cho luồng **cơ
     Callback hay hàm của thư viện khác có thể xin lại đúng mutex của bạn (mình đã chạy: treo, mã 124) hoặc xin một mutex khác mà tạo ra vòng chờ. Lấy dữ liệu ra, nhả khóa, rồi mới gọi.
 
 !!! warning "Lỗi 3: Tưởng `scoped_lock` cứu được mọi chuyện"
-    Nó chỉ lo thứ tự giữa các mutex trong **một** lời gọi. Nếu hai mutex là một (`chuyen(a, a)`), hoặc nếu bạn vừa giữ mutex từ trước vừa xin thêm bằng lời gọi khác, vẫn có thể deadlock.
+    Nó chỉ lo thứ tự giữa các mutex trong **một** lời gọi. Nếu hai mutex là một (`chuyen(a, a)`: hành vi không xác định, trên máy mình treo), hoặc nếu bạn vừa giữ mutex từ trước vừa xin thêm bằng lời gọi khác, vẫn có thể deadlock.
 
 ## ✍️ Trắc nghiệm
 
