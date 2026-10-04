@@ -38,3 +38,4 @@
 | [Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên](nhom-4-oop-patterns/32-ke-thua.md) | <span class="diem" data-bai="32"></span> |
 | [Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật](nhom-4-oop-patterns/33-da-hinh-virtual.md) | <span class="diem" data-bai="33"></span> |
 | [Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu](nhom-4-oop-patterns/34-template.md) | <span class="diem" data-bai="34"></span> |
+| [Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít](nhom-4-oop-patterns/35-pattern-singleton-factory.md) | <span class="diem" data-bai="35"></span> |
