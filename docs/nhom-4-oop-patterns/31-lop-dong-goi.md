@@ -1,12 +1,12 @@
 # Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ
 
 !!! abstract "🎯 Học xong bài này, bạn sẽ"
-    - Nói đúng khác biệt duy nhất giữa `class` và `struct` (mức truy cập mặc định), dùng `public:`/`private:` để **đóng gói**, và giữ **bất biến** của lớp (ví dụ `TaiKhoan` không bao giờ có số dư âm) bằng hàm tạo và hàm thành viên thay cho trường công khai.
+    - Nói đúng khác biệt duy nhất giữa `class` và `struct` (mức truy cập mặc định), dùng `public:`/`private:` để **đóng gói**, và giữ **bất biến** của lớp (ví dụ `TaiKhoan` giữ số dư không âm qua mọi đường vào) bằng hàm tạo và hàm thành viên thay cho trường công khai.
     - Dùng **danh sách khởi tạo thành viên** và biết vì sao nó bắt buộc với thành viên `const` hay tham chiếu; biết thứ tự dựng thành viên theo thứ tự **khai báo** (không theo thứ tự bạn viết trong danh sách, g++ cảnh báo `-Wreorder`) và thứ tự hủy ngược lại (đã chạy thật).
     - Đọc và viết hàm thành viên `const` (nối [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md)), `this`, thành viên `static` (một bản cho cả lớp), `explicit` cho hàm tạo một tham số, `= default`/`= delete` (nối [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)), và nhắc được `friend`.
     - So với Go: struct + method, receiver giá trị/con trỏ, không có hàm tạo/hàm hủy (hàm `NewX`, `defer`), truy cập theo package chứ không theo kiểu.
 
-**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (struct, hàm tạo, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`const&`, hàm thành viên `const` nhắc ngắn), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy chạy ở cuối khối, `throw`), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`this`, hàm tạo sao chép, `= delete`), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`try`/`catch`, `e.what()`, `<stdexcept>`), [Bài 25](../nhom-3-da-luong/25-data-race-mutex.md) (`class`, `public:`, `private:`), [Bài 30](../nhom-3-da-luong/30-thread-pool-hieu-nang.md) (đuôi `_` trong tên thành viên).
+**Bạn cần biết trước:** [Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) (struct, hàm tạo, hàm hủy), [Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) (`const&`, hàm thành viên `const` nhắc ngắn), [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md) (hàm hủy chạy ở cuối khối, `throw`), [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md) (`this`, hàm tạo sao chép, `= delete`), [Bài 12](../nhom-1-nen-tang-bo-nho/12-move-semantics.md) (`= default` nêu tên), [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md) (`try`/`catch`, `e.what()`, `<stdexcept>`), [Bài 22](../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap.md) và [Bài 24](../nhom-3-da-luong/24-thread-co-ban.md) (danh sách khởi tạo đã gặp), [Bài 25](../nhom-3-da-luong/25-data-race-mutex.md) (`class`, `public:`, `private:`), [Bài 30](../nhom-3-da-luong/30-thread-pool-hieu-nang.md) (đuôi `_` trong tên thành viên).
 
 ## 🧠 Câu chuyện mở đầu
 
@@ -21,7 +21,9 @@ Một **xưởng đồ chơi** có tập **bản vẽ**. Mỗi bản vẽ mô t�
 
 ### 1. `class` và `struct`: một khác biệt duy nhất
 
-[Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct` ("khác nhau nhỏ sẽ nói ở bài sau"). Khác nhau nhỏ đó là **mức truy cập mặc định**: thành viên của `struct` mặc định `public` (ai cũng đụng được), của `class` mặc định `private` (chỉ code của chính lớp đụng được). Chuẩn C++ còn dùng đúng quy tắc này cho kế thừa (Bài 32 sẽ nói), ngoài ra hai từ khóa **hoàn toàn như nhau**: đều có hàm tạo, hàm hủy, hàm thành viên, đều đặt ở stack hay heap được. Thói quen thường gặp: `struct` cho gói dữ liệu đơn giản, `class` khi lớp có quy tắc cần giữ. Đó là quy ước đặt tên, không phải luật của ngôn ngữ. Ví dụ 1 (hai Thử thay đổi cuối) chạy thật điều này.
+[Bài 02](../nhom-1-nen-tang-bo-nho/02-stack-heap-static.md) nói `class` dùng như `struct` ("khác nhau nhỏ sẽ nói ở bài sau"). Khác nhau nhỏ đó là **mức truy cập mặc định**: thành viên của `struct` mặc định `public` (ai cũng đụng được), của `class` mặc định `private` (chỉ code của chính lớp đụng được). Chuẩn C++ còn dùng đúng quy tắc này cho kế thừa (Bài 32 sẽ nói). Thử 3 ở Ví dụ 1 chạy thật điều này.
+
+Ngoài ra hai từ khóa **hoàn toàn như nhau**: đều có hàm tạo, hàm hủy, hàm thành viên, đều đặt ở stack hay heap được. Thói quen thường gặp là `struct` cho gói dữ liệu đơn giản, `class` khi lớp có quy tắc cần giữ; đó chỉ là quy ước đặt tên, không phải luật.
 
 ### 2. Đóng gói và bất biến
 
@@ -36,7 +38,7 @@ Mọi đối tượng ra đời qua một hàm tạo. Nếu hàm tạo ném ngo�
 
 [Bài 22](../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap.md) và [Bài 24](../nhom-3-da-luong/24-thread-co-ban.md) đã dùng `: hop(4)` sau dấu `)` của hàm tạo. Đó là **danh sách khởi tạo thành viên**: các thành viên được **dựng** (khởi tạo ngay) trước khi thân `{}` của hàm tạo chạy. Viết `chu_ = chu;` trong thân thì thành viên đã được dựng xong rồi mới bị **gán** lại, tức là hai bước.
 
-Có ba chỗ danh sách là **bắt buộc**:
+Có ba chỗ **bắt buộc** dùng danh sách (hoặc giá trị đặt ngay chỗ khai báo như `int ma_ = 0;`):
 
 - Thành viên `const`: sinh ra là phải có giá trị, gán sau là sửa hằng.
 - Thành viên là tham chiếu `int&`: phải gắn ngay lúc khai báo ([Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md)).
@@ -55,11 +57,13 @@ Xưởng đồ chơi: thợ lắp bộ phận theo thứ tự trên bản vẽ r
 
 ### 5. Hàm thành viên `const` và `this`
 
-[Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) đã cho thấy chữ `const` đặt **sau** danh sách tham số, như `int soDu() const`: cam kết "hàm này không sửa đối tượng". Chỉ hàm có chữ đó mới gọi được qua `const TaiKhoan&`, nên hàm chỉ đọc luôn nên có `const`. Bên trong, `this` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)) có kiểu `const TaiKhoan*`, nên thân hàm không sửa được thành viên (trừ thành viên khai báo `mutable`, từ khóa ít dùng, chỉ nhắc tên). `this` còn dùng để trả `*this`, cho phép gọi nối `b.datTen("x").datTen("y")` (Ví dụ 4).
+[Bài 06](../nhom-1-nen-tang-bo-nho/06-tham-chieu-const.md) đã cho thấy chữ `const` đặt **sau** danh sách tham số, như `int soDu() const`: cam kết "hàm này không sửa đối tượng". Chỉ hàm có chữ đó mới gọi được qua `const TaiKhoan&`, nên hàm chỉ đọc luôn nên có `const`. Bên trong, `this` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)) có kiểu `const TaiKhoan*`, nên thân hàm không sửa được thành viên (trừ thành viên khai báo `mutable`, từ khóa ít dùng, chỉ nhắc tên).
+
+`this` còn dùng để trả `*this`, cho phép gọi nối `b.datTen("x").datTen("y")` (Ví dụ 4).
 
 ### 6. Thành viên `static`
 
-Thành viên thường mỗi đối tượng một bản. **Thành viên `static`** chỉ có **một bản cho cả lớp** (tờ ghi chú dán trên bản vẽ), hợp để đếm "đã làm ra bao nhiêu món". Khai báo `static int soLuong_;` trong lớp chưa cấp chỗ nhớ: trước C++17 phải **định nghĩa đúng một lần ngoài lớp** (`int DoChoi::soLuong_ = 0;`). Quên thì g++ dịch được nhưng bước **liên kết** (linker: bước cuối ghép các phần đã dịch thành chương trình) báo `undefined reference`. C++17 cho viết `inline static int soLuong_ = 0;` ngay trong lớp.
+Thành viên thường mỗi đối tượng một bản. **Thành viên `static`** chỉ có **một bản cho cả lớp** (tờ ghi chú dán trên bản vẽ), hợp để đếm "đang có bao nhiêu món". Khai báo `static int soLuong_;` trong lớp chưa cấp chỗ nhớ: phải **định nghĩa đúng một lần ngoài lớp** (`int DoChoi::soLuong_ = 0;`). Quên thì g++ dịch được nhưng bước **liên kết** (linker: bước cuối ghép các phần đã dịch thành chương trình) báo `undefined reference`. Từ C++17 có cách khác: thêm chữ `inline` (ở đây hiểu là "định nghĩa ngay trong lớp, vẫn chỉ một bản"), như `inline static int soLuong_ = 0;`.
 
 **Hàm `static`** (như `static int dem()`) gọi bằng `DoChoi::dem()`, không có `this`, nên chỉ đụng được thành viên `static`.
 
@@ -75,9 +79,10 @@ Hàm tạo một tham số, như `Tien(long long d)`, mặc định còn là **p
 
 ### Ví dụ 1: `TaiKhoan` giữ bất biến "số dư không âm"
 
-Hàm tạo kiểm số dư đầu, `rut` từ chối rút quá số dư, và không có cách nào ghi thẳng `soDu_`. `std::invalid_argument` là kiểu ngoại lệ có sẵn trong `<stdexcept>` cho "đối số không hợp lệ" (cùng họ với `out_of_range` ở [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)).
+Hàm tạo kiểm số dư đầu, `rut` từ chối rút quá số dư, và không có cách nào ghi thẳng `soDu_`. `LLONG_MAX` (trong `<climits>`) là số `long long` lớn nhất; `nop` từ chối khoản làm số dư vượt nó, vì tràn số nguyên có dấu là hành vi không xác định. `std::invalid_argument` là kiểu ngoại lệ có sẵn trong `<stdexcept>` cho "đối số không hợp lệ" (cùng họ với `out_of_range` ở [Bài 16](../nhom-2-stl-thuat-toan/16-vector.md)).
 
 ```cpp
+#include <climits>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -91,7 +96,7 @@ public:
         }
     }
     bool nop(long long tien) {                             // (4)
-        if (tien <= 0) return false;
+        if (tien <= 0 || tien > LLONG_MAX - soDu_) return false;
         soDu_ += tien;
         return true;
     }
@@ -105,7 +110,7 @@ public:
 
 private:
     std::string chu_;
-    long long soDu_;                                       // (7) bất biến: luôn >= 0
+    long long soDu_;                                       // (7) bất biến: >= 0
 };
 
 void in(const TaiKhoan& t) {                               // (8)
@@ -131,7 +136,7 @@ int main() {
 | Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
 |---|---|---|
 | `TaiKhoan tk("An", 100)` | Hàm tạo (1): danh sách (2) dựng `chu_`, `soDu_`; số dư đầu không âm nên (3) không ném | `tk`: chu_ "An", soDu_ 100 |
-| `tk.nop(50)` | (4): 50 > 0 nên cộng | soDu_ 150 |
+| `tk.nop(50)` | (4): 50 > 0 và không vượt `LLONG_MAX` nên cộng | soDu_ 150 |
 | `tk.rut(30)` | (5): hợp lệ, trừ, trả `true` (in `1`) | soDu_ 120 |
 | `tk.rut(500)` | (5): 500 > 120 nên trả `false` (in `0`), số dư giữ nguyên | soDu_ 120 |
 | `in(tk)` | (8) nhận `const&`, chỉ gọi được hàm `const` (6) | in `An: 120` |
@@ -146,7 +151,12 @@ An: 120
 loi: so du dau am
 ```
 
-Mình chạy cả bản này với ASan + UBSan: sạch, mã thoát 0. **Hai Thử thay đổi về truy cập (đã chạy, đều là lỗi biên dịch):** thêm `tk.soDu_ = -5;` vào `main` cho `error: ‘long long int TaiKhoan::soDu_’ is private within this context` (bất biến an toàn vì chỉ code của lớp ghi được `soDu_`); bỏ chữ `const` khỏi `soDu()` thì `t.soDu()` trong `in` thành `error: passing ‘const TaiKhoan’ as ‘this’ argument discards qualifiers`. **Thử thay đổi về `class` và `struct` (đã chạy):** đổi `class TaiKhoan {` thành `struct TaiKhoan {` rồi xóa hai dòng `public:` và `private:`. Chương trình vẫn chạy, và nếu thêm `tk.soDu_ = -5; in(tk);` vào `main` thì in `An: -5`: mọi thứ thành công khai nên bất biến vỡ. Ngược lại giữ `class` mà xóa riêng `public:` thì hàm tạo cũng thành `private`, g++ báo `error: ‘TaiKhoan::TaiKhoan(std::string, long long int)’ is private within this context`.
+Mình chạy cả bản này với ASan + UBSan: sạch, mã thoát 0. Bốn Thử thay đổi, mình đều đã chạy:
+
+- **Thử 1: thêm `tk.soDu_ = -5;` vào `main`.** Lỗi biên dịch `error: ‘long long int TaiKhoan::soDu_’ is private within this context`. Bất biến an toàn vì chỉ code của lớp ghi được `soDu_`.
+- **Thử 2: bỏ chữ `const` khỏi `soDu()`.** Dòng `t.soDu()` trong `in` thành `error: passing ‘const TaiKhoan’ as ‘this’ argument discards qualifiers`.
+- **Thử 3: đổi `class TaiKhoan {` thành `struct TaiKhoan {` rồi xóa hai dòng `public:` và `private:`.** Chương trình vẫn chạy, và thêm `tk.soDu_ = -5; in(tk);` vào `main` thì in `An: -5`: mọi thứ thành công khai nên bất biến vỡ. Ngược lại, giữ `class` mà chỉ xóa `public:` thì g++ báo nhiều lỗi `is private within this context`, trong đó có `TaiKhoan::TaiKhoan(std::string, long long int)`.
+- **Thử 4: thêm `tk.nop(LLONG_MAX);` sau `tk.nop(50);`.** `nop` trả `false`, số dư vẫn 150 và UBSan sạch. Bỏ vế `tien > LLONG_MAX - soDu_` thì mình chạy ra tràn số và số dư âm, nên bất biến chỉ đúng khi mọi đường vào đều kiểm.
 
 ### Ví dụ 2: thành viên `const`, tham chiếu và kiểu không có hàm tạo mặc định
 
@@ -154,29 +164,36 @@ Hàm tạo dưới đây gán trong thân. Mình đã chạy, g++ từ chối v�
 
 ```cpp
 // bo-qua-kiem-tra
-struct Ghi { Ghi(int) {} };
+struct Phu { Phu(int) {} };
 class Cap {
 public:
     Cap(int i, int& r) {
         id_ = i;           // thành viên const
         ref_ = r;          // thành viên tham chiếu
-        g_ = Ghi(1);       // thành viên không có hàm tạo không tham số
+        p_ = Phu(1);       // thành viên không có hàm tạo không tham số
     }
 private:
     const int id_;
     int& ref_;
-    Ghi g_;
+    Phu p_;
 };
 ```
 
 ```text
 error: uninitialized const member in ‘const int’
 error: uninitialized reference member in ‘int&’
-error: no matching function for call to ‘Ghi::Ghi()’
+error: no matching function for call to ‘Phu::Phu()’
 error: assignment of read-only member ‘Cap::id_’
 ```
 
-Chuyển ba thành viên vào danh sách (`Cap(int i, int& r) : id_(i), ref_(r), g_(1) {}`, thân rỗng) thì biên dịch sạch với `-Wall -Wextra` (mình đã chạy).
+| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
+|---|---|---|
+| `Cap(int i, int& r) {` | Thân `{` chạy sau khi thành viên đã được dựng; `id_` và `ref_` không có giá trị ban đầu nên g++ báo hai lỗi `uninitialized`; `p_` cần dựng bằng `Phu()` mà `Phu` không có nên báo `no matching function` | chưa dựng được |
+| `id_ = i;` | Gán vào một hằng: `assignment of read-only member` | `id_` là hằng, không sửa được |
+| `ref_ = r;` | Không có lỗi riêng ở dòng này: dù gắn được thì cũng chỉ là gán giá trị chứ không gắn lại tham chiếu | không đổi |
+| `p_ = Phu(1);` | Gán sau khi dựng mặc định đã thất bại | không đổi |
+
+Chuyển ba thành viên vào danh sách (`Cap(int i, int& r) : id_(i), ref_(r), p_(1) {}`, thân rỗng) thì biên dịch sạch với `-Wall -Wextra` (mình đã chạy).
 
 ### Ví dụ 3: thứ tự gọi hàm tạo và hàm hủy
 
@@ -242,15 +259,15 @@ het khoi
 ra khoi
 ```
 
-Mình chạy với ASan + UBSan: sạch. Nếu khai báo hai biến `DoChoi` trong cùng khối, chuyện trong từng đối tượng vẫn như trên, còn giữa hai đối tượng cái ra đời sau chết trước (như [Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)).
+Mình chạy với ASan + UBSan: sạch.
 
 **Thử thay đổi: viết danh sách (1) ngược lại, `: banh_("banh"), khung_("khung")`.** Mình đã chạy: output **y hệt** (vẫn `tao khung` trước `tao banh`), vì thứ tự dựng là thứ tự khai báo (4), không phải thứ tự trong danh sách. g++ 11.4 với `-Wall` cảnh báo (rút gọn): `warning: ‘DoChoi::banh_’ will be initialized after [-Wreorder]`, kèm `when initialized here`.
 
-Nguy hiểm thật khi thành viên này dùng thành viên kia: với `struct Hai { int a; int b; Hai(int x) : b(x), a(b + 1) {} };` mình chạy thì g++ báo thêm `‘*this.Hai::b’ is used uninitialized [-Wuninitialized]`, vì `a` được dựng trước `b`. Giá trị `a` khi đó không đáng tin; sửa bằng cách viết danh sách đúng thứ tự khai báo, hoặc tính `a` từ tham số `x` thay vì từ `b`.
+Nguy hiểm thật khi thành viên này dùng thành viên kia: với `struct Hai { int a; int b; Hai(int x) : b(x), a(b + 1) {} };` mình chạy thì g++ báo thêm `‘*this.Hai::b’ is used uninitialized [-Wuninitialized]`, vì `a` được dựng trước `b`. Sửa: viết danh sách đúng thứ tự khai báo, hoặc tính `a` từ `x`.
 
 ### Ví dụ 4: `this`, hàm `const` và thành viên `static`
 
-`DoChoi` đếm số đối tượng đang sống bằng `soLuong_`: hàm tạo tăng, hàm hủy giảm. `datTen` trả `*this` để gọi nối; `diaChi() const` trả `this` (kiểu `const DoChoi*`).
+`DoChoi` đếm số đối tượng đang sống bằng `soLuong_`: hàm tạo tăng, hàm hủy giảm. `datTen` trả `*this` để gọi nối.
 
 ```cpp
 #include <iostream>
@@ -268,7 +285,6 @@ public:
         ten_ = ten;
         return *this;                                // (4)
     }
-    const DoChoi* diaChi() const { return this; }    // (5)
     const std::string& ten() const { return ten_; }
     static int dem() { return soLuong_; }            // (6)
 
@@ -289,7 +305,6 @@ int main() {
         std::cout << "b ten: " << b.ten() << "\n";
     }
     std::cout << "sau khoi: " << a.dem() << "\n";    // (10)
-    std::cout << "this == &a: " << (a.diaChi() == &a) << "\n";
     return 0;
 }
 ```
@@ -301,7 +316,7 @@ int main() {
 | `DoChoi b("xe lua")` | (1) tăng, in `trong khoi: 2` | `soLuong_` = 2; `a`, `b` mỗi cái một `ten_` |
 | (9) | `datTen` đổi tên rồi trả `*this` (chính `b`), nên nối `datTen` tiếp được | `b.ten_` = "tau thuy" |
 | `}` hết khối | `b` chết, (2) giảm | `soLuong_` = 1 |
-| (10), `diaChi()` | `a.dem()` cũng được, cùng một bản `soLuong_`; `this` bên trong là địa chỉ của `a` | in `sau khoi: 1`, rồi `1` |
+| (10) | `a.dem()` cũng được, cùng một bản `soLuong_` | in `sau khoi: 1` |
 
 **Kết quả khi chạy:**
 
@@ -310,10 +325,9 @@ luc dau: 0
 trong khoi: 2
 b ten: tau thuy
 sau khoi: 1
-this == &a: 1
 ```
 
-Ba lần **Thử thay đổi** (mình đã chạy cả ba):
+Ba **Thử thay đổi** (mình đã chạy cả ba):
 
 - **Xóa dòng (8):** g++ dịch xong nhưng bước liên kết báo `undefined reference to ‘DoChoi::soLuong_’`.
 - **C++17:** thay dòng (7) bằng `inline static int soLuong_ = 0;` rồi bỏ (8): cùng kết quả. Với `-std=c++14`, g++ cảnh báo `inline variables are only available with ‘-std=c++17’`.
@@ -352,26 +366,20 @@ int main() {
 | (3) `tra(5)` | `5` là `int` còn `tra` cần `Tien`: C++ thấy (1) nhận số nên tự tạo `Tien(5)` tạm | in `tra 5 dong` |
 | (4) | Tương tự, `b` dựng từ số `7` | `b.dong_` = 7 |
 
-**Kết quả khi chạy:**
-
-```text
-tra 100 dong
-tra 5 dong
-b = 7
-```
+**Kết quả khi chạy:** ba dòng `tra 100 dong`, `tra 5 dong`, `b = 7`.
 
 **Thử thay đổi: viết `explicit Tien(long long dong)` ở (1).** Mình đã chạy; dòng (3) và (4) cùng thành lỗi biên dịch: `error: could not convert ‘5’ from ‘int’ to ‘Tien’` và `error: conversion from ‘int’ to non-scalar type ‘Tien’ requested`. `tra(Tien(100))` vẫn hợp lệ vì viết rõ; `Tien b = 7;` bị coi là chuyển ngầm dù có dấu `=`.
 
-### Ví dụ 6: `= default` và `= delete`
+### Ví dụ 6: tự khai báo hàm tạo thì mất hàm tạo mặc định
+
+Hai hàm tạo ở (1) và (2) đều do bạn khai báo, nên trình biên dịch không tự sinh `Khoa()`. Mình đã chạy, g++ từ chối:
 
 ```cpp
-#include <iostream>
-
+// bo-qua-kiem-tra
 class Khoa {
 public:
-    Khoa() = default;                               // (1)
-    explicit Khoa(int ma) : ma_(ma) {}              // (2)
-    Khoa(const Khoa&) = delete;                     // (3)
+    explicit Khoa(int ma) : ma_(ma) {}              // (1)
+    Khoa(const Khoa&) = delete;                     // (2)
     int ma() const { return ma_; }
 
 private:
@@ -379,27 +387,28 @@ private:
 };
 
 int main() {
-    Khoa a;
+    Khoa a;                                         // (3)
     Khoa b(42);
-    std::cout << a.ma() << " " << b.ma() << "\n";
+    Khoa c = b;                                     // (4)
     return 0;
 }
 ```
 
-| Dòng | Chuyện gì xảy ra | Bộ nhớ lúc này |
+| Dòng | Chuyện gì xảy ra | Kết quả |
 |---|---|---|
-| (1) | Vì có (2), trình biên dịch không tự sinh hàm tạo không tham số; `= default` xin lại bản mặc định | chưa có đối tượng |
-| `Khoa a;` `Khoa b(42);` | Dùng (1) rồi (2): `ma_` của `a` lấy mặc định 0, của `b` là 42 | `a.ma_` = 0, `b.ma_` = 42 |
-| (3) | Cấm sao chép (như `unique_ptr`, [Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)); phép gán sao chép cấm tương tự bằng `operator=` | không đổi |
+| (3) | Cần `Khoa()` nhưng có (1) và (2) nên không có bản tự sinh | `error: no matching function for call to ‘Khoa::Khoa()’` |
+| `Khoa b(42);` | Dùng (1) | hợp lệ |
+| (4) | Sao chép gọi hàm tạo sao chép đã `= delete` ở (2) | `error: use of deleted function ‘Khoa::Khoa(const Khoa&)’` |
 
-**Kết quả khi chạy:** `0 42`. Hai thử thay đổi mình đã chạy: thêm `Khoa c = b;` cho `error: use of deleted function ‘Khoa::Khoa(const Khoa&)’`; bỏ dòng (1) rồi viết `Khoa a;` cho `error: no matching function for call to ‘Khoa::Khoa()’`. Mọi chương trình chạy được ở bài này đều sạch với `-fsanitize=address,undefined`.
+Sửa (3): thêm `Khoa() = default;` (xin lại hàm tạo mặc định), bỏ dòng (4): mình chạy ra thoát mã 0, sạch ASan + UBSan. Muốn cấm cả phép gán sao chép thì thêm `Khoa& operator=(const Khoa&) = delete;` ([Bài 11](../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3.md)). Mọi chương trình chạy được ở bài này đều sạch với `-fsanitize=address,undefined`.
 
 ## Go: struct + method, nhưng không có hàm tạo, hàm hủy, `this`
 
 !!! info "Bạn biết Go?"
     Mình đã chạy một gói Go 1.27.1 nhỏ để kiểm các ý dưới đây:
-    - **Struct + method**: `func (t *TaiKhoan) Rut(tien int64) bool` có receiver là tham số **có tên** (`t`) đặt trước tên hàm, nên Go không có `this` mà bạn tự đặt tên. Receiver con trỏ sửa được đối tượng; receiver giá trị `func (t TaiKhoan) RutNham(...)` sửa trên **bản sao** (mình chạy: số dư vẫn 70 sau `RutNham(10)`). Nó không phải lời hứa như `const` của C++: Go không có hàm thành viên `const`.
-    - **Không có hàm tạo**: quy ước là hàm `NewTaiKhoan(chu string, soDuDau int64) (*TaiKhoan, error)` trả lỗi qua giá trị (mình chạy: `NewTaiKhoan("Binh", -5)` trả lỗi `so du dau am`). Nhưng không có gì buộc người ngoài gọi nó: `var z tk.TaiKhoan` vẫn tạo được giá trị 0 (mình chạy: `z.SoDu()` = 0). Với C++, nếu mọi hàm tạo đều kiểm, thì không đối tượng nào ra đời mà bỏ qua kiểm tra, như `Khoa a;` ở Ví dụ 6 bị chặn khi không có hàm tạo mặc định.
+
+    - **Struct + method**: `func (t *TaiKhoan) Rut(tien int64) bool` có receiver là tham số **có tên** (`t`) đặt trước tên hàm, nên Go không có `this` mà bạn tự đặt tên. Receiver con trỏ sửa được đối tượng; receiver giá trị `func (t TaiKhoan) RutNham(...)` sửa trên **bản sao** (mình chạy: số dư vẫn 70 sau `RutNham(10)`). Receiver giá trị không phải lời hứa "không sửa" như `const` của C++: Go không có hàm thành viên `const`.
+    - **Không có hàm tạo**: quy ước là hàm `NewTaiKhoan(chu string, soDuDau int64) (*TaiKhoan, error)` trả lỗi qua giá trị (mình chạy: `NewTaiKhoan("Binh", -5)` trả lỗi `so du dau am`). Nhưng không có gì buộc người ngoài gọi nó: `var z tk.TaiKhoan` vẫn tạo được giá trị 0 (mình chạy: `z.SoDu()` = 0). Với C++, nếu lớp chỉ có hàm tạo có kiểm tra thì `TaiKhoan t;` bị chặn (không có `TaiKhoan()`), nên không đối tượng nào ra đời mà bỏ qua kiểm tra (như `Khoa a;` ở Ví dụ 6).
     - **Không có hàm hủy**: dọn tài nguyên chắc chắn đúng lúc dùng `defer f.Close()` ([Bài 08](../nhom-1-nen-tang-bo-nho/08-raii.md)); bộ gom rác chỉ lo bộ nhớ, vào lúc nó chọn.
     - **Truy cập theo package, không theo kiểu**: trường viết thường `soDu` chỉ thấy được **trong cùng package**. Mình chạy: hàm khác của package `tk` đọc `t.soDu` được; từ package `main` thì `t.soDu undefined (type *tk.TaiKhoan has no field or method soDu, but does have method SoDu)`. `private` của C++ thì theo **lớp**: kể cả hàm khác cùng file cũng không được đụng, trừ `friend`.
 
@@ -418,17 +427,14 @@ int main() {
     Là cam kết hàm không sửa trạng thái (có thể quan sát) của đối tượng: bên trong `this` có kiểu `const T*`. Chỉ hàm `const` gọi được trên đối tượng `const` hoặc qua `const&`, nên hàm chỉ đọc nên luôn đánh dấu `const`. Gọi hàm không `const` trên đối tượng `const` là lỗi biên dịch.
 
 ??? question "Thành viên `static` là gì?"
-    Là thành viên thuộc về **lớp**, chỉ có một bản dùng chung cho mọi đối tượng, nên hợp với bộ đếm hay cấu hình chung. Trước C++17 phải định nghĩa một lần ngoài lớp (`int T::x = 0;`), từ C++17 có thể `inline static` ngay trong lớp. Hàm thành viên `static` không có `this`, gọi bằng `T::ham()`.
+    Là thành viên thuộc về **lớp**, chỉ có một bản dùng chung cho mọi đối tượng, nên hợp với bộ đếm hay cấu hình chung. Phải định nghĩa một lần ngoài lớp (`int T::x = 0;`); từ C++17 có thể `inline static` ngay trong lớp. Hàm thành viên `static` không có `this`, gọi bằng `T::ham()`.
 
 ## ⚠️ Lỗi thường gặp
 
 !!! warning "Lỗi 1: Để trường `public` rồi mong người dùng tự giữ quy tắc"
     Lớp không còn bảo đảm gì: ai cũng ghi được `soDu = -5`. Để trường `private`, kiểm trong hàm tạo và các hàm thay đổi trạng thái, và đưa ra hành động có nghĩa (`rut`, `nop`) thay vì setter thuần.
 
-!!! warning "Lỗi 2: Viết danh sách khởi tạo khác thứ tự khai báo"
-    Thứ tự dựng là thứ tự khai báo, nên `: b_(1), a_(b_ + 10)` đọc `b_` khi chưa có giá trị (mình chạy: `-Wreorder` và `-Wuninitialized`). Viết danh sách đúng thứ tự khai báo và bật `-Wall`.
-
-!!! warning "Lỗi 3: Quên `const` ở hàm chỉ đọc, hoặc quên định nghĩa thành viên `static`"
+!!! warning "Lỗi 2: Quên `const` ở hàm chỉ đọc, hoặc quên định nghĩa thành viên `static`"
     Quên `const` thì hàm không dùng được với `const&` (`discards qualifiers`). Thành viên `static` không `inline` mà quên định nghĩa ngoài lớp thì lỗi `undefined reference` ở bước liên kết.
 
 ## ✍️ Trắc nghiệm
@@ -447,9 +453,9 @@ public:
 };
 ```
 
-- `a_` luôn là 11, vì danh sách khởi tạo chạy từ trái sang phải
-- `a_` không đáng tin, vì nó được dựng trước `b_` mà lại đọc cả `b_`
-- `a_` luôn là 10, vì thành viên `int` tự bằng 0 trước khi bị đọc
+- `a_` là 11, vì danh sách khởi tạo chạy từ trái sang phải
+- `a_` chưa có giá trị đáng tin, vì nó dựng trước `b_` mà đọc `b_`
+- `a_` là 10, vì thành viên `int` mặc định bằng 0 trước khi bị đọc
 - Không biên dịch được, vì `b_` bị dùng trước khi đối tượng ra đời
 
 <p class="giai-thich" markdown>Thứ tự dựng là thứ tự khai báo trong lớp: `a_` đứng trước `b_` nên được dựng trước, và lúc đó `b_` chưa có giá trị; g++ báo `-Wreorder` và `-Wuninitialized`. Danh sách không chạy theo thứ tự bạn viết. Thành viên `int` không tự bằng 0, nó chứa rác nếu chưa ai gán. Và chương trình vẫn biên dịch được (chỉ có cảnh báo), nên đây là lỗi âm thầm chứ không phải lỗi biên dịch.</p>
@@ -503,7 +509,7 @@ void f(const H& h) {
 </div>
 
 <div class="cau-hoi" data-dap-an="3" markdown>
-**Câu 4.** Điều nào là lý do thật để một thành viên `const int id_;` phải được khởi tạo trong danh sách khởi tạo?
+**Câu 4.** Thành viên khai báo `const int id_;` (không có giá trị đặt sẵn) phải được khởi tạo trong danh sách khởi tạo. Điều nào là lý do thật?
 
 - Danh sách cho phép chọn thứ tự dựng thành viên khác thứ tự khai báo của lớp
 - Thân hàm tạo chạy xong mới tới lượt dựng các thành viên của lớp đó
@@ -554,12 +560,34 @@ Tien b = 7;      // dòng 4
 <p class="giai-thich" markdown>`explicit` cấm chuyển ngầm: dòng 3 cần biến `5` thành `Tien` ngầm, dòng 4 (`Tien b = 7;`) cũng là khởi tạo bằng chuyển ngầm dù có dấu `=`, mình đã chạy ra hai lỗi. Dòng 1 viết rõ hàm tạo nên hợp lệ, dòng 2 chỉ truyền một `Tien` có sẵn. Dòng 4 không phải phép gán vào biến đã có, nên lý do "dấu `=` bị cấm" là sai. Và lời gọi hàm không phải nơi duy nhất cần chuyển ngầm, cách khởi tạo bằng `=` cũng cần.</p>
 </div>
 
+<div class="cau-hoi" data-dap-an="4" markdown>
+**Câu 7.** Đọc đoạn sau. Dòng nào gây lỗi biên dịch?
+
+```text
+struct S { int x; };
+class T { int x; };
+int main() {
+    S s;
+    T t;
+    s.x = 1;   // dòng 1
+    t.x = 1;   // dòng 2
+}
+```
+
+- Chỉ dòng 1, vì `struct` không cho đụng thẳng vào thành viên của nó
+- Cả hai dòng, vì thành viên chỉ đổi được qua hàm thành viên
+- Không dòng nào, vì `class` và `struct` chỉ khác nhau ở tên gọi
+- Chỉ dòng 2, vì `class` mặc định `private`, `struct` mặc định `public`
+
+<p class="giai-thich" markdown>Thành viên của `struct` mặc định `public` nên dòng 1 hợp lệ, còn thành viên của `class` mặc định `private` nên dòng 2 bị từ chối (`is private within this context`, mình đã chạy). Hai từ khóa không chỉ khác tên: mức truy cập mặc định là chỗ khác duy nhất. `struct` không cấm đụng vào thành viên, chính nó mặc định cho phép. Và C++ không bắt mọi thành viên phải đi qua hàm: trường `public` ghi thẳng được.</p>
+</div>
+
 </div>
 
 ## 🔑 Tóm tắt
 
-1. `class` và `struct` chỉ khác mức truy cập mặc định (`private` và `public`); đóng gói là đặt trường `private`, cho bên ngoài đi qua hàm tạo và hàm thành viên để giữ **bất biến** (như `TaiKhoan` không bao giờ có số dư âm), nên đưa hành động có nghĩa (`rut`, `nop`) thay vì setter thuần.
+1. `class` và `struct` chỉ khác mức truy cập mặc định (`private` và `public`); đóng gói là đặt trường `private`, cho bên ngoài đi qua hàm tạo và hàm thành viên để giữ **bất biến** (như `TaiKhoan` giữ số dư không âm: hàm tạo, `nop`, `rut` đều kiểm, kể cả khoản nộp quá lớn), nên đưa hành động có nghĩa (`rut`, `nop`) thay vì setter thuần.
 2. Danh sách khởi tạo dựng thành viên trực tiếp và bắt buộc với thành viên `const`, tham chiếu, hay kiểu không có hàm tạo mặc định (mình chạy ra lỗi thật); thứ tự dựng là thứ tự **khai báo** chứ không theo thứ tự trong danh sách (`-Wreorder`, mình đã chạy).
 3. Thứ tự: thành viên dựng theo khai báo rồi thân hàm tạo; hủy thì thân hàm hủy trước rồi thành viên theo thứ tự ngược; hai biến cục bộ trong một khối thì cái sau chết trước (mình in ra thứ tự thật).
-4. Hàm chỉ đọc nên là `const` (`this` thành `const T*`, mới dùng được qua `const&`); `this` là con trỏ tới đối tượng, trả `*this` để gọi nối; thành viên `static` là **một bản cho cả lớp** (định nghĩa ngoài lớp, hoặc `inline static` từ C++17) và hàm `static` không có `this`.
+4. Hàm chỉ đọc nên là `const` (`this` thành `const T*`, mới dùng được qua `const&`); `this` là con trỏ tới đối tượng, trả `*this` để gọi nối; thành viên `static` là **một bản cho cả lớp** (định nghĩa ngoài lớp, hoặc `inline static` từ C++17: định nghĩa ngay trong lớp) và hàm `static` không có `this`.
 5. `explicit` cấm chuyển kiểu ngầm của hàm tạo một tham số; `= default` xin lại hàm tự sinh, `= delete` cấm hẳn; `friend` cho một hàm hay lớp đụng vào `private` (dùng ít). Go: struct + method (receiver có tên, giá trị hay con trỏ), hàm `NewX` thay hàm tạo, `defer` thay hàm hủy, truy cập theo package (hoa/thường), không có `this`.
