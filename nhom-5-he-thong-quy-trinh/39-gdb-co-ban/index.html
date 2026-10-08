@@ -1,0 +1,2625 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-5-he-thong-quy-trinh/39-gdb-co-ban/">
+      
+      
+        <link rel="prev" href="../38-bien-dich-lien-ket-build/">
+      
+      
+        <link rel="next" href="../40-gdb-nang-cao-core-dump/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-39-gdb-co-ban-dung-chuong-trinh-va-nhin-vao-ben-trong" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 2 — STL và thuật toán
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 2 — STL và thuật toán
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/16-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 16 — std::vector: mảng co giãn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 17 — string, string_view, array, deque, list
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 18 — map, set, unordered_map: tra cứu theo khóa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 19 — Iterator và iterator invalidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 20 — <algorithm> và lambda: sort, find, transform, remove-erase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 21 — Big-O, danh sách liên kết, stack và queue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 3 — Đa luồng
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 3 — Đa luồng
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/24-thread-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/25-data-race-mutex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/26-deadlock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/27-condition-variable/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/28-atomic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/29-async-future/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 29 — std::async và std::future: lấy kết quả từ luồng khác
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 4 — OOP, template và Design Patterns
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 4 — OOP, template và Design Patterns
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/31-lop-dong-goi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/32-ke-thua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/33-da-hinh-virtual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/34-template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/35-pattern-singleton-factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/36-pattern-observer-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../38-bien-dich-lien-ket-build/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-chuan-bi-chuong-trinh-co-loi-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Chuẩn bị: chương trình có lỗi logic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-dung-o-au-break-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Dừng ở đâu: break, run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-i-tung-buoc-next-step-finish-until-continue" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Đi từng bước: next, step, finish, until, continue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-nhin-vao-ben-trong-bt-frame-info-print-ptype" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Nhìn vào bên trong: bt, frame, info, print, ptype
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-theo-doi-display-ieu-kien-watch" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Theo dõi: display, điều kiện, watch
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-sua-thu-ngay-trong-gdb-print-x-set-var" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Sửa thử ngay trong gdb: print x = ..., set var
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-xem-bo-nho-tho-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Xem bộ nhớ thô: x
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chay-kich-ban-va-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chạy kịch bản và TUI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-bang-tra-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Bảng tra nhanh
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-sua-loi-lon-va-kiem-chung-bang-gdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: sửa lỗi lon và kiểm chứng bằng gdb
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../40-gdb-nang-cao-core-dump/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../41-sanitizer-valgrind/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../42-strace-perf-do-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../43-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 43 — Git: lịch sử, nhánh, gộp và cứu lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../44-mang-socket/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 44 — Mạng: TCP/UDP, socket C++, REST và gRPC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../45-database-sdlc-game/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 45 — Database, quy trình phần mềm và nguyên lý game dev: ba chủ đề bổ sung
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../46-tong-on-debug-phong-van/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 46 — Tổng ôn: quy trình gỡ lỗi và kể chuyện dự án
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-chuan-bi-chuong-trinh-co-loi-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Chuẩn bị: chương trình có lỗi logic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-dung-o-au-break-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Dừng ở đâu: break, run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-i-tung-buoc-next-step-finish-until-continue" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Đi từng bước: next, step, finish, until, continue
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-nhin-vao-ben-trong-bt-frame-info-print-ptype" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Nhìn vào bên trong: bt, frame, info, print, ptype
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-theo-doi-display-ieu-kien-watch" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Theo dõi: display, điều kiện, watch
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-sua-thu-ngay-trong-gdb-print-x-set-var" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Sửa thử ngay trong gdb: print x = ..., set var
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-xem-bo-nho-tho-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Xem bộ nhớ thô: x
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chay-kich-ban-va-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chạy kịch bản và TUI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-bang-tra-nhanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Bảng tra nhanh
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-sua-loi-lon-va-kiem-chung-bang-gdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: sửa lỗi lon và kiểm chứng bằng gdb
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-39-gdb-co-ban-dung-chuong-trinh-va-nhin-vao-ben-trong">Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong<a class="headerlink" href="#bai-39-gdb-co-ban-dung-chuong-trinh-va-nhin-vao-ben-trong" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Dừng chương trình đúng chỗ bằng <code>break</code> (theo hàm, theo <code>tệp:dòng</code>, có điều kiện, <code>tbreak</code>) rồi đi từng bước bằng <code>next</code>, <code>step</code>, <code>finish</code>, <code>until</code>, <code>continue</code>.</li>
+<li>Nhìn vào bên trong: <code>bt</code>, <code>frame</code>, <code>up</code>, <code>down</code>, <code>info locals</code>, <code>print</code>, <code>ptype</code>, <code>display</code>, <code>x</code>, và dùng <code>watch</code> để chứng minh một biến <strong>không bao giờ đổi</strong>.</li>
+<li>Sửa thử giá trị ngay trong gdb (<code>set var</code>, <code>print x = ...</code>) để kiểm chứng giả thuyết, và viết được kịch bản <code>gdb -batch -x</code>.</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../38-bien-dich-lien-ket-build/">Bài 38</a> (vì sao phải biên dịch <code>-g -O0</code>), <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/">Bài 02</a> (stack, khung gọi hàm) và <a href="../../nhom-2-stl-thuat-toan/16-vector/">Bài 16</a> (<code>std::vector</code>).</p>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Bạn xem một <strong>cuộn phim</strong> về một ngày ở nhà bếp. Phim chạy một mạch, nhanh quá, và đúng ở cảnh quan trọng thì bạn chớp mắt. Bạn cần một <strong>điều khiển từ xa</strong>.</p>
+<p>Nút <strong>Tạm dừng</strong> (đặt trước ở cảnh bạn nghi ngờ) là <code>break</code>. Nút <strong>tua từng khung</strong> là <code>next</code> và <code>step</code>. Ống kính <strong>phóng to</strong> vào một chiếc bát là <code>print</code>. Còn chuông <strong>báo khi có ai chạm vào chiếc bát</strong> là <code>watch</code>.</p>
+<p>Điều khiển từ xa này chính là <strong>gdb</strong> (GNU Debugger, trình gỡ lỗi): nó chạy chương trình của bạn <strong>bên trong nó</strong>, cho dừng bất cứ lúc nào, rồi cho bạn nhìn mọi biến.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví dụ cuộn phim không còn đúng?</p>
+<p>Phim thật bạn chỉ xem được, không sửa được cảnh. gdb thì cho bạn <strong>sửa giá trị biến ngay lúc đang dừng</strong> (mục 6) rồi cho chạy tiếp. Và gdb thường <strong>không tua ngược</strong> được: lỡ bấm quá tay thì phải chạy lại từ đầu.</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-chuan-bi-chuong-trinh-co-loi-logic">1. Chuẩn bị: chương trình có lỗi logic<a class="headerlink" href="#1-chuan-bi-chuong-trinh-co-loi-logic" title="Permanent link">&para;</a></h3>
+<p>Cả bài dùng một chương trình nhỏ mà <strong>không sập, không cảnh báo, nhưng in sai</strong>. Nó tìm điểm cao nhất trong danh sách ba sinh viên, mà điểm đều âm (-5, -2, -9), nên đáp án đúng là <code>-2</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">SinhVien</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">ten</span><span class="p">;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">diem</span><span class="p">;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">};</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kt">int</span><span class="w"> </span><span class="nf">diemCaoNhat</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SinhVien</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SinhVien</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sv</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sv</span><span class="p">.</span><span class="n">diem</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">lon</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">            </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sv</span><span class="p">.</span><span class="n">diem</span><span class="p">;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">lon</span><span class="p">;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">}</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SinhVien</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="s">"An"</span><span class="p">,</span><span class="w"> </span><span class="mi">-5</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">"Binh"</span><span class="p">,</span><span class="w"> </span><span class="mi">-2</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">"Chi"</span><span class="p">,</span><span class="w"> </span><span class="mi">-9</span><span class="p">}};</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diemCaoNhat</span><span class="p">(</span><span class="n">ds</span><span class="p">);</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cao nhat = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>Khai báo hàm <code>diemCaoNhat</code>, nhận danh sách bằng tham chiếu <code>const</code> (<a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/">Bài 06</a>)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>lon</code> bắt đầu bằng <code>0</code>: giả định "điểm cao nhất không thấp hơn 0"</td>
+</tr>
+<tr>
+<td>12–16</td>
+<td>Duyệt từng <code>sv</code>; chỉ khi <code>sv.diem &gt; lon</code> mới cập nhật <code>lon</code></td>
+</tr>
+<tr>
+<td>17</td>
+<td>Trả <code>lon</code></td>
+</tr>
+<tr>
+<td>21–23</td>
+<td>Tạo ba sinh viên, gọi hàm, in kết quả</td>
+</tr>
+</tbody>
+</table>
+<p>Mình biên dịch bằng <code>g++ -std=c++17 -Wall -Wextra -g -O0 lon.cpp -o lon</code> (<code>-g -O0</code> theo <a href="../38-bien-dich-lien-ket-build/">Bài 38</a>). Chạy ra <code>cao nhat = 0</code>: <strong>sai</strong>, vì không sinh viên nào có 0 điểm. Không có gì để g++ cảnh báo, nên đây đúng là chỗ cần gdb.</p>
+<p>Máy mình: g++ 13.3 và gdb 15 trên Ubuntu. gdb có thể hỏi bật <code>debuginfod</code> (tải thông tin gỡ lỗi của thư viện từ mạng); mình tắt bằng <code>set debuginfod enabled off</code> để đầu ra gọn.</p>
+<h3 id="2-dung-o-au-break-run">2. Dừng ở đâu: <code>break</code>, <code>run</code><a class="headerlink" href="#2-dung-o-au-break-run" title="Permanent link">&para;</a></h3>
+<p>Mở gdb bằng <code>gdb ./lon</code>, rồi gõ lệnh ở dấu nhắc <code>(gdb)</code>. Bốn cách đặt điểm dừng (breakpoint) hay dùng:</p>
+<table>
+<thead>
+<tr>
+<th>Lệnh</th>
+<th>Dừng khi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>break diemCaoNhat</code></td>
+<td>Chương trình vào hàm đó</td>
+</tr>
+<tr>
+<td><code>break lon.cpp:13</code></td>
+<td>Chạy tới dòng 13 của tệp đó (có thể viết <code>break 13</code> nếu chỉ có một tệp)</td>
+</tr>
+<tr>
+<td><code>break lon.cpp:13 if sv.diem == -2</code></td>
+<td>Tới dòng 13 <strong>và</strong> điều kiện đúng</td>
+</tr>
+<tr>
+<td><code>tbreak diemCaoNhat</code></td>
+<td>Như <code>break</code> nhưng chỉ dừng <strong>một lần</strong> rồi tự xóa (temporary)</td>
+</tr>
+</tbody>
+</table>
+<p><code>run</code> bắt đầu chạy chương trình. Dưới đây là phiên gdb thật. Mình thêm <code>(gdb)</code> trước mỗi lệnh cho dễ đọc, bỏ vài dòng thông báo thư viện luồng, còn lại là nguyên văn.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>(gdb) break diemCaoNhat
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Breakpoint 1 at 0x2459: file lon.cpp, line 10.
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>(gdb) run
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Breakpoint 1, diemCaoNhat (ds=std::vector of length 3, capacity 3 = {...}) at lon.cpp:10
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>10  int diemCaoNhat(const std::vector&lt;SinhVien&gt;&amp; ds) {
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>(gdb) bt
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>#0  diemCaoNhat (ds=std::vector of length 3, capacity 3 = {...}) at lon.cpp:10
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>#1  0x00005555555566c8 in main () at lon.cpp:22
+</code></pre></div>
+<p>Hai điều đáng để ý.</p>
+<p>Một: gdb dừng ở <strong>dòng 10</strong> (dòng khai báo), chứ không phải dòng 11. g++ thường gắn mã chuẩn bị đầu hàm (dựng khung stack, bước bảo vệ stack mà g++ trên Ubuntu bật sẵn) vào dòng khai báo, nên điểm dừng nằm ở đó; <code>next</code> một lần là sang dòng 11. Hai: gdb tự in <code>std::vector of length 3, capacity 3</code> thay vì dãy con trỏ khó đọc, nhờ <strong>pretty-printer</strong> (bộ in đẹp) đi kèm thư viện chuẩn của g++.</p>
+<h3 id="3-i-tung-buoc-next-step-finish-until-continue">3. Đi từng bước: <code>next</code>, <code>step</code>, <code>finish</code>, <code>until</code>, <code>continue</code><a class="headerlink" href="#3-i-tung-buoc-next-step-finish-until-continue" title="Permanent link">&para;</a></h3>
+<p>Đây là năm nút "tua" của điều khiển từ xa. Khác biệt <code>next</code> và <code>step</code> là chỗ người mới hay lẫn nhất.</p>
+<table>
+<thead>
+<tr>
+<th>Lệnh (viết tắt)</th>
+<th>Làm gì</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>next</code> (<code>n</code>)</td>
+<td>Chạy hết <strong>một dòng</strong>; gặp lời gọi hàm thì chạy cả hàm đó rồi mới dừng</td>
+</tr>
+<tr>
+<td><code>step</code> (<code>s</code>)</td>
+<td>Chạy một dòng; gặp lời gọi hàm có thông tin gỡ lỗi thì <strong>chui vào</strong> hàm</td>
+</tr>
+<tr>
+<td><code>finish</code></td>
+<td>Chạy cho tới khi hàm hiện tại <strong>trả về</strong>, rồi in giá trị trả về</td>
+</tr>
+<tr>
+<td><code>until 17</code></td>
+<td>Chạy tới dòng 17 (hữu ích để thoát khỏi vòng lặp)</td>
+</tr>
+<tr>
+<td><code>continue</code> (<code>c</code>)</td>
+<td>Chạy tiếp cho tới điểm dừng kế hoặc hết chương trình</td>
+</tr>
+</tbody>
+</table>
+<p>Mình đứng ở dòng 10, bấm <code>next</code> ba lần, rồi hỏi gdb trạng thái:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>(gdb) next
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>11      int lon = 0;
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>(gdb) next
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>12      for (const SinhVien&amp; sv : ds) {
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>(gdb) next
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>13          if (sv.diem &gt; lon) {
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>(gdb) finish
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>0x00005555555566c8 in main () at lon.cpp:22
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>22      int kq = diemCaoNhat(ds);
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>Value returned is $6 = 0
+</code></pre></div>
+<p><code>finish</code> cho biết ngay hàm trả <code>0</code>: không cần đọc code, đã thấy kết quả sai. (<code>$6</code> là số thứ tự giá trị mà gdb tự đánh để bạn dùng lại; mục 4.)</p>
+<p>Còn <code>step</code> ở dòng 12 thì sao? Dòng đó có lời gọi <code>ds.begin()</code> của <code>std::vector</code>. Mình thử, và <code>step</code> chui thẳng vào mã thư viện:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>(gdb) step
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>std::vector&lt;SinhVien, std::allocator&lt;SinhVien&gt; &gt;::begin (this=0x7fffffffd960) at /usr/include/c++/13/bits/stl_vector.h:883
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>883       begin() const _GLIBCXX_NOEXCEPT
+</code></pre></div>
+<p>Đó không phải thứ bạn muốn xem. Quy tắc dễ nhớ: <strong>mặc định dùng <code>next</code></strong>; chỉ dùng <code>step</code> khi bạn biết hàm sắp gọi là code của mình. Lỡ chui vào thì <code>finish</code> để ra.</p>
+<h3 id="4-nhin-vao-ben-trong-bt-frame-info-print-ptype">4. Nhìn vào bên trong: <code>bt</code>, <code>frame</code>, <code>info</code>, <code>print</code>, <code>ptype</code><a class="headerlink" href="#4-nhin-vao-ben-trong-bt-frame-info-print-ptype" title="Permanent link">&para;</a></h3>
+<p>Đang dừng ở dòng 13 (vòng lặp đầu, <code>sv</code> là An), mình hỏi liên tiếp:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>(gdb) info locals
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sv = @0x55555556d2b0: {ten = "An", diem = -5}
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>__for_range = std::vector of length 3, capacity 3 = {{ten = "An", diem = -5}, {ten = "Binh", diem = -2}, {ten = "Chi", diem = -9}}
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>__for_begin = {ten = "An", diem = -5}
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>__for_end = {ten = "", diem = 0}
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>lon = 0
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>(gdb) print sv.diem
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>$2 = -5
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>(gdb) print ds[1]
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>$4 = {ten = "Binh", diem = -2}
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>(gdb) print ds.size()
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>$5 = 3
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>(gdb) ptype sv
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>type = const struct SinhVien {
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    std::string ten;
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    int diem;
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>} &amp;
+</code></pre></div>
+<p>Cách đọc:</p>
+<ul>
+<li><code>info locals</code> liệt kê biến cục bộ của khung hiện tại. Ba biến <code>__for_*</code> là biến ẩn mà g++ sinh ra cho vòng <code>for (... : ds)</code>; bạn có thể bỏ qua.</li>
+<li><code>print</code> (viết tắt <code>p</code>) tính một <strong>biểu thức</strong> C++ và in kết quả: tên biến, <code>sv.diem</code>, <code>ds[1]</code>, thậm chí <code>ds.size()</code>. Mỗi kết quả được đánh số <code>$1</code>, <code>$2</code>, ... để dùng lại như <code>print $2 + 1</code>.</li>
+<li><code>ptype</code> (print type) in <strong>kiểu</strong> đầy đủ; ở đây cho thấy <code>sv</code> là tham chiếu <code>const</code> tới <code>SinhVien</code>. Đừng <code>ptype</code> cả một <code>std::vector</code>: nó dội ra hàng trăm dòng.</li>
+<li><code>info args</code> in tham số của hàm; <code>bt</code> (backtrace) in chuỗi hàm đang gọi nhau, <code>#0</code> là hàm trong cùng.</li>
+</ul>
+<p>Muốn xem biến của hàm đã gọi mình, dùng <code>up</code> (lên một khung), <code>down</code> (xuống), hay <code>frame N</code>. Ví dụ <code>frame 1</code> nhảy sang <code>main</code> để xem <code>ds</code> ở đó. Chỉ khung đang chọn mới "thấy" biến của nó: đứng ở <code>main</code> mà <code>print lon</code> thì báo <code>No symbol "lon" in current context</code>.</p>
+<p>Hai mẹo in: <code>print *ds._M_impl._M_start@2</code> in <strong>hai phần tử đầu</strong> của mảng nằm sau <code>vector</code> (cú pháp <code>@N</code> nghĩa là "N phần tử liền nhau"); <code>print/x sv.diem</code> in dạng hệ 16. Mình thử <code>print *ds.data()@2</code> thì gdb báo <code>Cannot evaluate function -- may be inlined</code>: hàm thành viên chưa được biên dịch ra thì gdb không gọi được. Khi đó đi vào dữ liệu thô như trên.</p>
+<h3 id="5-theo-doi-display-ieu-kien-watch">5. Theo dõi: <code>display</code>, điều kiện, <code>watch</code><a class="headerlink" href="#5-theo-doi-display-ieu-kien-watch" title="Permanent link">&para;</a></h3>
+<p><strong><code>display</code></strong> là <code>print</code> tự lặp lại sau mỗi lần dừng. Mình đặt điểm dừng có điều kiện chỉ nổ ở sinh viên Bình (<code>diem == -2</code>), rồi <code>display</code> hai biểu thức và bước tiếp:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>(gdb) tbreak diemCaoNhat
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Temporary breakpoint 1 at 0x2459: file lon.cpp, line 10.
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>(gdb) break lon.cpp:13 if sv.diem == -2
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Breakpoint 2 at 0x24a9: file lon.cpp, line 13.
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>(gdb) run
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>Temporary breakpoint 1, diemCaoNhat (...) at lon.cpp:10
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>(gdb) continue
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>Breakpoint 2, diemCaoNhat (ds=std::vector of length 3, capacity 3 = {...}) at lon.cpp:13
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>13          if (sv.diem &gt; lon) {
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>(gdb) print sv
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>$2 = (const SinhVien &amp;) @0x55555556d2d8: {ten = "Binh", diem = -2}
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>(gdb) display lon
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>(gdb) display sv.diem
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>(gdb) next
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>12      for (const SinhVien&amp; sv : ds) {
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>1: lon = 0
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>2: sv.diem = -2
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>(gdb) next
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>13          if (sv.diem &gt; lon) {
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>1: lon = 0
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>2: sv.diem = -9
+</code></pre></div>
+<p>(Dòng <code>Temporary breakpoint 1, ...</code> mình rút gọn ở chỗ <code>(...)</code>.) Điều kiện chỉ nổ ở Bình nên <code>continue</code> bỏ qua An. Hai dòng <code>1:</code>, <code>2:</code> là kết quả <code>display</code> tự in sau mỗi bước: bạn <strong>thấy <code>lon</code> vẫn là 0 trong khi <code>sv.diem</code> toàn âm</strong>. <code>undisplay 1</code> tắt cái đầu. Xem cả danh sách điểm dừng bằng <code>info breakpoints</code>, xóa bằng <code>delete 1</code>.</p>
+<p><strong><code>watch</code></strong> là chuông báo "có ai chạm vào biến này không". Mình đặt nó ngay sau khi <code>lon</code> được khởi tạo (đứng ở dòng 12) rồi cho chạy tiếp:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>(gdb) break lon.cpp:12
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Breakpoint 1 at 0x246f: file lon.cpp, line 12.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>(gdb) run
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Breakpoint 1, diemCaoNhat (ds=std::vector of length 3, capacity 3 = {...}) at lon.cpp:12
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>12      for (const SinhVien&amp; sv : ds) {
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>(gdb) watch lon
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>Hardware watchpoint 2: lon
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>(gdb) continue
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>Watchpoint 2 deleted because the program has left the block in
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>which its expression is valid.
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>0x00005555555566c8 in main () at lon.cpp:22
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>22      int kq = diemCaoNhat(ds);
+</code></pre></div>
+<p>Chuông <strong>không kêu lần nào</strong>: gdb chỉ báo rằng <code>lon</code> đã hết phạm vi khi hàm kết thúc. Đây là <strong>bằng chứng</strong> (không phải phỏng đoán) rằng sau dòng 11, không dòng nào ghi vào <code>lon</code>. Nên điều kiện <code>sv.diem &gt; lon</code> không bao giờ đúng, và lỗi nằm ở giá trị khởi đầu.</p>
+<p>Nếu đặt <code>watch lon</code> sớm hơn, trước khi dòng 11 chạy, chuông kêu <strong>một lần</strong>: gdb báo <code>Old value = 32767</code>, <code>New value = 0</code> (giá trị rác cũ biến thành 0 lúc khởi tạo). Mình đã thấy đúng như vậy khi thử.</p>
+<h3 id="6-sua-thu-ngay-trong-gdb-print-x-set-var">6. Sửa thử ngay trong gdb: <code>print x = ...</code>, <code>set var</code><a class="headerlink" href="#6-sua-thu-ngay-trong-gdb-print-x-set-var" title="Permanent link">&para;</a></h3>
+<p>Giả thuyết bây giờ: "nếu <code>lon</code> khởi đầu thấp hơn mọi điểm thì kết quả đúng". Kiểm chứng không cần sửa code: dừng ở dòng 17 (<code>return lon;</code>), gán <code>lon</code>, rồi <code>finish</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>(gdb) break lon.cpp:17
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Breakpoint 1 at 0x24e2: file lon.cpp, line 17.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>(gdb) run
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>Breakpoint 1, diemCaoNhat (ds=std::vector of length 3, capacity 3 = {...}) at lon.cpp:17
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>17      return lon;
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>(gdb) print lon
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>$1 = 0
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>(gdb) print lon = -1000
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>$2 = -1000
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>(gdb) finish
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>0x00005555555566c8 in main () at lon.cpp:22
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>22      int kq = diemCaoNhat(ds);
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>Value returned is $3 = -1000
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>(gdb) continue
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>cao nhat = -1000
+</code></pre></div>
+<p><code>print lon = -1000</code> là phép gán C++ chạy trong chương trình; <code>set var lon = -1000</code> làm đúng việc đó mà không in. Ở đây nó chưa chữa lỗi (mình gán ở cuối nên trả <code>-1000</code>), nhưng nó cho thấy bạn <strong>thay được trạng thái đang chạy</strong>. Muốn kiểm chứng đúng giả thuyết thì gán <code>lon</code> ngay sau dòng 11, trước vòng lặp. Mọi thay đổi chỉ sống trong lần chạy này: tệp <code>lon.cpp</code> không đổi, bạn vẫn phải sửa code thật (phần ví dụ).</p>
+<h3 id="7-xem-bo-nho-tho-x">7. Xem bộ nhớ thô: <code>x</code><a class="headerlink" href="#7-xem-bo-nho-tho-x" title="Permanent link">&para;</a></h3>
+<p>Đôi khi cần xem <strong>byte</strong> chứ không phải biến. Lệnh <code>x/&lt;số lượng&gt;&lt;định dạng&gt;&lt;cỡ&gt; &lt;địa chỉ&gt;</code> (examine, soi) làm việc đó: định dạng <code>d</code> là số thập phân, <code>x</code> hệ 16, <code>s</code> chuỗi chữ, <code>i</code> lệnh máy; cỡ <code>b</code> byte, <code>w</code> 4 byte. Đứng ở vòng cuối (<code>sv</code> là Chi):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>(gdb) x/dw &amp;sv.diem
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>0x55555556d320: -9
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>(gdb) x/s sv.ten._M_dataplus._M_p
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>0x55555556d310: "Chi"
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>(gdb) x/8xb &amp;sv.diem
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>0x55555556d320: 0xf7    0xff    0xff    0xff    0x00    0x00    0x00    0x00
+</code></pre></div>
+<p><code>-9</code> nằm trong bộ nhớ là bốn byte <code>f7 ff ff ff</code> (số âm kiểu bù hai; byte thấp đứng trước, vì máy này viết số theo kiểu little-endian). Đây là nền để đọc lỗi bộ nhớ ở <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>.</p>
+<h3 id="8-chay-kich-ban-va-tui">8. Chạy kịch bản và TUI<a class="headerlink" href="#8-chay-kich-ban-va-tui" title="Permanent link">&para;</a></h3>
+<p>Gõ cùng một chuỗi lệnh nhiều lần thì chán. Ghi chúng vào tệp (mỗi dòng một lệnh) rồi chạy <code>gdb -batch -x kichban.gdb ./lon</code>: <code>-batch</code> nghĩa là chạy hết lệnh rồi <strong>thoát</strong>, không dừng chờ bạn. Tệp mình dùng:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>set debuginfod enabled off
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>break lon.cpp:17
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>commands
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  silent
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  printf "lon = %d\n", lon
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  continue
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>end
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>run
+</code></pre></div>
+<p>Khối <code>commands ... end</code> gắn việc cần làm vào điểm dừng: <code>silent</code> (không in thông báo dừng), in một dòng rồi <code>continue</code>. Chạy thật ra:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>lon = 0
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cao nhat = 0
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>[Inferior 1 (process 476577) exited normally]
+</code></pre></div>
+<p>Kịch bản này nhìn <code>lon</code> mà không cần ngồi canh. <strong>Cẩn thận</strong>: nếu một lệnh trong tệp <code>-x</code> bị lỗi, gdb báo <code>Error in sourced command file</code> và <strong>bỏ các lệnh còn lại</strong>. Mình gặp đúng chuyện đó khi một dòng <code>print *p</code> với <code>p</code> rỗng nằm giữa kịch bản (<a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>). Thêm lệnh nhỏ lẻ thì dùng <code>-ex "lệnh"</code>, mỗi cờ một lệnh.</p>
+<p><strong>TUI</strong> (text user interface) chia màn hình terminal làm hai: nửa trên là mã nguồn có đánh dấu dòng đang dừng. Bật bằng <code>gdb -tui ./lon</code> hoặc bấm <code>Ctrl+X</code> rồi <code>A</code> khi đang ở gdb. Mình chỉ nhắc tên; bài này không dùng.</p>
+<h3 id="9-bang-tra-nhanh">9. Bảng tra nhanh<a class="headerlink" href="#9-bang-tra-nhanh" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Việc</th>
+<th>Lệnh</th>
+<th>Viết tắt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chạy chương trình (từ đầu)</td>
+<td><code>run</code></td>
+<td><code>r</code></td>
+</tr>
+<tr>
+<td>Đặt điểm dừng</td>
+<td><code>break hàm</code> / <code>break tệp:dòng</code></td>
+<td><code>b</code></td>
+</tr>
+<tr>
+<td>Điểm dừng có điều kiện</td>
+<td><code>break ... if biểu_thức</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Điểm dừng một lần</td>
+<td><code>tbreak ...</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Liệt kê / xóa điểm dừng</td>
+<td><code>info breakpoints</code> / <code>delete N</code></td>
+<td><code>i b</code></td>
+</tr>
+<tr>
+<td>Chạy một dòng, không chui vào hàm</td>
+<td><code>next</code></td>
+<td><code>n</code></td>
+</tr>
+<tr>
+<td>Chạy một dòng, chui vào hàm</td>
+<td><code>step</code></td>
+<td><code>s</code></td>
+</tr>
+<tr>
+<td>Chạy tới khi hàm trả về</td>
+<td><code>finish</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Chạy tới dòng N</td>
+<td><code>until N</code></td>
+<td><code>u N</code></td>
+</tr>
+<tr>
+<td>Chạy tiếp</td>
+<td><code>continue</code></td>
+<td><code>c</code></td>
+</tr>
+<tr>
+<td>Chuỗi hàm đang gọi</td>
+<td><code>backtrace</code></td>
+<td><code>bt</code>, <code>where</code></td>
+</tr>
+<tr>
+<td>Chọn khung</td>
+<td><code>frame N</code>, <code>up</code>, <code>down</code></td>
+<td><code>f N</code></td>
+</tr>
+<tr>
+<td>Biến cục bộ / tham số</td>
+<td><code>info locals</code> / <code>info args</code></td>
+<td></td>
+</tr>
+<tr>
+<td>In biểu thức</td>
+<td><code>print biểu_thức</code></td>
+<td><code>p</code></td>
+</tr>
+<tr>
+<td>In kiểu</td>
+<td><code>ptype tên</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Tự in sau mỗi lần dừng</td>
+<td><code>display biểu_thức</code> / <code>undisplay N</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Báo khi biến bị ghi</td>
+<td><code>watch biến</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Gán giá trị</td>
+<td><code>set var x = 5</code> hoặc <code>print x = 5</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Xem bộ nhớ</td>
+<td><code>x/4dw &amp;biến</code></td>
+<td></td>
+</tr>
+<tr>
+<td>In mã nguồn quanh dòng hiện tại</td>
+<td><code>list</code></td>
+<td><code>l</code></td>
+</tr>
+<tr>
+<td>Thoát</td>
+<td><code>quit</code></td>
+<td><code>q</code></td>
+</tr>
+</tbody>
+</table>
+<p>Bấm Enter trong gdb sẽ <strong>lặp lệnh trước đó</strong>, tiện khi cần <code>next</code> liên tục.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Trình gỡ lỗi chuẩn của Go là <strong>Delve</strong> (<code>dlv</code>), không phải gdb, vì gdb không hiểu tốt goroutine của Go. Ý tưởng giống hệt: <code>dlv debug</code> biên dịch rồi chạy, rồi bạn gõ <code>break main.go:10</code>, <code>continue</code>, <code>next</code>, <code>step</code>, <code>print x</code>, <code>bt</code> (và lệnh riêng <code>goroutines</code> để liệt kê goroutine). Để gỡ lỗi dễ, Go cũng cần tắt tối ưu: <code>go build -gcflags="all=-N -l"</code> (<code>-N</code> tắt tối ưu, <code>-l</code> tắt inline) tương ứng với <code>-O0</code> của bạn. Máy mình không cài <code>dlv</code> nên mình chưa chạy nó; phần <code>-gcflags</code> mình đã biên dịch thử được.</p>
+</div>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="vi-du-sua-loi-lon-va-kiem-chung-bang-gdb">Ví dụ: sửa lỗi <code>lon</code> và kiểm chứng bằng gdb<a class="headerlink" href="#vi-du-sua-loi-lon-va-kiem-chung-bang-gdb" title="Permanent link">&para;</a></h3>
+<p>Từ bằng chứng ở mục 5, lỗi nằm ở giá trị khởi đầu. Sửa: bắt đầu bằng điểm của sinh viên đầu tiên, và xử lý danh sách rỗng riêng.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="k">struct</span><span class="w"> </span><span class="nc">SinhVien</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">ten</span><span class="p">;</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">diem</span><span class="p">;</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">};</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="kt">int</span><span class="w"> </span><span class="nf">diemCaoNhat</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SinhVien</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ds</span><span class="p">.</span><span class="n">front</span><span class="p">().</span><span class="n">diem</span><span class="p">;</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">SinhVien</span><span class="o">&amp;</span><span class="w"> </span><span class="n">sv</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sv</span><span class="p">.</span><span class="n">diem</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">lon</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">            </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sv</span><span class="p">.</span><span class="n">diem</span><span class="p">;</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">lon</span><span class="p">;</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="p">}</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SinhVien</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="s">"An"</span><span class="p">,</span><span class="w"> </span><span class="mi">-5</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">"Binh"</span><span class="p">,</span><span class="w"> </span><span class="mi">-2</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">"Chi"</span><span class="p">,</span><span class="w"> </span><span class="mi">-9</span><span class="p">}};</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cao nhat = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">diemCaoNhat</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">SinhVien</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rong</span><span class="p">;</span>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"rong = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">diemCaoNhat</span><span class="p">(</span><span class="n">rong</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11–13</td>
+<td>Danh sách rỗng thì không có "cao nhất", trả <code>0</code> (quy ước của hàm này)</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>lon</code> bắt đầu bằng điểm đầu tiên: giờ nó <strong>là một giá trị có thật</strong> trong danh sách</td>
+</tr>
+<tr>
+<td>15–19</td>
+<td>Vòng lặp như cũ: chỉ cập nhật khi gặp điểm cao hơn</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Với <code>-5</code>, <code>-2</code>, <code>-9</code>: <code>lon</code> đi <code>-5</code> rồi <code>-2</code>, các điểm sau không vượt nên giữ <code>-2</code></td>
+</tr>
+<tr>
+<td>26–27</td>
+<td>Danh sách rỗng đi vào nhánh dòng 11</td>
+</tr>
+</tbody>
+</table>
+<p>Kết quả: <code>cao nhat = -2</code> rồi <code>rong = 0</code>. Muốn gdb xác nhận, mình đặt <code>watch lon</code> ở đầu vòng lặp: lần này chuông kêu khi <code>lon</code> đổi từ <code>-5</code> sang <code>-2</code>, đúng điều bản cũ không làm được.</p>
+<p>Bài học về <strong>cách làm việc</strong>, không chỉ về lỗi này: giả thuyết ("<code>lon</code> không bao giờ đổi") → chứng minh bằng <code>watch</code> → thử sửa trong gdb → sửa code thật → chạy lại. Đừng sửa code trước rồi mới tin.</p>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>Khác nhau giữa <code>next</code> và <code>step</code>?</summary>
+<p>Cả hai chạy một dòng. Gặp lời gọi hàm thì <code>next</code> chạy trọn hàm đó rồi dừng ở dòng kế, còn <code>step</code> chui vào bên trong (nếu hàm có thông tin gỡ lỗi). <code>finish</code> ra khỏi hàm hiện tại. Mặc định dùng <code>next</code>; <code>step</code> hay dẫn vào mã thư viện như <code>std::vector::begin</code>.</p>
+</details>
+<details class="question">
+<summary>Breakpoint, watchpoint và catchpoint khác nhau thế nào?</summary>
+<p>Breakpoint dừng khi chương trình tới một <strong>vị trí code</strong> (hàm hay dòng). Watchpoint dừng khi một <strong>vùng nhớ</strong> bị ghi (<code>watch biến</code>), không quan tâm code nào ghi. Catchpoint dừng khi xảy ra một <strong>sự kiện</strong> như ném ngoại lệ (<code>catch throw</code>, <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>). Điểm dừng có điều kiện (<code>break ... if</code>) dùng được cho breakpoint.</p>
+</details>
+<details class="question">
+<summary>Vì sao phải biên dịch <code>-g</code> mới gỡ lỗi tử tế?</summary>
+<p><code>-g</code> ghi tên biến, kiểu, và ánh xạ dòng nguồn với mã máy vào tệp (<a href="../38-bien-dich-lien-ket-build/">Bài 38</a>). Không có nó gdb chỉ thấy địa chỉ và tên hàm: mình thử, <code>print lon</code> báo <code>No symbol "lon" in current context</code> và <code>bt</code> không có số dòng. <code>-g</code> không làm chương trình chạy chậm.</p>
+</details>
+<details class="question">
+<summary>Làm sao biết một biến bị đổi ở đâu trong chương trình?</summary>
+<p>Dừng ở nơi biến còn đúng, rồi <code>watch biến</code>. Mỗi lần có lệnh ghi vào biến, gdb dừng, in giá trị cũ và mới, và <code>bt</code> cho biết hàm nào ghi. Nếu chuông không kêu lần nào, biến chưa từng bị ghi sau điểm đó (chính là bằng chứng ở mục 5).</p>
+</details>
+<details class="question">
+<summary>Gỡ lỗi bằng gdb có sửa được code đang chạy không?</summary>
+<p>Sửa được <strong>giá trị biến</strong> (<code>set var x = 5</code>, <code>print x = 5</code>) và gọi hàm (<code>print ham(3)</code>) trong lần chạy hiện tại, để kiểm chứng giả thuyết nhanh. Nhưng không sửa được mã nguồn: muốn đổi chương trình phải sửa tệp <code>.cpp</code>, biên dịch lại.</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Gỡ lỗi bản không có <code>-g</code> hoặc bản <code>-O2</code></p>
+<p>Không <code>-g</code>: không có tên biến, số dòng. Có <code>-O2</code>: biến <code>&lt;optimized out&gt;</code>, dòng nhảy lung tung, thậm chí điểm dừng không bao giờ nổ (<a href="../40-gdb-nang-cao-core-dump/">Bài 40</a> cho ví dụ thật). Biên dịch lại <code>-g -O0</code> trước, rồi mới nghi gdb.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Dùng <code>step</code> ở mọi nơi</p>
+<p>Một lần <code>step</code> ở dòng có <code>ds.begin()</code> đưa bạn vào tệp <code>stl_vector.h</code>, nơi không có lỗi của bạn. Dùng <code>next</code>, và <code>step</code> chỉ ở hàm của chính mình.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Tin rằng sửa trong gdb là đã sửa lỗi</p>
+<p><code>print lon = -1000</code> chỉ đổi bộ nhớ trong lần chạy này. Thoát gdb là mất. Dùng nó để <strong>chứng minh</strong> giả thuyết, rồi sửa code thật.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="39">
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 1.</strong> Bạn đặt <code>watch lon</code> khi đang đứng sau dòng <code>int lon = 0;</code> rồi <code>continue</code>. gdb không báo <code>Old value</code>/<code>New value</code> lần nào mà in <code>Watchpoint 2 deleted because the program has left the block in which its expression is valid</code>. Kết luận nào bảo vệ được?</p>
+<ul>
+<li><code>watch</code> bị hỏng vì biến <code>lon</code> nằm trên stack, nơi CPU không theo dõi được</li>
+<li>Không lệnh nào ghi vào <code>lon</code> sau điểm đặt</li>
+<li><code>lon</code> đã bị tối ưu hóa mất nên gdb không có chỗ nào để theo dõi</li>
+<li>Chương trình đã sập trước khi tới bất kỳ dòng nào ghi vào <code>lon</code></li>
+</ul>
+<p class="giai-thich">Watchpoint dừng mỗi lần vùng nhớ của biểu thức bị ghi. Không dừng lần nào cho tới lúc hàm kết thúc (khi biến hết phạm vi, gdb tự xóa watchpoint) nghĩa là không có lệnh ghi nào xảy ra: bằng chứng rằng <code>lon</code> không đổi. Biến trên stack theo dõi được bình thường, bằng thanh ghi gỡ lỗi của CPU. Ở bản <code>-O0</code> biến còn nguyên, và chương trình vẫn chạy hết hàm (thấy ở dòng cuối: gdb dừng ở <code>main</code>).</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 2.</strong> Đứng ở dòng <code>for (const SinhVien&amp; sv : ds) {</code> (có gọi <code>ds.begin()</code> của <code>std::vector</code>). Bạn gõ <code>step</code> thay vì <code>next</code>. Chuyện gì xảy ra?</p>
+<ul>
+<li>Chương trình chạy hết vòng lặp rồi mới dừng</li>
+<li>gdb bỏ qua lời gọi <code>begin()</code> và dừng ở dòng kế tiếp trong hàm của bạn</li>
+<li>gdb báo lỗi vì <code>begin()</code> không phải hàm do bạn tự viết</li>
+<li>gdb chui vào mã <code>begin()</code> trong tệp thư viện chuẩn</li>
+</ul>
+<p class="giai-thich"><code>step</code> chui vào hàm được gọi nếu có thông tin gỡ lỗi, và <code>std::vector::begin</code> có (g++ cài kèm nguồn thư viện), nên gdb dừng ở <code>stl_vector.h</code>. Việc bỏ qua lời gọi là việc của <code>next</code>. <code>step</code> không tính "hàm của bạn hay của thư viện", chỉ cần có thông tin dòng. Không có chuyện chạy hết vòng lặp: <code>until</code> hay <code>continue</code> mới làm vậy.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 3.</strong> Bạn muốn biết hàm <code>diemCaoNhat</code> trả về gì mà không đọc từng dòng. Lệnh nào cho kết quả trực tiếp?</p>
+<ul>
+<li><code>finish</code>, chạy tới khi hàm trả về rồi in giá trị trả về</li>
+<li><code>until 17</code>, chạy tới dòng 17</li>
+<li><code>frame 1</code>, chọn khung của <code>main</code></li>
+<li><code>display lon</code>, in <code>lon</code> mỗi lần dừng</li>
+</ul>
+<p class="giai-thich"><code>finish</code> chạy cho tới khi hàm hiện tại trả về rồi in <code>Value returned is $N = ...</code>, đúng thứ cần. <code>until</code> chạy tới một dòng nhưng không cho biết giá trị trả. <code>frame 1</code> chỉ chọn khung của hàm gọi, chưa chạy gì. <code>display lon</code> in <code>lon</code> sau mỗi lần dừng, mà <code>lon</code> chưa chắc bằng giá trị trả.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 4.</strong> Bạn đặt <code>break lon.cpp:13 if sv.diem == -2</code> rồi <code>run</code>, <code>continue</code>. Gõ <code>print sv</code> khi gdb dừng. Dữ liệu là <code>{"An", -5}, {"Binh", -2}, {"Chi", -9}</code>. gdb in gì?</p>
+<ul>
+<li><code>{ten = "An", diem = -5}</code>, vì An là phần tử đầu tiên của danh sách</li>
+<li><code>{ten = "Chi", diem = -9}</code>, vì đó là phần tử cuối được duyệt</li>
+<li><code>{ten = "Binh", diem = -2}</code>, phần tử thỏa điều kiện</li>
+<li>Báo lỗi vì <code>sv</code> chưa khởi tạo</li>
+</ul>
+<p class="giai-thich">Điều kiện <code>sv.diem == -2</code> chỉ đúng khi <code>sv</code> đang là Bình, nên điểm dừng bỏ qua An và chỉ nổ ở lượt thứ hai; lúc đó <code>print sv</code> in Bình. Đã chạy qua lượt đầu nên An không còn là <code>sv</code>. Chi chưa được duyệt tới. <code>sv</code> được khởi tạo ở mỗi lượt vòng lặp, không phải lỗi.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 5.</strong> Bạn biên dịch <code>g++ lon.cpp -o lon</code> (không <code>-g</code>), <code>break diemCaoNhat</code>, <code>run</code>, rồi <code>print lon</code>. gdb in <code>No symbol "lon" in current context</code>. Nguyên nhân gần nhất?</p>
+<ul>
+<li>gdb chưa hiểu kiểu <code>std::vector</code> nên từ chối in mọi biến</li>
+<li>Tệp không có thông tin gỡ lỗi</li>
+<li><code>lon</code> là biến toàn cục nên gdb không in được theo tên</li>
+<li><code>lon</code> chưa khởi tạo nên gdb từ chối in giá trị rác</li>
+</ul>
+<p class="giai-thich">Không có <code>-g</code> thì tệp không mang tên biến hay số dòng, nên gdb chỉ còn tên hàm (lấy từ bảng tên) và địa chỉ. Pretty-printer không liên quan đến việc có tên biến hay không. <code>lon</code> là biến cục bộ, không phải toàn cục. gdb in biến chưa khởi tạo bình thường (giá trị rác), không từ chối.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 6.</strong> Kịch bản <code>-x</code> có dòng 1 <code>run</code> (chương trình dừng với <code>p=0x0</code>), dòng 2 <code>print p</code>, dòng 3 <code>print *p</code>, dòng 4 <code>bt</code>. Dòng 3 báo <code>Cannot access memory at address 0x0</code>. Điều gì xảy ra với dòng 4?</p>
+<ul>
+<li><code>bt</code> vẫn chạy, vì gdb luôn chạy hết kịch bản dù có lệnh lỗi</li>
+<li><code>bt</code> chạy nhưng in rỗng vì con trỏ rỗng đang được chọn</li>
+<li><code>bt</code> chạy, thêm chữ <code>Error</code> vào cuối</li>
+<li><code>bt</code> không chạy: lệnh lỗi làm gdb bỏ phần còn lại</li>
+</ul>
+<p class="giai-thich">Khi nạp bằng <code>-x</code>, một lệnh lỗi làm gdb in <code>Error in sourced command file</code> và bỏ các dòng sau. Muốn lệnh có thể lỗi mà vẫn chạy tiếp thì dùng mỗi lệnh một <code>-ex</code>. Con trỏ rỗng chỉ làm lỗi <code>print *p</code>, không ảnh hưởng <code>bt</code>. Nên <code>bt</code> đứng sau lệnh lỗi trong kịch bản thì không bao giờ được chạy.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 7.</strong> Bạn gõ <code>print lon = -1000</code> ở dòng <code>return lon;</code> rồi <code>continue</code>, chương trình in <code>cao nhat = -1000</code>. Sau đó bạn thoát gdb và chạy lại <code>./lon</code> bình thường. Kết quả?</p>
+<ul>
+<li>In <code>cao nhat = 0</code>, vì lệnh chỉ đổi bộ nhớ lúc đó</li>
+<li>In <code>cao nhat = -1000</code>, vì gdb ghi vào tệp</li>
+<li>In <code>cao nhat = -2</code>, vì gdb đã sửa lỗi logic giúp bạn luôn</li>
+<li>Không chạy được, vì tệp đã bị gdb khóa sau khi sửa</li>
+</ul>
+<p class="giai-thich"><code>print x = giá_trị</code> là phép gán trong bộ nhớ của tiến trình đang chạy dưới gdb; tệp chạy trên đĩa và mã nguồn không đổi. Lần chạy mới bắt đầu lại từ <code>int lon = 0</code> và in <code>0</code>. gdb không biết "đáp án đúng" để tự sửa. Tệp chạy không bị khóa sau khi gdb thoát.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li>gdb là điều khiển từ xa cho chương trình: biên dịch <code>-g -O0</code>, <code>run</code>, đặt điểm dừng bằng <code>break hàm</code>, <code>break tệp:dòng</code>, <code>break ... if điều_kiện</code> hay <code>tbreak</code>; điểm dừng ở hàm nằm ở dòng khai báo, <code>next</code> một lần mới vào thân.</li>
+<li>Đi từng bước: <code>next</code> (không chui vào hàm), <code>step</code> (chui vào, hay dẫn vào mã thư viện), <code>finish</code> (ra khỏi hàm và in giá trị trả), <code>until N</code>, <code>continue</code>; Enter lặp lệnh trước.</li>
+<li>Nhìn vào trong: <code>bt</code>, <code>frame N</code>/<code>up</code>/<code>down</code>, <code>info locals</code>/<code>info args</code>, <code>print</code> (biểu thức, <code>ds[1]</code>, mảng bằng <code>@N</code>, <code>vector</code> và <code>string</code> đều đọc được nhờ pretty-printer), <code>ptype</code>, <code>display</code>, <code>x/4dw</code> cho byte thô.</li>
+<li><code>watch biến</code> dừng khi biến bị ghi; nếu nó kết thúc bằng thông báo "left the block" mà không nổ lần nào thì đó là bằng chứng biến không bao giờ đổi; <code>print x = 5</code>/<code>set var</code> sửa giá trị trong lần chạy hiện tại để thử giả thuyết, không sửa mã nguồn.</li>
+<li>Kịch bản: <code>gdb -batch -x tệp ./prog</code> chạy rồi thoát (một lệnh lỗi trong tệp <code>-x</code> làm bỏ các lệnh sau; dùng <code>-ex</code> rời nếu cần), <code>commands ... end</code> gắn việc vào điểm dừng, TUI chỉ cần biết tên; Go có Delve (<code>dlv</code>) với ý tưởng giống hệt.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../38-bien-dich-lien-ket-build/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../40-gdb-nang-cao-core-dump/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>

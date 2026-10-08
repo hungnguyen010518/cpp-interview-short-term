@@ -1,0 +1,2793 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-5-he-thong-quy-trinh/41-sanitizer-valgrind/">
+      
+      
+        <link rel="prev" href="../40-gdb-nang-cao-core-dump/">
+      
+      
+        <link rel="next" href="../42-strace-perf-do-hieu-nang/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-41-cong-cu-bat-loi-bo-nho-va-luong-sanitizer-sau-va-valgrind" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 2 — STL và thuật toán
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 2 — STL và thuật toán
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/16-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 16 — std::vector: mảng co giãn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 17 — string, string_view, array, deque, list
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 18 — map, set, unordered_map: tra cứu theo khóa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 19 — Iterator và iterator invalidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 20 — <algorithm> và lambda: sort, find, transform, remove-erase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 21 — Big-O, danh sách liên kết, stack và queue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 3 — Đa luồng
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 3 — Đa luồng
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/24-thread-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/25-data-race-mutex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/26-deadlock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/27-condition-variable/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/28-atomic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/29-async-future/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 29 — std::async và std::future: lấy kết quả từ luồng khác
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 4 — OOP, template và Design Patterns
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 4 — OOP, template và Design Patterns
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/31-lop-dong-goi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/32-ke-thua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/33-da-hinh-virtual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/34-template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/35-pattern-singleton-factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/36-pattern-observer-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../38-bien-dich-lien-ket-build/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../39-gdb-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../40-gdb-nang-cao-core-dump/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ban-o-cac-cong-cu" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Bản đồ các công cụ
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-asan-sau-hon-chinh-bang-asan_options" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. ASan sâu hơn: chỉnh bằng ASAN_OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-co-thu-vien-chuan-vi-ngoai-bien" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Cờ thư viện chuẩn: v[i] ngoài biên
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ubsan-mo-rong" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. UBSan mở rộng
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-threadsanitizer-chay-that" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. ThreadSanitizer chạy thật
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-fstack-protector-ghi-e-stack-phat-hien-luc-ham-tra-ve" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. -fstack-protector: ghi đè stack, phát hiện lúc hàm trả về
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-valgrind-va-msan-chi-neu-cach-dung" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Valgrind và MSan: chỉ nêu cách dùng
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chon-cong-cu-theo-trieu-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chọn công cụ theo triệu chứng
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-sua-data-race-bang-stdatomic-roi-kiem-lai-bang-tsan" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: sửa data race bằng std::atomic rồi kiểm lại bằng TSan
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../42-strace-perf-do-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../43-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 43 — Git: lịch sử, nhánh, gộp và cứu lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../44-mang-socket/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 44 — Mạng: TCP/UDP, socket C++, REST và gRPC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../45-database-sdlc-game/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 45 — Database, quy trình phần mềm và nguyên lý game dev: ba chủ đề bổ sung
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../46-tong-on-debug-phong-van/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 46 — Tổng ôn: quy trình gỡ lỗi và kể chuyện dự án
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ban-o-cac-cong-cu" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Bản đồ các công cụ
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-asan-sau-hon-chinh-bang-asan_options" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. ASan sâu hơn: chỉnh bằng ASAN_OPTIONS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-co-thu-vien-chuan-vi-ngoai-bien" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Cờ thư viện chuẩn: v[i] ngoài biên
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ubsan-mo-rong" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. UBSan mở rộng
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-threadsanitizer-chay-that" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. ThreadSanitizer chạy thật
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-fstack-protector-ghi-e-stack-phat-hien-luc-ham-tra-ve" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. -fstack-protector: ghi đè stack, phát hiện lúc hàm trả về
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-valgrind-va-msan-chi-neu-cach-dung" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Valgrind và MSan: chỉ nêu cách dùng
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-chon-cong-cu-theo-trieu-chung" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Chọn công cụ theo triệu chứng
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vi-du-sua-data-race-bang-stdatomic-roi-kiem-lai-bang-tsan" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ví dụ: sửa data race bằng std::atomic rồi kiểm lại bằng TSan
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-41-cong-cu-bat-loi-bo-nho-va-luong-sanitizer-sau-va-valgrind">Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind<a class="headerlink" href="#bai-41-cong-cu-bat-loi-bo-nho-va-luong-sanitizer-sau-va-valgrind" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Chỉnh được hành vi của sanitizer bằng <code>ASAN_OPTIONS</code> (<code>halt_on_error</code>, <code>detect_leaks</code>, <code>abort_on_error</code>), đọc được báo cáo ASan cho lỗi "chết chỗ này, lỗi chỗ kia" ở <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>, và gắn ASan với gdb.</li>
+<li>Chạy ThreadSanitizer thật trên data race và deadlock, đọc báo cáo (kể cả dòng <code>As if synchronized via sleep</code>), và dùng thêm <code>-D_GLIBCXX_ASSERTIONS</code>, <code>-D_GLIBCXX_DEBUG</code>, <code>-fsanitize=undefined</code> mở rộng, <code>-fstack-protector</code>.</li>
+<li>Biết Valgrind (<code>memcheck</code>, <code>helgrind</code>, <code>massif</code>, <code>callgrind</code>) và MemorySanitizer dùng để làm gì, và chọn công cụ theo triệu chứng.</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (ASan, UBSan cơ bản: bài này <strong>không dạy lại</strong>), <a href="../../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a> (data race), <a href="../../nhom-3-da-luong/26-deadlock/">Bài 26</a> (deadlock), <a href="../38-bien-dich-lien-ket-build/">Bài 38</a> (cờ biên dịch) và <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a> (hai ca "chết chỗ này, lỗi chỗ kia" và deadlock mà bài này soi lại).</p>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Quay lại <strong>dãy tủ khóa</strong> ở <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>, nhưng giờ nó là cả một <strong>tòa nhà</strong> với nhiều ban bảo vệ, mỗi ban canh một việc.</p>
+<p>Ban <strong>tủ khóa</strong> (ASan) canh ai mở nhầm ngăn. Ban <strong>luật số học</strong> (UBSan) canh các phép tính sai luật. Ban <strong>sổ ra vào</strong> (TSan) ghi ai vào phòng nào lúc nào, và la lên khi hai người cùng chạm một món đồ mà <strong>không xếp hàng</strong>. Còn <strong>đội kiểm toán thuê ngoài</strong> (Valgrind) không cần sửa tòa nhà, chỉ cần thuê vào kiểm, nhưng làm rất chậm.</p>
+<p>Mọi ban bảo vệ đều có chung điều này: họ chỉ báo những gì <strong>xảy ra trong ngày họ làm việc</strong>. Ngày nào lỗi không xảy ra thì họ im lặng.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví dụ tòa nhà không còn đúng?</p>
+<p>Bảo vệ thật không đổi tòa nhà, còn sanitizer thì có: g++ <strong>chèn thêm mã kiểm tra</strong> vào chương trình khi biên dịch (<a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>). Bài này cũng cho thấy thêm một điều bảo vệ thật không có: bạn có thể bảo ban nào đó "gặp lỗi thì <strong>gọi gdb</strong>" thay vì chỉ báo cáo.</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-ban-o-cac-cong-cu">1. Bản đồ các công cụ<a class="headerlink" href="#1-ban-o-cac-cong-cu" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Công cụ</th>
+<th>Cờ biên dịch / lệnh</th>
+<th>Bắt</th>
+<th>Ghi chú</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AddressSanitizer (ASan)</td>
+<td><code>-fsanitize=address</code></td>
+<td>Ra ngoài biên, dùng sau khi trả, trả hai lần, rò rỉ (LeakSanitizer đi kèm)</td>
+<td>Chậm cỡ vài lần (<a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>)</td>
+</tr>
+<tr>
+<td>UBSan</td>
+<td><code>-fsanitize=undefined</code></td>
+<td>Tràn số có dấu, dịch bit quá cỡ, <code>vptr</code>, <code>nonnull</code>...</td>
+<td>Mục 4</td>
+</tr>
+<tr>
+<td>ThreadSanitizer (TSan)</td>
+<td><code>-fsanitize=thread</code></td>
+<td>Data race, đảo thứ tự khóa</td>
+<td><strong>Không ghép được</strong> với ASan; mục 5</td>
+</tr>
+<tr>
+<td>MemorySanitizer (MSan)</td>
+<td><code>-fsanitize=memory</code></td>
+<td>Đọc bộ nhớ <strong>chưa khởi tạo</strong></td>
+<td><strong>Chỉ có ở clang</strong>; máy mình không có clang nên <strong>mình chưa chạy</strong></td>
+</tr>
+<tr>
+<td>Cờ thư viện chuẩn</td>
+<td><code>-D_GLIBCXX_ASSERTIONS</code>, <code>-D_GLIBCXX_DEBUG</code></td>
+<td><code>v[i]</code> ngoài biên, iterator sai</td>
+<td>Mục 3</td>
+</tr>
+<tr>
+<td>Bảo vệ stack</td>
+<td><code>-fstack-protector-strong</code></td>
+<td>Ghi đè ra ngoài mảng cục bộ, phát hiện lúc hàm trả về</td>
+<td>Mục 6</td>
+</tr>
+<tr>
+<td>Valgrind</td>
+<td><code>valgrind ./prog</code></td>
+<td>Gần như ASan, không cần biên dịch lại; thêm <code>helgrind</code>, <code>massif</code>, <code>callgrind</code></td>
+<td>Mục 7; <strong>mình chưa chạy</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-asan-sau-hon-chinh-bang-asan_options">2. ASan sâu hơn: chỉnh bằng <code>ASAN_OPTIONS</code><a class="headerlink" href="#2-asan-sau-hon-chinh-bang-asan_options" title="Permanent link">&para;</a></h3>
+<p><strong><code>ASAN_OPTIONS</code></strong> là biến môi trường, gồm các cặp <code>tên=giá_trị</code> cách nhau dấu <code>:</code>. Nó đổi hành vi ASan <strong>mà không cần biên dịch lại</strong>. Bốn tùy chọn hay dùng, đều do mình chạy thật:</p>
+<table>
+<thead>
+<tr>
+<th>Tùy chọn</th>
+<th>Tác dụng</th>
+<th>Mình thấy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>halt_on_error=0</code></td>
+<td>Báo lỗi <strong>rồi chạy tiếp</strong> thay vì dừng ở lỗi đầu</td>
+<td>Chỉ có tác dụng nếu đã biên dịch kèm <code>-fsanitize-recover=address</code></td>
+</tr>
+<tr>
+<td><code>detect_leaks=0</code></td>
+<td>Tắt LeakSanitizer ở cuối chương trình</td>
+<td>Chương trình rò rỉ: mặc định mã thoát 1, đặt <code>0</code> thì mã 0 và im lặng</td>
+</tr>
+<tr>
+<td><code>abort_on_error=1</code></td>
+<td>Sau báo cáo, gọi <code>abort()</code> (<code>SIGABRT</code>) thay vì <code>exit(1)</code></td>
+<td>Để gdb hoặc core dump bắt được tại chỗ (xem dưới)</td>
+</tr>
+<tr>
+<td><code>symbolize=0</code></td>
+<td>Không đổi địa chỉ thành tên hàm và dòng</td>
+<td>Báo cáo chỉ còn <code>#0 0x… (tran_asan+0x…)</code>, khó đọc; mặc định là bật</td>
+</tr>
+</tbody>
+</table>
+<p>Hai lỗi trong một lượt chạy, để thấy <code>halt_on_error</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">int</span><span class="p">[</span><span class="mi">3</span><span class="p">]{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"loi 1: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"loi 2: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"xong</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td>Mảng 3 <code>int</code> trên heap</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>a[3]</code> là ô thứ tư, <strong>ngoài biên</strong>: lỗi 1 (đọc)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Trả mảng</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>a[0]</code> sau khi đã trả: lỗi 2 (dùng sau khi trả)</td>
+</tr>
+</tbody>
+</table>
+<p>Biên dịch hai kiểu rồi chạy với <code>ASAN_OPTIONS=halt_on_error=0</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ g++ -std=c++17 -g -fsanitize=address hai_loi.cpp -o hl1
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>$ ASAN_OPTIONS=halt_on_error=0 ./hl1          # thiếu -fsanitize-recover
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>(1 báo cáo heap-buffer-overflow rồi dừng, mã thoát 1)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>$ g++ -std=c++17 -g -fsanitize=address -fsanitize-recover=address hai_loi.cpp -o hl2
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>$ ASAN_OPTIONS=halt_on_error=0 ./hl2
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>loi 1: 0
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>loi 2: 7
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>xong                                           # mã thoát 0
+</code></pre></div>
+<p>Bản <code>hl2</code> in <strong>hai</strong> báo cáo (mình đếm: <code>heap-buffer-overflow</code> ở dòng 6 và <code>heap-use-after-free</code> ở dòng 8) và chạy hết. Hai giá trị đọc ra (<code>0</code> và <code>7</code>) là rác từ bộ nhớ không thuộc mảng.</p>
+<p>Lợi ích: một lần chạy thấy mọi lỗi. Nguy cơ: sau lỗi đầu, chương trình đang ở trạng thái hỏng, nên báo cáo về sau có thể là <strong>hệ quả</strong>, không phải lỗi mới.</p>
+<h4 id="asan-voi-chet-cho-nay-loi-cho-kia">ASan với "chết chỗ này, lỗi chỗ kia"<a class="headerlink" href="#asan-voi-chet-cho-nay-loi-cho-kia" title="Permanent link">&para;</a></h4>
+<p>Quay lại chương trình <code>tran.cpp</code> ở mục 4 của <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>: <code>datTatCa(diem, 9, -1)</code> ghi tràn mảng 4 ô, phá đối tượng <code>phu</code> nằm sát, và chương trình chết muộn ở <code>delete phu</code>. Gdb phải dùng <code>bt</code>, <code>x</code>, <code>watch -l</code> mới tới thủ phạm. Với ASan chỉ cần biên dịch lại rồi chạy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer tran.cpp -o tran_asan
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>$ ./tran_asan
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>bat dau
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x… at pc 0x… bp 0x… sp 0x…
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>WRITE of size 4 at 0x… thread T0
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    #0 0x… in datTatCa(int*, int, int) tran.cpp:7
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    #1 0x… in main tran.cpp:15
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    ...
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>0x… is located 0 bytes after 16-byte region [0x…,0x…)
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>allocated by thread T0 here:
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    #0 0x… in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    #1 0x… in main tran.cpp:12
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    ...
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>SUMMARY: AddressSanitizer: heap-buffer-overflow tran.cpp:7 in datTatCa(int*, int, int)
+</code></pre></div>
+<p>(Mình rút gọn: bỏ địa chỉ, đường dẫn, các khung thư viện, và bảng "Shadow bytes" ở cuối. Mã thoát 1.) Ba dòng đủ giải án:</p>
+<ul>
+<li><code>WRITE of size 4 ... tran.cpp:7</code>: dòng <strong>thủ phạm</strong> là <code>mang[i] = giaTri;</code>, gọi từ <code>main</code> dòng 15. ASan dừng ở <strong>đúng lần ghi tràn đầu tiên</strong>, trước khi bộ nhớ kề bên bị hỏng, nên không có nạn nhân nào để đuổi theo.</li>
+<li><code>0 bytes after 16-byte region</code>: chỗ ghi nằm ngay sau một khối 16 byte (4 <code>int</code>).</li>
+<li><code>allocated by ... tran.cpp:12</code>: khối đó được cấp phát ở dòng 12 (<code>new int[4]</code>). Hai dòng 7 và 12 đủ để thấy <code>n=9</code> lớn hơn 4.</li>
+</ul>
+<p>So với gdb ở Bài 40: ASan không cần biết trước nên theo dõi chỗ nào, và chi phí là biên dịch lại, chạy chậm hơn.</p>
+<h4 id="asan-ket-hop-gdb">ASan kết hợp gdb<a class="headerlink" href="#asan-ket-hop-gdb" title="Permanent link">&para;</a></h4>
+<p>Khi cần xem biến lúc ASan bắt lỗi, có hai cách. <strong>Cách 1</strong>: <code>abort_on_error=1</code>, để ASan gọi <code>abort()</code> rồi gdb dừng ở <code>SIGABRT</code> với đủ ngăn xếp. Mình chạy chương trình <code>hl1</code> ở trên dưới gdb:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>(gdb) set environment ASAN_OPTIONS=abort_on_error=1
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>(gdb) run
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>...
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Program received signal SIGABRT, Aborted.
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>(gdb) bt
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>#4  0x… in __GI_abort () at ./stdlib/abort.c:79
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>#5  0x… in __sanitizer::Abort () ...
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>#7  0x… in __asan::ScopedInErrorReport::~ScopedInErrorReport (...)
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>#8  0x… in __asan::ReportGenericError (...)
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>#10 0x… in __asan::__asan_report_load4 (...)
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>#11 0x… in main () at hai_loi.cpp:6
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>(gdb) frame 11
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>(gdb) info locals
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>a = 0x502000000010
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>(gdb) print a[3]
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>$1 = 0
+</code></pre></div>
+<p>Tìm khung có tên hàm của bạn (ở đây <code>#11</code>, dòng 6) rồi <code>frame 11</code> để xem biến.</p>
+<p><strong>Cách 2</strong>: đặt điểm dừng ngay hàm báo lỗi của ASan, <strong>trước</strong> khi nó in báo cáo: <code>set breakpoint pending on</code> rồi <code>break __asan::ReportGenericError</code>. Mình thử: gdb dừng ở đó, <code>up 2</code> đưa về <code>main () at hai_loi.cpp:6</code> và <code>info locals</code> cho <code>a</code>. (Cách 2 dựa vào tên hàm nội bộ của libasan trong g++ 13, có thể đổi giữa các phiên bản; cách 1 ổn định hơn.)</p>
+<h3 id="3-co-thu-vien-chuan-vi-ngoai-bien">3. Cờ thư viện chuẩn: <code>v[i]</code> ngoài biên<a class="headerlink" href="#3-co-thu-vien-chuan-vi-ngoai-bien" title="Permanent link">&para;</a></h3>
+<p>ASan canh <strong>địa chỉ heap</strong>. Nhưng <code>std::vector</code> thường xin dư chỗ (<code>capacity</code> lớn hơn <code>size</code>), và phần dư vẫn là bộ nhớ hợp lệ, nên <code>v[size()]</code> rơi vào đó thì ASan có thể không báo. Thư viện chuẩn của g++ có hai cờ biên dịch kiểm tra <strong>ở mức container</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Cờ</th>
+<th>Bắt</th>
+<th>Chi phí</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-D_GLIBCXX_ASSERTIONS</code></td>
+<td><code>v[i]</code> ngoài biên, <code>front()</code> của vector rỗng... bằng một <code>assert</code> rẻ</td>
+<td>Nhỏ, dùng được cả ở bản phát hành</td>
+</tr>
+<tr>
+<td><code>-D_GLIBCXX_DEBUG</code></td>
+<td>Tất cả ở trên <strong>và</strong> iterator vô hiệu, so sánh iterator khác container...</td>
+<td>Lớn: đổi cả bố cục kiểu dữ liệu; mọi tệp và thư viện nối cùng nhau phải dùng cùng cờ</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diem</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">phu</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">        </span><span class="n">diem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"phu[0] = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">phu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6–7</td>
+<td>Hai vector: <code>diem</code> 4 ô, <code>phu</code> 3 ô bằng 7; dữ liệu của chúng ở heap, nằm gần nhau</td>
+</tr>
+<tr>
+<td>8–10</td>
+<td><code>diem[i]</code> với <code>i</code> chạy <code>0..8</code>: từ <code>i = 4</code> là ngoài biên</td>
+</tr>
+<tr>
+<td>11</td>
+<td>In <code>phu[0]</code>: nếu <code>phu</code> còn nguyên thì phải là <code>7</code></td>
+</tr>
+</tbody>
+</table>
+<p>Mình biên dịch ba kiểu và chạy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$ g++ -std=c++17 -g vec.cpp -o vec &amp;&amp; ./vec
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>phu[0] = -1
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>munmap_chunk(): invalid pointer                    &lt;- mã thoát 134, chết lúc dọn
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>$ g++ -std=c++17 -g -D_GLIBCXX_ASSERTIONS vec.cpp -o vec &amp;&amp; ./vec
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>.../stl_vector.h:1128: ... operator[](size_type) [with _Tp = int; ...]: Assertion '__n &lt; this-&gt;size()' failed.   &lt;- mã 134
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>$ g++ -std=c++17 -g -D_GLIBCXX_DEBUG vec.cpp -o vec &amp;&amp; ./vec
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>Error: attempt to subscript container with out-of-bounds index 4, but
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>container only holds 4 elements.                   &lt;- mã 134
+</code></pre></div>
+<p>Bản thường <strong>không</strong> báo gì ở chỗ tràn: <code>phu[0]</code> đã thành <code>-1</code> (nạn nhân!) rồi sập lúc dọn. Hai cờ kia dừng ngay lần <code>diem[4]</code> đầu tiên, và <code>bt</code> trong gdb chỉ thẳng <code>main () at vec.cpp:9</code>. <code>_GLIBCXX_DEBUG</code> còn nói rõ chỉ số <code>4</code> và kích thước <code>4</code>. Tương tự <code>v.at(i)</code> (<a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a>) nhưng không cần sửa code.</p>
+<h3 id="4-ubsan-mo-rong">4. UBSan mở rộng<a class="headerlink" href="#4-ubsan-mo-rong" title="Permanent link">&para;</a></h3>
+<p><a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> dạy tràn số và dịch bit. <code>-fsanitize=undefined</code> còn gồm nhiều kiểm tra khác (g++ đặt tên từng cái, như <code>vptr</code>, <code>nonnull-attribute</code>, <code>bounds</code>, <code>null</code>). Chương trình sau gom ba lỗi:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Cha</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">Cha</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">};</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Con</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Cha</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="p">};</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="k">struct</span><span class="w"> </span><span class="nc">Khac</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Cha</span><span class="w"> </span><span class="p">{};</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">__attribute__</span><span class="p">((</span><span class="n">nonnull</span><span class="p">))</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">chon</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">ten</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">}</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">    </span><span class="n">Khac</span><span class="w"> </span><span class="n">k</span><span class="p">;</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">    </span><span class="n">Cha</span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">k</span><span class="p">;</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">    </span><span class="n">Con</span><span class="o">*</span><span class="w"> </span><span class="n">sai</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">Con</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sai</span><span class="o">-&gt;</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">rong</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nullptr</span><span class="p">;</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">chon</span><span class="p">(</span><span class="n">rong</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">lon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1e20</span><span class="p">;</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lon</span><span class="p">);</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>17–19</td>
+<td><code>c</code> trỏ vào một <code>Khac</code>, ép xuống <code>Con*</code> (dòng 19): sai kiểu, đối tượng thực là <code>Khac</code></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Đọc <code>sai-&gt;x</code> trên đối tượng không phải <code>Con</code></td>
+</tr>
+<tr>
+<td>12–14</td>
+<td><code>__attribute__((nonnull))</code> là lời hứa của g++: tham số đầu <strong>không bao giờ</strong> rỗng</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Truyền <code>nullptr</code> cho tham số đã hứa không rỗng</td>
+</tr>
+<tr>
+<td>25–26</td>
+<td>Ép <code>1e20</code> (to hơn <code>int</code>) sang <code>int</code>: ngoài miền</td>
+</tr>
+</tbody>
+</table>
+<p>Biên dịch <code>-g -fsanitize=undefined</code>, chạy (rút gọn, thoát mã 0 vì UBSan in rồi chạy tiếp):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>ub2.cpp:19:16: runtime error: downcast of address 0x… which does not point to an object of type 'Con'
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ub2.cpp:20:23: runtime error: member access within address 0x… which does not point to an object of type 'Con'
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ub2.cpp:23:35: runtime error: null pointer passed as argument 1, which is declared to never be null
+</code></pre></div>
+<p>Ba điều rút ra:</p>
+<ul>
+<li><code>vptr</code> bắt ép kiểu xuống sai trong cây kế thừa (<a href="../../nhom-4-oop-patterns/33-da-hinh-virtual/">Bài 33</a>), và còn in kèm <code>note: object is of type 'Khac'</code> (mình lược bỏ).</li>
+<li>Dòng 26 (<code>1e20</code> sang <code>int</code>) <strong>không</strong> bị báo: <code>float-cast-overflow</code> không nằm trong <code>undefined</code>. Thêm <code>-fsanitize=undefined,float-cast-overflow</code> thì có dòng thứ tư <code>1e+20 is outside the range of representable values of type 'int'</code> (mình thử cả hai).</li>
+<li>Muốn dừng ở lỗi đầu: <code>UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1</code>, hoặc biên dịch <code>-fno-sanitize-recover=undefined</code>. Mình thử cả hai, chương trình dừng ngay ở báo cáo đầu, mã thoát 1.</li>
+</ul>
+<h3 id="5-threadsanitizer-chay-that">5. ThreadSanitizer chạy thật<a class="headerlink" href="#5-threadsanitizer-chay-that" title="Permanent link">&para;</a></h3>
+<p>TSan chạy một <strong>sổ ra vào</strong>: mỗi truy cập bộ nhớ và mỗi mutex được ghi lại, nó so xem có hai truy cập từ hai luồng mà <strong>không có quan hệ "xảy ra trước"</strong> (<a href="../../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a>).</p>
+<p>Hai lưu ý khi chạy trên máy mình: TSan chạy trần thì dừng với <code>FATAL: ThreadSanitizer: unexpected memory mapping</code>, nên mình chạy qua <code>setarch $(uname -m) -R ./prog</code> (tắt xáo trộn địa chỉ); và nó chậm: một chương trình 4 luồng ngắn mất 0,34 giây dưới TSan so với 0,03 giây bản thường (một lần đo).</p>
+<p><strong>Ca 1: <code>sleep</code> không phải đồng bộ.</strong> Lỗi phổ biến: "chờ đủ lâu thì luồng kia chắc đã xong".</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;chrono&gt;</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;thread&gt;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="kt">int</span><span class="w"> </span><span class="n">ketQua</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t</span><span class="p">([]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ketQua</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">50</span><span class="p">));</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ketQua = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ketQua</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span><span class="n">t</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9</td>
+<td>Luồng <code>t</code> ghi <code>42</code> vào <code>ketQua</code></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>main</code> ngủ 50 ms, hy vọng <code>t</code> đã ghi xong</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>main</code> <strong>đọc</strong> <code>ketQua</code> khi chưa <code>join</code> và chưa có khóa: đọc và ghi từ hai luồng, không đồng bộ</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>join</code> đến muộn, sau khi đã đọc</td>
+</tr>
+</tbody>
+</table>
+<p>Chạy thường, mình luôn thấy <code>ketQua = 42</code>: lỗi <strong>ẩn</strong>. Dưới TSan (<code>-g -fsanitize=thread</code>, thoát mã 66), báo cáo thật, rút gọn:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>ketQua = 42
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>==================
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>WARNING: ThreadSanitizer: data race (pid=…)
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  Read of size 4 at 0x… by main thread:
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    #0 main ngu.cpp:11
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  Previous write of size 4 at 0x… by thread T1:
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    #0 operator() ngu.cpp:9
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    ...
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>  As if synchronized via sleep:
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    #0 nanosleep ...
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    #2 main ngu.cpp:10
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>  Location is global 'ketQua' of size 4 at 0x…
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>  Thread T1 (tid=…, finished) created by main thread at:
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    #2 main ngu.cpp:9
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>SUMMARY: ThreadSanitizer: data race ngu.cpp:11 in main
+</code></pre></div>
+<p>Đọc từ trên: <code>Read ... by main thread: ngu.cpp:11</code> và <code>Previous write ... by thread T1: ngu.cpp:9</code> là hai truy cập xung đột.</p>
+<p>Dòng quý nhất là <strong><code>As if synchronized via sleep</code></strong>: TSan nhận ra bạn <em>đang dùng <code>sleep</code> thay cho đồng bộ</em> (dòng 10) và nói thẳng điều đó.</p>
+<p>Chữa: <code>t.join()</code> <strong>trước</strong> khi đọc (hoặc dùng <code>std::atomic</code>, <code>std::future</code>, <a href="../../nhom-3-da-luong/29-async-future/">Bài 29</a>): đừng bao giờ tăng thời gian ngủ.</p>
+<p><strong>Ca 2: deadlock hai mutex (nối <a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>).</strong> Chạy <code>treo2</code> (An khóa <code>bepA</code> rồi xin <code>bepB</code>; Bình ngược lại) dưới TSan thì TSan <strong>không báo gì</strong> và chương trình vẫn treo (mình thử: <code>timeout 5</code>, mã 124). Lý do: TSan ghi thứ tự khóa khi một khóa <strong>được lấy xong</strong>, mà hai luồng chưa bao giờ lấy xong khóa thứ hai.</p>
+<p>Mình đổi <code>main</code> thành chạy <strong>lần lượt</strong> (<code>an.join()</code> rồi mới tạo <code>binh</code>) để không treo, giữ nguyên hai hàm, đặt tên <code>treo_tt.cpp</code>. Lần này TSan thấy hai thứ tự khóa ngược nhau trong cùng chương trình:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>ca hai xong
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>==================
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>WARNING: ThreadSanitizer: lock-order-inversion (potential deadlock) (pid=…)
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  Cycle in lock order graph: M0 (0x…) =&gt; M1 (0x…) =&gt; M0
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>  Mutex M1 acquired here while holding mutex M0 in thread T1:
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    #0 pthread_mutex_lock ...
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    #4 anLam() treo_tt.cpp:16
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>  Mutex M0 acquired here while holding mutex M1 in thread T2:
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    #0 pthread_mutex_lock ...
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    #4 binhLam() treo_tt.cpp:26
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>SUMMARY: ThreadSanitizer: lock-order-inversion (potential deadlock) ...
+</code></pre></div>
+<p><code>M0</code> là <code>bepA</code>, <code>M1</code> là <code>bepB</code>. T1 (An) lấy <code>M1</code> khi đang giữ <code>M0</code> (dòng 16), T2 (Bình) lấy <code>M0</code> khi đang giữ <code>M1</code> (dòng 26): chu trình <code>M0 =&gt; M1 =&gt; M0</code>, chính là deadlock tiềm tàng.</p>
+<p>Sửa bằng <code>std::scoped_lock</code> (<a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>) rồi chạy lại: không báo cáo, mã 0. Bài học: TSan bắt <strong>tiềm năng</strong> deadlock miễn là hai thứ tự khóa ngược nhau <strong>từng</strong> xảy ra, dù lần đó không treo.</p>
+<h3 id="6-fstack-protector-ghi-e-stack-phat-hien-luc-ham-tra-ve">6. <code>-fstack-protector</code>: ghi đè stack, phát hiện lúc hàm trả về<a class="headerlink" href="#6-fstack-protector-ghi-e-stack-phat-hien-luc-ham-tra-ve" title="Permanent link">&para;</a></h3>
+<p>ASan canh được mảng cục bộ, nhưng tốn. Cách rẻ hơn: g++ đặt một số bí mật (<strong>canary</strong>, chim hoàng yến trong mỏ) giữa mảng cục bộ và địa chỉ trả về; trước khi hàm trả về, nó kiểm số đó còn nguyên không. Ubuntu bật <code>-fstack-protector-strong</code> sẵn (gdb cho thấy cờ này trong <code>Producer</code> của tệp mình biên dịch).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstring&gt;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="kt">void</span><span class="w"> </span><span class="nf">chep</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">nguon</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">o</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">strcpy</span><span class="p">(</span><span class="n">o</span><span class="p">,</span><span class="w"> </span><span class="n">nguon</span><span class="p">);</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"o = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="p">}</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="n">chep</span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"ngan"</span><span class="p">);</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"ve main binh an"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>Mảng <code>o</code> chỉ 8 byte, trên stack</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>strcpy</code> chép chuỗi không kiểm độ dài: tràn nếu <code>nguon</code> dài hơn 7 ký tự</td>
+</tr>
+<tr>
+<td>8</td>
+<td>In <code>o</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Hàm trả về: ở đây canary được kiểm</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Truyền đối số dòng lệnh làm <code>nguon</code>, hoặc <code>"ngan"</code> nếu không có</td>
+</tr>
+</tbody>
+</table>
+<p>Mình truyền chuỗi 32 chữ <code>A</code>, với <code>-fno-stack-protector</code> và <code>-fstack-protector-strong</code> (cả hai kèm <code>-D_FORTIFY_SOURCE=0</code> để không có lớp bảo vệ khác che khuất):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>-fno-stack-protector:      o = AAAA...A       &lt;- mã thoát 139 (SIGSEGV, chết lúc trả về với địa chỉ bị đè)
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>-fstack-protector-strong:  o = AAAA...A
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>                           *** stack smashing detected ***: terminated     &lt;- mã thoát 134
+</code></pre></div>
+<p>Cả hai đều in <code>o = AAAA...</code> (tràn <strong>chưa</strong> bị phát hiện ở dòng 7). Có canary thì dừng sạch ở dòng 9 (cuối hàm) với thông báo rõ; không có thì chương trình nhảy tới địa chỉ rác.</p>
+<p>Trong gdb, <code>bt</code> của bản có canary lên tới <code>__stack_chk_fail</code> rồi <code>chep (...) at ngan_xep.cpp:9</code>, và các khung trên nữa là rác <code>0x4141414141414141</code> (mã ASCII của <code>A</code>): ngăn xếp đã bị đè. Cũng là kiểu "chết muộn": chỗ sập (dòng 9) khác chỗ gây lỗi (dòng 7).</p>
+<h3 id="7-valgrind-va-msan-chi-neu-cach-dung">7. Valgrind và MSan: chỉ nêu cách dùng<a class="headerlink" href="#7-valgrind-va-msan-chi-neu-cach-dung" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Phần này mình CHƯA chạy</p>
+<p>Máy mình dùng để viết bài <strong>không cài <code>valgrind</code></strong> (và không có <code>sudo</code> để cài), cũng không có <code>clang</code> cho MSan. Dưới đây là kiến thức về công cụ, <strong>không có đầu ra dán từ lần chạy</strong>, nên mình không bịa ví dụ báo cáo. Nếu bạn chạy mà thấy khác, tin kết quả của bạn.</p>
+</div>
+<p><strong>Valgrind</strong> chạy chương trình <strong>đã biên dịch sẵn</strong> trong một "máy ảo" theo dõi từng truy cập bộ nhớ, nên không cần biên dịch lại (nhưng nên có <code>-g</code> để có số dòng), và thường chậm hơn ASan nhiều. Bốn công cụ trong bộ:</p>
+<table>
+<thead>
+<tr>
+<th>Lệnh</th>
+<th>Việc</th>
+<th>Cách đọc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>valgrind --leak-check=full ./prog</code> (<code>memcheck</code>, mặc định)</td>
+<td>Đọc/ghi ngoài khối, dùng sau khi trả, <strong>dùng giá trị chưa khởi tạo</strong>, rò rỉ</td>
+<td>Các mục <code>Invalid read/write of size N</code>, <code>Conditional jump depends on uninitialised value(s)</code>, cuối là bản tóm tắt rò rỉ <code>definitely lost</code> / <code>indirectly lost</code> / <code>still reachable</code></td>
+</tr>
+<tr>
+<td><code>valgrind --tool=helgrind ./prog</code></td>
+<td>Data race và đảo thứ tự khóa (như TSan)</td>
+<td>Mục <code>Possible data race</code> và <code>Lock order violated</code></td>
+</tr>
+<tr>
+<td><code>valgrind --tool=massif ./prog</code> rồi <code>ms_print massif.out.&lt;PID&gt;</code></td>
+<td><strong>Dùng heap theo thời gian</strong>: bao nhiêu byte, do dòng nào cấp phát</td>
+<td>Đồ thị chữ và danh sách "snapshot" đỉnh dùng bộ nhớ</td>
+</tr>
+<tr>
+<td><code>valgrind --tool=callgrind ./prog</code> rồi <code>callgrind_annotate callgrind.out.&lt;PID&gt;</code></td>
+<td>Đếm lệnh chạy từng hàm, đồ thị gọi hàm</td>
+<td>Danh sách hàm xếp theo số lệnh; công cụ GUI <code>kcachegrind</code> vẽ lên</td>
+</tr>
+</tbody>
+</table>
+<p><strong>MSan</strong> (<code>clang++ -fsanitize=memory -g</code>) bắt <strong>đọc bộ nhớ chưa khởi tạo</strong>, thứ ASan không bắt. Nó đòi mọi thư viện liên kết cũng được biên dịch kèm MSan, nên khó dùng; ở g++ thì dùng Valgrind <code>memcheck</code>, hoặc biên dịch <code>-Wall -O2</code> để g++ cảnh báo những ca rõ ràng (mình thấy <code>-Wuninitialized</code> ở <a href="../38-bien-dich-lien-ket-build/">Bài 38</a>).</p>
+<h3 id="8-chon-cong-cu-theo-trieu-chung">8. Chọn công cụ theo triệu chứng<a class="headerlink" href="#8-chon-cong-cu-theo-trieu-chung" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Triệu chứng</th>
+<th>Công cụ đầu tiên</th>
+<th>Vì sao / công cụ phụ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rò rỉ bộ nhớ (RAM tăng mãi)</td>
+<td>ASan (LeakSanitizer), <code>massif</code></td>
+<td>Danh sách khối chưa trả, cùng dòng <code>new</code></td>
+</tr>
+<tr>
+<td>Ghi/đọc ngoài biên (mảng thô, heap, stack)</td>
+<td>ASan</td>
+<td>Dòng ghi và dòng cấp phát; <code>-fstack-protector</code> cho stack</td>
+</tr>
+<tr>
+<td><code>v[i]</code> ngoài biên của vector</td>
+<td><code>-D_GLIBCXX_ASSERTIONS</code></td>
+<td>Dừng ngay tại <code>operator[]</code>; hoặc ASan</td>
+</tr>
+<tr>
+<td>Use-after-free, double free</td>
+<td>ASan</td>
+<td>Báo dòng cấp phát, dòng trả, dòng dùng</td>
+</tr>
+<tr>
+<td>Chết ở <code>free</code>/<code>delete</code>, bộ nhớ hỏng từ trước</td>
+<td>ASan</td>
+<td>Chỉ thủ phạm; nếu không có ASan: <code>watch -l</code> trong gdb (<a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>)</td>
+</tr>
+<tr>
+<td>Data race, kết quả đổi theo lần chạy</td>
+<td>TSan</td>
+<td><code>helgrind</code> thay thế</td>
+</tr>
+<tr>
+<td>Treo, nghi deadlock</td>
+<td>gdb <code>thread apply all bt</code></td>
+<td>TSan bắt thứ tự khóa ngược (ca tuần tự); <code>scoped_lock</code> để chữa</td>
+</tr>
+<tr>
+<td>Dùng biến <strong>chưa khởi tạo</strong></td>
+<td>Valgrind <code>memcheck</code>, MSan (clang)</td>
+<td>ASan <strong>không</strong> bắt; <code>-Wall -O2</code> bắt ca rõ</td>
+</tr>
+<tr>
+<td>Tràn số có dấu, dịch bit, ép kiểu sai</td>
+<td>UBSan</td>
+<td>Một dòng mỗi lỗi</td>
+</tr>
+<tr>
+<td>Chạy chậm</td>
+<td><code>perf</code>, <code>gprof</code>, <code>callgrind</code></td>
+<td><a href="../42-strace-perf-do-hieu-nang/">Bài 42</a></td>
+</tr>
+</tbody>
+</table>
+<p>Chung cho tất cả: chạy sạch <strong>không chứng minh</strong> chương trình đúng. Chạy sanitizer trong kiểm thử, với dữ liệu càng đa dạng càng tốt.</p>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Go không có tràn mảng thô, nên phần lớn công cụ ASan/UBSan không cần. Còn data race thì có đúng một công cụ tương ứng TSan: <strong><code>go test -race</code></strong> (hay <code>go run -race</code>, <code>go build -race</code>). Theo tài liệu của Go, bộ phát hiện này dựa trên thư viện ThreadSanitizer, và báo <code>WARNING: DATA RACE</code> kèm hai ngăn xếp (đọc/ghi). Nó cũng chậm và tốn bộ nhớ hơn bản thường. <code>go build -asan</code> và <code>-msan</code> có, nhưng chỉ có ý nghĩa khi chương trình dùng cgo (gọi mã C). Go còn có <code>go vet</code> để bắt lỗi phổ biến lúc biên dịch. Mình không chạy lại phần Go ở bài này; Go 1.22 trên máy mình cho thấy <code>panic: index out of range</code> khi ghi ngoài slice (<a href="../40-gdb-nang-cao-core-dump/">Bài 40</a>).</p>
+</div>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="vi-du-sua-data-race-bang-stdatomic-roi-kiem-lai-bang-tsan">Ví dụ: sửa data race bằng <code>std::atomic</code> rồi kiểm lại bằng TSan<a class="headerlink" href="#vi-du-sua-data-race-bang-stdatomic-roi-kiem-lai-bang-tsan" title="Permanent link">&para;</a></h3>
+<p>Chương trình đếm với bốn luồng ở <a href="../../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a> có data race. Bản sửa gọn nhất cho <strong>một bộ đếm</strong> là <code>std::atomic</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;thread&gt;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dem</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="kt">void</span><span class="w"> </span><span class="nf">tang</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">        </span><span class="o">++</span><span class="n">dem</span><span class="p">;</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="p">}</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cacLuong</span><span class="p">;</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="n">cacLuong</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">tang</span><span class="p">);</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">cacLuong</span><span class="p">)</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"dem = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">dem</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Việc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td><code>dem</code> là <code>std::atomic&lt;int&gt;</code>: mỗi <code>++</code> là một thao tác nguyên vẹn, không bị xen giữa</td>
+</tr>
+<tr>
+<td>8–12</td>
+<td>Mỗi luồng tăng 100000 lần</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Bốn luồng chạy cùng lúc</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>join</code> cả bốn <strong>trước</strong> khi đọc <code>dem</code></td>
+</tr>
+<tr>
+<td>19</td>
+<td>In <code>dem</code>: luôn là <code>400000</code></td>
+</tr>
+</tbody>
+</table>
+<p>Kết quả: <code>dem = 400000</code> mọi lần. Mình biên dịch <code>-g -fsanitize=thread</code> và chạy qua <code>setarch $(uname -m) -R</code>: <strong>không có báo cáo nào</strong>, mã thoát 0. Cùng chương trình khi <code>dem</code> là <code>int</code> thường thì TSan báo <code>data race</code> ngay (đúng báo cáo của <a href="../../nhom-3-da-luong/25-data-race-mutex/">Bài 25</a>).</p>
+<p>Quy trình chung cho mọi lỗi trong bài: tái hiện dưới công cụ phù hợp, đọc <strong>dòng thủ phạm</strong>, sửa gốc (đồng bộ, đúng biên, đúng thứ tự khóa), rồi chạy lại <strong>cùng công cụ</strong> để chứng minh nó im lặng.</p>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>AddressSanitizer, ThreadSanitizer, UBSan: mỗi cái bắt gì, có dùng chung được không?</summary>
+<p>ASan bắt lỗi địa chỉ (ngoài biên, dùng sau khi trả, trả hai lần, rò rỉ), TSan bắt data race và đảo thứ tự khóa, UBSan bắt UB không liên quan địa chỉ (tràn số có dấu, dịch bit, ép kiểu sai, tham số <code>nonnull</code>). ASan và UBSan ghép được (<code>-fsanitize=address,undefined</code>); TSan <strong>không</strong> ghép với ASan (g++ báo <code>incompatible</code>), nên chạy riêng một lượt.</p>
+</details>
+<details class="question">
+<summary>Chương trình chết ở <code>delete</code> hay <code>free</code>, code ở đó nhìn đúng. Bạn làm gì?</summary>
+<p>Nghi bộ nhớ đã hỏng từ trước (nạn nhân khác thủ phạm). Biên dịch lại với ASan: nó dừng ở lần ghi tràn đầu tiên và in cả dòng ghi lẫn dòng cấp phát. Nếu không dùng được ASan, đặt <code>watch -l</code> trên vùng bị hỏng trong gdb để bắt lệnh ghi đè. Thêm log thường không giúp vì log đổi bố cục bộ nhớ.</p>
+</details>
+<details class="question">
+<summary><code>halt_on_error=0</code> làm gì, và cần gì kèm theo?</summary>
+<p>Nó bảo ASan báo lỗi xong thì chạy tiếp thay vì dừng, để thấy nhiều lỗi trong một lượt chạy. Phải biên dịch thêm <code>-fsanitize-recover=address</code>; thiếu cờ này thì tùy chọn không có tác dụng (mình thử: vẫn dừng ở lỗi đầu, mã 1). Lỗi sau lỗi đầu có thể chỉ là hệ quả của bộ nhớ đã hỏng.</p>
+</details>
+<details class="question">
+<summary>Valgrind khác sanitizer thế nào, và khi nào chọn nó?</summary>
+<p>Valgrind chạy nguyên bản chương trình đã biên dịch, không biên dịch lại, nên dùng được trên mã không sửa được; bù lại chậm hơn nhiều. Nó bắt thêm <strong>biến chưa khởi tạo</strong> (<code>memcheck</code>) mà ASan không bắt, và có <code>massif</code> (heap theo thời gian), <code>callgrind</code> (đếm lệnh theo hàm). Sanitizer nhanh hơn và chỉ đúng dòng tốt hơn khi bạn biên dịch được.</p>
+</details>
+<details class="question">
+<summary>Vì sao TSan không báo gì khi chương trình đã treo vì deadlock?</summary>
+<p>TSan ghi thứ tự khóa khi một khóa được lấy xong. Hai luồng treo chưa bao giờ lấy xong khóa thứ hai, nên chưa có "thứ tự ngược" nào được ghi. Chạy lại ca đó theo cách không treo (mỗi luồng chạy lần lượt) thì TSan báo <code>lock-order-inversion</code>. Cũng vì thế gdb (<code>thread apply all bt</code>) là công cụ cho chương trình đang treo.</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Tưởng chạy sạch sanitizer là chương trình đúng</p>
+<p>Sanitizer chỉ thấy đường đi <strong>đã chạy</strong>. Lỗi nằm ở nhánh chưa được kiểm thử vẫn lọt. Chạy với nhiều đầu vào, kể cả đầu vào xấu (rỗng, rất lớn).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Đặt <code>halt_on_error=0</code> mà quên <code>-fsanitize-recover=address</code></p>
+<p>Tùy chọn im lặng không có tác dụng: chương trình vẫn dừng ở lỗi đầu. Kiểm tra bằng cách đếm số báo cáo.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Chữa data race bằng <code>sleep</code></p>
+<p>TSan nói thẳng <code>As if synchronized via sleep</code>. <code>sleep</code> chỉ đổi xác suất, không tạo quan hệ "xảy ra trước". Dùng <code>join</code>, mutex, <code>atomic</code> hay <code>future</code>.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="41">
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 1.</strong> Báo cáo ASan cho chương trình <code>tran.cpp</code> có <code>WRITE of size 4 ... #0 datTatCa(int*, int, int) tran.cpp:7</code>, <code>#1 main tran.cpp:15</code>, và <code>0 bytes after 16-byte region ... allocated by ... main tran.cpp:12</code>. Điều nào đúng?</p>
+<ul>
+<li>Lỗi ở <code>delete phu</code>, vì đó là chỗ chương trình sập</li>
+<li>Dòng 7 ghi vượt khối cấp phát ở dòng 12</li>
+<li>Dòng 15 cấp phát thiếu bộ nhớ cho mảng <code>diem</code></li>
+<li>Khối 16 byte đã bị trả trước khi dòng 7 ghi vào</li>
+</ul>
+<p class="giai-thich"><code>WRITE of size 4</code> tại dòng 7 cùng "0 bytes after 16-byte region" nghĩa là lần ghi nằm ngay sau khối 16 byte (4 <code>int</code>) cấp phát ở dòng 12: ghi tràn. Thủ phạm là dòng ghi, không phải <code>delete phu</code> (ASan dừng trước khi nạn nhân xuất hiện). Dòng 15 chỉ là nơi gọi hàm với <code>n=9</code>. Nếu khối đã bị trả thì báo cáo sẽ là <code>heap-use-after-free</code> với dòng <code>freed by</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 2.</strong> Bạn biên dịch <code>g++ -g -fsanitize=address a.cpp</code> (không <code>-fsanitize-recover</code>) rồi chạy <code>ASAN_OPTIONS=halt_on_error=0 ./a.out</code> trên chương trình có hai lỗi bộ nhớ khác nhau. Kết quả?</p>
+<ul>
+<li>Hai báo cáo và chương trình chạy hết, mã thoát 0</li>
+<li>Hai báo cáo rồi dừng, mã thoát 1</li>
+<li>Không báo cáo nào, vì tùy chọn tắt ASan</li>
+<li>Một báo cáo rồi dừng, tùy chọn không có tác dụng</li>
+</ul>
+<p class="giai-thich"><code>halt_on_error=0</code> chỉ hoạt động nếu mã đã được biên dịch ở chế độ "có thể phục hồi" (<code>-fsanitize-recover=address</code>). Thiếu cờ đó, ASan vẫn dừng ở lỗi đầu tiên và thoát mã 1. Hai báo cáo và mã 0 là kết quả của bản có cờ phục hồi. Tùy chọn này không tắt ASan.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 3.</strong> Cùng đoạn <code>diem[i] = -1;</code> với <code>i</code> tới <code>8</code> trên <code>std::vector&lt;int&gt; diem(4, 0)</code>. Biên dịch thường chạy ra <code>phu[0] = -1</code> rồi chết lúc dọn; thêm <code>-D_GLIBCXX_ASSERTIONS</code> thì chạy ra <code>Assertion '__n &lt; this-&gt;size()' failed</code>. Điều gì đúng?</p>
+<ul>
+<li>Dừng ngay ở lần <code>diem[4]</code> đầu, trước khi <code>phu</code> bị đè</li>
+<li>Chương trình dừng sau khi <code>phu</code> bị đè, vì cờ kiểm tra lúc dọn</li>
+<li>Cờ thêm <code>try/catch</code> quanh vòng lặp để bắt lỗi</li>
+<li>Cờ làm <code>diem</code> tự lớn thêm để đủ 9 ô</li>
+</ul>
+<p class="giai-thich"><code>-D_GLIBCXX_ASSERTIONS</code> làm <code>operator[]</code> kiểm <code>chỉ_số &lt; size()</code> mỗi lần gọi; <code>diem[4]</code> (chỉ số bằng size) vi phạm ngay nên chương trình <code>abort</code> ở lần đó, <code>phu</code> còn nguyên. Không có kiểm tra lúc dọn. Cờ không thêm ngoại lệ (nó <code>abort</code>, không ném). Vector cũng không tự lớn khi dùng <code>[]</code>: đó là việc của <code>push_back</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 4.</strong> TSan in <code>Read of size 4 ... by main thread: ngu.cpp:11</code>, <code>Previous write ... by thread T1: ngu.cpp:9</code>, và <code>As if synchronized via sleep: ... main ngu.cpp:10</code>. Cách sửa đúng?</p>
+<ul>
+<li>Tăng <code>sleep_for</code> lên 500 ms để luồng <code>t</code> chắc chắn xong</li>
+<li>Bỏ <code>sleep_for</code> và đọc <code>ketQua</code> ngay</li>
+<li>Gọi <code>t.join()</code> trước khi đọc <code>ketQua</code></li>
+<li>Đổi <code>ketQua</code> thành <code>static</code></li>
+</ul>
+<p class="giai-thich"><code>join</code> tạo quan hệ "xảy ra trước": mọi việc luồng <code>t</code> làm (ghi <code>ketQua</code>) hoàn tất trước khi <code>join</code> trả về, nên đọc sau đó là hợp lệ. Dòng <code>As if synchronized via sleep</code> cho biết <code>sleep</code> chỉ làm lỗi ít lộ chứ không đồng bộ gì, nên tăng thời gian vẫn là data race. Bỏ sleep càng dễ đọc trước khi ghi. <code>static</code> ở phạm vi toàn cục không đổi gì về đồng bộ.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 5.</strong> Chương trình hai luồng khóa hai mutex ngược thứ tự và <strong>đang treo</strong>. Bạn chạy nó dưới <code>-fsanitize=thread</code> và TSan không in gì. Giải thích nào khả dĩ nhất?</p>
+<ul>
+<li>TSan không hỗ trợ <code>std::mutex</code></li>
+<li>Cả hai luồng chưa bao giờ lấy xong khóa thứ hai, nên chưa có thứ tự khóa ngược nào được ghi</li>
+<li>Deadlock không phải lỗi mà TSan nhận biết</li>
+<li>TSan đã sửa deadlock nên chương trình không treo</li>
+</ul>
+<p class="giai-thich">TSan phát hiện đảo thứ tự khóa bằng cách ghi lại "lấy khóa B khi đang giữ khóa A" mỗi khi một khóa được lấy <strong>xong</strong>. Hai luồng treo kẹt ở lần xin thứ hai, nên chưa ghi được thứ tự nào. Chạy tuần tự để chương trình không treo thì TSan báo <code>lock-order-inversion</code>. TSan hỗ trợ <code>std::mutex</code> bình thường, và nó chỉ báo cáo, không tự sửa gì.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 6.</strong> Hàm đọc một biến cục bộ <code>int x;</code> chưa gán rồi dùng nó trong <code>if</code>. Trên máy chỉ có g++ (không clang) và Valgrind đã cài, công cụ nào đáng thử đầu tiên?</p>
+<ul>
+<li>Valgrind <code>memcheck</code>, vì nó theo dõi giá trị chưa gán</li>
+<li>ASan, vì nó bắt mọi lỗi bộ nhớ phát sinh lúc chạy chương trình</li>
+<li>TSan, vì biến chưa gán là một dạng đua</li>
+<li><code>-D_GLIBCXX_DEBUG</code>, vì nó kiểm biến cục bộ</li>
+</ul>
+<p class="giai-thich"><code>memcheck</code> theo dõi từng bit đã được khởi tạo chưa và báo <code>Conditional jump depends on uninitialised value(s)</code> khi giá trị đó quyết định một nhánh. ASan canh địa chỉ nên <strong>không</strong> thấy biến chưa gán. TSan chỉ lo truy cập giữa các luồng. <code>_GLIBCXX_DEBUG</code> lo container của thư viện chuẩn, không lo biến cục bộ.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 7.</strong> Hàm <code>chep</code> có <code>char o[8]</code> và <code>strcpy(o, nguon)</code> với <code>nguon</code> dài 32 ký tự, biên dịch <code>-fstack-protector-strong</code>. Chương trình in <code>o = AAAA...</code> rồi <code>*** stack smashing detected ***: terminated</code>. Dòng nào là chỗ <strong>phát hiện</strong>, dòng nào là chỗ <strong>gây lỗi</strong>?</p>
+<ul>
+<li>Phát hiện ở <code>strcpy</code>, gây lỗi ở cuối hàm</li>
+<li>Phát hiện ở <code>strcpy</code> ngay lúc ghi, gây lỗi cũng ở <code>strcpy</code></li>
+<li>Phát hiện lúc hàm trả về (dấu <code>}</code>), gây lỗi ở <code>strcpy</code></li>
+<li>Phát hiện ở <code>main</code>, gây lỗi ở <code>std::cout</code></li>
+</ul>
+<p class="giai-thich">Canary chỉ được kiểm ngay trước khi hàm trả về, nên thông báo đến từ dấu <code>}</code> cuối <code>chep</code>, sau khi <code>strcpy</code> đã ghi đè. Việc <code>o = AAAA...</code> vẫn in ra cho thấy tràn không bị chặn ở <code>strcpy</code>. <code>main</code> không gây lỗi, và <code>std::cout</code> chỉ in chuỗi <code>o</code>. Nên đây là ca "chết muộn" hơi khác ca heap: nạn nhân và thủ phạm cách nhau vài dòng.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 8.</strong> ASan báo lỗi trong chương trình và bạn muốn xem giá trị biến lúc đó trong gdb mà không phải đoán. Cách nào đúng?</p>
+<ul>
+<li>Chạy <code>gdb</code> rồi gõ <code>catch asan</code></li>
+<li>Đặt <code>ASAN_OPTIONS=symbolize=0</code> để gdb đọc được địa chỉ</li>
+<li>Biên dịch thêm <code>-fsanitize=thread</code> để gdb nhận biết</li>
+<li>Đặt <code>ASAN_OPTIONS=abort_on_error=1</code>, để ASan <code>abort()</code> rồi dừng ở <code>SIGABRT</code>, dùng <code>frame N</code> tới khung của mình</li>
+</ul>
+<p class="giai-thich">Với <code>abort_on_error=1</code>, sau báo cáo ASan gọi <code>abort()</code>, gdb dừng ở <code>SIGABRT</code> với ngăn xếp đầy đủ, và <code>frame N</code> tới khung hàm của bạn cho <code>info locals</code>. Không có lệnh <code>catch asan</code> trong gdb. <code>symbolize=0</code> làm báo cáo khó đọc hơn, không giúp gdb. TSan không ghép được với ASan, và cũng không liên quan đến việc gdb dừng.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li><code>ASAN_OPTIONS</code> chỉnh ASan không cần biên dịch lại: <code>halt_on_error=0</code> (phải kèm <code>-fsanitize-recover=address</code>, thiếu thì vẫn dừng ở lỗi đầu), <code>detect_leaks=0</code> (tắt LeakSanitizer), <code>abort_on_error=1</code> (để gdb dừng ở <code>SIGABRT</code> rồi <code>frame N</code> xem biến), <code>symbolize=0</code> (mất tên hàm và dòng).</li>
+<li>Với lỗi "chết chỗ này, lỗi chỗ kia" của Bài 40, ASan chỉ ngay <code>WRITE of size 4 ... datTatCa tran.cpp:7</code> và <code>allocated by ... tran.cpp:12</code>: dừng ở lần ghi tràn đầu tiên, trước khi nạn nhân xuất hiện; <code>-D_GLIBCXX_ASSERTIONS</code> (rẻ) và <code>-D_GLIBCXX_DEBUG</code> (đắt, cần nhất quán cờ) bắt <code>v[i]</code> ngoài biên ngay tại <code>operator[]</code>, khi bản thường chỉ chết muộn lúc dọn.</li>
+<li><code>-fsanitize=undefined</code> còn gồm <code>vptr</code> (ép kiểu xuống sai), <code>nonnull-attribute</code>..., nhưng không gồm <code>float-cast-overflow</code> (phải thêm); <code>-fstack-protector-strong</code> (Ubuntu bật sẵn) phát hiện ghi đè stack lúc hàm trả về với <code>*** stack smashing detected ***</code>, nghĩa là chết muộn hơn dòng gây lỗi.</li>
+<li>TSan chạy thật (qua <code>setarch $(uname -m) -R</code> trên máy này): bắt data race với hai ngăn xếp đọc/ghi và dòng <code>As if synchronized via sleep</code> khi dùng <code>sleep</code> thay đồng bộ; bắt <code>lock-order-inversion</code> khi hai thứ tự khóa ngược nhau từng xảy ra, nhưng im lặng với chương trình đã treo vì deadlock (dùng gdb cho ca đó); sửa rồi chạy lại cùng công cụ để thấy nó im.</li>
+<li>Valgrind (<code>memcheck</code> cho biến chưa khởi tạo và rò rỉ, <code>helgrind</code> cho đua, <code>massif</code> cho heap theo thời gian, <code>callgrind</code> cho đếm lệnh) và MSan (chỉ clang) bài này <strong>chưa chạy</strong> vì máy không có; chọn công cụ theo triệu chứng (rò rỉ, ngoài biên, use-after-free, data race, biến chưa khởi tạo, UB số học); chạy sạch không chứng minh chương trình đúng; Go có <code>go test -race</code> ứng với TSan.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../40-gdb-nang-cao-core-dump/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../42-strace-perf-do-hieu-nang/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>
