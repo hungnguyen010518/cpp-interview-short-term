@@ -26,7 +26,7 @@ Tiếp theo là **Nhóm 3 — Đa luồng** từ [Bài 24](nhom-3-da-luong/24-th
 
 Rồi đến **Nhóm 4 — OOP, template và Design Patterns** từ [Bài 31](nhom-4-oop-patterns/31-lop-dong-goi.md) đến [Bài 37](nhom-4-oop-patterns/37-solid-thiet-ke.md): lớp và đóng gói, kế thừa, đa hình/virtual, template, Singleton/Factory, Observer/Strategy, SOLID.
 
-Nhóm sau (hệ thống) sẽ được thêm dần.
+Cuối cùng là **Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình** từ [Bài 38](nhom-5-he-thong-quy-trinh/38-bien-dich-lien-ket-build.md) đến [Bài 46](nhom-5-he-thong-quy-trinh/46-tong-on-debug-phong-van.md): biên dịch và liên kết, gdb, core dump, sanitizer, strace/perf, Git, mạng, database/quy trình/game, và bài tổng ôn về cách gỡ lỗi khi phỏng vấn.
 
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).

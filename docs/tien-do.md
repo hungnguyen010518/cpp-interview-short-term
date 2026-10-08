@@ -41,3 +41,12 @@
 | [Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít](nhom-4-oop-patterns/35-pattern-singleton-factory.md) | <span class="diem" data-bai="35"></span> |
 | [Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy](nhom-4-oop-patterns/36-pattern-observer-strategy.md) | <span class="diem" data-bai="36"></span> |
 | [Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa](nhom-4-oop-patterns/37-solid-thiet-ke.md) | <span class="diem" data-bai="37"></span> |
+| [Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build](nhom-5-he-thong-quy-trinh/38-bien-dich-lien-ket-build.md) | <span class="diem" data-bai="38"></span> |
+| [Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong](nhom-5-he-thong-quy-trinh/39-gdb-co-ban.md) | <span class="diem" data-bai="39"></span> |
+| [Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng](nhom-5-he-thong-quy-trinh/40-gdb-nang-cao-core-dump.md) | <span class="diem" data-bai="40"></span> |
+| [Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind](nhom-5-he-thong-quy-trinh/41-sanitizer-valgrind.md) | <span class="diem" data-bai="41"></span> |
+| [Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov](nhom-5-he-thong-quy-trinh/42-strace-perf-do-hieu-nang.md) | <span class="diem" data-bai="42"></span> |
+| [Bài 43 — Git: lịch sử, nhánh, gộp và cứu lỗi](nhom-5-he-thong-quy-trinh/43-git.md) | <span class="diem" data-bai="43"></span> |
+| [Bài 44 — Mạng: TCP/UDP, socket C++, REST và gRPC](nhom-5-he-thong-quy-trinh/44-mang-socket.md) | <span class="diem" data-bai="44"></span> |
+| [Bài 45 — Database, quy trình phần mềm và nguyên lý game dev: ba chủ đề bổ sung](nhom-5-he-thong-quy-trinh/45-database-sdlc-game.md) | <span class="diem" data-bai="45"></span> |
+| [Bài 46 — Tổng ôn: quy trình gỡ lỗi và kể chuyện dự án](nhom-5-he-thong-quy-trinh/46-tong-on-debug-phong-van.md) | <span class="diem" data-bai="46"></span> |
