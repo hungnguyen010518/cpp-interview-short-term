@@ -2,7 +2,7 @@
 """Biên dịch và chạy mọi khối ```cpp trong các bài học.
 
 Mỗi khối là một chương trình đầy đủ: phải biên dịch được với
-`g++ -std=c++17 -Wall -pthread`, chạy dưới 5 giây và thoát mã 0.
+`g++ -std=c++17 -Wall -pthread`, chạy dưới 5 giây (30 giây khi có TSan) và thoát mã 0.
 Khối có dòng đầu tiên `// bo-qua-kiem-tra` (minh họa hành vi không xác định)
 được bỏ qua.
 
@@ -49,6 +49,14 @@ def lay_co_bien_dich(code: str) -> list:
     return co
 
 
+GIOI_HAN_GIAY = 5
+GIOI_HAN_TSAN_GIAY = 30  # TSan làm chương trình chậm nhiều lần; runner CI lại ít lõi
+
+
+def gioi_han_giay(co: list) -> int:
+    return GIOI_HAN_TSAN_GIAY if "-fsanitize=thread" in co else GIOI_HAN_GIAY
+
+
 def kiem_khoi(code: str):
     """Trả về None nếu ổn, ngược lại là thông báo lỗi."""
     if code.lstrip().startswith(BO_QUA):
@@ -68,10 +76,10 @@ def kiem_khoi(code: str):
             if "-fsanitize=thread" in co and shutil.which("setarch"):
                 # kernel mới đặt ASLR cao hơn mức TSan chịu được; tắt ASLR cho tiến trình con
                 lenh = ["setarch", "x86_64", "-R"] + lenh
-            kq = subprocess.run(lenh, capture_output=True, text=True, timeout=5,
+            kq = subprocess.run(lenh, capture_output=True, text=True, timeout=gioi_han_giay(co),
                 stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
-            return "chạy quá 5 giây"
+            return f"chạy quá {gioi_han_giay(co)} giây"
         if kq.returncode != 0:
             return f"chạy trả mã {kq.returncode}\n{kq.stderr}"
     return None

@@ -116,6 +116,10 @@ class TestTsan(unittest.TestCase):
         finally:
             os.environ.pop("KIEM_TSAN", None)
 
+    def test_gioi_han_thoi_gian_rong_hon_khi_co_tsan(self):
+        self.assertEqual(k.gioi_han_giay(["-std=c++17"]), 5)
+        self.assertGreater(k.gioi_han_giay(["-fsanitize=thread"]), 5)
+
     def test_tsan_chi_ap_dung_cho_khoi_dung_luong(self):
         import os
         os.environ["KIEM_TSAN"] = "1"
