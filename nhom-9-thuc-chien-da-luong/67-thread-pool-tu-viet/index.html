@@ -1,0 +1,3730 @@
+
+<!doctype html>
+<html lang="vi" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Khóa ôn C++ ngắn hạn để đi phỏng vấn — giải thích để học sinh lớp 5 cũng hiểu, mỗi bài có trắc nghiệm tương tác.">
+      
+      
+      
+        <link rel="canonical" href="https://hungnguyen010518.github.io/cpp-interview-short-term/nhom-9-thuc-chien-da-luong/67-thread-pool-tu-viet/">
+      
+      
+        <link rel="prev" href="../66-bounded-queue/">
+      
+      
+        <link rel="next" href="../68-singleton-call-once/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm - C++ phỏng vấn — ôn nhanh</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/quiz.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bai-67-thuc-chien-thread-pool-tu-viet-tra-future-dung-em" class="md-skip">
+          Bỏ qua
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Đầu trang">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-header__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            C++ phỏng vấn — ôn nhanh
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ tối"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ tối" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Chuyển sang chế độ sáng"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Chuyển sang chế độ sáng" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Tìm kiếm" placeholder="Tìm kiếm" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Tìm kiếm">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Xoá" aria-label="Xoá" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Thanh điều hướng" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="C++ phỏng vấn — ôn nhanh" class="md-nav__button md-logo" aria-label="C++ phỏng vấn — ôn nhanh" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m10.5 15.97.41 2.44c-.26.14-.68.27-1.24.39-.57.13-1.24.2-2.01.2-2.21-.04-3.87-.7-4.98-1.96Q1 15.135 1 12.21c.05-2.31.72-4.08 2-5.32C4.32 5.64 5.96 5 7.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49-1.06-.34c-.4-.1-.86-.15-1.39-.15-1.16-.01-2.12.36-2.87 1.1-.76.73-1.15 1.85-1.18 3.34 0 1.36.37 2.42 1.08 3.2.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M11 11h2V9h2v2h2v2h-2v2h-2v-2h-2zm7 0h2V9h2v2h2v2h-2v2h-2v-2h-2z"/></svg>
+
+    </a>
+    C++ phỏng vấn — ôn nhanh
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hungnguyen010518/cpp-interview-short-term" title="Xem mã nguồn" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cpp-interview-short-term
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Trang chủ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tien-do/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiến độ của bạn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 1 — Nền tảng và bộ nhớ
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 1 — Nền tảng và bộ nhớ
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/01-bo-nho-byte-dia-chi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 01 — Chương trình C++ đầu tiên, bộ nhớ, byte và địa chỉ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/02-stack-heap-static/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 02 — Ba vùng nhớ: stack, heap và vùng tĩnh
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/03-con-tro-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 03 — Con trỏ cơ bản
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/04-con-tro-ham/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 04 — Con trỏ với hàm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/05-mang-phep-tinh-con-tro/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 05 — Mảng và phép tính con trỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/06-tham-chieu-const/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 06 — Tham chiếu và const
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/07-new-delete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 07 — Cấp phát động new/delete và ba lỗi kinh điển
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/08-raii/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 08 — RAII: tài nguyên tự trả khi đối tượng chết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/09-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 09 — std::unique_ptr: một chủ duy nhất cho mỗi cây
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 10 — std::shared_ptr, std::weak_ptr và cách chọn smart pointer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/11-sao-chep-rule-of-3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 11 — Sao chép đúng cách và Rule of 3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 12 — Move semantics, rule of 5/0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 13 — Tính năng C++11 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/14-cpp14-17/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 14 — Tính năng C++14/17 hay gặp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 15 — Hành vi không xác định và công cụ bắt lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 2 — STL và thuật toán
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 2 — STL và thuật toán
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/16-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 16 — std::vector: mảng co giãn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/17-string-array-deque-list/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 17 — string, string_view, array, deque, list
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/18-map-set-unordered/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 18 — map, set, unordered_map: tra cứu theo khóa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/19-iterator-vo-hieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 19 — Iterator và iterator invalidation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 20 — <algorithm> và lambda: sort, find, transform, remove-erase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/21-big-o-cau-truc-du-lieu/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 21 — Big-O, danh sách liên kết, stack và queue
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/22-bst-bang-bam-heap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 22 — Cây nhị phân tìm kiếm, bảng băm và heap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-2-stl-thuat-toan/23-thuat-toan-hay-hoi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 23 — Thuật toán hay hỏi ở phỏng vấn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 3 — Đa luồng
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 3 — Đa luồng
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/24-thread-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 24 — std::thread: tạo luồng, join, detach và truyền tham số
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/25-data-race-mutex/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 25 — Data race và std::mutex: nhiều luồng cùng sửa một biến
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/26-deadlock/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 26 — Deadlock: khi các luồng chờ nhau mãi mãi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/27-condition-variable/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 27 — condition_variable: chờ điều kiện thay vì hỏi liên tục
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/28-atomic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 28 — std::atomic: thao tác nguyên tử, compare_exchange và cờ dừng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/29-async-future/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 29 — std::async và std::future: lấy kết quả từ luồng khác
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 30 — Thread pool và hiệu năng: false sharing, Amdahl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 4 — OOP, template và Design Patterns
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 4 — OOP, template và Design Patterns
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/31-lop-dong-goi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 31 — Lớp và đóng gói: giữ cho đối tượng luôn hợp lệ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/32-ke-thua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 32 — Kế thừa: dùng lại lớp cha, và khi nào không nên
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/33-da-hinh-virtual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 33 — Đa hình và virtual: một lời gọi, đúng hàm của món thật
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/34-template/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 34 — Template: viết một lần, trình biên dịch làm bản cho từng kiểu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/35-pattern-singleton-factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 35 — Singleton và Factory: hai mẫu thiết kế, và vì sao nên dùng ít
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/36-pattern-observer-strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 36 — Observer và Strategy: báo tin cho nhiều nơi, và đổi cách làm lúc chạy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-4-oop-patterns/37-solid-thiet-ke/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 37 — SOLID và thiết kế lớp: năm nguyên tắc, và đừng thiết kế thừa
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/38-bien-dich-lien-ket-build/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 38 — Từ mã nguồn đến chương trình: biên dịch, liên kết và build
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/39-gdb-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 39 — gdb cơ bản: dừng chương trình và nhìn vào bên trong
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/40-gdb-nang-cao-core-dump/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 40 — gdb nâng cao: sập chương trình, core dump, đa luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/41-sanitizer-valgrind/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 41 — Công cụ bắt lỗi bộ nhớ và luồng: sanitizer sâu và Valgrind
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/42-strace-perf-do-hieu-nang/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 42 — Soi tiến trình và đo hiệu năng: strace, perf, gprof, gcov
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/43-git/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 43 — Git: lịch sử, nhánh, gộp và cứu lỗi
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/44-mang-socket/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 44 — Mạng: TCP/UDP, socket C++, REST và gRPC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/45-database-sdlc-game/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 45 — Database, quy trình phần mềm và nguyên lý game dev: ba chủ đề bổ sung
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-5-he-thong-quy-trinh/46-tong-on-debug-phong-van/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 46 — Tổng ôn: quy trình gỡ lỗi và kể chuyện dự án
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 6 — Hệ điều hành và tiến trình
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 6 — Hệ điều hành và tiến trình
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-6-he-dieu-hanh-tien-trinh/47-tien-trinh-vs-luong/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 47 — Tiến trình và luồng: khác nhau ở đâu, khi nào chọn cái nào
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-6-he-dieu-hanh-tien-trinh/48-fork-exec-wait/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 48 — fork, exec, wait: sinh tiến trình con và dọn dẹp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-6-he-dieu-hanh-tien-trinh/49-ipc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 49 — Giao tiếp giữa các tiến trình (IPC): pipe, shared memory, message queue, socket, signal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-6-he-dieu-hanh-tien-trinh/50-io-epoll-event-loop/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 50 — I/O chặn, epoll và event loop: một luồng một kết nối hay một vòng lặp cho tất cả
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 7 — Chọn đúng công cụ: bài tình huống
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 7 — Chọn đúng công cụ: bài tình huống
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/51-chon-smart-pointer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 51 — Chọn smart pointer: unique_ptr, shared_ptr, weak_ptr hay con trỏ thô
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/52-smart-pointer-da-luong/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 52 — Smart pointer trong đa luồng: thứ gì an toàn, thứ gì không
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/53-chon-container/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 53 — Chọn container: vector, list, deque, map, unordered_map, set
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/54-container-da-luong/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 54 — Container và đa luồng: khóa ở đâu, an toàn tới đâu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/55-api-so-huu-tham-so/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 55 — Thiết kế hàm: truyền tham số và sở hữu rõ ràng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/56-xu-ly-loi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 56 — Xử lý lỗi: exception, mã lỗi, optional hay expected
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/57-chon-dong-bo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 57 — Chọn cơ chế đồng bộ: mutex, atomic, condition_variable, future, semaphore
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-7-chon-dung-cong-cu/58-bo-nho-nang-cao/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 58 — Bộ nhớ nâng cao: căn lề, padding, cache line, placement new, memory pool
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 8 — Đa luồng chiều sâu
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 8 — Đa luồng chiều sâu
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/59-memory-model/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 59 — Memory model: happens-before, acquire/release và vì sao volatile không cứu được
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 60 — Semaphore, latch, barrier: đếm người vào, đếm cho đủ, hẹn nhau ở vạch
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/61-mau-an-toan-luong/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 61 — Mẫu thiết kế an toàn luồng: monitor, thread-local, bất biến, truyền thông điệp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/62-lock-free-co-ban/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 62 — Lock-free cơ bản: compare_exchange, ABA và hàng đợi SPSC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/63-jthread-coroutine/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 63 — jthread, stop_token và coroutine (C++20): nhận biết
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-8-da-luong-chieu-sau/64-go-loi-da-luong/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 64 — Gỡ lỗi đa luồng thực chiến: TSan, helgrind, gdb và đo tranh chấp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 9 — Thực chiến phỏng vấn đa luồng
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 9 — Thực chiến phỏng vấn đa luồng
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../65-in-chan-le-abc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 65 — Thực chiến: in chẵn lẻ và in ABC xoay vòng bằng nhiều luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../66-bounded-queue/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 66 — Thực chiến: hàng đợi chặn có giới hạn (producer-consumer)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-phan-xa-au-tien-hoi-lai-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Phản xạ đầu tiên: hỏi lại đề
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-e-a-submit-tra-futurer" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Đề (a): submit trả future&lt;R&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-e-b-dung-em" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Đề (b): dừng êm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-chuan-bao-am-gi-may-nay-cho-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Chuẩn bảo đảm gì, máy này cho gì
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loi-giai-a-pool-tra-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lời giải (a): pool trả future
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ban-sai-cua-a-ba-loi-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bản SAI của (a): ba lỗi điển hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chi-phi-va-o-phuc-tap-cua-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chi phí và độ phức tạp của (a)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-giai-b-dung-em" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lời giải (b): dừng êm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ban-sai-cua-b-hai-loi-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bản SAI của (b): hai lỗi điển hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chi-phi-va-o-phuc-tap-cua-b" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chi phí và độ phức tạp của (b)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../68-singleton-call-once/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 68 — Thực chiến: khởi tạo một lần an toàn luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../69-semaphore-barrier-tu-cai/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 69 — Thực chiến: tự cài semaphore và barrier từ mutex + condition_variable
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../70-rwlock-dining/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 70 — Thực chiến: khóa đọc-ghi và triết gia ăn tối
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../71-lru-cache/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 71 — Thực chiến: LRU cache an toàn luồng
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../72-concurrent-hashmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 72 — Thực chiến: concurrent hash map chia shard
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../73-event-bus/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 73 — Thực chiến: event bus (pub/sub) an toàn luồng với weak_ptr
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../74-timer-rate-limiter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 74 — Thực chiến: bộ hẹn giờ và giới hạn tốc độ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../75-parallel-sum-sort-wordcount/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 75 — Thực chiến: chia việc song song — tổng, merge sort, đếm từ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../76-bug-hunt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 76 — Bug-hunt: 12 đoạn code đa luồng có lỗi, tìm lỗi ở đâu
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Nhóm 10 — Live-coding C++ tổng hợp
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            Nhóm 10 — Live-coding C++ tổng hợp
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/77-tu-cai-unique-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 77 — Live-coding: tự cài unique_ptr
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/78-tu-cai-shared-ptr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 78 — Live-coding: tự cài shared_ptr và weak_ptr
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/79-tu-cai-vector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 79 — Live-coding: tự cài vector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/80-tu-cai-string/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 80 — Live-coding: tự cài string
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/81-tu-cai-hashmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 81 — Live-coding: tự cài hash map
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/82-tu-cai-function/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 82 — Live-coding: tự cài std::function và type erasure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/83-code-review-bug/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 83 — Code review: tìm lỗi trong 15 đoạn C++
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../nhom-10-live-coding/84-tong-on-100-cau/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bài 84 — Tổng ôn: 100 câu hỏi nhanh và thiết kế hệ thống nhỏ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bảng thuật ngữ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Mục lục">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Mục lục
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cau-chuyen-mo-au" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧠 Câu chuyện mở đầu
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#giai-thich" class="md-nav__link">
+    <span class="md-ellipsis">
+      📖 Giải thích
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📖 Giải thích">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-phan-xa-au-tien-hoi-lai-e" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Phản xạ đầu tiên: hỏi lại đề
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-e-a-submit-tra-futurer" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Đề (a): submit trả future&lt;R&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-e-b-dung-em" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Đề (b): dừng êm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-chuan-bao-am-gi-may-nay-cho-gi" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Chuẩn bảo đảm gì, máy này cho gì
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vi-du-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      💻 Ví dụ code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Ví dụ code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loi-giai-a-pool-tra-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lời giải (a): pool trả future
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ban-sai-cua-a-ba-loi-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bản SAI của (a): ba lỗi điển hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chi-phi-va-o-phuc-tap-cua-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chi phí và độ phức tạp của (a)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loi-giai-b-dung-em" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lời giải (b): dừng êm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ban-sai-cua-b-hai-loi-ien-hinh" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bản SAI của (b): hai lỗi điển hình
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chi-phi-va-o-phuc-tap-cua-b" class="md-nav__link">
+    <span class="md-ellipsis">
+      Chi phí và độ phức tạp của (b)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cau-hoi-phong-van-hay-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎤 Câu hỏi phỏng vấn hay gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loi-thuong-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚠️ Lỗi thường gặp
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trac-nghiem" class="md-nav__link">
+    <span class="md-ellipsis">
+      ✍️ Trắc nghiệm
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tom-tat" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔑 Tóm tắt
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="bai-67-thuc-chien-thread-pool-tu-viet-tra-future-dung-em">Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm<a class="headerlink" href="#bai-67-thuc-chien-thread-pool-tu-viet-tra-future-dung-em" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">🎯 Học xong bài này, bạn sẽ</p>
+<ul>
+<li>Nghe đề "viết cho tôi một thread pool" mà không lao vào gõ: hỏi lại bốn câu (việc có kết quả không, ngoại lệ đi đâu, dừng thì việc còn lại ra sao, nộp muộn thì sao) rồi mới viết.</li>
+<li>Viết <code>submit(f)</code> trả <code>std::future&lt;R&gt;</code> cho mọi kiểu <code>R</code> kể cả <code>void</code>, bằng <code>template</code>, <code>std::invoke_result_t</code>, <code>std::packaged_task</code> bọc trong <code>std::shared_ptr</code>; thấy lỗi biên dịch thật khi không bọc, và hiểu vì sao.</li>
+<li>Làm <strong>dừng êm</strong>: <code>shutdown()</code> từ chối việc mới, làm hết việc đã nhận, <code>join</code>, gọi nhiều lần vẫn được, hàm hủy gọi lại nó; ngoại lệ trong việc đi qua <code>future</code> thay vì làm cả chương trình <code>std::terminate</code>.</li>
+<li>Chạy thật năm bản SAI (việc chờ việc làm pool treo, đọc kết quả không qua <code>get()</code> bị TSan báo, bỏ việc còn lại làm <code>broken_promise</code>, không chặn nộp muộn làm <code>get()</code> treo, không bọc <code>shared_ptr</code> không biên dịch được), đếm chi phí của <code>submit</code>, và nói rõ chuẩn bảo đảm gì còn g++ 11 trên máy này cho gì.</li>
+</ul>
+</div>
+<p><strong>Bạn cần biết trước:</strong> <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/">Bài 30</a> (pool tối thiểu: hàng đợi, worker chạy ngoài khóa, hủy = đặt cờ + <code>notify_all</code> + <code>join</code>; bài này <strong>nâng cấp</strong> nó, không dạy lại), <a href="../../nhom-3-da-luong/29-async-future/">Bài 29</a> (<code>future</code>, <code>get</code>, <code>packaged_task</code>, ngoại lệ đi qua future), <a href="../../nhom-3-da-luong/27-condition-variable/">Bài 27</a> (<code>wait</code> có vị từ), <a href="../../nhom-3-da-luong/24-thread-co-ban/">Bài 24</a> (<code>join</code>, <code>joinable</code>), <a href="../../nhom-4-oop-patterns/34-template/">Bài 34</a> (<code>template &lt;class F&gt;</code>), <a href="../../nhom-4-oop-patterns/36-pattern-observer-strategy/">Bài 36</a> (<code>using</code> đặt bí danh kiểu), <a href="../../nhom-1-nen-tang-bo-nho/10-shared-ptr-weak-ptr/">Bài 10</a> (<code>make_shared</code>), <a href="../../nhom-1-nen-tang-bo-nho/12-move-semantics/">Bài 12</a> (<code>std::move</code>), <a href="../../nhom-1-nen-tang-bo-nho/13-cpp11-14-17/">Bài 13</a> (lambda), <a href="../../nhom-2-stl-thuat-toan/20-algorithm-lambda/">Bài 20</a> (<code>std::function</code>), <a href="../../nhom-1-nen-tang-bo-nho/08-raii/">Bài 08</a> (RAII, <code>throw</code>/<code>catch</code>), <a href="../../nhom-1-nen-tang-bo-nho/15-hanh-vi-khong-xac-dinh-cong-cu/">Bài 15</a> (TSan).</p>
+<h2 id="cau-chuyen-mo-au">🧠 Câu chuyện mở đầu<a class="headerlink" href="#cau-chuyen-mo-au" title="Permanent link">&para;</a></h2>
+<p>Người phỏng vấn đẩy cây bút về phía bạn: "Mười lăm phút. Viết cho tôi một thread pool. Nộp việc nào cũng được, và tôi muốn lấy kết quả về. Khi đóng pool thì đừng làm mất việc của khách."</p>
+<p>Quay lại <strong>nhà bếp nhiều đầu bếp</strong>. Bếp có một đội đầu bếp cố định và một bảng phiếu việc (<a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/">Bài 30</a>). Bài này thêm hai thứ. Mỗi khi nộp phiếu, khách được cầm một <strong>phiếu hẹn</strong> (<code>future</code>) để lát nữa ra lấy món. Và có giờ <strong>đóng cửa bếp</strong>: treo biển "ngừng nhận món mới", đầu bếp làm nốt mọi phiếu còn trên bảng rồi mới về.</p>
+<div class="admonition info">
+<p class="admonition-title">Chỗ nào ví von nhà bếp không còn đúng?</p>
+<p>Phiếu hẹn thật chỉ mang món. Phiếu hẹn của C++ mang cả <strong>sự cố</strong>: món cháy thì khách cầm phiếu nhận lại đúng lỗi đó khi <code>get()</code>, chứ đầu bếp không la lên cho cả bếp nghe. Đầu bếp thật cũng biết món nào nặng nhẹ; worker chỉ thấy một cái hàm. Và bảng phiếu của ta có một khóa duy nhất, nên chuyện "đầu bếp chen nhau ở bảng" có thật (câu hỏi work stealing ở 🎤).</p>
+</div>
+<h2 id="giai-thich">📖 Giải thích<a class="headerlink" href="#giai-thich" title="Permanent link">&para;</a></h2>
+<h3 id="1-phan-xa-au-tien-hoi-lai-e">1. Phản xạ đầu tiên: hỏi lại đề<a class="headerlink" href="#1-phan-xa-au-tien-hoi-lai-e" title="Permanent link">&para;</a></h3>
+<p>Đề thread pool nghe quen nên dễ lao vào viết. Người phỏng vấn thường chấm xem bạn có hỏi bốn câu sau không, vì mỗi câu đổi thiết kế:</p>
+<table>
+<thead>
+<tr>
+<th>Câu hỏi lại</th>
+<th>Vì sao đổi thiết kế</th>
+<th>Bài này chọn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Việc có kết quả và có thể ném ngoại lệ không?</td>
+<td>Có thì cần <code>future</code>, không thì <code>std::function&lt;void()&gt;</code> đủ</td>
+<td>trả <code>future&lt;R&gt;</code>, ngoại lệ đi qua nó</td>
+</tr>
+<tr>
+<td>Việc có tham số không?</td>
+<td>Quyết định chữ ký <code>submit</code></td>
+<td>không tham số; người gọi bọc bằng lambda <code>[=]</code></td>
+</tr>
+<tr>
+<td>Đóng pool thì việc còn trong hàng làm sao?</td>
+<td>Làm hết hay bỏ</td>
+<td>làm hết (drain)</td>
+</tr>
+<tr>
+<td>Nộp việc sau khi đóng thì sao?</td>
+<td>Im lặng nuốt, trả lỗi hay ném</td>
+<td>ném <code>std::runtime_error</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-e-a-submit-tra-futurer">2. Đề (a): <code>submit</code> trả <code>future&lt;R&gt;</code><a class="headerlink" href="#2-e-a-submit-tra-futurer" title="Permanent link">&para;</a></h3>
+<div class="admonition example">
+<p class="admonition-title">Đề (a): thread pool tối thiểu trả future</p>
+<p>Viết lớp <code>NhomLuong</code> (thread pool). Hàm tạo nhận số worker <code>n</code>. Hàm <code>submit(f)</code> nhận <strong>một thứ gọi được không đối số</strong> (lambda, hàm, functor) kiểu bất kỳ và trả <code>std::future&lt;R&gt;</code>, với <code>R</code> là kiểu mà <code>f()</code> trả về, <strong>kể cả <code>void</code></strong>. Worker chạy việc ngoài khóa; mỗi <code>future</code> giao đúng kết quả của việc của nó.</p>
+<ul>
+<li>Đầu vào kiểm thử: pool 4 worker; nộp 8 việc, việc <code>i</code> trả <code>i * i</code>, rồi lấy kết quả <strong>theo thứ tự phiếu</strong>; nộp thêm 4 việc <code>void</code> mỗi việc ghi một ô <code>int</code> thường của mảng; nộp một việc trả <code>std::string</code>.</li>
+<li>Đầu ra phải tất định: <code>1 4 9 16 25 36 49 64</code>, <code>tong = 204</code>, <code>bang = 100 200 300 400</code>, <code>xin chao</code>. TSan phải sạch.</li>
+</ul>
+</div>
+<details class="tip">
+<summary>Gợi ý 1</summary>
+<p>Hàng đợi <code>std::function&lt;void()&gt;</code> của Bài 30 đã đủ để <em>chạy</em> việc. Cái thiếu là <strong>chỗ để lấy giá trị về</strong>. Trong Bài 29 mục 7, thứ nào bọc một hàm và đưa ra cho bạn một <code>future</code>?</p>
+</details>
+<details class="tip">
+<summary>Gợi ý 2</summary>
+<p><code>std::packaged_task</code> không sao chép được, còn <code>std::function</code> đòi thứ nó chứa phải sao chép được. Muốn cất một thứ không sao chép được vào một hộp sao chép được thì bọc nó vào thứ mà sao chép chỉ chép "tay cầm", rồi để hộp giữ tay cầm. Đó là loại con trỏ nào ở Bài 10?</p>
+</details>
+<details class="tip">
+<summary>Gợi ý 3</summary>
+<p>Chữ ký: <code>template &lt;class F&gt; std::future&lt;std::invoke_result_t&lt;F&gt;&gt; submit(F f)</code>. Trong thân: <code>make_shared&lt;packaged_task&lt;R()&gt;&gt;(std::move(f))</code>, <strong><code>get_future()</code> trước</strong>, rồi mới đẩy <code>[goi] { (*goi)(); }</code> vào hàng dưới khóa, <code>notify_one</code>, trả phiếu.</p>
+</details>
+<p><strong>Hướng giải.</strong> Ba mảnh của Bài 30 giữ nguyên. Mảnh mới chỉ nằm trong <code>submit</code>, và nó trả lời đúng bốn thứ cần giải thích trước khi đọc code:</p>
+<ul>
+<li><code>template &lt;class F&gt;</code>: <code>F</code> là chỗ trống cho kiểu của việc, trình biên dịch tự suy ra từ đối số (<a href="../../nhom-4-oop-patterns/34-template/">Bài 34</a>). Mỗi lambda có kiểu riêng, nên mỗi lần gọi với lambda khác là một bản <code>submit</code> khác.</li>
+<li><code>std::invoke_result_t&lt;F&gt;</code> (C++17, trong <code>&lt;type_traits&gt;</code>): "kiểu mà <code>f()</code> trả về khi gọi không đối số". Lambda <code>[] { return 3.5; }</code> cho <code>double</code>, lambda không có <code>return</code> cho <code>void</code>. Bí danh <code>using R = ...</code> (<a href="../../nhom-4-oop-patterns/36-pattern-observer-strategy/">Bài 36</a>) đặt tên ngắn cho kiểu đó.</li>
+<li><code>std::packaged_task&lt;R()&gt;</code>: <code>R()</code> đọc như <code>int(int, int)</code> ở Bài 29, nghĩa là "hàm không nhận gì, trả <code>R</code>". Nó chạy khi được gọi và tự cất kết quả hay ngoại lệ vào <code>future</code>.</li>
+<li><code>std::shared_ptr</code> bọc gói: sao chép <code>shared_ptr</code> rẻ, chỉ có <strong>một</strong> <code>packaged_task</code> thật, nên hộp <code>std::function&lt;void()&gt;</code> sao chép được mà không cần gói sao chép được. Lambda <code>[goi] { (*goi)(); }</code> giữ một <code>shared_ptr</code>; <code>*goi</code> lấy gói ra khỏi <code>shared_ptr</code> và <code>( )</code> gọi nó như một hàm, đúng như ở Bài 30.</li>
+</ul>
+<h3 id="3-e-b-dung-em">3. Đề (b): dừng êm<a class="headerlink" href="#3-e-b-dung-em" title="Permanent link">&para;</a></h3>
+<div class="admonition example">
+<p class="admonition-title">Đề (b): <code>shutdown()</code> êm, ngoại lệ đi qua future</p>
+<p>Nâng cấp <code>NhomLuong</code>. Thêm <code>shutdown()</code> sao cho: (1) từ chối việc nộp mới, bằng cách <code>submit</code> ném <code>std::runtime_error("pool da dong")</code>; (2) làm hết mọi việc đã nhận; (3) <code>join</code> mọi worker; (4) gọi lần hai không sao; (5) hàm hủy cũng gọi <code>shutdown()</code>. Việc ném ngoại lệ phải đến tay người giữ <code>future</code> qua <code>get()</code>, và worker vẫn sống để làm việc tiếp.</p>
+<ul>
+<li>Đầu vào kiểm thử: pool 3 worker; nộp 20 việc (mỗi việc tăng một <code>atomic&lt;int&gt;</code> và trả <code>i</code>), một việc ném <code>std::runtime_error("loi tinh toan")</code>; <code>shutdown()</code>; lấy kết quả; nộp thêm một việc; <code>shutdown()</code> lần hai.</li>
+<li>Đầu ra: <code>da chay: 20 viec</code>, <code>tong = 210</code>, <code>viec loi: loi tinh toan</code>, <code>nop sau khi dong: bi tu choi (pool da dong)</code>, <code>shutdown lan hai: khong sao</code>. TSan sạch.</li>
+</ul>
+</div>
+<details class="tip">
+<summary>Gợi ý 1</summary>
+<p>Hàm hủy của Bài 30 đã <strong>làm hết việc rồi mới thoát</strong> (worker chỉ <code>return</code> khi hàng rỗng <em>và</em> đã dừng). Bạn gần xong: việc cần làm là tách nó ra thành hàm gọi được tường minh và chặn <code>submit</code> sau khi cờ dừng đã bật.</p>
+</details>
+<details class="tip">
+<summary>Gợi ý 2</summary>
+<p>Kiểm cờ <code>dung_</code> ở đâu? Trong <code>submit</code>, ở <strong>cùng đoạn giữ khóa</strong> với <code>push</code>. Đọc <code>dung_</code> ngoài khóa trong lúc <code>shutdown</code> ghi nó là data race. Còn <code>join</code> lần hai: <code>std::thread</code> đã <code>join</code> thì <code>joinable()</code> trả <code>false</code>, bỏ qua được.</p>
+</details>
+<details class="tip">
+<summary>Gợi ý 3</summary>
+<p>Ngoại lệ: không cần viết thêm gì, <code>packaged_task</code> tự bắt rồi cất vào <code>future</code>. Worker không cần <code>try</code>/<code>catch (...)</code> như Bài 30 (ở đó việc nộp là <code>std::function</code> trần, nên <code>catch (...)</code> phải nuốt lỗi).</p>
+</details>
+<p><strong>Hướng giải.</strong> Chỉ ba chỗ đổi, mỗi chỗ một câu hỏi bảng trắng:</p>
+<ul>
+<li>Cờ <code>dung_</code> được kiểm trong <code>submit</code> <strong>dưới khóa</strong>: không có khe giữa "đã kiểm chưa đóng" và "đã đẩy vào hàng".</li>
+<li><code>shutdown()</code> = đặt cờ dưới khóa, <code>notify_all</code>, <code>join</code> (bỏ qua luồng đã <code>join</code>). Hàm hủy gọi nó, nên quên gọi cũng vẫn dừng êm (RAII).</li>
+<li>Policy "làm hết" nằm ở vị từ của <code>wait</code> và dòng <code>if (hang_.empty()) return;</code>: dừng <strong>và</strong> hết việc mới thoát. Policy "bỏ hết" chỉ cần đổi một dòng, và hậu quả thấy ở bản sai 4.</li>
+</ul>
+<h3 id="4-chuan-bao-am-gi-may-nay-cho-gi">4. Chuẩn bảo đảm gì, máy này cho gì<a class="headerlink" href="#4-chuan-bao-am-gi-may-nay-cho-gi" title="Permanent link">&para;</a></h3>
+<p>Đa luồng dễ làm ta chép một lần chạy may mắn thành "luật". Bảng dưới tách hai thứ; cột phải là điều mình <strong>đã chạy</strong> (g++ 11.4, libstdc++, máy có 8 luồng phần cứng).</p>
+<table>
+<thead>
+<tr>
+<th>Điều</th>
+<th>Chuẩn bảo đảm</th>
+<th>Máy này cho</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kết quả <code>get()</code></td>
+<td>Đúng giá trị (hoặc ngoại lệ) của việc đó; việc xong <strong>đồng bộ-với</strong> lúc <code>get()</code> trả về (mọi thứ việc ghi trước khi xong, luồng gọi <code>get()</code> đều thấy), nên đọc ô mà việc đã ghi, sau <code>get()</code>, là an toàn không cần khóa</td>
+<td><code>bang = 100 200 300 400</code>, TSan sạch (30 lần)</td>
+</tr>
+<tr>
+<td>Không <code>get()</code>, chỉ <code>sleep_for</code> rồi đọc</td>
+<td>Data race, hành vi không xác định</td>
+<td>in vẫn đúng, nhưng TSan báo race ở 27 trên 30 lần, 3 lần im</td>
+</tr>
+<tr>
+<td>Thứ tự <strong>xong</strong> của các việc</td>
+<td>Không bảo đảm; chuẩn cũng không nói worker nào nhận việc nào</td>
+<td>chương trình riêng nộp 9 việc ngủ 2 đến 4 ms: 5 trên 6 lần xong theo <code>0 1 3 2 4 6 5 7 8</code>, một lần <code>0 1 2 3 4 6 5 7 8</code></td>
+</tr>
+<tr>
+<td><code>join</code> chính luồng đang chạy</td>
+<td>Lỗi <code>resource_deadlock_would_occur</code></td>
+<td><code>Resource deadlock avoided</code></td>
+</tr>
+<tr>
+<td><code>packaged_task</code> hủy khi chưa chạy</td>
+<td><code>future</code> nhận <code>broken_promise</code></td>
+<td><code>Broken promise</code> (bản sai 4)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vi-du-code">💻 Ví dụ code<a class="headerlink" href="#vi-du-code" title="Permanent link">&para;</a></h2>
+<h3 id="loi-giai-a-pool-tra-future">Lời giải (a): pool trả future<a class="headerlink" href="#loi-giai-a-pool-tra-future" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;condition_variable&gt;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;future&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;mutex&gt;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;queue&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;thread&gt;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;type_traits&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">NhomLuong</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="n">NhomLuong</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">            </span><span class="n">worker_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">([</span><span class="k">this</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">chay</span><span class="p">();</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">invoke_result_t</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">submit</span><span class="p">(</span><span class="n">F</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">             </span><span class="c1">// (1) F là kiểu gì cũng được</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invoke_result_t</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span><span class="w">                         </span><span class="c1">// (2) kiểu f() trả về</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">goi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">));</span><span class="w">  </span><span class="c1">// (3)</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">goi</span><span class="o">-&gt;</span><span class="n">get_future</span><span class="p">();</span><span class="w">                     </span><span class="c1">// (4) lấy phiếu TRƯỚC khi nộp</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">            </span><span class="n">hang_</span><span class="p">.</span><span class="n">push</span><span class="p">([</span><span class="n">goi</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">goi</span><span class="p">)();</span><span class="w"> </span><span class="p">});</span><span class="w">                       </span><span class="c1">// (5) hộp copy được, bên trong chỉ một gói</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="n">cv_</span><span class="p">.</span><span class="n">notify_one</span><span class="p">();</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">kq</span><span class="p">;</span><span class="w">                                                 </span><span class="c1">// (6)</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="o">~</span><span class="n">NhomLuong</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">            </span><span class="n">dung_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">        </span><span class="n">cv_</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">worker_</span><span class="p">)</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="k">private</span><span class="o">:</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">chay</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="n">viec</span><span class="p">;</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">            </span><span class="p">{</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lk</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="w">                </span><span class="n">cv_</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="k">this</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">hang_</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">dung_</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hang_</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="w">                </span><span class="n">viec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">hang_</span><span class="p">.</span><span class="n">front</span><span class="p">());</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="w">                </span><span class="n">hang_</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="w">            </span><span class="n">viec</span><span class="p">();</span><span class="w">                                                </span><span class="c1">// (7) chạy ngoài khóa</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="w"> </span><span class="n">khoa_</span><span class="p">;</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span><span class="w"> </span><span class="n">cv_</span><span class="p">;</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">hang_</span><span class="p">;</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">dung_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&gt;</span><span class="w"> </span><span class="n">worker_</span><span class="p">;</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a><span class="p">};</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a><span class="w">    </span><span class="n">NhomLuong</span><span class="w"> </span><span class="n">nhom</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">cacPhieu</span><span class="p">;</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a><span class="w">        </span><span class="n">cacPhieu</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span><span class="w">    </span><span class="c1">// (8) việc trả int</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tong</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">cacPhieu</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a><span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">get</span><span class="p">();</span><span class="w">                                           </span><span class="c1">// (9) chờ đúng việc này xong</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="p">;</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a><span class="w">        </span><span class="n">tong</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">v</span><span class="p">;</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">tong = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tong</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>
+<a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bang</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">                                   </span><span class="c1">// ô int thường, KHÔNG atomic, không khóa</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">xong</span><span class="p">;</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81" href="#__codelineno-0-81"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82" href="#__codelineno-0-82"></a><span class="w">        </span><span class="n">xong</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="o">&amp;</span><span class="n">bang</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span><span class="w">   </span><span class="c1">// (10) việc void, ghi ô riêng</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83" href="#__codelineno-0-83"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84" href="#__codelineno-0-84"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">xong</span><span class="p">)</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">get</span><span class="p">();</span><span class="w">                     </span><span class="c1">// (11) get() là cầu đồng bộ</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85" href="#__codelineno-0-85"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bang = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86" href="#__codelineno-0-86"></a>
+<a id="__codelineno-0-87" name="__codelineno-0-87" href="#__codelineno-0-87"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ten</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">"xin chao"</span><span class="p">);</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// (12)</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88" href="#__codelineno-0-88"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">ten</span><span class="p">.</span><span class="n">get</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89" href="#__codelineno-0-89"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90" href="#__codelineno-0-90"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>submit</code> là template: <code>F</code> là kiểu lambda của người gọi; kiểu trả về là <code>future</code> của kiểu mà <code>F</code> trả</td>
+</tr>
+<tr>
+<td>(2)-(3)</td>
+<td><code>R</code> là kiểu kết quả; <code>make_shared</code> dựng một <code>packaged_task&lt;R()&gt;</code> từ việc <code>f</code> (<code>std::move</code> vì <code>f</code> có thể cầm thứ chỉ-chuyển), cất trong <code>shared_ptr</code></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>get_future()</code> lấy phiếu <strong>trước</strong> khi nộp: sau khi nộp, worker có thể đang gọi gói, và hai luồng không được đụng một đối tượng cùng lúc</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>Dưới khóa, đẩy một lambda <code>[goi]</code> vào hàng; sao chép lambda chỉ sao chép <code>shared_ptr</code>, gói thật chỉ có một</td>
+</tr>
+<tr>
+<td>(6)</td>
+<td>Trả phiếu cho người gọi, ngoài khóa; <code>notify_one</code> đã gọi sau khi nhả khóa</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td>Worker lấy hộp việc ra, nhả khóa rồi gọi; <code>packaged_task</code> chạy hàm của người dùng và cất kết quả vào trạng thái chung của <code>future</code></td>
+</tr>
+<tr>
+<td>(8)-(9)</td>
+<td>Tám việc trả <code>int</code>; vòng <code>get()</code> chờ <strong>đúng việc của phiếu đó</strong>, theo thứ tự phiếu nên đầu ra tất định dù việc xong thứ tự nào</td>
+</tr>
+<tr>
+<td>(10)-(12)</td>
+<td>Bốn việc <code>void</code> mỗi việc ghi một ô <code>int</code> thường của <code>bang</code>; <code>get()</code> trên <code>future&lt;void&gt;</code> không trả gì nhưng <strong>là cầu đồng bộ</strong>: sau nó, <code>main</code> đọc <code>bang</code> an toàn. (12) cho <code>R</code> là <code>std::string</code>: cùng một <code>submit</code> làm cho mọi kiểu</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (g++ -std=c++17 -Wall -Wextra -pthread; <code>-O0</code> và <code>-O2</code> cho cùng đầu ra; 30 lần chạy dưới <code>setarch x86_64 -R</code> với <code>-fsanitize=thread</code> đều giống nhau và TSan không báo gì):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>1 4 9 16 25 36 49 64 
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>tong = 204
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>bang = 100 200 300 400
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>xin chao
+</code></pre></div>
+<p><strong>Thử thay đổi 1: nộp lambda có đối số, <code>nhom.submit([](int x) { return x; });</code>.</strong> Mình đã chạy: lỗi biên dịch <code>no type named 'type' in 'struct std::invoke_result&lt;main()::&lt;lambda(int)&gt; &gt;'</code>, vì <code>invoke_result_t&lt;F&gt;</code> hỏi "gọi <code>F</code> không đối số trả gì" mà <code>F</code> đòi một <code>int</code>. Muốn truyền đối số, người gọi bọc lại: <code>submit([x] { return x; })</code>. Bản thư viện nhận thêm <code>Args&amp;&amp;... args</code> rồi chuyển tiếp; mình bỏ để bài không vướng cú pháp ngoài phạm vi.</p>
+<p><strong>Thử thay đổi 2: nộp lambda chỉ-chuyển, <code>[p = std::move(p)] { return *p + 1; }</code> với <code>p</code> là <code>unique_ptr&lt;int&gt;</code>.</strong> (Đây là init-capture của <a href="../../nhom-7-chon-dung-cong-cu/52-smart-pointer-da-luong/">Bài 52</a>: tạo biến <code>p</code> mới trong lambda từ biểu thức bên phải.) Mình đã chạy: ra <code>42</code>, vì <code>packaged_task</code> nhận được thứ chỉ-chuyển; chỉ cái hộp <code>std::function</code> mới đòi sao chép, và ta chỉ cho nó giữ <code>shared_ptr</code>.</p>
+<h3 id="ban-sai-cua-a-ba-loi-ien-hinh">Bản SAI của (a): ba lỗi điển hình<a class="headerlink" href="#ban-sai-cua-a-ba-loi-ien-hinh" title="Permanent link">&para;</a></h3>
+<p><strong>Sai 1: cất thẳng <code>packaged_task</code> vào hộp, không qua <code>shared_ptr</code>.</strong> Thay (3)-(5) bằng đoạn dưới (<code>goi</code> là <code>packaged_task</code> thường; <code>mutable</code> cho phép gọi nó trong lambda; <code>[g = std::move(goi)]</code> chuyển gói vào lambda):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="n">goi</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">goi</span><span class="p">.</span><span class="n">get_future</span><span class="p">();</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">hang_</span><span class="p">.</span><span class="n">push</span><span class="p">([</span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">goi</span><span class="p">)]()</span><span class="w"> </span><span class="k">mutable</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">g</span><span class="p">();</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// hang_ là queue&lt;std::function&lt;void()&gt;&gt;</span>
+</code></pre></div>
+<p>Mình chạy: không biên dịch được, <code>error: static assertion failed: std::function target must be copy-constructible</code>. Gói chỉ-chuyển làm lambda chỉ-chuyển, mà <code>std::function</code> (C++17) đòi sao chép được. C++23 có <code>std::move_only_function</code> làm đúng việc này; mình chỉ nhắc tên, không chạy vì g++ 11 chưa có.</p>
+<p><strong>Sai 2: việc chờ việc trong cùng pool.</strong> Pool 2 worker, nộp hai việc, mỗi việc nộp thêm một việc con vào <strong>cùng</strong> pool rồi <code>get()</code> ngay:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">NhomLuong</span><span class="w"> </span><span class="nf">nhom</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="n">cacPhieu</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="o">&amp;</span><span class="n">nhom</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trong</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// việc con vào cùng pool</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">trong</span><span class="p">.</span><span class="n">get</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">                                          </span><span class="c1">// worker này ngủ chờ việc con</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}));</span>
+</code></pre></div>
+<p>Mình chạy ba lần với <code>timeout 3</code>: cả ba mã <strong>124</strong>, không in gì. Hai worker đều đang ngủ trong <code>get()</code> chờ hai việc con, mà hai việc con nằm trong hàng và chỉ worker mới chạy được chúng: không ai rảnh. Đổi <code>NhomLuong nhom(3)</code> thì ra <code>11</code> rồi <code>21</code> mã 0, <strong>đúng vì may</strong> (có worker thứ ba rảnh). Với ba việc ngoài thì ba worker cũng kẹt: đúng/sai tùy số worker so với độ sâu việc chờ việc.</p>
+<p><strong>Sai 3: đọc kết quả mà không qua <code>get()</code>.</strong> Thay dòng (11) bằng <code>std::this_thread::sleep_for(std::chrono::milliseconds(200));</code> (thêm <code>#include &lt;chrono&gt;</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="n">xong</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="o">&amp;</span><span class="n">bang</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">200</span><span class="p">));</span><span class="w">   </span><span class="c1">// "đủ lâu rồi", không phải đồng bộ</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bang = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bang</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div>
+<p>Không bật TSan, chương trình vẫn in <code>bang = 100 200 300 400</code>. Dưới TSan (30 lần): 27 lần báo <code>WARNING: ThreadSanitizer: data race</code> với <code>Read of size 4 ... by main thread</code> đối chiếu <code>Previous write of size 4 ... by thread T3</code> và dòng <code>As if synchronized via sleep</code> (TSan nói thẳng: bạn đang coi <code>sleep</code> như đồng bộ). Số báo cáo mỗi lần từ 1 đến 4; 3 lần <strong>không báo gì</strong> dù lỗi vẫn còn. "TSan sạch" chỉ nghĩa là lần chạy đó không thấy, không chứng minh đúng.</p>
+<h3 id="chi-phi-va-o-phuc-tap-cua-a">Chi phí và độ phức tạp của (a)<a class="headerlink" href="#chi-phi-va-o-phuc-tap-cua-a" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mặt</th>
+<th>Kết quả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Độ phức tạp</td>
+<td><code>submit</code> O(1) trung bình (đẩy vào <code>queue</code>); lấy việc O(1); bộ nhớ O(số việc đang chờ)</td>
+</tr>
+<tr>
+<td>Khóa</td>
+<td>mỗi việc 2 lần khóa mutex (đẩy, lấy) và một <code>notify_one</code>; một hàng đợi chung nên khóa này là điểm nghẽn khi việc cực ngắn và nhiều worker</td>
+</tr>
+<tr>
+<td>Cấp phát</td>
+<td>mình thay <code>operator new</code> bằng bản đếm, nộp 1000 việc vào pool <strong>không worker</strong>: <code>submit</code> có future ra <strong>4,07</strong> lần cấp phát mỗi việc, còn <code>submit</code> kiểu <code>void</code> của Bài 30 ra 0,06 (chỉ là khối <code>deque</code> thỉnh thoảng xin thêm). Số 4 là của libstdc++ g++ 11, chuẩn không nói</td>
+</tr>
+<tr>
+<td>Thời gian <code>submit</code></td>
+<td>cũng pool không worker, 200000 việc: kiểu <code>void</code> 21 đến 49 ns mỗi việc ở <code>-O2</code> (149 đến 244 ns không tối ưu), có future 152 đến 443 ns (1467 đến 1759 ns): đắt gấp <strong>5 đến 10 lần</strong>. Máy lúc đo bận nên đổi nhiều</td>
+</tr>
+<tr>
+<td>Có đáng không</td>
+<td>cỡ 0,2 đến 1,7 micro-giây là nhỏ so với việc đáng song song (từ hàng chục micro-giây, Bài 30); việc nhỏ hơn thì gộp lô</td>
+</tr>
+</tbody>
+</table>
+<p>Chỉ cần chạy mà không cần kết quả thì <code>submit</code> kiểu <code>void</code> rẻ hơn rõ.</p>
+<h3 id="loi-giai-b-dung-em">Lời giải (b): dừng êm<a class="headerlink" href="#loi-giai-b-dung-em" title="Permanent link">&para;</a></h3>
+<p>Lớp giữ nguyên ba mảnh. Chỉ khác ba chỗ so với (a): kiểm cờ trong <code>submit</code> (1), <code>shutdown()</code> tách riêng (2)-(3), hàm hủy gọi nó (4).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;atomic&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;condition_variable&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;functional&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;future&gt;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;mutex&gt;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;queue&gt;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdexcept&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;thread&gt;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;type_traits&gt;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="k">class</span><span class="w"> </span><span class="nc">NhomLuong</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="n">NhomLuong</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">            </span><span class="n">worker_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">([</span><span class="k">this</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">chay</span><span class="p">();</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">    </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">F</span><span class="o">&gt;</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">invoke_result_t</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">submit</span><span class="p">(</span><span class="n">F</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">        </span><span class="k">using</span><span class="w"> </span><span class="n">R</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">invoke_result_t</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">goi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">packaged_task</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">goi</span><span class="o">-&gt;</span><span class="n">get_future</span><span class="p">();</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dung_</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">"pool da dong"</span><span class="p">);</span><span class="w">   </span><span class="c1">// (1) kiểm cờ CÙNG khóa với push</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="w">            </span><span class="n">hang_</span><span class="p">.</span><span class="n">push</span><span class="p">([</span><span class="n">goi</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">goi</span><span class="p">)();</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">        </span><span class="n">cv_</span><span class="p">.</span><span class="n">notify_one</span><span class="p">();</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">kq</span><span class="p">;</span>
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">shutdown</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">                                              </span><span class="c1">// (2) dừng êm, gọi bao nhiêu lần cũng được</span>
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a><span class="w">            </span><span class="n">dung_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a><span class="w">        </span><span class="n">cv_</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">worker_</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">joinable</span><span class="p">())</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">join</span><span class="p">();</span><span class="w">                            </span><span class="c1">// (3) join lần hai: joinable() == false, bỏ qua</span>
+<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a>
+<a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a><span class="w">    </span><span class="o">~</span><span class="n">NhomLuong</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">shutdown</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w">                                   </span><span class="c1">// (4) RAII: hủy pool cũng dừng êm</span>
+<a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a>
+<a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a><span class="k">private</span><span class="o">:</span>
+<a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">chay</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a><span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a><span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="n">viec</span><span class="p">;</span>
+<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a><span class="w">            </span><span class="p">{</span>
+<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a><span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lk</span><span class="p">(</span><span class="n">khoa_</span><span class="p">);</span>
+<a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a><span class="w">                </span><span class="n">cv_</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lk</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="k">this</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">hang_</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">dung_</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hang_</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w">                         </span><span class="c1">// (5) chỉ thoát khi đã dừng VÀ hết việc</span>
+<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a><span class="w">                </span><span class="n">viec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">hang_</span><span class="p">.</span><span class="n">front</span><span class="p">());</span>
+<a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a><span class="w">                </span><span class="n">hang_</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span>
+<a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-5-60" name="__codelineno-5-60" href="#__codelineno-5-60"></a><span class="w">            </span><span class="n">viec</span><span class="p">();</span><span class="w">                                                </span><span class="c1">// (6) packaged_task tự bắt ngoại lệ</span>
+<a id="__codelineno-5-61" name="__codelineno-5-61" href="#__codelineno-5-61"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-5-62" name="__codelineno-5-62" href="#__codelineno-5-62"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-63" name="__codelineno-5-63" href="#__codelineno-5-63"></a>
+<a id="__codelineno-5-64" name="__codelineno-5-64" href="#__codelineno-5-64"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="w"> </span><span class="n">khoa_</span><span class="p">;</span>
+<a id="__codelineno-5-65" name="__codelineno-5-65" href="#__codelineno-5-65"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span><span class="w"> </span><span class="n">cv_</span><span class="p">;</span>
+<a id="__codelineno-5-66" name="__codelineno-5-66" href="#__codelineno-5-66"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">hang_</span><span class="p">;</span>
+<a id="__codelineno-5-67" name="__codelineno-5-67" href="#__codelineno-5-67"></a><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">dung_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<a id="__codelineno-5-68" name="__codelineno-5-68" href="#__codelineno-5-68"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="o">&gt;</span><span class="w"> </span><span class="n">worker_</span><span class="p">;</span>
+<a id="__codelineno-5-69" name="__codelineno-5-69" href="#__codelineno-5-69"></a><span class="p">};</span>
+<a id="__codelineno-5-70" name="__codelineno-5-70" href="#__codelineno-5-70"></a>
+<a id="__codelineno-5-71" name="__codelineno-5-71" href="#__codelineno-5-71"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-72" name="__codelineno-5-72" href="#__codelineno-5-72"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">daChay</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<a id="__codelineno-5-73" name="__codelineno-5-73" href="#__codelineno-5-73"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">cacPhieu</span><span class="p">;</span>
+<a id="__codelineno-5-74" name="__codelineno-5-74" href="#__codelineno-5-74"></a><span class="w">    </span><span class="n">NhomLuong</span><span class="w"> </span><span class="n">nhom</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<a id="__codelineno-5-75" name="__codelineno-5-75" href="#__codelineno-5-75"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-76" name="__codelineno-5-76" href="#__codelineno-5-76"></a><span class="w">        </span><span class="n">cacPhieu</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([</span><span class="o">&amp;</span><span class="n">daChay</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">daChay</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span>
+<a id="__codelineno-5-77" name="__codelineno-5-77" href="#__codelineno-5-77"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-78" name="__codelineno-5-78" href="#__codelineno-5-78"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([]()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="s">"loi tinh toan"</span><span class="p">);</span><span class="w"> </span><span class="p">});</span><span class="w">  </span><span class="c1">// (7)</span>
+<a id="__codelineno-5-79" name="__codelineno-5-79" href="#__codelineno-5-79"></a>
+<a id="__codelineno-5-80" name="__codelineno-5-80" href="#__codelineno-5-80"></a><span class="w">    </span><span class="n">nhom</span><span class="p">.</span><span class="n">shutdown</span><span class="p">();</span><span class="w">                                               </span><span class="c1">// (8) chờ hết 21 việc</span>
+<a id="__codelineno-5-81" name="__codelineno-5-81" href="#__codelineno-5-81"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"da chay: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">daChay</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" viec</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-82" name="__codelineno-5-82" href="#__codelineno-5-82"></a>
+<a id="__codelineno-5-83" name="__codelineno-5-83" href="#__codelineno-5-83"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tong</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-84" name="__codelineno-5-84" href="#__codelineno-5-84"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">cacPhieu</span><span class="p">)</span><span class="w"> </span><span class="n">tong</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">get</span><span class="p">();</span><span class="w">          </span><span class="c1">// (9) phiếu vẫn lấy được sau khi pool đóng</span>
+<a id="__codelineno-5-85" name="__codelineno-5-85" href="#__codelineno-5-85"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"tong = "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tong</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-86" name="__codelineno-5-86" href="#__codelineno-5-86"></a>
+<a id="__codelineno-5-87" name="__codelineno-5-87" href="#__codelineno-5-87"></a><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-88" name="__codelineno-5-88" href="#__codelineno-5-88"></a><span class="w">        </span><span class="n">loi</span><span class="p">.</span><span class="n">get</span><span class="p">();</span><span class="w">                                                 </span><span class="c1">// (10) ngoại lệ đi qua future</span>
+<a id="__codelineno-5-89" name="__codelineno-5-89" href="#__codelineno-5-89"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="o">&amp;</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-90" name="__codelineno-5-90" href="#__codelineno-5-90"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"viec loi: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">what</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-91" name="__codelineno-5-91" href="#__codelineno-5-91"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-92" name="__codelineno-5-92" href="#__codelineno-5-92"></a>
+<a id="__codelineno-5-93" name="__codelineno-5-93" href="#__codelineno-5-93"></a><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-94" name="__codelineno-5-94" href="#__codelineno-5-94"></a><span class="w">        </span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">});</span><span class="w">                             </span><span class="c1">// (11) nộp sau khi đóng</span>
+<a id="__codelineno-5-95" name="__codelineno-5-95" href="#__codelineno-5-95"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="o">&amp;</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-96" name="__codelineno-5-96" href="#__codelineno-5-96"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"nop sau khi dong: bi tu choi ("</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">what</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">")</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-97" name="__codelineno-5-97" href="#__codelineno-5-97"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-98" name="__codelineno-5-98" href="#__codelineno-5-98"></a>
+<a id="__codelineno-5-99" name="__codelineno-5-99" href="#__codelineno-5-99"></a><span class="w">    </span><span class="n">nhom</span><span class="p">.</span><span class="n">shutdown</span><span class="p">();</span><span class="w">                                               </span><span class="c1">// (12) gọi lần hai: không sao</span>
+<a id="__codelineno-5-100" name="__codelineno-5-100" href="#__codelineno-5-100"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"shutdown lan hai: khong sao</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-5-101" name="__codelineno-5-101" href="#__codelineno-5-101"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="__codelineno-5-102" name="__codelineno-5-102" href="#__codelineno-5-102"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Chạy từng dòng</strong></p>
+<table>
+<thead>
+<tr>
+<th>Dòng</th>
+<th>Chuyện gì xảy ra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>submit</code> kiểm <code>dung_</code> <strong>dưới cùng khóa</strong> với <code>push</code>: hoặc việc vào hàng trước khi cờ bật (sẽ được làm), hoặc bị từ chối; không có khe ở giữa</td>
+</tr>
+<tr>
+<td>(2)-(3)</td>
+<td><code>shutdown()</code>: đặt cờ dưới khóa, đánh thức mọi worker, <code>join</code>; lần gọi hai thì <code>joinable()</code> là <code>false</code> nên bỏ qua</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Hàm hủy gọi <code>shutdown()</code>: hết phạm vi là dừng êm, kể cả khi có ngoại lệ</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>Worker chỉ thoát khi hàng <strong>rỗng</strong> và cờ đã bật: việc còn lại được làm hết rồi mới thoát</td>
+</tr>
+<tr>
+<td>(6)</td>
+<td>Việc nộp qua <code>submit</code> là <code>packaged_task</code>: ngoại lệ của hàm người dùng bị nó bắt và cất vào <code>future</code>, nên không thoát ra khỏi hàm của worker</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td>Lambda không có <code>return</code> sẽ bị suy ra là <code>void</code>, nên viết <code>-&gt; int</code> để khẳng định nó trả <code>int</code> (và nhận <code>future&lt;int&gt;</code>); dòng này chỉ ném</td>
+</tr>
+<tr>
+<td>(8)-(10)</td>
+<td><code>shutdown()</code> trả khi 21 việc đã chạy xong; các phiếu cũ <strong>vẫn lấy được</strong> sau khi pool đóng vì kết quả nằm trong trạng thái chung của <code>future</code>, không nằm trong pool; <code>get()</code> của việc lỗi ném lại đúng ngoại lệ</td>
+</tr>
+<tr>
+<td>(11)-(12)</td>
+<td>Nộp sau khi đóng bị từ chối bằng ngoại lệ; <code>shutdown()</code> lần hai trả ngay</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Kết quả khi chạy</strong> (30 lần dưới TSan, đầu ra giống nhau, TSan sạch; ba lần thường cũng giống):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>da chay: 20 viec
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>tong = 210
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>viec loi: loi tinh toan
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>nop sau khi dong: bi tu choi (pool da dong)
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>shutdown lan hai: khong sao
+</code></pre></div>
+<p><strong>Thử thay đổi 1: một việc gọi <code>shutdown()</code> của chính pool.</strong> Pool 1 worker, việc <code>[&amp;n2] { n2.shutdown(); }</code> bắt ngoại lệ rồi trả <code>e.what()</code>. Mình đã chạy: <code>Resource deadlock avoided</code> (một <code>std::system_error</code>): <code>shutdown()</code> bảo worker <code>join</code> mọi luồng, kể cả chính nó. Chuẩn quy định đây là lỗi <code>resource_deadlock_would_occur</code>, nên pool thật cấm hoặc phát hiện <code>shutdown</code> từ worker.</p>
+<p><strong>Thử thay đổi 2: việc đang chạy nộp thêm việc khi pool đang dừng.</strong> Pool 2 worker, việc A báo "đã bắt đầu", ngủ 100 ms rồi gọi <code>nhom.submit(...)</code>; <code>main</code> chờ tín hiệu rồi <code>shutdown()</code>. Mình đã chạy: A nhận ngoại lệ <code>pool da dong</code>, tức là việc đang dở cũng <strong>không</strong> nộp thêm được. Ai muốn cho phép việc con trong lúc dừng thì phải đổi policy (đếm "việc đang chạy" và chỉ đóng khi bằng 0): bài này không làm.</p>
+<h3 id="ban-sai-cua-b-hai-loi-ien-hinh">Bản SAI của (b): hai lỗi điển hình<a class="headerlink" href="#ban-sai-cua-b-hai-loi-ien-hinh" title="Permanent link">&para;</a></h3>
+<p><strong>Sai 4: dừng là bỏ, kệ việc còn trong hàng.</strong> Đổi dòng (5) thành:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dung_</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span><span class="w">      </span><span class="c1">// SAI: cờ dừng bật là thoát, dù hàng còn việc</span>
+</code></pre></div>
+<p>Kịch bản: pool 1 worker, việc 0 báo "đã bắt đầu" rồi ngủ 100 ms, nộp thêm bốn việc, <code>main</code> chờ tín hiệu rồi hủy pool, rồi <code>get()</code> cả năm phiếu. Mình chạy 100 lần, <strong>cả 100 lần</strong> ra đúng một kết quả:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>viec 0: 0
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>viec 1: future_error: std::future_error: Broken promise
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>viec 2: future_error: std::future_error: Broken promise
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>viec 3: future_error: std::future_error: Broken promise
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>viec 4: future_error: std::future_error: Broken promise
+</code></pre></div>
+<p>Việc 0 đang chạy nên xong; bốn việc còn lại bị bỏ trong hàng, hộp bị hủy kéo theo <code>packaged_task</code> bị hủy chưa chạy, nên mỗi <code>future</code> nhận <code>broken_promise</code> (đúng như bảng chuẩn). Cần "bỏ hết" cố ý thì làm rõ (xóa hàng dưới khóa) và nói với người dùng; vô tình thì là bug. Mình cần việc 0 báo "đã bắt đầu" để kịch bản tất định; thiếu tín hiệu đó, worker còn có thể chưa kịp lấy việc 0.</p>
+<p><strong>Sai 5: không chặn việc nộp sau khi đóng.</strong> Bỏ dòng <code>if (dung_) throw ...</code> ở (1), rồi nộp sau <code>shutdown()</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// bo-qua-kiem-tra</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">NhomLuong</span><span class="w"> </span><span class="nf">nhom</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">nhom</span><span class="p">.</span><span class="n">shutdown</span><span class="p">();</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">std</span><span class="o">::</span><span class="n">future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nhom</span><span class="p">.</span><span class="n">submit</span><span class="p">([]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">42</span><span class="p">;</span><span class="w"> </span><span class="p">});</span><span class="w">   </span><span class="c1">// không bị từ chối, không ai chạy</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">300</span><span class="p">))</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">future_status</span><span class="o">::</span><span class="n">timeout</span><span class="p">)</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"sau 300 ms viec van chua chay</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">get</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span><span class="w">                           </span><span class="c1">// chờ mãi</span>
+</code></pre></div>
+<p>Mình chạy với <code>timeout 3</code>: in <code>sau 300 ms viec van chua chay</code> rồi <code>get() ...</code>, mã thoát <strong>124</strong>. Việc nằm trong hàng, hết worker để chạy, và gói vẫn sống trong hàng của pool nên chưa bị coi là bỏ rơi: không có <code>broken_promise</code> để cứu, <code>get()</code> chờ mãi. Đây là lý do người phỏng vấn hay hỏi "nộp muộn thì sao".</p>
+<h3 id="chi-phi-va-o-phuc-tap-cua-b">Chi phí và độ phức tạp của (b)<a class="headerlink" href="#chi-phi-va-o-phuc-tap-cua-b" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mặt</th>
+<th>Kết quả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shutdown()</code></td>
+<td>O(số worker + thời gian làm hết việc còn lại / số worker); không mất việc nào</td>
+</tr>
+<tr>
+<td>Policy "làm hết"</td>
+<td>an toàn cho người giữ phiếu nhưng <code>shutdown()</code> có thể mất lâu nếu hàng dài; muốn dừng nhanh thì policy "bỏ" (xóa hàng, người giữ phiếu nhận <code>broken_promise</code>)</td>
+</tr>
+<tr>
+<td>Hàng đợi không giới hạn</td>
+<td>người nộp nhanh hơn worker thì hàng phình mãi: bộ nhớ lớn dần. Giải pháp là hàng chặn có giới hạn (<a href="../66-bounded-queue/">Bài 66</a>): <code>submit</code> chờ khi đầy</td>
+</tr>
+<tr>
+<td>Gọi <code>shutdown()</code> từ hai luồng cùng lúc</td>
+<td>chưa an toàn: hai luồng cùng <code>join</code> một <code>std::thread</code> là hành vi không xác định; pool thật thêm một khóa, hoặc quy ước một chủ sở hữu</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Bạn biết Go?</p>
+<p>Go không có <code>future</code> chuẩn. Quen thuộc nhất: <code>Submit</code> trả một <strong>channel có đệm 1</strong> (<code>ch := make(chan KetQua, 1)</code>) mà worker gửi kết quả (cả <code>error</code>) vào, <code>&lt;-ch</code> thay <code>get()</code> (<a href="../../nhom-3-da-luong/29-async-future/">Bài 29</a>). Dừng êm là <code>close(jobs)</code> rồi <code>wg.Wait()</code>: vòng <code>for job := range jobs</code> làm hết việc còn lại rồi thoát, cùng policy "làm hết" của bài này. Khác chỗ quan trọng: gửi vào channel <strong>đã đóng</strong> thì <code>panic</code> ("send on closed channel"), còn C++ ta tự chọn cách báo (bài này ném ngoại lệ). Mình đã chạy một pool nhỏ theo đúng mô tả này bằng <code>go run -race</code> (Go 1.27.2): 3 worker, <code>close(jobs)</code> rồi <code>wg.Wait()</code> làm hết cả 8 việc (một việc trả lỗi qua channel đệm 1), <code>-race</code> sạch; gửi thêm vào <code>jobs</code> đã đóng thì <code>panic: send on closed channel</code> (mình bắt bằng <code>recover</code>).</p>
+</div>
+<h2 id="cau-hoi-phong-van-hay-gap">🎤 Câu hỏi phỏng vấn hay gặp<a class="headerlink" href="#cau-hoi-phong-van-hay-gap" title="Permanent link">&para;</a></h2>
+<details class="question">
+<summary>Viết cho tôi một thread pool có <code>submit</code> trả kết quả.</summary>
+<p>Mình hỏi lại: việc có tham số và ngoại lệ không. Rồi vẽ ba mảnh: hàng đợi <code>std::function&lt;void()&gt;</code> dưới mutex, <code>condition_variable</code>, N worker chạy việc <strong>ngoài khóa</strong>. <code>submit</code> là template: <code>R = invoke_result_t&lt;F&gt;</code>, tạo <code>packaged_task&lt;R()&gt;</code> bọc trong <code>shared_ptr</code> (vì <code>std::function</code> đòi sao chép được mà <code>packaged_task</code> thì không), <code>get_future()</code> trước khi đẩy, đẩy <code>[goi] { (*goi)(); }</code> dưới khóa, <code>notify_one</code>, trả phiếu.
+<strong>Nối tiếp 1:</strong> "Vì sao phải bọc <code>shared_ptr</code>?" Vì <code>std::function</code> yêu cầu thứ nó chứa sao chép được; mình chạy bản không bọc ra <code>static assertion failed: ... must be copy-constructible</code>. C++23 có <code>std::move_only_function</code> để khỏi bọc.
+<strong>Nối tiếp 2:</strong> "Một việc trong pool nộp việc con rồi <code>get()</code> thì sao?" Có thể kẹt: mọi worker ngủ chờ việc con mà việc con không có worker nào chạy (mình chạy 2 worker, treo mã 124). Tránh bằng: việc không chờ việc cùng pool, hoặc worker rảnh tự "giúp" chạy việc con khi chờ, hoặc dùng hai pool.</p>
+</details>
+<details class="question">
+<summary>Dừng pool thế nào cho êm?</summary>
+<p>Bốn việc: từ chối việc mới (<code>submit</code> kiểm cờ dưới <strong>cùng khóa</strong> với <code>push</code>), làm hết việc đã nhận (worker thoát khi dừng <strong>và</strong> hàng rỗng), <code>join</code> mọi worker, và để hàm hủy gọi lại <code>shutdown()</code> (RAII). Ngoại lệ không cần xử lý riêng vì <code>packaged_task</code> cất nó vào <code>future</code>.
+<strong>Nối tiếp 1:</strong> "Còn việc trong hàng khi đóng thì làm hay bỏ?" Là policy phải nói rõ: "làm hết" an toàn cho người giữ phiếu; "bỏ" thì người giữ phiếu nhận <code>broken_promise</code> (mình chạy bản bỏ vô tình: 4 phiếu <code>Broken promise</code>). 
+<strong>Nối tiếp 2:</strong> "Nộp việc khi đã đóng?" Phải từ chối rõ (ném, hay trả lỗi); im lặng nhận thì <code>get()</code> chờ mãi (mình chạy: mã 124). <strong>Nối tiếp 3:</strong> "Worker tự gọi <code>shutdown()</code>?" <code>join</code> chính nó: <code>Resource deadlock avoided</code>.</p>
+</details>
+<details class="question">
+<summary>Bao nhiêu worker, và một hàng đợi chung có đủ không? Work stealing là gì?</summary>
+<p>Số worker theo Bài 30: việc nặng CPU xấp xỉ <code>hardware_concurrency()</code>, việc chờ I/O nhiều hơn; đo chứ không đoán. Một hàng đợi chung có <strong>một khóa</strong>: mỗi việc 2 lần khóa, nên khi việc cực ngắn và worker đông, khóa thành nút thắt. Cách giảm ở mức nguyên lý: mỗi worker một hàng đợi riêng (hầu như không tranh chấp), worker rảnh thì <strong>trộm</strong> việc từ đầu kia hàng của worker khác (<strong>work stealing</strong>). Chủ lấy một đầu, kẻ trộm lấy đầu kia nên ít đụng nhau.
+<strong>Nối tiếp:</strong> "Bạn có cài work stealing không?" Mình chỉ nói được nguyên lý; mình <strong>không cài và không đo</strong> ở bài này. Hàng đợi chung đủ cho đa số việc cỡ vừa; chỉ khi đo thấy khóa là nghẽn thì mới đổi, vì work stealing phức tạp hơn nhiều (và khó đúng, như mọi thứ gần lock-free).</p>
+</details>
+<h2 id="loi-thuong-gap">⚠️ Lỗi thường gặp<a class="headerlink" href="#loi-thuong-gap" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 1: Cất <code>packaged_task</code> thẳng vào <code>std::function</code></p>
+<p>Gói chỉ-chuyển làm lambda chỉ-chuyển, <code>std::function</code> (C++17) từ chối: <code>static assertion failed</code> lúc biên dịch. Bọc <code>shared_ptr</code>, hoặc dùng <code>move_only_function</code> (C++23).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 2: Hứa quá lời khi nói trên bảng</p>
+<p>Đừng nói "kết quả ra theo thứ tự nộp": chỉ <strong>phiếu</strong> theo thứ tự, thứ tự xong thì không (mình chạy: 5 trên 6 lần <code>0 1 3 2 ...</code>). Đừng nói "TSan sạch tức là đúng": mình có 3 trên 30 lần lỗi thật mà TSan im.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Lỗi 3: Việc chờ việc, và quên chuyện nộp muộn</p>
+<p>Pool nhỏ + việc <code>get()</code> việc con của cùng pool là treo (mã 124), đúng hay sai tùy số worker. Và "dừng" mà không nói việc còn lại ra sao, nộp muộn ra sao là thiếu đúng hai câu người phỏng vấn sẽ hỏi.</p>
+</div>
+<h2 id="trac-nghiem">✍️ Trắc nghiệm<a class="headerlink" href="#trac-nghiem" title="Permanent link">&para;</a></h2>
+<div class="quiz" data-bai="67">
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 1.</strong> Đọc đoạn sau, trong <code>submit</code> của pool có hàng đợi <code>std::queue&lt;std::function&lt;void()&gt;&gt; hang_</code>. Điều gì xảy ra khi biên dịch?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>std::packaged_task&lt;R()&gt; goi(std::move(f));
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>std::future&lt;R&gt; kq = goi.get_future();
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>hang_.push([g = std::move(goi)]() mutable { g(); });
+</code></pre></div>
+<ul>
+<li>Biên dịch được, vì <code>std::move</code> đã chuyển gói vào lambda một cách an toàn</li>
+<li>Lỗi biên dịch, vì <code>std::function</code> đòi thứ nó chứa phải sao chép được</li>
+<li>Biên dịch được nhưng hai worker có thể cùng gọi một gói, nên chạy sai</li>
+<li>Lỗi biên dịch, vì <code>mutable</code> không dùng chung được với init-capture</li>
+</ul>
+<p class="giai-thich">Lambda giữ một <code>packaged_task</code> chỉ-chuyển nên chính nó chỉ-chuyển, mà <code>std::function</code> (C++17) yêu cầu thứ nó chứa sao chép được: g++ báo <code>static assertion failed: ... must be copy-constructible</code>. <code>std::move</code> đúng nhưng không giúp qua yêu cầu đó của <code>std::function</code>. Hai worker cùng gọi một gói không xảy ra vì đây là lỗi lúc biên dịch, không chạy tới. Còn <code>mutable</code> và init-capture dùng chung được, đoạn này chỉ sai ở chỗ khác.</p>
+</div>
+<div class="cau-hoi" data-dap-an="4">
+<p><strong>Câu 2.</strong> Worker của pool thoát ngay khi cờ dừng bật, kể cả khi hàng còn việc (<code>if (dung_) return;</code>). Pool có 1 worker, một việc đang chạy và bốn việc đang nằm trong hàng, rồi pool bị hủy. Người giữ phiếu của bốn việc đó gọi <code>get()</code>. Chuyện gì xảy ra?</p>
+<ul>
+<li>Treo mãi, vì phiếu chưa có kết quả và không ai đặt kết quả cho nó</li>
+<li>Nhận giá trị mặc định (<code>0</code> với <code>int</code>), vì việc bị bỏ nên trả giá trị rỗng</li>
+<li>Chương trình gọi <code>std::terminate</code>, vì phiếu bị hủy khi còn việc chưa chạy</li>
+<li>Nhận ngoại lệ <code>std::future_error</code> (<code>broken_promise</code>) ngay, không chờ</li>
+</ul>
+<p class="giai-thich">Khi pool bị hủy, hàng đợi bị hủy, các gói <code>packaged_task</code> chưa chạy bị hủy theo; chuẩn quy định một gói bị hủy khi chưa chạy thì <code>future</code> của nó nhận <code>future_error</code> với <code>broken_promise</code> (mình chạy: <code>Broken promise</code>). Không treo, vì trạng thái đã được đặt thành lỗi. Không có giá trị mặc định nào được bịa ra. Và <code>std::terminate</code> chỉ đến khi ngoại lệ thoát khỏi hàm của luồng, còn ở đây nó nằm gọn trong <code>future</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 3.</strong> Đọc đoạn sau. Pool có đúng 2 worker; hai việc ngoài được nộp, mỗi việc làm như dưới. Điều nào đúng?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>auto f = pool.submit(viecCon);   // nộp việc con vào CÙNG pool
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>return f.get();                  // rồi chờ ngay trên worker
+</code></pre></div>
+<ul>
+<li>Có thể treo mãi: cả hai worker ngủ chờ việc con mà không ai chạy được</li>
+<li>Chạy bình thường, vì việc con xếp hàng và <code>get()</code> tự chạy nó trên luồng gọi</li>
+<li>Ném <code>broken_promise</code>, vì việc con bị nộp khi pool đang bận</li>
+<li>Chạy bình thường nhưng chậm, vì việc con chỉ được chạy khi worker rảnh</li>
+</ul>
+<p class="giai-thich">Cả hai worker đang kẹt trong <code>get()</code>, còn hai việc con nằm trong hàng và chỉ worker mới lấy được: không ai rảnh, nên treo (mình chạy ba lần, cả ba mã 124). <code>get()</code> chỉ chờ, không tự chạy việc. <code>broken_promise</code> chỉ khi gói bị hủy chưa chạy, mà ở đây gói còn sống trong hàng. Và "chậm" sai vì chờ <strong>mãi mãi</strong> khác với chờ lâu: không worker nào trở nên rảnh.</p>
+</div>
+<div class="cau-hoi" data-dap-an="3">
+<p><strong>Câu 4.</strong> <code>submit</code> không kiểm cờ dừng. Sau <code>shutdown()</code>, ai đó nộp một việc và giữ phiếu, pool vẫn còn sống. Kết quả cho người giữ phiếu khi gọi <code>get()</code> là gì?</p>
+<ul>
+<li>Việc chạy ngay trên luồng gọi <code>submit</code>, vì không còn worker nào khác</li>
+<li>Ném <code>broken_promise</code> ngay, vì pool đã đóng nên việc bị coi là bỏ rơi</li>
+<li>Chờ mãi, vì gói nằm trong hàng mà không còn worker nào chạy nó</li>
+<li>Trả giá trị rỗng, vì pool đã đóng nên việc bị hủy bỏ</li>
+</ul>
+<p class="giai-thich">Gói vẫn được giữ trong hàng đợi của pool còn sống nên chưa bị hủy và chưa bị coi là bỏ rơi, không có <code>broken_promise</code> nào được đặt; không worker nào còn để chạy nó nên <code>get()</code> chờ mãi (mình chạy: mã 124). Việc không tự chạy trên luồng gọi, vì <code>submit</code> chỉ đẩy vào hàng. Thư viện cũng không bịa giá trị rỗng. Cách sửa là chặn ngay lúc nộp, trong cùng khóa với <code>push</code>.</p>
+</div>
+<div class="cau-hoi" data-dap-an="2">
+<p><strong>Câu 5.</strong> Việc <code>void</code> ghi <code>bang[k]</code> (một <code>int</code> thường) và <code>main</code> đọc <code>bang[k]</code> sau <code>sleep_for(200ms)</code>, không gọi <code>get()</code>. Nhận xét nào đúng?</p>
+<ul>
+<li>An toàn, vì 200 ms đủ lâu để mọi việc chắc chắn đã xong</li>
+<li>Là data race theo chuẩn, và đầu ra đúng chỉ là may</li>
+<li>An toàn, vì mỗi việc ghi một ô riêng nên không đụng nhau</li>
+<li>Là data race, và TSan luôn báo ở mọi lần chạy</li>
+</ul>
+<p class="giai-thich"><code>sleep_for</code> không tạo quan hệ đồng bộ giữa luồng ghi và luồng đọc, nên đây vẫn là data race dù chương trình in đúng; TSan còn ghi <code>As if synchronized via sleep</code>. Ô riêng chỉ giúp các việc không đụng nhau, còn <code>main</code> đọc ô mà việc kia ghi thì cần đồng bộ (<code>get()</code> làm việc đó). "TSan luôn báo" sai: mình chạy 30 lần, 3 lần im, vì công cụ chỉ báo điều nó thấy trong lần chạy đó. Còn "200 ms đủ lâu" là suy nghĩ về thời gian, chuẩn thì chỉ nói về quan hệ đồng bộ.</p>
+</div>
+<div class="cau-hoi" data-dap-an="1">
+<p><strong>Câu 6.</strong> Một việc đang chạy trong pool tự gọi <code>pool.shutdown()</code>, trong đó mọi worker bị <code>join</code>. Điều nào đúng?</p>
+<ul>
+<li>Ném <code>std::system_error</code>: <code>join</code> lên chính luồng đó là lỗi deadlock</li>
+<li>Chạy êm, vì <code>join</code> luồng đang chạy sẽ trả ngay khi việc đó kết thúc</li>
+<li>Treo mãi ở <code>join</code>, vì chuẩn bảo đảm luồng tự <code>join</code> chính mình là treo</li>
+<li>Gọi <code>std::terminate</code>, vì hủy <code>std::thread</code> còn joinable khi đang chạy</li>
+</ul>
+<p class="giai-thich"><code>join</code> lên chính luồng đang chạy là lỗi mà chuẩn gọi tên là <code>resource_deadlock_would_occur</code>, và libstdc++ báo bằng <code>std::system_error</code> với thông điệp <code>Resource deadlock avoided</code> (mình chạy). Không phải chạy êm, vì việc đang chờ chính nó kết thúc nên không bao giờ trả ngay. Chuẩn không hứa "treo mãi" mà hứa một lỗi. <code>std::terminate</code> ở đây không do <code>join</code> này: ngoại lệ do <code>join</code> ném ra nằm trong một việc nộp qua <code>submit</code>, nên <code>packaged_task</code> bắt nó và cất vào <code>future</code>.</p>
+</div>
+</div>
+<h2 id="tom-tat">🔑 Tóm tắt<a class="headerlink" href="#tom-tat" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Nâng cấp pool của <a href="../../nhom-3-da-luong/30-thread-pool-hieu-nang/">Bài 30</a>: <code>submit</code> là template, kiểu kết quả <code>R = std::invoke_result_t&lt;F&gt;</code>, gói <code>std::packaged_task&lt;R()&gt;</code> trong <code>std::shared_ptr</code> (vì <code>std::function</code> đòi sao chép được, mình chạy bản không bọc ra <code>static assertion failed</code>), <code>get_future()</code> trước khi đẩy, đẩy dưới khóa; <code>submit</code> kiểu future đắt cỡ 4 cấp phát và gấp 5 đến 10 lần <code>submit</code> <code>void</code> (mình đo, đổi theo máy).</li>
+<li>Kết quả và ngoại lệ đi qua <code>future</code>: <code>get()</code> là <strong>cầu đồng bộ</strong> nên đọc dữ liệu việc đã ghi sau <code>get()</code> là an toàn; thay bằng <code>sleep_for</code> thì là data race (TSan báo 27 trên 30 lần, 3 lần im: "sạch" không chứng minh đúng). Thứ tự xong của việc không được bảo đảm, chỉ thứ tự phiếu.</li>
+<li>Dừng êm = từ chối việc mới (kiểm cờ dưới <strong>cùng khóa</strong> với <code>push</code>), làm hết việc đã nhận (worker thoát khi dừng và hàng rỗng), <code>join</code>, gọi lại được, hàm hủy gọi <code>shutdown()</code>. Bỏ việc còn lại thì phiếu nhận <code>broken_promise</code>; không chặn nộp muộn thì <code>get()</code> treo (mã 124).</li>
+<li>Bẫy bảng trắng: việc chờ việc trong cùng pool treo (đúng hay sai tùy số worker), <code>shutdown()</code> từ worker là <code>Resource deadlock avoided</code>, hai luồng cùng <code>shutdown()</code> chưa an toàn, hàng đợi không giới hạn phình bộ nhớ (cần hàng chặn, <a href="../66-bounded-queue/">Bài 66</a>).</li>
+<li>Nói được ở mức lời: số worker theo loại việc (đo), work stealing giảm tranh chấp khóa của một hàng đợi chung nhưng phức tạp (mình không cài, không đo), <code>move_only_function</code> là C++23. Go dùng channel có đệm 1 làm phiếu và <code>close</code> rồi <code>wg.Wait()</code> để dừng êm; gửi vào channel đã đóng là <code>panic</code> (mình chạy một pool Go nhỏ: <code>-race</code> sạch).</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Trở lại mục lục
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Chân trang" >
+        
+          
+          <a href="../66-bounded-queue/" class="md-footer__link md-footer__link--prev" aria-label="Trước: Bài 66 — Thực chiến: hàng đợi chặn có giới hạn (producer-consumer)">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Trước
+              </span>
+              <div class="md-ellipsis">
+                Bài 66 — Thực chiến: hàng đợi chặn có giới hạn (producer-consumer)
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../68-singleton-call-once/" class="md-footer__link md-footer__link--next" aria-label="Sau: Bài 68 — Thực chiến: khởi tạo một lần an toàn luồng">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Sau
+              </span>
+              <div class="md-ellipsis">
+                Bài 68 — Thực chiến: khởi tạo một lần an toàn luồng
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "content.code.copy", "search.highlight"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "\u0110\u00e3 sao ch\u00e9p", "clipboard.copy": "Sao ch\u00e9p v\u00e0o b\u1ed9 nh\u1edb t\u1ea1m", "search.result.more.one": "1 t\u1eeb kh\u00e1c trong trang", "search.result.more.other": "# t\u1eeb kh\u00e1c trong trang", "search.result.none": "Kh\u00f4ng t\u00ecm th\u1ea5y t\u00e0i li\u1ec7u li\u00ean quan", "search.result.one": "1 t\u00e0i li\u1ec7u li\u00ean quan", "search.result.other": "# t\u00e0i li\u1ec7u li\u00ean quan", "search.result.placeholder": "Nh\u1eadp \u0111\u1ec3 b\u1eaft \u0111\u1ea7u t\u00ecm ki\u1ebfm", "search.result.term.missing": "Kh\u00f4ng", "select.version": "Ch\u1ecdn phi\u00ean b\u1ea3n"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.525ec568.min.js"></script>
+      
+        <script src="../../javascripts/quiz.js"></script>
+      
+    
+  </body>
+</html>
