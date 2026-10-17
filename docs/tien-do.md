@@ -50,3 +50,15 @@
 | [Bài 44 — Mạng: TCP/UDP, socket C++, REST và gRPC](nhom-5-he-thong-quy-trinh/44-mang-socket.md) | <span class="diem" data-bai="44"></span> |
 | [Bài 45 — Database, quy trình phần mềm và nguyên lý game dev: ba chủ đề bổ sung](nhom-5-he-thong-quy-trinh/45-database-sdlc-game.md) | <span class="diem" data-bai="45"></span> |
 | [Bài 46 — Tổng ôn: quy trình gỡ lỗi và kể chuyện dự án](nhom-5-he-thong-quy-trinh/46-tong-on-debug-phong-van.md) | <span class="diem" data-bai="46"></span> |
+| [Bài 47 — Tiến trình và luồng: khác nhau ở đâu, khi nào chọn cái nào](nhom-6-he-dieu-hanh-tien-trinh/47-tien-trinh-vs-luong.md) | <span class="diem" data-bai="47"></span> |
+| [Bài 48 — fork, exec, wait: sinh tiến trình con và dọn dẹp](nhom-6-he-dieu-hanh-tien-trinh/48-fork-exec-wait.md) | <span class="diem" data-bai="48"></span> |
+| [Bài 49 — Giao tiếp giữa các tiến trình (IPC): pipe, shared memory, message queue, socket, signal](nhom-6-he-dieu-hanh-tien-trinh/49-ipc.md) | <span class="diem" data-bai="49"></span> |
+| [Bài 50 — I/O chặn, epoll và event loop: một luồng một kết nối hay một vòng lặp cho tất cả](nhom-6-he-dieu-hanh-tien-trinh/50-io-epoll-event-loop.md) | <span class="diem" data-bai="50"></span> |
+| [Bài 51 — Chọn smart pointer: unique_ptr, shared_ptr, weak_ptr hay con trỏ thô](nhom-7-chon-dung-cong-cu/51-chon-smart-pointer.md) | <span class="diem" data-bai="51"></span> |
+| [Bài 52 — Smart pointer trong đa luồng: thứ gì an toàn, thứ gì không](nhom-7-chon-dung-cong-cu/52-smart-pointer-da-luong.md) | <span class="diem" data-bai="52"></span> |
+| [Bài 53 — Chọn container: vector, list, deque, map, unordered_map, set](nhom-7-chon-dung-cong-cu/53-chon-container.md) | <span class="diem" data-bai="53"></span> |
+| [Bài 54 — Container và đa luồng: khóa ở đâu, an toàn tới đâu](nhom-7-chon-dung-cong-cu/54-container-da-luong.md) | <span class="diem" data-bai="54"></span> |
+| [Bài 55 — Thiết kế hàm: truyền tham số và sở hữu rõ ràng](nhom-7-chon-dung-cong-cu/55-api-so-huu-tham-so.md) | <span class="diem" data-bai="55"></span> |
+| [Bài 56 — Xử lý lỗi: exception, mã lỗi, optional hay expected](nhom-7-chon-dung-cong-cu/56-xu-ly-loi.md) | <span class="diem" data-bai="56"></span> |
+| [Bài 57 — Chọn cơ chế đồng bộ: mutex, atomic, condition_variable, future, semaphore](nhom-7-chon-dung-cong-cu/57-chon-dong-bo.md) | <span class="diem" data-bai="57"></span> |
+| [Bài 58 — Bộ nhớ nâng cao: căn lề, padding, cache line, placement new, memory pool](nhom-7-chon-dung-cong-cu/58-bo-nho-nang-cao.md) | <span class="diem" data-bai="58"></span> |

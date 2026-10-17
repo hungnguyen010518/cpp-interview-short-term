@@ -28,5 +28,10 @@ Rồi đến **Nhóm 4 — OOP, template và Design Patterns** từ [Bài 31](nh
 
 Cuối cùng là **Nhóm 5 — Hệ thống, công cụ gỡ lỗi và quy trình** từ [Bài 38](nhom-5-he-thong-quy-trinh/38-bien-dich-lien-ket-build.md) đến [Bài 46](nhom-5-he-thong-quy-trinh/46-tong-on-debug-phong-van.md): biên dịch và liên kết, gdb, core dump, sanitizer, strace/perf, Git, mạng, database/quy trình/game, và bài tổng ôn về cách gỡ lỗi khi phỏng vấn.
 
+Khi đã quen kiến thức nền, học phần **chuyên sâu cho phỏng vấn tình huống**, nơi người phỏng vấn hỏi "gặp tình huống này thì chọn gì, vì sao":
+
+- **Nhóm 6 — Hệ điều hành và tiến trình** (Bài 47–50): [tiến trình và luồng](nhom-6-he-dieu-hanh-tien-trinh/47-tien-trinh-vs-luong.md), `fork`/`exec`/`wait`, giao tiếp giữa các tiến trình (IPC), I/O chặn và `epoll`.
+- **Nhóm 7 — Chọn đúng công cụ** (Bài 51–58): [chọn smart pointer](nhom-7-chon-dung-cong-cu/51-chon-smart-pointer.md), smart pointer và container trong đa luồng, chọn container, thiết kế hàm và sở hữu, xử lý lỗi, chọn cơ chế đồng bộ, bộ nhớ nâng cao.
+
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).
