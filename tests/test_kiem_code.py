@@ -89,5 +89,42 @@ class TestStdinVaThuMuc(unittest.TestCase):
                 self.assertEqual(k.main(["x", d]), 0)
 
 
+CO_RACE = """#include <thread>
+#include <iostream>
+int dem = 0;
+int main() {
+    std::thread a([] { for (int i = 0; i < 100000; ++i) ++dem; });
+    std::thread b([] { for (int i = 0; i < 100000; ++i) ++dem; });
+    a.join(); b.join();
+    std::cout << dem << "\\n";
+    return 0;
+}
+"""
+
+
+class TestTsan(unittest.TestCase):
+    def test_khong_co_tsan_thi_race_van_qua(self):
+        import os
+        os.environ.pop("KIEM_TSAN", None)
+        self.assertIsNone(k.kiem_khoi(CO_RACE))
+
+    def test_co_tsan_thi_bat_race(self):
+        import os
+        os.environ["KIEM_TSAN"] = "1"
+        try:
+            self.assertIn("mã", k.kiem_khoi(CO_RACE))
+        finally:
+            os.environ.pop("KIEM_TSAN", None)
+
+    def test_tsan_chi_ap_dung_cho_khoi_dung_luong(self):
+        import os
+        os.environ["KIEM_TSAN"] = "1"
+        try:
+            self.assertNotIn("-fsanitize=thread", k.lay_co_bien_dich(CHUONG_TRINH_TOT))
+            self.assertIn("-fsanitize=thread", k.lay_co_bien_dich(CO_RACE))
+        finally:
+            os.environ.pop("KIEM_TSAN", None)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -6,11 +6,16 @@ Mỗi khối là một chương trình đầy đủ: phải biên dịch đượ
 Khối có dòng đầu tiên `// bo-qua-kiem-tra` (minh họa hành vi không xác định)
 được bỏ qua.
 
+Đặt biến môi trường KIEM_TSAN=1 để các khối có dùng luồng (<thread>, <future>)
+được biên dịch thêm với -fsanitize=thread và phải chạy sạch cảnh báo.
+
 Dùng:  python3 scripts/kiem_code.py [thu_muc_docs]
 Thoát mã 1 nếu có khối lỗi.
 """
+import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -34,6 +39,16 @@ def lay_khoi(text: str) -> list:
     return ket_qua
 
 
+DUNG_LUONG = re.compile(r"#include\s*<(thread|future)>")
+
+
+def lay_co_bien_dich(code: str) -> list:
+    co = ["-std=c++17", "-Wall", "-pthread"]
+    if os.environ.get("KIEM_TSAN") == "1" and DUNG_LUONG.search(code):
+        co += ["-g", "-fsanitize=thread"]
+    return co
+
+
 def kiem_khoi(code: str):
     """Trả về None nếu ổn, ngược lại là thông báo lỗi."""
     if code.lstrip().startswith(BO_QUA):
@@ -42,13 +57,18 @@ def kiem_khoi(code: str):
         nguon = pathlib.Path(d) / "a.cpp"
         chay = pathlib.Path(d) / "a.out"
         nguon.write_text(code, encoding="utf-8")
+        co = lay_co_bien_dich(code)
         bd = subprocess.run(
-            ["g++", "-std=c++17", "-Wall", "-pthread", "-o", str(chay), str(nguon)],
+            ["g++", *co, "-o", str(chay), str(nguon)],
             capture_output=True, text=True)
         if bd.returncode != 0:
             return "biên dịch lỗi:\n" + bd.stderr
         try:
-            kq = subprocess.run([str(chay)], capture_output=True, text=True, timeout=5,
+            lenh = [str(chay)]
+            if "-fsanitize=thread" in co and shutil.which("setarch"):
+                # kernel mới đặt ASLR cao hơn mức TSan chịu được; tắt ASLR cho tiến trình con
+                lenh = ["setarch", "x86_64", "-R"] + lenh
+            kq = subprocess.run(lenh, capture_output=True, text=True, timeout=5,
                 stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
             return "chạy quá 5 giây"
