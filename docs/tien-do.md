@@ -80,3 +80,11 @@
 | [Bài 74 — Thực chiến: bộ hẹn giờ và giới hạn tốc độ](nhom-9-thuc-chien-da-luong/74-timer-rate-limiter.md) | <span class="diem" data-bai="74"></span> |
 | [Bài 75 — Thực chiến: chia việc song song — tổng, merge sort, đếm từ](nhom-9-thuc-chien-da-luong/75-parallel-sum-sort-wordcount.md) | <span class="diem" data-bai="75"></span> |
 | [Bài 76 — Bug-hunt: 12 đoạn code đa luồng có lỗi, tìm lỗi ở đâu](nhom-9-thuc-chien-da-luong/76-bug-hunt.md) | <span class="diem" data-bai="76"></span> |
+| [Bài 77 — Live-coding: tự cài unique_ptr](nhom-10-live-coding/77-tu-cai-unique-ptr.md) | <span class="diem" data-bai="77"></span> |
+| [Bài 78 — Live-coding: tự cài shared_ptr và weak_ptr](nhom-10-live-coding/78-tu-cai-shared-ptr.md) | <span class="diem" data-bai="78"></span> |
+| [Bài 79 — Live-coding: tự cài vector](nhom-10-live-coding/79-tu-cai-vector.md) | <span class="diem" data-bai="79"></span> |
+| [Bài 80 — Live-coding: tự cài string](nhom-10-live-coding/80-tu-cai-string.md) | <span class="diem" data-bai="80"></span> |
+| [Bài 81 — Live-coding: tự cài hash map](nhom-10-live-coding/81-tu-cai-hashmap.md) | <span class="diem" data-bai="81"></span> |
+| [Bài 82 — Live-coding: tự cài std::function và type erasure](nhom-10-live-coding/82-tu-cai-function.md) | <span class="diem" data-bai="82"></span> |
+| [Bài 83 — Code review: tìm lỗi trong 15 đoạn C++](nhom-10-live-coding/83-code-review-bug.md) | <span class="diem" data-bai="83"></span> |
+| [Bài 84 — Tổng ôn: 100 câu hỏi nhanh và thiết kế hệ thống nhỏ](nhom-10-live-coding/84-tong-on-100-cau.md) | <span class="diem" data-bai="84"></span> |

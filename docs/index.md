@@ -37,5 +37,7 @@ Khi đã quen kiến thức nền, học phần **chuyên sâu cho phỏng vấn
 
 - **Nhóm 9 — Thực chiến phỏng vấn đa luồng** (Bài 65–76): các đề viết trên bảng trắng có gợi ý, lời giải chạy được và câu hỏi nối tiếp: [in chẵn lẻ và ABC](nhom-9-thuc-chien-da-luong/65-in-chan-le-abc.md), hàng đợi chặn, thread pool tự viết, khởi tạo một lần, semaphore và barrier tự cài, khóa đọc-ghi, LRU cache, concurrent hash map, event bus, bộ hẹn giờ, chia việc song song, và bài tìm lỗi [12 đoạn code đa luồng](nhom-9-thuc-chien-da-luong/76-bug-hunt.md).
 
+- **Nhóm 10 — Live-coding C++ tổng hợp** (Bài 77–84): tự cài [unique_ptr](nhom-10-live-coding/77-tu-cai-unique-ptr.md), shared_ptr/weak_ptr, vector, string, hash map, `std::function`; [code review tìm lỗi trong 15 đoạn C++](nhom-10-live-coding/83-code-review-bug.md); và bài [tổng ôn 100 câu hỏi nhanh](nhom-10-live-coding/84-tong-on-100-cau.md) cùng ba mini thiết kế hệ thống.
+
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).
