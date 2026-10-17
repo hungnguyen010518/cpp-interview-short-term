@@ -243,7 +243,7 @@ Quy tắc rút ra giống bẫy của [Bài 25](../nhom-3-da-luong/25-data-race-
 
 ### 7. Bốn kiểu khóa, và cách chọn
 
-Sau khi biết **cái gì** gây hỏng, ta bàn **khóa thế nào**. Không có container "an toàn luồng" trong thư viện chuẩn: không có `concurrent_map`. Các thư viện ngoài có sẵn (Intel TBB có `concurrent_hash_map`, Folly có `ConcurrentHashMap`; chỉ nhắc tên). Bài này chỉ dùng thư viện chuẩn, tự bọc khóa lấy. Hàng đợi an toàn luồng là một chủ đề riêng, bài thực chiến Bài 66 sẽ xây.
+Sau khi biết **cái gì** gây hỏng, ta bàn **khóa thế nào**. Không có container "an toàn luồng" trong thư viện chuẩn: không có `concurrent_map`. Các thư viện ngoài có sẵn (Intel TBB có `concurrent_hash_map`, Folly có `ConcurrentHashMap`; chỉ nhắc tên). Bài này chỉ dùng thư viện chuẩn, tự bọc khóa lấy. Hàng đợi an toàn luồng là một chủ đề riêng, bài thực chiến [Bài 66](../nhom-9-thuc-chien-da-luong/66-bounded-queue.md) sẽ xây.
 
 | Kiểu khóa | Cách làm | Hợp khi | **Không** hợp khi |
 |---|---|---|---|

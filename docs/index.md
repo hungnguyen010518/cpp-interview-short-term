@@ -35,5 +35,7 @@ Khi đã quen kiến thức nền, học phần **chuyên sâu cho phỏng vấn
 
 - **Nhóm 8 — Đa luồng chiều sâu** (Bài 59–64): [memory model](nhom-8-da-luong-chieu-sau/59-memory-model.md), semaphore/latch/barrier, mẫu thiết kế an toàn luồng, lock-free cơ bản, `jthread` và coroutine, gỡ lỗi đa luồng.
 
+- **Nhóm 9 — Thực chiến phỏng vấn đa luồng** (Bài 65–76): các đề viết trên bảng trắng có gợi ý, lời giải chạy được và câu hỏi nối tiếp: [in chẵn lẻ và ABC](nhom-9-thuc-chien-da-luong/65-in-chan-le-abc.md), hàng đợi chặn, thread pool tự viết, khởi tạo một lần, semaphore và barrier tự cài, khóa đọc-ghi, LRU cache, concurrent hash map, event bus, bộ hẹn giờ, chia việc song song, và bài tìm lỗi [12 đoạn code đa luồng](nhom-9-thuc-chien-da-luong/76-bug-hunt.md).
+
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).

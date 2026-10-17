@@ -77,7 +77,7 @@ int NhatKy::baoCao(HopThongBao& hop) {
 
 Mình biên dịch sạch (`-Wall`) và chạy bản đầy đủ đó với `timeout 3` năm lần: lần nào cũng **không in gì** và `timeout` thoát mã **124**. Cả hai lớp đều "đúng" nếu xét riêng; lỗi nằm ở thứ tự khóa bị chia qua ranh giới hai lớp, đúng nguyên nhân deadlock cổ điển của [Bài 26](../nhom-3-da-luong/26-deadlock.md). Bản sửa (Ví dụ 1 ở mục 💻): **sao chép danh sách người nghe trong khóa, nhả khóa, rồi mới gọi**.
 
-Cái giá của bản sửa có hai phần. Mỗi lần phát phải sao chép cả danh sách. Và callback có thể chạy sau khi người nghe đã hủy đăng ký, nên người nghe phải chịu được "thông báo muộn" (Bài 73 xử lý bằng `weak_ptr`).
+Cái giá của bản sửa có hai phần. Mỗi lần phát phải sao chép cả danh sách. Và callback có thể chạy sau khi người nghe đã hủy đăng ký, nên người nghe phải chịu được "thông báo muộn" ([Bài 73](../nhom-9-thuc-chien-da-luong/73-event-bus.md) xử lý bằng `weak_ptr`).
 
 **Khóa thô hay khóa mịn?** Khóa thô là một mutex cho cả cấu trúc; khóa mịn là nhiều mutex, mỗi cái một phần.
 
@@ -87,7 +87,7 @@ Cái giá của bản sửa có hai phần. Mỗi lần phát phải sao chép c
 | Dễ đúng | Dễ: một khóa, một bất biến | Khó: thêm thứ tự khóa, deadlock ([Bài 26](../nhom-3-da-luong/26-deadlock.md)); bất biến vắt qua nhiều phần |
 | Khi chọn | Mặc định, bắt đầu từ đây | Chỉ khi đã **đo** thấy khóa thô là nút thắt |
 
-Đường giữa an toàn nhất là **chia shard** ([Bài 54](../nhom-7-chon-dung-cong-cu/54-container-da-luong.md), Bài 72): N phần độc lập, mỗi thao tác chỉ đụng đúng một khóa nên không có thứ tự khóa để sai.
+Đường giữa an toàn nhất là **chia shard** ([Bài 54](../nhom-7-chon-dung-cong-cu/54-container-da-luong.md), [Bài 72](../nhom-9-thuc-chien-da-luong/72-concurrent-hashmap.md)): N phần độc lập, mỗi thao tác chỉ đụng đúng một khóa nên không có thứ tự khóa để sai.
 
 ### 3. Mẫu 2, bất biến và copy-on-write: công bố cả bản mới
 

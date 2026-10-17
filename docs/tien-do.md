@@ -68,3 +68,15 @@
 | [Bài 62 — Lock-free cơ bản: compare_exchange, ABA và hàng đợi SPSC](nhom-8-da-luong-chieu-sau/62-lock-free-co-ban.md) | <span class="diem" data-bai="62"></span> |
 | [Bài 63 — jthread, stop_token và coroutine (C++20): nhận biết](nhom-8-da-luong-chieu-sau/63-jthread-coroutine.md) | <span class="diem" data-bai="63"></span> |
 | [Bài 64 — Gỡ lỗi đa luồng thực chiến: TSan, helgrind, gdb và đo tranh chấp](nhom-8-da-luong-chieu-sau/64-go-loi-da-luong.md) | <span class="diem" data-bai="64"></span> |
+| [Bài 65 — Thực chiến: in chẵn lẻ và in ABC xoay vòng bằng nhiều luồng](nhom-9-thuc-chien-da-luong/65-in-chan-le-abc.md) | <span class="diem" data-bai="65"></span> |
+| [Bài 66 — Thực chiến: hàng đợi chặn có giới hạn (producer-consumer)](nhom-9-thuc-chien-da-luong/66-bounded-queue.md) | <span class="diem" data-bai="66"></span> |
+| [Bài 67 — Thực chiến: thread pool tự viết, trả future, dừng êm](nhom-9-thuc-chien-da-luong/67-thread-pool-tu-viet.md) | <span class="diem" data-bai="67"></span> |
+| [Bài 68 — Thực chiến: khởi tạo một lần an toàn luồng](nhom-9-thuc-chien-da-luong/68-singleton-call-once.md) | <span class="diem" data-bai="68"></span> |
+| [Bài 69 — Thực chiến: tự cài semaphore và barrier từ mutex + condition_variable](nhom-9-thuc-chien-da-luong/69-semaphore-barrier-tu-cai.md) | <span class="diem" data-bai="69"></span> |
+| [Bài 70 — Thực chiến: khóa đọc-ghi và triết gia ăn tối](nhom-9-thuc-chien-da-luong/70-rwlock-dining.md) | <span class="diem" data-bai="70"></span> |
+| [Bài 71 — Thực chiến: LRU cache an toàn luồng](nhom-9-thuc-chien-da-luong/71-lru-cache.md) | <span class="diem" data-bai="71"></span> |
+| [Bài 72 — Thực chiến: concurrent hash map chia shard](nhom-9-thuc-chien-da-luong/72-concurrent-hashmap.md) | <span class="diem" data-bai="72"></span> |
+| [Bài 73 — Thực chiến: event bus (pub/sub) an toàn luồng với weak_ptr](nhom-9-thuc-chien-da-luong/73-event-bus.md) | <span class="diem" data-bai="73"></span> |
+| [Bài 74 — Thực chiến: bộ hẹn giờ và giới hạn tốc độ](nhom-9-thuc-chien-da-luong/74-timer-rate-limiter.md) | <span class="diem" data-bai="74"></span> |
+| [Bài 75 — Thực chiến: chia việc song song — tổng, merge sort, đếm từ](nhom-9-thuc-chien-da-luong/75-parallel-sum-sort-wordcount.md) | <span class="diem" data-bai="75"></span> |
+| [Bài 76 — Bug-hunt: 12 đoạn code đa luồng có lỗi, tìm lỗi ở đâu](nhom-9-thuc-chien-da-luong/76-bug-hunt.md) | <span class="diem" data-bai="76"></span> |

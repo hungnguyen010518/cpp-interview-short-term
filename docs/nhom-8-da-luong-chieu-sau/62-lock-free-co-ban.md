@@ -260,7 +260,7 @@ Có **hai** lần giao: ghi giao dữ liệu cho đọc (qua `duoi_`) và đọc
 
 | Tình huống | Chọn | Vì sao |
 |---|---|---|
-| Nhiều luồng ghi và/hoặc nhiều luồng đọc, hàng đợi việc thông thường | `mutex` + `condition_variable` (Bài 66) | Đúng, dễ kiểm, và luồng ngủ khi hết việc thay vì đốt CPU |
+| Nhiều luồng ghi và/hoặc nhiều luồng đọc, hàng đợi việc thông thường | `mutex` + `condition_variable` ([Bài 66](../nhom-9-thuc-chien-da-luong/66-bounded-queue.md)) | Đúng, dễ kiểm, và luồng ngủ khi hết việc thay vì đốt CPU |
 | Cần **chờ** khi đầy/rỗng | `condition_variable` | SPSC chỉ trả `false`; chờ là việc của người gọi (quay vòng đốt CPU, hoặc ngủ rồi thử lại) |
 | Đúng một ghi một đọc, đường nóng, **đã đo** thấy khóa là nút cổ chai | SPSC | Quy tắc sở hữu làm nó đơn giản; mục 💻 đo nhanh hơn bản mutex 10 đến 20 lần |
 | Cấu trúc phức tạp (map, danh sách xóa giữa), nhiều luồng ghi | Khóa, hoặc thư viện đã được kiểm chứng (ví dụ `spsc_queue`, `queue` trong Boost.Lockfree) | ABA, thu hồi bộ nhớ, thứ tự bộ nhớ: sai một chỗ là lỗi hiếm khó tái hiện |
