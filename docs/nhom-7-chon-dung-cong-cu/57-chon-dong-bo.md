@@ -31,7 +31,7 @@ Các công cụ của [Bài 24](../nhom-3-da-luong/24-thread-co-ban.md) đến [
 | Một biến đơn giản: bộ đếm, cờ, con trỏ | `std::atomic` | không bảo vệ được nhiều biến cùng lúc |
 | Chờ một sự kiện hay điều kiện do luồng khác tạo | `std::condition_variable` (+ mutex + vị từ) | ngủ thay vì hỏi liên tục |
 | Nhận **một** kết quả (hay ngoại lệ) đúng một lần | `std::promise` / `std::future` / `std::async` | không dùng được cho dòng kết quả liên tục |
-| Giới hạn **số luồng** vào một khu (ví dụ 3) | `semaphore` (C++20, dạy kỹ ở Bài 60) | mutex là trường hợp "giới hạn 1" nhưng có chủ sở hữu |
+| Giới hạn **số luồng** vào một khu (ví dụ 3) | `semaphore` (C++20, dạy kỹ ở [Bài 60](../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md)) | mutex là trường hợp "giới hạn 1" nhưng có chủ sở hữu |
 | Đọc rất nhiều, ghi hiếm, vùng đọc đủ dài | `std::shared_mutex` | phải đo xem có đáng |
 | Vùng găng cực ngắn, chắc chắn luồng giữ khóa không bị hệ điều hành tạm dừng (preempt) | spinlock | hiếm khi đáng (mục 4) |
 
@@ -265,7 +265,7 @@ Rút ra: vùng đọc **ngắn** thì `shared_mutex` không hơn (ở 8 luồng 
 
 **Semaphore** (đèn hiệu đếm) giữ một con số `n` "thẻ": `acquire()` lấy một thẻ (hết thẻ thì **chờ**), `release()` trả một thẻ. Khác mutex ở hai điểm: số thẻ **tùy ý** (không chỉ 1), và **không có chủ sở hữu** (luồng này lấy, luồng khác trả cũng được). C++20 có `std::counting_semaphore` trong `<semaphore>`; mình kiểm tra thật: biên dịch với `g++ -std=c++20 -pthread`, còn `-std=c++17` báo `'counting_semaphore' in namespace 'std' does not name a template type`.
 
-Mình chạy thử 10 luồng cùng xin dùng một khu chỉ cho 3 người (mỗi luồng ngủ 5 ms trong khu, một biến atomic ghi số người đồng thời lớn nhất): ra `3` ở hai lần chạy. Ở C++17 chưa có semaphore chuẩn, ta mô phỏng bằng `mutex` + `condition_variable` + một biến đếm số thẻ còn lại (Bài 60 viết lớp đó, Bài 69 tự cài kỹ hơn).
+Mình chạy thử 10 luồng cùng xin dùng một khu chỉ cho 3 người (mỗi luồng ngủ 5 ms trong khu, một biến atomic ghi số người đồng thời lớn nhất): ra `3` ở hai lần chạy. Ở C++17 chưa có semaphore chuẩn, ta mô phỏng bằng `mutex` + `condition_variable` + một biến đếm số thẻ còn lại ([Bài 60](../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md) viết lớp đó, Bài 69 tự cài kỹ hơn).
 
 !!! info "Bạn biết Go?"
     Go không có semaphore trong thư viện chuẩn, nhưng một **channel có đệm** làm đúng việc đó: `sem := make(chan struct{}, 3)`, lấy thẻ là `sem <- struct{}{}` (đầy thì chờ), trả thẻ là `<-sem`. Mình chạy 10 goroutine với kênh đệm 3: số goroutine đồng thời lớn nhất đo được là `3`, `go run -race` sạch. Ý tưởng "đếm thẻ" cùng một.
@@ -276,7 +276,7 @@ Mình chạy thử 10 luồng cùng xin dùng một khu chỉ cho 3 người (m�
 
 **Bẫy 2: `volatile` không phải đồng bộ.** `volatile` của C++ chỉ dặn trình biên dịch giữ nguyên các lần đọc ghi (dành cho thanh ghi phần cứng); nó không làm `++` nguyên tử, không tạo thứ tự giữa các luồng, và data race trên nó vẫn là hành vi không xác định ([Bài 28](../nhom-3-da-luong/28-atomic.md): `volatile int` đếm ra thiếu, TSan báo). Thứ dùng chung giữa luồng là `atomic` hoặc mutex.
 
-**Bẫy 3: lock-free không có nghĩa nhanh hơn.** "Lock-free" nói về **bảo đảm tiến lên** (một luồng bị hoãn không làm kẹt cả đám), không nói về tốc độ. `atomic<long long>` trên máy mình là lock-free (`is_lock_free()`, [Bài 28](../nhom-3-da-luong/28-atomic.md)) mà ở mục 3 vẫn chậm hơn chia ngăn **12 đến 33 lần**, vì mọi lõi vẫn tranh nhau một dòng cache. Còn tự viết cấu trúc lock-free thì khó đúng (ABA, thứ tự bộ nhớ, Bài 62) và hiếm khi đáng.
+**Bẫy 3: lock-free không có nghĩa nhanh hơn.** "Lock-free" nói về **bảo đảm tiến lên** (một luồng bị hoãn không làm kẹt cả đám), không nói về tốc độ. `atomic<long long>` trên máy mình là lock-free (`is_lock_free()`, [Bài 28](../nhom-3-da-luong/28-atomic.md)) mà ở mục 3 vẫn chậm hơn chia ngăn **12 đến 33 lần**, vì mọi lõi vẫn tranh nhau một dòng cache. Còn tự viết cấu trúc lock-free thì khó đúng (ABA, thứ tự bộ nhớ, [Bài 62](../nhom-8-da-luong-chieu-sau/62-lock-free-co-ban.md)) và hiếm khi đáng.
 
 ## 💻 Ví dụ code
 
@@ -376,11 +376,11 @@ Mỗi tình huống là một câu người phỏng vấn có thể hỏi. Mình
 3. **Hàng đợi việc: luồng chính bỏ việc vào, worker lấy ra.** `mutex` + `condition_variable` + vị từ (ví dụ trên, hay `BoundedQueue` ở Bài 66). Atomic không làm được vì hàng đợi là cấu trúc nhiều biến; vòng `while (hang.empty()) {}` thì đốt CPU ([Bài 27](../nhom-3-da-luong/27-condition-variable.md)).
 4. **Các luồng phải chờ một luồng nạp xong tài nguyên (cấu hình, từ điển) rồi mới chạy.** Một nơi chờ: `promise<void>` + `future` (luồng nạp gọi `set_value()`, luồng chờ gọi `get()`). Nhiều nơi cùng chờ một sự kiện: `condition_variable` + cờ `sanSang` + `notify_all` (hay `shared_future`). "Ai tới trước thì khởi tạo, người sau dùng luôn": `std::call_once` hoặc biến `static` cục bộ (Bài 68). Không dùng `sleep_for` rồi hy vọng đã xong.
 5. **Cache tra cứu: đọc rất nhiều, thỉnh thoảng ghi.** Bắt đầu bằng **một mutex** quanh cả map. Chỉ đổi sang `shared_mutex` khi **đo** thấy vùng đọc đủ dài và ghi hiếm (mục 5: vùng đọc ngắn thì không lợi). Atomic không giúp: `map` là nhiều biến. Chi tiết: [Bài 54](54-container-da-luong.md) và Bài 71.
-6. **Chỉ cho tối đa 3 luồng dùng kết nối cơ sở dữ liệu cùng lúc; luồng thứ 4 chờ.** `semaphore` (mục 6): `counting_semaphore<3>` ở C++20, hay mô phỏng bằng mutex + cv + biến đếm ở C++17 (Bài 60). Mutex không đủ vì chỉ cho một người vào. `shared_mutex` cũng sai: nó cho **không giới hạn** người đọc.
-7. **Nhiều luồng ghi log ra màn hình.** **Một mutex quanh cả dòng** (hay: mọi luồng đẩy dòng vào hàng đợi, một luồng duy nhất ghi: Bài 61, 84). Từng lần `std::cout << ...` không gây data race (mình chạy với TSan: sạch), nhưng một dòng gồm nhiều `<<` thì các luồng **chen vào giữa**: xem ngay dưới.
+6. **Chỉ cho tối đa 3 luồng dùng kết nối cơ sở dữ liệu cùng lúc; luồng thứ 4 chờ.** `semaphore` (mục 6): `counting_semaphore<3>` ở C++20, hay mô phỏng bằng mutex + cv + biến đếm ở C++17 ([Bài 60](../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md)). Mutex không đủ vì chỉ cho một người vào. `shared_mutex` cũng sai: nó cho **không giới hạn** người đọc.
+7. **Nhiều luồng ghi log ra màn hình.** **Một mutex quanh cả dòng** (hay: mọi luồng đẩy dòng vào hàng đợi, một luồng duy nhất ghi: [Bài 61](../nhom-8-da-luong-chieu-sau/61-mau-an-toan-luong.md), 84). Từng lần `std::cout << ...` không gây data race (mình chạy với TSan: sạch), nhưng một dòng gồm nhiều `<<` thì các luồng **chen vào giữa**: xem ngay dưới.
 8. **Chuyển tiền: trừ ở tài khoản A, cộng ở tài khoản B, và người khác không được thấy trạng thái dở.** **Mutex** bọc cả hai bước. Hai atomic riêng vẫn có khoảng hở ở giữa (mục 7, bẫy 1). Nhiều tài khoản thì nhớ thứ tự khóa hay `std::scoped_lock` ([Bài 26](../nhom-3-da-luong/26-deadlock.md)).
 9. **Luồng chính cần kết quả của một phép tính nặng chạy trên luồng khác, đúng một lần, kể cả khi nó ném ngoại lệ.** `std::async` + `std::future` (hay `promise`). Ngoại lệ đi qua `get()`, còn `std::thread` thuần thì ngoại lệ làm `std::terminate` ([Bài 29](../nhom-3-da-luong/29-async-future.md)). Không dùng "biến chung + cờ + sleep".
-10. **Luồng chính phải chờ N luồng chạy xong rồi mới đi tiếp.** `join` (hay `get()` trên N future). Nếu cần "đếm ngược N rồi mở cửa" mà luồng không kết thúc, hoặc nhiều luồng hẹn nhau ở một vạch qua nhiều vòng: `std::latch`, `std::barrier` (C++20, Bài 60). Không dùng atomic quay vòng chờ.
+10. **Luồng chính phải chờ N luồng chạy xong rồi mới đi tiếp.** `join` (hay `get()` trên N future). Nếu cần "đếm ngược N rồi mở cửa" mà luồng không kết thúc, hoặc nhiều luồng hẹn nhau ở một vạch qua nhiều vòng: `std::latch`, `std::barrier` (C++20, [Bài 60](../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md)). Không dùng atomic quay vòng chờ.
 
 Về tình huống 7, đoạn mình chạy là: bốn luồng, mỗi luồng in ba dòng, mỗi dòng gồm nhiều `<<`, không khóa.
 
@@ -553,7 +553,7 @@ public:
 
 ## 🔑 Tóm tắt
 
-1. Câu hỏi gốc: **luồng này cần gì từ luồng kia?** Loại trừ trên nhiều biến thì `mutex`; một biến đơn thì `atomic`; chờ sự kiện thì `condition_variable` (cờ nằm dưới khóa); nhận một kết quả một lần thì `promise`/`future`; giới hạn số luồng vào khu thì semaphore (Bài 60); đọc nhiều ghi ít thì `shared_mutex` nếu đã đo.
+1. Câu hỏi gốc: **luồng này cần gì từ luồng kia?** Loại trừ trên nhiều biến thì `mutex`; một biến đơn thì `atomic`; chờ sự kiện thì `condition_variable` (cờ nằm dưới khóa); nhận một kết quả một lần thì `promise`/`future`; giới hạn số luồng vào khu thì semaphore ([Bài 60](../nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md)); đọc nhiều ghi ít thì `shared_mutex` nếu đã đo.
 2. Chi phí theo nguyên lý: atomic < mutex không tranh chấp < mutex phải ngủ chờ. Mình đo bốn luồng: mutex chậm hơn atomic 2,2 đến 5,8 lần, và atomic chậm hơn bộ đếm **chia ngăn** (mỗi luồng một ngăn `alignas(64)`, gộp sau `join`) 12 đến 33 lần; bỏ `alignas(64)` thì lợi thế còn 1,5 đến 2,6 lần.
 3. Spinlock (viết bằng `atomic_flag`) đúng nhưng đốt CPU lúc chờ; mình đo nó ngang mutex ở hai luồng và chậm hơn 2 đến 17 lần ở bốn luồng trở lên. `shared_mutex` ngang hoặc chậm hơn khi vùng đọc ngắn, nhanh hơn 3 đến 5 lần khi vùng đọc dài và ghi hiếm.
 4. Ba bẫy: hai `atomic` không giữ được bất biến chung (cần một mutex); `volatile` không phải đồng bộ; lock-free không có nghĩa nhanh hơn. Cờ mà vị từ của `wait` đọc phải đổi dưới cùng mutex, nếu không có thể lost wakeup (mình mở cửa sổ lỗi: treo 10 lần trên 10).

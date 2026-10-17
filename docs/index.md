@@ -33,5 +33,7 @@ Khi đã quen kiến thức nền, học phần **chuyên sâu cho phỏng vấn
 - **Nhóm 6 — Hệ điều hành và tiến trình** (Bài 47–50): [tiến trình và luồng](nhom-6-he-dieu-hanh-tien-trinh/47-tien-trinh-vs-luong.md), `fork`/`exec`/`wait`, giao tiếp giữa các tiến trình (IPC), I/O chặn và `epoll`.
 - **Nhóm 7 — Chọn đúng công cụ** (Bài 51–58): [chọn smart pointer](nhom-7-chon-dung-cong-cu/51-chon-smart-pointer.md), smart pointer và container trong đa luồng, chọn container, thiết kế hàm và sở hữu, xử lý lỗi, chọn cơ chế đồng bộ, bộ nhớ nâng cao.
 
+- **Nhóm 8 — Đa luồng chiều sâu** (Bài 59–64): [memory model](nhom-8-da-luong-chieu-sau/59-memory-model.md), semaphore/latch/barrier, mẫu thiết kế an toàn luồng, lock-free cơ bản, `jthread` và coroutine, gỡ lỗi đa luồng.
+
 Điểm trắc nghiệm của bạn được lưu **ngay trong trình duyệt này** (không gửi đi đâu cả).
 Xem bạn đang yếu bài nào ở trang [Tiến độ](tien-do.md).

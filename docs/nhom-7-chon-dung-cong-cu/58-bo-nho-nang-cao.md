@@ -277,7 +277,7 @@ Mình không dựng chương trình đo phân mảnh (nó đổi theo thuật to
 | Hợp với | Cả cụm đối tượng **cùng sinh, cùng chết** (một yêu cầu, một khung hình, một lần phân tích cú pháp) | Đối tượng cùng loại tạo và hủy **lẻ tẻ liên tục**, vòng đời khác nhau (kết nối, hạt, gói tin) |
 | Hàm hủy | Không gọi (chỉ cho kiểu không có gì phải dọn khi hủy) | Gọi tay khi trả |
 
-Cả hai có chung giới hạn: **đa luồng** thì phải đồng bộ (mutex, hoặc mỗi luồng một cái riêng; hướng này Bài 61 nói tới), và **ASan không bắt được** lỗi dùng ô sau khi trả vì với ASan cả vùng vẫn là một khối đang sống (Ví dụ 2 cho thấy).
+Cả hai có chung giới hạn: **đa luồng** thì phải đồng bộ (mutex, hoặc mỗi luồng một cái riêng; hướng này [Bài 61](../nhom-8-da-luong-chieu-sau/61-mau-an-toan-luong.md) nói tới), và **ASan không bắt được** lỗi dùng ô sau khi trả vì với ASan cả vùng vẫn là một khối đang sống (Ví dụ 2 cho thấy).
 
 ### 7. `std::pmr`: arena có sẵn trong thư viện chuẩn (C++17)
 

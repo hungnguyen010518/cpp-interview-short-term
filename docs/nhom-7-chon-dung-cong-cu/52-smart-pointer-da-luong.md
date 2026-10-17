@@ -501,7 +501,7 @@ khong nhat quan: 0
 phien ban cuoi: 100000
 ```
 
-Luồng đọc luôn thấy một cấu hình **trọn vẹn** (một phiên bản, không nửa cũ nửa mới), và bản cũ tự bị hủy khi bản chụp cuối cùng của nó chết. Đó là **copy-on-write** (sao chép khi ghi): không sửa bản cũ, tạo bản mới rồi đổi con trỏ. Bài 61 sẽ xếp mẫu này vào nhóm "bất biến".
+Luồng đọc luôn thấy một cấu hình **trọn vẹn** (một phiên bản, không nửa cũ nửa mới), và bản cũ tự bị hủy khi bản chụp cuối cùng của nó chết. Đó là **copy-on-write** (sao chép khi ghi): không sửa bản cũ, tạo bản mới rồi đổi con trỏ. [Bài 61](../nhom-8-da-luong-chieu-sau/61-mau-an-toan-luong.md) sẽ xếp mẫu này vào nhóm "bất biến".
 
 ### Callback an toàn: bắt `weak_ptr` hay giữ chủ sống
 

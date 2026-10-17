@@ -62,3 +62,9 @@
 | [Bài 56 — Xử lý lỗi: exception, mã lỗi, optional hay expected](nhom-7-chon-dung-cong-cu/56-xu-ly-loi.md) | <span class="diem" data-bai="56"></span> |
 | [Bài 57 — Chọn cơ chế đồng bộ: mutex, atomic, condition_variable, future, semaphore](nhom-7-chon-dung-cong-cu/57-chon-dong-bo.md) | <span class="diem" data-bai="57"></span> |
 | [Bài 58 — Bộ nhớ nâng cao: căn lề, padding, cache line, placement new, memory pool](nhom-7-chon-dung-cong-cu/58-bo-nho-nang-cao.md) | <span class="diem" data-bai="58"></span> |
+| [Bài 59 — Memory model: happens-before, acquire/release và vì sao volatile không cứu được](nhom-8-da-luong-chieu-sau/59-memory-model.md) | <span class="diem" data-bai="59"></span> |
+| [Bài 60 — Semaphore, latch, barrier: đếm người vào, đếm cho đủ, hẹn nhau ở vạch](nhom-8-da-luong-chieu-sau/60-semaphore-latch-barrier.md) | <span class="diem" data-bai="60"></span> |
+| [Bài 61 — Mẫu thiết kế an toàn luồng: monitor, thread-local, bất biến, truyền thông điệp](nhom-8-da-luong-chieu-sau/61-mau-an-toan-luong.md) | <span class="diem" data-bai="61"></span> |
+| [Bài 62 — Lock-free cơ bản: compare_exchange, ABA và hàng đợi SPSC](nhom-8-da-luong-chieu-sau/62-lock-free-co-ban.md) | <span class="diem" data-bai="62"></span> |
+| [Bài 63 — jthread, stop_token và coroutine (C++20): nhận biết](nhom-8-da-luong-chieu-sau/63-jthread-coroutine.md) | <span class="diem" data-bai="63"></span> |
+| [Bài 64 — Gỡ lỗi đa luồng thực chiến: TSan, helgrind, gdb và đo tranh chấp](nhom-8-da-luong-chieu-sau/64-go-loi-da-luong.md) | <span class="diem" data-bai="64"></span> |
